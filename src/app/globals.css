@@ -3,6 +3,11 @@
 @theme {
   --color-primary: #fcd535;
   --color-primary-dark: #181a20;
+  --color-neutral-gray-100: #eaecef;
+  --color-neutral-gray-200: #2b3139;
+  --color-neutral-gray-300: #5e6673;
+  --color-neutral-gray-400: #848e9c;
+  --color-neutral-gray-500: #b7bdc6;
 }
 
 @theme inline {

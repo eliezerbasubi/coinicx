@@ -1,3 +1,5 @@
 import { redirect } from "next/navigation";
 
-redirect("/crypto/buy");
+import { ROUTES } from "@/constants/routes";
+
+redirect(ROUTES.crypto.buy);
