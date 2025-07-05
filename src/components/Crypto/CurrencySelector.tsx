@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { ChevronDown, Search } from "lucide-react";
 
@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/utils/cn";
 
 type Props = {
   value: ICurrency;
@@ -22,61 +23,87 @@ const CurrencySelector = ({
   collisionBoundary,
   onValueChange,
 }: Props) => {
+  const [open, setOpen] = useState(false);
+
+  const onClick = (value: ICurrency) => {
+    onValueChange?.(value);
+    setOpen(false);
+  };
+
   return (
-    <Popover>
-      <PopoverTrigger className="flex items-center space-x-2">
-        {value.imageUrl && (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger className="w-fit flex items-center shrink-0">
+        {value.assetLogo && (
           <Image
             unoptimized
-            src={value.imageUrl}
-            alt={value.fullName}
-            width={40}
-            height={40}
-            className="size-10 rounded-full"
+            src={value.assetLogo}
+            alt={value.assetName}
+            width={20}
+            height={20}
+            className="size-5 rounded-full"
           />
         )}
-        <span>{value.pair.split("_")[0]}</span>
+        <span className="uppercase font-semibold mx-1">{value.assetCode}</span>
         <ChevronDown />
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
-        align="start"
-        className="w-full"
+        align="end"
+        collisionPadding={0}
+        sideOffset={24}
+        className="w-[398px] -mr-4"
+        avoidCollisions={false}
         collisionBoundary={collisionBoundary}
       >
-        <div className="flex items-center h-11 rounded-lg border border-neutral-gray-300 hover:border-primary">
+        <div className="flex items-center h-11 px-4 mb-4 rounded-lg border border-neutral-gray-200 hover:border-primary">
           <Search />
           <input
             type="search"
-            className="w-full h-full outline-none caret-primary"
+            placeholder="Search"
+            className="w-full h-full outline-none caret-primary pl-4"
           />
         </div>
 
-        <div className="space-y-1">
-          {currencies.map((currency, index) => (
-            <div
-              key={currency.pair + index}
-              role="button"
-              tabIndex={0}
-              onKeyDown={() => null}
-              onClick={() => onValueChange?.(currency)}
-              className="flex items-center space-x-2"
-            >
-              <Image
-                unoptimized
-                src={currency.imageUrl}
-                alt={currency.fullName}
-                width={40}
-                height={40}
-                className="size-10 rounded-full shrink-0"
-              />
+        <div className="h-60 overflow-y-auto">
+          {currencies.map((currency) => {
+            const isActive =
+              currency.assetCode === value.assetCode &&
+              currency.symbol === value.symbol;
 
-              <div className="w-full">
-                <p className="font-bold">{currency.pair.split("_")[0]}</p>
-                <p className="text-neutral-gray-500">{currency.fullName}</p>
+            return (
+              <div
+                key={currency.assetCode + currency.symbol + currency.assetName}
+                role="button"
+                tabIndex={0}
+                onKeyDown={() => null}
+                onClick={() => onClick(currency)}
+                className={cn(
+                  "flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-neutral-gray-200",
+                  {
+                    "bg-neutral-gray-200": isActive,
+                  },
+                )}
+              >
+                <Image
+                  unoptimized
+                  src={currency.assetLogo}
+                  alt={currency.assetName}
+                  width={20}
+                  height={20}
+                  className="size-5 rounded-full shrink-0"
+                />
+
+                <div className="w-full flex items-center space-x-3">
+                  <p className="font-semibold uppercase">
+                    {currency.assetCode}
+                  </p>
+                  <p className="text-neutral-gray-400 text-sm">
+                    {currency.assetName}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </PopoverContent>
     </Popover>

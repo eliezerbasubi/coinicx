@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import {
   AreaSeries,
@@ -12,19 +13,32 @@ import {
   TimeChartOptions,
 } from "lightweight-charts";
 
+import { GraphPeriod } from "@/types/market";
 import { getQuotes } from "@/services/markets";
+import { useCryptoMarketContext } from "@/store/markets/hook";
+import { cn } from "@/utils/cn";
 
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+  useCurrentAssets,
+  useCurrentCryptoCurrency,
+  useExchangeRate,
+} from "./hooks";
+import { getTimeRange } from "./utils";
 
-type Props = {};
-
-type Tab = "daily" | "weekly" | "monthly" | "yearly";
+const TABS: Array<{ value: GraphPeriod; label: string }> = [
+  { value: "daily", label: "1D" },
+  { value: "weekly", label: "1W" },
+  { value: "monthly", label: "1M" },
+  { value: "yearly", label: "1Y" },
+];
 
 const chartOptions = {
   height: 360,
-  // localization: {
-  //   priceFormatter: (value: number) => `${value.toFixed(2)}%`,
-  // },
+  localization: {
+    priceFormatter: (value: number) =>
+      value.toLocaleString("en-US", { notation: "compact" }),
+  },
   timeScale: {
     borderColor: "#ffffff08",
     secondsVisible: true,
@@ -63,14 +77,38 @@ const chartOptions = {
   },
 } as DeepPartial<TimeChartOptions>;
 
-const QuoteChart = (props: Props) => {
+const QuoteChart = () => {
   const chartRef = useRef<HTMLDivElement | null>(null);
-  const [currentTab, setCurrentTab] = useState<Tab>("daily");
+  const [currentTab, setCurrentTab] = useState<GraphPeriod>("daily");
+
+  const marketType = useCryptoMarketContext((s) => s.marketType);
+  const { cryptoAssetCode, fiatAssetCode, selectedAssets } = useCurrentAssets();
+  const exchangeRate = useExchangeRate({
+    baseCurrency: cryptoAssetCode,
+    quoteCurrency: fiatAssetCode,
+  });
+
+  const title =
+    marketType === "sell"
+      ? `Sell ${cryptoAssetCode} for ${fiatAssetCode}`
+      : `Buy ${cryptoAssetCode} with ${fiatAssetCode}`;
+
+  const timeRange = getTimeRange(currentTab);
 
   const { data, status } = useQuery({
-    queryKey: ["quotes", currentTab],
-    queryFn: () => getQuotes(),
+    queryKey: [
+      "quotes",
+      currentTab,
+      selectedAssets?.crypto.id,
+      selectedAssets?.fiat.id,
+    ],
     refetchOnWindowFocus: false,
+    enabled: !!selectedAssets?.crypto?.id && !!selectedAssets?.fiat.id,
+    queryFn: () =>
+      getQuotes(selectedAssets!.crypto.id, {
+        vs_currency: selectedAssets!.fiat.assetCode,
+        ...timeRange,
+      }),
   });
 
   useEffect(() => {
@@ -125,9 +163,9 @@ const QuoteChart = (props: Props) => {
     });
 
     areaSeries.setData(
-      data.map((datum) => ({
-        time: Date.parse(datum.timestamp) as Time,
-        value: datum.quote.USD.price,
+      data.map(([timestamp, quote]) => ({
+        time: timestamp as Time,
+        value: quote,
       })),
     );
 
@@ -148,42 +186,24 @@ const QuoteChart = (props: Props) => {
 
   return (
     <div className="w-full">
-      <div className="mb-3 mt-6 w-full">
-        <div className="flex justify-between items-center mb-3">
-          <p className="text-2xl font-bold">BNB/AED</p>
-          <p className="text-2xl font-bold">
-            {Number(3480).toLocaleString("en-US", { currency: "USD" })}AED
-          </p>
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="-space-x-2 inline-flex">
-            <div className="size-8 rounded-full bg-primary"></div>
-            <div className="size-8 rounded-full bg-teal-500"></div>
-          </div>
-
-          <p className="text-2xl font-bold text-green-400">+1.32%</p>
-        </div>
-      </div>
+      <QuoteChartLegend />
       <div className="w-full flex justify-end mb-3">
         <Tabs
           value={currentTab}
           defaultValue="daily"
-          onValueChange={(value) => setCurrentTab(value as Tab)}
+          onValueChange={(value) => setCurrentTab(value as GraphPeriod)}
           className="my-4"
         >
           <TabsList className="md:min-w-[200px]">
-            <TabsTrigger value="daily" className="font-semibold">
-              1D
-            </TabsTrigger>
-            <TabsTrigger value="weekly" className="font-semibold">
-              7D
-            </TabsTrigger>
-            <TabsTrigger value="monthly" className="font-semibold">
-              1M
-            </TabsTrigger>
-            <TabsTrigger value="yearly" className="font-semibold">
-              1Y
-            </TabsTrigger>
+            {TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="font-semibold cursor-pointer"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
       </div>
@@ -194,6 +214,78 @@ const QuoteChart = (props: Props) => {
           </div>
         )}
         <div ref={chartRef} />
+      </div>
+    </div>
+  );
+};
+
+const QuoteChartLegend = () => {
+  const marketType = useCryptoMarketContext((s) => s.marketType);
+  const { cryptoAssetCode, fiatAssetCode, selectedAssets } = useCurrentAssets();
+  const exchangeRate = useExchangeRate({
+    baseCurrency: cryptoAssetCode,
+    quoteCurrency: fiatAssetCode,
+  });
+
+  const cryptoData = useCurrentCryptoCurrency();
+  const percentageChange24h = cryptoData?.price_change_percentage_24h ?? 0;
+
+  const title =
+    marketType === "sell"
+      ? `Sell ${cryptoAssetCode} for ${fiatAssetCode}`
+      : `Buy ${cryptoAssetCode} with ${fiatAssetCode}`;
+
+  return (
+    <div className="w-full">
+      <h1 className="text-3xl font-extrabold">{title}</h1>
+      <div className="mb-3 mt-6 w-full">
+        <div className="flex justify-between items-center mb-3 uppercase">
+          <p className="text-2xl font-bold">
+            {cryptoAssetCode}/{fiatAssetCode}
+          </p>
+          <p className="text-2xl font-bold">
+            {exchangeRate?.value?.toLocaleString("en-US", {
+              style: "currency",
+              currency: fiatAssetCode,
+            })}
+          </p>
+        </div>
+        <div className="flex justify-between items-center">
+          <div className="-space-x-2 inline-flex">
+            <div className="size-8 rounded-full bg-primary overflow-hidden">
+              {selectedAssets && (
+                <Image
+                  alt={selectedAssets.crypto.assetName}
+                  src={selectedAssets.crypto.assetLogo}
+                  className="size-8"
+                  width={32}
+                  height={32}
+                  unoptimized
+                />
+              )}
+            </div>
+            <div className="size-8 rounded-full bg-teal-500">
+              {selectedAssets && (
+                <Image
+                  alt={selectedAssets.fiat.assetName}
+                  src={selectedAssets.fiat.assetLogo}
+                  className="size-8"
+                  width={32}
+                  height={32}
+                  unoptimized
+                />
+              )}
+            </div>
+          </div>
+
+          <p
+            className={cn("text-2xl font-bold text-green-400", {
+              "text-red-400": percentageChange24h < 0,
+            })}
+          >
+            {percentageChange24h.toFixed(2)}%
+          </p>
+        </div>
       </div>
     </div>
   );

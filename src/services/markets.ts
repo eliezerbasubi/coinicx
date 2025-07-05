@@ -1,46 +1,40 @@
-import { ICurrency, IQuote } from "@/types/market";
+import { ICryptoCurrency, IExchangeRate } from "@/types/market";
 
-export const getFiatCurrencies = async (): Promise<ICurrency[]> => {
+export const getCryptoCurrencies = async (): Promise<ICryptoCurrency[]> => {
+  const res = await fetch(
+    "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd",
+  );
+
+  const result = await res.json();
+
+  return result;
+};
+
+export const getQuotes = async (
+  id: string,
+  params: { from: number; to: number; vs_currency: string },
+): Promise<Array<[number, number]>> => {
+  const queryString = new URLSearchParams(
+    params as unknown as Record<string, string>,
+  );
+
   const response = await fetch(
-    "https://www.binance.com/bapi/asset/v1/public/asset-service/product/currency",
+    `https://api.coingecko.com/api/v3/coins/${id}/market_chart/range?${queryString}`,
   );
 
   const result = await response.json();
 
-  return result.data;
+  return result.prices;
 };
 
-export const getCryptoCurrencies = async (): Promise<ICurrency[]> => {
-  const data = await Promise.resolve(
-    require("@/lib/mocks/crypotcurrencies.json"),
-  );
-
-  return data.data.map((datum: any) => ({
-    pair: datum.assetCode,
-    rate: 0,
-    symbol: datum.assetCode,
-    fullName: datum.assetCode,
-    imageUrl: datum.logoUrl,
-  }));
-};
-
-export const getQuotes = async (): Promise<IQuote[]> => {
+export const getExchangeRates = async (): Promise<
+  Record<string, IExchangeRate>
+> => {
   const response = await fetch(
-    "https://www.binance.com/bapi/composite/v1/public/promo/cmc/cryptocurrency/quotes/historical?id=1&time_start=1750757439&interval=5m&count=288",
+    "https://api.coingecko.com/api/v3/exchange_rates",
   );
 
   const result = await response.json();
 
-  return result.data.body.data.quotes;
-};
-
-export const getQuote = async (symbol: string): Promise<IQuote[]> => {
-  const response = await fetch(
-    "https://www.binance.com/bapi/composite/v1/public/promo/cmc/cryptocurrency/quotes/latest?symbol=" +
-      symbol,
-  );
-
-  const result = await response.json();
-
-  return result.data.body.data.quotes;
+  return result.rates;
 };

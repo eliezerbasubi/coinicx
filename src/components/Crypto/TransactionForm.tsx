@@ -1,11 +1,13 @@
-import React, { useRef } from "react";
+import React, { CSSProperties, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-import { MarketType } from "@/types/market";
+import { AssetType, ICurrency, MarketType } from "@/types/market";
+import FIAT_CURRENCIES from "@/lib/mocks/fiat.json";
 import { ROUTES } from "@/constants/routes";
-import { getCryptoCurrencies, getFiatCurrencies } from "@/services/markets";
+import { getCryptoCurrencies } from "@/services/markets";
+import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
 
 import { Button } from "../ui/button";
@@ -13,80 +15,122 @@ import TokenInput from "./TokenInput";
 
 const CurrencySelector = dynamic(() => import("./CurrencySelector"));
 
-type Props = {
-  type: MarketType;
+type AssetByMarketType = Record<
+  "tokenIn" | "tokenOut",
+  { list: Array<ICurrency>; defaultAssetCode: string; assetType: AssetType }
+>;
+
+const findAsset = (
+  list: ICurrency[],
+  assetCode: string,
+  defaultAssetCode: string,
+) => {
+  const lowerTarget = assetCode.toLowerCase();
+  const lowerDefault = defaultAssetCode.toLowerCase();
+
+  return (
+    list.find((item) => item.assetCode.toLowerCase() === lowerTarget) ??
+    list.find((item) => item.assetCode.toLowerCase() === lowerDefault)
+  );
 };
 
-const TransactionForm = ({ type }: Props) => {
+const TransactionForm = () => {
   const inputsContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const { cryptoList, fiatList, isLoading } = useQueries({
-    queries: [
-      {
-        queryKey: ["cryptoList"],
-        queryFn: () => getCryptoCurrencies(),
-        refetchOnWindowFocus: false,
-      },
-      {
-        queryKey: ["fiatList"],
-        queryFn: () => getFiatCurrencies(),
-        refetchOnWindowFocus: false,
-      },
-    ],
-    combine(result) {
-      return {
-        cryptoList: result[0].data,
-        fiatList: result[1].data,
-        isLoading:
-          result[0].status === "pending" || result[1].status === "pending",
-      };
-    },
-  });
+  const marketType = useCryptoMarketContext((s) => s.marketType);
+  const isLoading = useCryptoMarketContext((s) => s.isLoadingAssets);
+  const selectedAssets = useCryptoMarketContext((s) => s.selectedAssets);
+  const assetsByMarketType = useCryptoMarketContext((s) => s.assetsByTokenType);
+  const setSelectedAssets = useCryptoMarketContext((s) => s.setSelectedAssets);
+
+  const onValueChange = (currency: ICurrency, assetType: AssetType) => {
+    const mainPath =
+      marketType === "sell" ? ROUTES.crypto.sell : ROUTES.crypto.buy;
+
+    let { crypto, fiat } = selectedAssets!;
+
+    if (assetType === "fiat") {
+      fiat = currency;
+    } else {
+      crypto = currency;
+    }
+
+    const newPath = [
+      mainPath,
+      `/${fiat.assetCode.toUpperCase()}`,
+      `/${crypto.assetCode.toUpperCase()}`,
+    ];
+
+    window.history.replaceState({}, "", newPath.join(""));
+
+    setSelectedAssets({ fiat, crypto });
+  };
 
   return (
     <div className="w-full max-w-md mx-auto border border-neutral-gray-200 rounded-2xl overflow-hidden">
-      <nav className="w-full h-16 flex items-center">
-        <NavItem isCurrent={type === "buy"} type="buy" label="Buy" />
-        <NavItem isCurrent={type === "sell"} type="sell" label="Sell" />
-      </nav>
+      <div
+        className={cn(
+          "h-[84px] bg-linear-[90deg] from-primary-dark from-50% to-neutral-gray-200 to-0%",
+          { "from-neutral-gray-200 to-primary-dark": marketType === "sell" },
+        )}
+      >
+        <nav className="w-full h-16 flex items-center isolate space-x-12 bg-linear-[180deg] from-neutral-gray-200 from-50% to-primary-dark to-0%">
+          <NavItem current={marketType} type="buy" label="Buy" />
+          <NavItem current={marketType} type="sell" label="Sell" />
+        </nav>
+      </div>
 
-      <div className="bg-primary-dark rounded-2xl overflow-hidden">
+      <div className="bg-primary-dark rounded-2xl overflow-hidden -mt-5">
         <div ref={inputsContainerRef} className="p-6 space-y-4">
           <TokenInput
             label="Spend"
             name="tokenIn"
             placeholder="Enter Amount"
-            // trailing={
-            //   isLoading ? (
-            //     <p>loading...</p>
-            //   ) : (
-            //     cryptoList && (
-            //       <CurrencySelector
-            //         value={cryptoList[0]}
-            //         currencies={cryptoList}
-            //         collisionBoundary={inputsContainerRef.current}
-            //       />
-            //     )
-            //   )
-            // }
+            trailing={
+              isLoading ? (
+                <p>...</p>
+              ) : (
+                selectedAssets?.[assetsByMarketType.tokenIn.assetType] && (
+                  <CurrencySelector
+                    value={selectedAssets[assetsByMarketType.tokenIn.assetType]}
+                    currencies={assetsByMarketType.tokenIn.list}
+                    collisionBoundary={inputsContainerRef.current}
+                    onValueChange={(currency) =>
+                      onValueChange(
+                        currency,
+                        assetsByMarketType.tokenIn.assetType,
+                      )
+                    }
+                  />
+                )
+              )
+            }
           />
           <TokenInput
             label="Receive"
             name="tokenOut"
             placeholder="0"
-            // trailing={
-            //   isLoading ? (
-            //     <p>loading...</p>
-            //   ) : (
-            //     fiatList && (
-            //       <CurrencySelector
-            //         value={fiatList[0]}
-            //         currencies={fiatList}
-            //         collisionBoundary={inputsContainerRef.current}
-            //       />
-            //     )
-            //   )
-            // }
+            trailing={
+              isLoading ? (
+                <p>...</p>
+              ) : (
+                selectedAssets?.[assetsByMarketType.tokenOut.assetType] && (
+                  <CurrencySelector
+                    value={
+                      selectedAssets[assetsByMarketType.tokenOut.assetType]
+                    }
+                    currencies={assetsByMarketType.tokenOut.list}
+                    collisionBoundary={inputsContainerRef.current}
+                    onValueChange={(currency) =>
+                      onValueChange(
+                        currency,
+                        assetsByMarketType.tokenOut.assetType,
+                      )
+                    }
+                  />
+                )
+              )
+            }
           />
         </div>
         <div className="p-6 mt-32">
@@ -100,25 +144,39 @@ const TransactionForm = ({ type }: Props) => {
 };
 
 const NavItem = ({
-  isCurrent,
+  current,
   label,
   type,
 }: {
-  isCurrent: boolean;
+  current: MarketType;
   label: string;
   type: MarketType;
 }) => {
+  const isCurrent = current === type;
+  const skewX = 15;
+
   return (
     <Link
       href={type === "sell" ? ROUTES.crypto.sell : ROUTES.crypto.buy}
       className="w-full h-full"
     >
       <div
-        className={cn(
-          "w-full h-full flex justify-center items-center font-extrabold text-neutral-gray-300 bg-neutral-gray-200 rounded-bl-2xl",
+        style={
           {
+            "--color-current": isCurrent
+              ? "var(--color-primary-dark)"
+              : "var(--color-neutral-gray-200)",
+            "--skew-x": `${current === "sell" ? skewX * -1 : skewX}deg`,
+          } as CSSProperties
+        }
+        className={cn(
+          "relative w-full h-full flex justify-center items-center font-extrabold text-neutral-gray-300 bg-neutral-gray-200",
+          {
+            "after:block after:absolute after:inset-y-0 after:-right-6 after:w-6 after:rounded-2xl after:bg-[var(--color-current)] after:skew-x-[var(--skew-x)]":
+              type === "buy",
+            "before:block before:absolute before:inset-y-0 before:-left-6 before:w-6 before:rounded-2xl before:bg-[var(--color-current)] before:skew-x-[var(--skew-x)]":
+              type === "sell",
             "bg-primary-dark text-white": isCurrent,
-            "rounded-bl-none rounded-br-2xl": !isCurrent && type === "buy",
           },
         )}
       >
