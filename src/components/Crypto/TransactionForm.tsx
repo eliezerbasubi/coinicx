@@ -1,12 +1,14 @@
-import React, { CSSProperties, useMemo, useRef } from "react";
+import React, { CSSProperties, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 
-import { AssetType, ICurrency, MarketType } from "@/types/market";
-import FIAT_CURRENCIES from "@/lib/mocks/fiat.json";
+import {
+  AssetType,
+  ICryptoCurrency,
+  ICurrency,
+  MarketType,
+} from "@/types/market";
 import { ROUTES } from "@/constants/routes";
-import { getCryptoCurrencies } from "@/services/markets";
 import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
 
@@ -14,25 +16,6 @@ import { Button } from "../ui/button";
 import TokenInput from "./TokenInput";
 
 const CurrencySelector = dynamic(() => import("./CurrencySelector"));
-
-type AssetByMarketType = Record<
-  "tokenIn" | "tokenOut",
-  { list: Array<ICurrency>; defaultAssetCode: string; assetType: AssetType }
->;
-
-const findAsset = (
-  list: ICurrency[],
-  assetCode: string,
-  defaultAssetCode: string,
-) => {
-  const lowerTarget = assetCode.toLowerCase();
-  const lowerDefault = defaultAssetCode.toLowerCase();
-
-  return (
-    list.find((item) => item.assetCode.toLowerCase() === lowerTarget) ??
-    list.find((item) => item.assetCode.toLowerCase() === lowerDefault)
-  );
-};
 
 const TransactionForm = () => {
   const inputsContainerRef = useRef<HTMLDivElement | null>(null);
@@ -43,16 +26,20 @@ const TransactionForm = () => {
   const assetsByMarketType = useCryptoMarketContext((s) => s.assetsByTokenType);
   const setSelectedAssets = useCryptoMarketContext((s) => s.setSelectedAssets);
 
-  const onValueChange = (currency: ICurrency, assetType: AssetType) => {
+  const onValueChange = (args: {
+    currency: ICurrency;
+    assetType: AssetType;
+    cryptoAssetDetails?: ICryptoCurrency;
+  }) => {
     const mainPath =
       marketType === "sell" ? ROUTES.crypto.sell : ROUTES.crypto.buy;
 
     let { crypto, fiat } = selectedAssets!;
 
-    if (assetType === "fiat") {
-      fiat = currency;
+    if (args.assetType === "fiat") {
+      fiat = args.currency;
     } else {
-      crypto = currency;
+      crypto = args.currency;
     }
 
     const newPath = [
@@ -63,7 +50,14 @@ const TransactionForm = () => {
 
     window.history.replaceState({}, "", newPath.join(""));
 
-    setSelectedAssets({ fiat, crypto });
+    if (args.cryptoAssetDetails) {
+      setSelectedAssets({ cryptoAssetDetails: args.cryptoAssetDetails });
+    }
+
+    setSelectedAssets({
+      fiat,
+      crypto,
+    });
   };
 
   return (
@@ -95,11 +89,12 @@ const TransactionForm = () => {
                     value={selectedAssets[assetsByMarketType.tokenIn.assetType]}
                     currencies={assetsByMarketType.tokenIn.list}
                     collisionBoundary={inputsContainerRef.current}
-                    onValueChange={(currency) =>
-                      onValueChange(
+                    onValueChange={(currency, cryptoAssetDetails) =>
+                      onValueChange({
                         currency,
-                        assetsByMarketType.tokenIn.assetType,
-                      )
+                        assetType: assetsByMarketType.tokenIn.assetType,
+                        cryptoAssetDetails,
+                      })
                     }
                   />
                 )
@@ -121,11 +116,12 @@ const TransactionForm = () => {
                     }
                     currencies={assetsByMarketType.tokenOut.list}
                     collisionBoundary={inputsContainerRef.current}
-                    onValueChange={(currency) =>
-                      onValueChange(
+                    onValueChange={(currency, cryptoAssetDetails) =>
+                      onValueChange({
                         currency,
-                        assetsByMarketType.tokenOut.assetType,
-                      )
+                        assetType: assetsByMarketType.tokenOut.assetType,
+                        cryptoAssetDetails,
+                      })
                     }
                   />
                 )

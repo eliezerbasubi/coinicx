@@ -3,8 +3,6 @@ import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import {
   AreaSeries,
-  BarSeries,
-  BaselineSeries,
   ColorType,
   createChart,
   DeepPartial,
@@ -19,11 +17,7 @@ import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
 
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import {
-  useCurrentAssets,
-  useCurrentCryptoCurrency,
-  useExchangeRate,
-} from "./hooks";
+import { useCurrentAssets, useExchangeRate } from "./hooks";
 import { getTimeRange } from "./utils";
 
 const TABS: Array<{ value: GraphPeriod; label: string }> = [
@@ -81,32 +75,18 @@ const QuoteChart = () => {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const [currentTab, setCurrentTab] = useState<GraphPeriod>("daily");
 
-  const marketType = useCryptoMarketContext((s) => s.marketType);
-  const { cryptoAssetCode, fiatAssetCode, selectedAssets } = useCurrentAssets();
-  const exchangeRate = useExchangeRate({
-    baseCurrency: cryptoAssetCode,
-    quoteCurrency: fiatAssetCode,
-  });
-
-  const title =
-    marketType === "sell"
-      ? `Sell ${cryptoAssetCode} for ${fiatAssetCode}`
-      : `Buy ${cryptoAssetCode} with ${fiatAssetCode}`;
+  const cryptoAsset = useCryptoMarketContext((s) => s.selectedAssets?.crypto);
+  const fiatAsset = useCryptoMarketContext((s) => s.selectedAssets?.fiat);
 
   const timeRange = getTimeRange(currentTab);
 
   const { data, status } = useQuery({
-    queryKey: [
-      "quotes",
-      currentTab,
-      selectedAssets?.crypto.id,
-      selectedAssets?.fiat.id,
-    ],
+    queryKey: ["quotes", currentTab, cryptoAsset?.id, fiatAsset?.id],
     refetchOnWindowFocus: false,
-    enabled: !!selectedAssets?.crypto?.id && !!selectedAssets?.fiat.id,
+    enabled: !!cryptoAsset?.id && !!fiatAsset?.id,
     queryFn: () =>
-      getQuotes(selectedAssets!.crypto.id, {
-        vs_currency: selectedAssets!.fiat.assetCode,
+      getQuotes(cryptoAsset!.id, {
+        vs_currency: fiatAsset!.assetCode,
         ...timeRange,
       }),
   });
@@ -227,8 +207,8 @@ const QuoteChartLegend = () => {
     quoteCurrency: fiatAssetCode,
   });
 
-  const cryptoData = useCurrentCryptoCurrency();
-  const percentageChange24h = cryptoData?.price_change_percentage_24h ?? 0;
+  const percentageChange24h =
+    selectedAssets?.cryptoAssetDetails?.price_change_percentage_24h ?? 0;
 
   const title =
     marketType === "sell"

@@ -2,18 +2,16 @@
 
 import React, { useMemo } from "react";
 import { redirect } from "next/navigation";
-import { useQueries } from "@tanstack/react-query";
 
-import { ICurrency, MarketType } from "@/types/market";
+import { ICryptoCurrency, ICurrency, MarketType } from "@/types/market";
 import FIAT_CURRENCIES from "@/lib/mocks/fiat.json";
 import { defaultAssetsCode } from "@/constants/markets";
-import { QUERY_KEYS } from "@/constants/queryKeys";
 import { ROUTES } from "@/constants/routes";
-import { getCryptoCurrencies, getExchangeRates } from "@/services/markets";
 import CryptoMarketStoreProvider from "@/store/markets/provider";
 import { AssetsByTokenType } from "@/store/markets/store";
 
 import { useFetchData } from "../hooks";
+import { mapCryptoToAssetCurrency } from "../utils/mapCryptoToAssetCurrency";
 
 type Props = {
   marketType: MarketType;
@@ -21,10 +19,19 @@ type Props = {
   cryptoAssetCode: string;
 };
 
-const findAsset = (list: ICurrency[], assetCode: string) => {
+const findAsset = (
+  list: Array<ICurrency | ICryptoCurrency>,
+  assetCode: string,
+) => {
   const lowerTarget = assetCode.toLowerCase();
 
-  return list.find((item) => item.assetCode.toLowerCase() === lowerTarget);
+  const asset = list.find((item) =>
+    "assetCode" in item
+      ? item.assetCode.toLowerCase() === lowerTarget
+      : item.symbol.toLowerCase() === lowerTarget,
+  );
+
+  return asset;
 };
 
 const CryptoMarketProvider = ({
@@ -33,25 +40,13 @@ const CryptoMarketProvider = ({
   cryptoAssetCode,
   children,
 }: React.PropsWithChildren<Props>) => {
-  const [{ data, isLoading, status }] = useFetchData();
-
-  const cryptoList: ICurrency[] = useMemo(() => {
-    if (!data) return [];
-
-    return data.map((datum) => ({
-      id: datum.id,
-      assetCode: datum.symbol,
-      assetName: datum.name,
-      assetLogo: datum.image,
-      symbol: datum.symbol,
-    }));
-  }, [data]);
+  const [{ data: cryptoList, isLoading, status }] = useFetchData();
 
   const assetsByTokenType: AssetsByTokenType = useMemo(() => {
     if (marketType === "sell") {
       return {
         tokenIn: {
-          list: cryptoList,
+          list: cryptoList ?? [],
           assetType: "crypto",
         },
         tokenOut: {
@@ -66,7 +61,7 @@ const CryptoMarketProvider = ({
         assetType: "fiat",
       },
       tokenOut: {
-        list: cryptoList,
+        list: cryptoList ?? [],
         assetType: "crypto",
       },
     };
@@ -90,7 +85,11 @@ const CryptoMarketProvider = ({
       return undefined;
     }
 
-    return { crypto, fiat };
+    return {
+      cryptoAssetDetails: crypto as ICryptoCurrency,
+      crypto: mapCryptoToAssetCurrency(crypto as ICryptoCurrency),
+      fiat: fiat as ICurrency,
+    };
   }, [assetsByTokenType, fiatAssetCode, cryptoAssetCode]);
 
   // Redirect to default assets if the current asset is not supported

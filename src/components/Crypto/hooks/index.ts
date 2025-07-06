@@ -1,8 +1,7 @@
-import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 
-import { ICryptoCurrency, IExchangeRate } from "@/types/market";
+import { IExchangeRate } from "@/types/market";
 import { getCryptoPathParams } from "@/components/Crypto/utils/getCryptoPathParams";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import { getCryptoCurrencies, getExchangeRates } from "@/services/markets";
@@ -42,27 +41,25 @@ export const useCurrentAssets = () => {
   return { fiatAssetCode, cryptoAssetCode, selectedAssets };
 };
 
-export const useCurrentCryptoCurrency = () => {
-  const assetId = useCryptoMarketContext((s) => s.selectedAssets?.crypto.id);
-
-  const queryClient = useQueryClient();
-
-  const cryptoList = queryClient.getQueryData<ICryptoCurrency[]>([
-    QUERY_KEYS.cryptoList,
-  ]);
-
-  return useMemo(
-    () => cryptoList?.find((item) => item.id === assetId),
-    [assetId],
-  );
-};
-
 /**
- * A hook to convert to get a rate between a pair.
- * The BTC is the denominator currency
- * @param baseCurrency
- * @param quoteCurrency
- * @returns the quote exchange rate
+ * A hook to compute the exchange rate between two currencies using cached exchange rates.
+ *
+ * This hook retrieves the latest exchange rates from the cache (populated by the `getExchangeRates` service),
+ * and calculates the rate for converting a base currency to a quote currency. The calculation uses the base currency as the
+ * denominator and the quote currency as the numerator, following the convention that BTC is the denominator currency.
+ *
+ * If the requested currencies are not found in the cache, it falls back to using BTC for the base and USD for the quote.
+ *
+ * @param {Object} args - The arguments object.
+ * @param {string} args.baseCurrency - The asset code of the base currency (denominator) to convert from (e.g., 'BTC', 'ETH').
+ * @param {string} args.quoteCurrency - The asset code of the quote currency (numerator) to convert to (e.g., 'USD', 'NGN').
+ *
+ * @returns {IExchangeRate | undefined} The exchange rate object for the quote currency, with the `value` property representing
+ *          the computed rate for converting one unit of the base currency to the quote currency. Returns `undefined` if rates are not available.
+ *
+ * @example
+ * const rate = useExchangeRate({ baseCurrency: 'ETH', quoteCurrency: 'USD' });
+ * // rate.value gives the price of 1 ETH in USD
  */
 export const useExchangeRate = (args: {
   baseCurrency: string;
@@ -76,12 +73,25 @@ export const useExchangeRate = (args: {
 
   if (!exchangeRates) return;
 
-  const denominatorRate = exchangeRates["btc"].value;
-  const baseRate = exchangeRates[args.baseCurrency.toLowerCase()]?.value;
+  const baseRate =
+    exchangeRates[args.baseCurrency.toLowerCase()] ?? exchangeRates["btc"];
   const quoteExchange =
     exchangeRates[args.quoteCurrency.toLowerCase()] ?? exchangeRates["usd"];
 
-  const value = denominatorRate * baseRate * quoteExchange.value;
+  if (baseRate.unit.toLowerCase() === "btc") return quoteExchange;
+
+  const value = baseRate.value / quoteExchange.value;
 
   return { ...quoteExchange, value };
+};
+
+export const useSelectedAssetsRate = () => {
+  const { fiatAssetCode, cryptoAssetCode } = useCurrentAssets();
+
+  const rate = useExchangeRate({
+    baseCurrency: cryptoAssetCode,
+    quoteCurrency: fiatAssetCode,
+  });
+
+  return { rate, fiatAssetCode };
 };

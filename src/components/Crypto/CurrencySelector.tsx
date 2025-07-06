@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { ChevronDown, Search } from "lucide-react";
 
-import { ICurrency } from "@/types/market";
+import { ICryptoCurrency, ICurrency } from "@/types/market";
 import {
   Popover,
   PopoverContent,
@@ -10,11 +10,16 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/utils/cn";
 
+import { mapCryptoToAssetCurrency } from "./utils/mapCryptoToAssetCurrency";
+
 type Props = {
   value: ICurrency;
-  currencies: ICurrency[];
+  currencies: Array<ICurrency | ICryptoCurrency>;
   collisionBoundary?: Element | null;
-  onValueChange?: (value: ICurrency) => void;
+  onValueChange?: (
+    value: ICurrency,
+    cryptoAssetDetails?: ICryptoCurrency,
+  ) => void;
 };
 
 const CurrencySelector = ({
@@ -25,8 +30,8 @@ const CurrencySelector = ({
 }: Props) => {
   const [open, setOpen] = useState(false);
 
-  const onClick = (value: ICurrency) => {
-    onValueChange?.(value);
+  const onClick = (value: ICurrency, cryptoAssetDetails?: ICryptoCurrency) => {
+    onValueChange?.(value, cryptoAssetDetails);
     setOpen(false);
   };
 
@@ -66,17 +71,31 @@ const CurrencySelector = ({
 
         <div className="h-60 overflow-y-auto">
           {currencies.map((currency) => {
+            const assetCurrency =
+              "assetCode" in currency
+                ? currency
+                : mapCryptoToAssetCurrency(currency);
+
             const isActive =
-              currency.assetCode === value.assetCode &&
-              currency.symbol === value.symbol;
+              assetCurrency.assetCode === value.assetCode &&
+              assetCurrency.symbol === value.symbol;
 
             return (
               <div
-                key={currency.assetCode + currency.symbol + currency.assetName}
+                key={
+                  assetCurrency.assetCode +
+                  assetCurrency.symbol +
+                  assetCurrency.assetName
+                }
                 role="button"
                 tabIndex={0}
                 onKeyDown={() => null}
-                onClick={() => onClick(currency)}
+                onClick={() =>
+                  onClick(
+                    assetCurrency,
+                    !("assetCode" in currency) ? currency : undefined,
+                  )
+                }
                 className={cn(
                   "flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-neutral-gray-200",
                   {
@@ -86,8 +105,8 @@ const CurrencySelector = ({
               >
                 <Image
                   unoptimized
-                  src={currency.assetLogo}
-                  alt={currency.assetName}
+                  src={assetCurrency.assetLogo}
+                  alt={assetCurrency.assetName}
                   width={20}
                   height={20}
                   className="size-5 rounded-full shrink-0"
@@ -95,10 +114,10 @@ const CurrencySelector = ({
 
                 <div className="w-full flex items-center space-x-3">
                   <p className="font-semibold uppercase">
-                    {currency.assetCode}
+                    {assetCurrency.assetCode}
                   </p>
                   <p className="text-neutral-gray-400 text-sm">
-                    {currency.assetName}
+                    {assetCurrency.assetName}
                   </p>
                 </div>
               </div>

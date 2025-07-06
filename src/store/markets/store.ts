@@ -1,22 +1,31 @@
 import { createContext } from "react";
 import { create } from "zustand";
 
-import { AssetType, ICurrency, MarketType } from "@/types/market";
+import {
+  AssetType,
+  ICryptoCurrency,
+  ICurrency,
+  MarketType,
+} from "@/types/market";
 
 export type AssetsByTokenType = Record<
   "tokenIn" | "tokenOut",
-  { list: Array<ICurrency>; assetType: AssetType }
+  { list: Array<ICurrency | ICryptoCurrency>; assetType: AssetType }
 >;
+
+type SelectedAssets = Record<AssetType, ICurrency> & {
+  cryptoAssetDetails?: ICryptoCurrency;
+};
 
 export interface CryptoMarketProps {
   marketType: MarketType;
   isLoadingAssets: boolean;
   assetsByTokenType: AssetsByTokenType;
-  selectedAssets?: Record<AssetType, ICurrency>;
+  selectedAssets?: SelectedAssets;
 }
 
 export interface CryptoMarketState extends CryptoMarketProps {
-  setSelectedAssets: (assets: Partial<Record<AssetType, ICurrency>>) => void;
+  setSelectedAssets: (assets: Partial<SelectedAssets>) => void;
 }
 
 export const createCryptoMarketStore = (initialProps: CryptoMarketProps) => {
@@ -29,10 +38,6 @@ export const createCryptoMarketStore = (initialProps: CryptoMarketProps) => {
           : undefined,
       }));
     },
-    // setSelectedAssets: (assets) =>
-    //   set((state) => ({
-    //     selectedAssets: { ...state.selectedAssets, ...assets },
-    //   })),
   }));
 };
 

@@ -4,10 +4,40 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
 
-import { useCurrentCryptoCurrency } from "./hooks";
+import { useCurrentAssets, useExchangeRate } from "./hooks";
+
+const formatNumber = (
+  value: number,
+  options?: { locale?: string } & Intl.NumberFormatOptions,
+) => {
+  const { locale, ...rest } = options ?? {};
+  return value.toLocaleString(locale ?? "en-US", {
+    ...rest,
+    currency: rest.currency ?? "USD",
+  });
+};
 
 const MarketDetails = () => {
-  const data = useCurrentCryptoCurrency();
+  // We convert crypto details data to current fiat current because we are fetching it in USD
+  const { fiatAssetCode } = useCurrentAssets();
+  const exchangeRate = useExchangeRate({
+    baseCurrency: "usd",
+    quoteCurrency: fiatAssetCode,
+  });
+
+  const data = useCryptoMarketContext(
+    (s) => s.selectedAssets?.cryptoAssetDetails,
+  );
+
+  const formatNumberCurrency = (value: number) => {
+    const amount = value * (exchangeRate?.value ?? 0);
+
+    return formatNumber(amount, {
+      style: "currency",
+      currency: fiatAssetCode,
+      notation: "compact",
+    });
+  };
 
   return (
     <div className="w-full">
@@ -16,40 +46,25 @@ const MarketDetails = () => {
         <div className="w-full grid md:grid-cols-3 gap-4">
           <MarketDetailItem
             title="Popularity"
-            details={`#${data?.market_cap_rank}`}
+            details={`#${data?.market_cap_rank ?? 1}`}
           />
           <MarketDetailItem
             title="Market Cap"
-            details={(data?.market_cap ?? 0).toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-              notation: "compact",
-            })}
+            details={formatNumberCurrency(data?.market_cap ?? 0)}
           />
           <MarketDetailItem
             title="Circulating Supply"
-            details={(data?.circulating_supply ?? 0).toLocaleString("en-US", {
+            details={formatNumber(data?.circulating_supply ?? 0, {
               notation: "compact",
             })}
           />
           <MarketDetailItem
             title="Volume"
-            details={(data?.total_volume ?? 0).toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-              notation: "compact",
-            })}
+            details={formatNumberCurrency(data?.total_volume ?? 0)}
           />
           <MarketDetailItem
             title="Fully Diluted Valuation (FDV)"
-            details={(data?.fully_diluted_valuation ?? 0).toLocaleString(
-              "en-US",
-              {
-                style: "currency",
-                currency: "USD",
-                notation: "compact",
-              },
-            )}
+            details={formatNumberCurrency(data?.fully_diluted_valuation ?? 0)}
           />
         </div>
       </div>
