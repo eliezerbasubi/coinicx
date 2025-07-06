@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronDown, Search } from "lucide-react";
 
@@ -29,6 +29,23 @@ const CurrencySelector = ({
   onValueChange,
 }: Props) => {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredCurrencies = useMemo(() => {
+    const searchQuery = search.toLowerCase();
+
+    if (!search) return currencies;
+    return currencies.filter(
+      (currency) =>
+        currency.symbol.toLowerCase().includes(searchQuery) ||
+        ("name" in currency &&
+          currency.name.toLowerCase().includes(searchQuery)) ||
+        ("assetName" in currency &&
+          currency.assetName.toLowerCase().includes(searchQuery)) ||
+        ("assetCode" in currency &&
+          currency.assetCode.toLowerCase().includes(searchQuery)),
+    );
+  }, [search, currencies]);
 
   const onClick = (value: ICurrency, cryptoAssetDetails?: ICryptoCurrency) => {
     onValueChange?.(value, cryptoAssetDetails);
@@ -66,11 +83,13 @@ const CurrencySelector = ({
             type="search"
             placeholder="Search"
             className="w-full h-full outline-none caret-primary pl-4"
+            value={search}
+            onChange={({ target: { value } }) => setSearch(value)}
           />
         </div>
 
         <div className="h-60 overflow-y-auto">
-          {currencies.map((currency) => {
+          {filteredCurrencies.map((currency) => {
             const assetCurrency =
               "assetCode" in currency
                 ? currency

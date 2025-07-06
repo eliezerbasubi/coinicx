@@ -1,5 +1,6 @@
 export type MarketType = "buy" | "sell";
 export type AssetType = "fiat" | "crypto";
+export type TokenInputType = "tokenIn" | "tokenOut";
 export type GraphPeriod = "daily" | "weekly" | "monthly" | "yearly";
 
 export interface ICurrency {

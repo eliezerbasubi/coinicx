@@ -16,8 +16,10 @@ import { getQuotes } from "@/services/markets";
 import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
 
+import { Skeleton } from "../ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import { useCurrentAssets, useExchangeRate } from "./hooks";
+import { useCurrentAssets } from "./hooks";
+import { useExchangeRate } from "./hooks/useExchangeRate";
 import { getTimeRange } from "./utils";
 
 const TABS: Array<{ value: GraphPeriod; label: string }> = [
@@ -201,8 +203,9 @@ const QuoteChart = () => {
 
 const QuoteChartLegend = () => {
   const marketType = useCryptoMarketContext((s) => s.marketType);
+  const isLoadingAssets = useCryptoMarketContext((s) => s.isLoadingAssets);
   const { cryptoAssetCode, fiatAssetCode, selectedAssets } = useCurrentAssets();
-  const exchangeRate = useExchangeRate({
+  const { exchangeRate } = useExchangeRate({
     baseCurrency: cryptoAssetCode,
     quoteCurrency: fiatAssetCode,
   });
@@ -223,12 +226,14 @@ const QuoteChartLegend = () => {
           <p className="text-2xl font-bold">
             {cryptoAssetCode}/{fiatAssetCode}
           </p>
-          <p className="text-2xl font-bold">
-            {exchangeRate?.value?.toLocaleString("en-US", {
-              style: "currency",
-              currency: fiatAssetCode,
-            })}
-          </p>
+          {(isLoadingAssets && <Skeleton className="w-37" />) || (
+            <p className="text-2xl font-bold">
+              {exchangeRate?.value?.toLocaleString("en-US", {
+                style: "currency",
+                currency: fiatAssetCode,
+              })}
+            </p>
+          )}
         </div>
         <div className="flex justify-between items-center">
           <div className="-space-x-2 inline-flex">
@@ -258,13 +263,15 @@ const QuoteChartLegend = () => {
             </div>
           </div>
 
-          <p
-            className={cn("text-2xl font-bold text-green-400", {
-              "text-red-400": percentageChange24h < 0,
-            })}
-          >
-            {percentageChange24h.toFixed(2)}%
-          </p>
+          {(isLoadingAssets && <Skeleton className="w-20" />) || (
+            <p
+              className={cn("text-2xl font-bold text-green-400", {
+                "text-red-400": percentageChange24h < 0,
+              })}
+            >
+              {percentageChange24h.toFixed(2)}%
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ import FIAT_CURRENCIES from "@/lib/mocks/fiat.json";
 import { defaultAssetsCode } from "@/constants/markets";
 import { ROUTES } from "@/constants/routes";
 import CryptoMarketStoreProvider from "@/store/markets/provider";
-import { AssetsByTokenType } from "@/store/markets/store";
+import { AssetsByTokenInputType } from "@/store/markets/store";
 
 import { useFetchData } from "../hooks";
 import { mapCryptoToAssetCurrency } from "../utils/mapCryptoToAssetCurrency";
@@ -42,30 +42,33 @@ const CryptoMarketProvider = ({
 }: React.PropsWithChildren<Props>) => {
   const [{ data: cryptoList, isLoading, status }] = useFetchData();
 
-  const assetsByTokenType: AssetsByTokenType = useMemo(() => {
-    if (marketType === "sell") {
+  const marketAssets: Record<MarketType, AssetsByTokenInputType> =
+    useMemo(() => {
       return {
-        tokenIn: {
-          list: cryptoList ?? [],
-          assetType: "crypto",
+        buy: {
+          tokenIn: {
+            list: FIAT_CURRENCIES,
+            assetType: "fiat",
+          },
+          tokenOut: {
+            list: cryptoList ?? [],
+            assetType: "crypto",
+          },
         },
-        tokenOut: {
-          list: FIAT_CURRENCIES,
-          assetType: "fiat",
+        sell: {
+          tokenIn: {
+            list: cryptoList ?? [],
+            assetType: "crypto",
+          },
+          tokenOut: {
+            list: FIAT_CURRENCIES,
+            assetType: "fiat",
+          },
         },
       };
-    }
-    return {
-      tokenIn: {
-        list: FIAT_CURRENCIES,
-        assetType: "fiat",
-      },
-      tokenOut: {
-        list: cryptoList ?? [],
-        assetType: "crypto",
-      },
-    };
-  }, [marketType, cryptoList]);
+    }, [marketType, cryptoList]);
+
+  const assetsByTokenType = marketAssets[marketType];
 
   const defaultSelectedAssets = useMemo(() => {
     const crypto = findAsset(
@@ -104,7 +107,7 @@ const CryptoMarketProvider = ({
       marketType={marketType}
       isLoadingAssets={isLoading}
       selectedAssets={defaultSelectedAssets}
-      assetsByTokenType={assetsByTokenType}
+      marketAssets={marketAssets}
     >
       {children}
     </CryptoMarketStoreProvider>

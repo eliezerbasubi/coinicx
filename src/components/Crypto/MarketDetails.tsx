@@ -5,12 +5,13 @@ import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
-import { useCurrentAssets, useExchangeRate } from "./hooks";
+import { useCurrentAssets } from "./hooks";
+import { useExchangeRate } from "./hooks/useExchangeRate";
 
 const MarketDetails = () => {
   // We convert crypto details data to current fiat current because we are fetching it in USD
   const { fiatAssetCode } = useCurrentAssets();
-  const exchangeRate = useExchangeRate({
+  const { exchangeRate } = useExchangeRate({
     baseCurrency: "usd",
     quoteCurrency: fiatAssetCode,
   });
@@ -53,7 +54,7 @@ const MarketDetails = () => {
             details={formatNumberCurrency(data?.total_volume ?? 0)}
           />
           <MarketDetailItem
-            title="Fully Diluted Valuation (FDV)"
+            title="Fully Diluted Valuation"
             details={formatNumberCurrency(data?.fully_diluted_valuation ?? 0)}
           />
         </div>
@@ -86,13 +87,18 @@ const MarketDetails = () => {
 type MarketDetailItemProps = {
   title: string;
   details: React.ReactNode;
+  className?: string;
 };
 
-const MarketDetailItem = ({ title, details }: MarketDetailItemProps) => {
+const MarketDetailItem = ({
+  title,
+  details,
+  className,
+}: MarketDetailItemProps) => {
   const isLoading = useCryptoMarketContext((s) => s.isLoadingAssets);
 
   return (
-    <div className="bg-neutral-gray-200 rounded-lg p-3">
+    <div className={cn("bg-neutral-gray-200 rounded-lg p-3", className)}>
       <p className="text-sm text-neutral-gray-400 font-medium">{title}</p>
 
       <div className="font-bold mt-1">
@@ -105,6 +111,7 @@ const MarketDetailItem = ({ title, details }: MarketDetailItemProps) => {
 const ConversionItem = ({ title, value }: { title: string; value: number }) => {
   return (
     <MarketDetailItem
+      className={cn("bg-[#0080001c]", { "bg-[#ff120012]": value < 0 })}
       title={title}
       details={
         <p className={cn("text-green-400", { "text-red-400": value < 0 })}>

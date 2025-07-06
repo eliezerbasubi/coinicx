@@ -12,5 +12,9 @@
 
 @theme inline {
   --font-sans: var(--font-inter);
-  /* --font-mono: var(--font-geist-mono); */
+}
+
+html {
+  /* TODO: REMOVE THIS WHEN HANDLING LIGHT AND DARK MODE */
+  color-scheme: light;
 }

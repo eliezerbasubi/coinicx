@@ -20,9 +20,9 @@ const CryptoMarketStoreProvider = ({
     storeRef.current?.setState({
       selectedAssets: props.selectedAssets,
       isLoadingAssets: props.isLoadingAssets,
-      assetsByTokenType: props.assetsByTokenType,
+      marketAssets: props.marketAssets,
     });
-  }, [props.selectedAssets, props.isLoadingAssets, props.assetsByTokenType]);
+  }, [props.selectedAssets, props.isLoadingAssets, props.marketAssets]);
 
   return (
     <CryptoMarketContext.Provider value={storeRef.current}>
