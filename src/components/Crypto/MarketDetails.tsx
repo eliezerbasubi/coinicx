@@ -3,19 +3,9 @@ import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
+import { formatNumber } from "@/utils/formatting/numbers";
 
 import { useCurrentAssets, useExchangeRate } from "./hooks";
-
-const formatNumber = (
-  value: number,
-  options?: { locale?: string } & Intl.NumberFormatOptions,
-) => {
-  const { locale, ...rest } = options ?? {};
-  return value.toLocaleString(locale ?? "en-US", {
-    ...rest,
-    currency: rest.currency ?? "USD",
-  });
-};
 
 const MarketDetails = () => {
   // We convert crypto details data to current fiat current because we are fetching it in USD
