@@ -19,7 +19,7 @@ export const connectors = connectorsForWallets(
 
         // We would run into `ReferenceError: indexedDB is not defined` during SSR
         ...(typeof indexedDB !== "undefined"
-          ? [trustWallet, metaMaskWallet, walletConnectWallet]
+          ? [trustWallet, metaMaskWallet]
           : []),
       ],
     },

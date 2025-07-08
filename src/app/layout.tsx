@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${inter.className} font-sans antialiased bg-primary-dark`}
+        className={`${inter.variable} ${inter.className} font-sans antialiased bg-primary-dark text-white`}
       >
         <Providers>
           <Header />
