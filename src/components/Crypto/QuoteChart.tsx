@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import {
   AreaSeries,
+  ChartOptions,
   ColorType,
   createChart,
   DeepPartial,
@@ -29,7 +30,7 @@ const TABS: Array<{ value: GraphPeriod; label: string }> = [
   { value: "yearly", label: "1Y" },
 ];
 
-const chartOptions = {
+const chartOptions: DeepPartial<ChartOptions> = {
   height: 360,
   localization: {
     priceFormatter: (value: number) =>
@@ -42,12 +43,12 @@ const chartOptions = {
   },
   rightPriceScale: {
     borderColor: "transparent",
+    autoScale: true,
   },
   grid: {
     vertLines: {
       color: "transparent",
     },
-
     horzLines: {
       color: "#ffffff08",
     },
@@ -60,9 +61,9 @@ const chartOptions = {
   },
   handleScale: {
     axisPressedMouseMove: false,
-    mouseWheel: false,
     axisDoubleClickReset: false,
-    pinch: false,
+    mouseWheel: true,
+    pinch: true,
   },
   layout: {
     fontFamily: "Inter",
@@ -71,7 +72,7 @@ const chartOptions = {
     background: { type: ColorType.Solid, color: "transparent" },
     textColor: "#ffffff9e",
   },
-} as DeepPartial<TimeChartOptions>;
+};
 
 const QuoteChart = () => {
   const chartRef = useRef<HTMLDivElement | null>(null);
