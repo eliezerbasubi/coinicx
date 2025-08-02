@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { formatNumber } from "@/utils/formatting/numbers";
+import { formatInputValue } from "@/utils/formatting/numbers";
 
 type Props = {
   label: string;
@@ -13,7 +13,7 @@ type Props = {
 >;
 
 const TokenInput = ({ label, name, trailing, ...props }: Props) => {
-  const formattedValue = formatNumber(Number(props.value), {
+  const formattedValue = formatInputValue(String(props.value), {
     maximumFractionDigits: 14,
   });
 

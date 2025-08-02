@@ -3,6 +3,9 @@
 @theme {
   --color-primary: #fcd535;
   --color-primary-dark: #181a20;
+  --color-trade-dark: #0b0e11;
+  --color-buy: #2ebd85;
+  --color-sell: #f6465d;
   --color-neutral-gray-100: #eaecef;
   --color-neutral-gray-200: #2b3139;
   --color-neutral-gray-300: #5e6673;
@@ -17,4 +20,20 @@
 html {
   /* TODO: REMOVE THIS WHEN HANDLING LIGHT AND DARK MODE */
   color-scheme: light;
+}
+
+/* Customize scroll bar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+::-webkit-scrollbar-track {
+  background-color: var(--color-neutral-gray-200);
+  border-radius: 9999px;
+  -webkit-border-radius: 9999px;
+  -moz-border-radius: 9999px;
+  -ms-border-radius: 9999px;
+  -o-border-radius: 9999px;
 }

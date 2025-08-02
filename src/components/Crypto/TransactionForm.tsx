@@ -168,8 +168,8 @@ const TransactionForm = () => {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    // Prevent value from exceeding 12 characters
-    if (value.length >= 12) {
+    // Limit amount to a million
+    if (Number(value) >= 1e9) {
       e.preventDefault();
       return;
     }

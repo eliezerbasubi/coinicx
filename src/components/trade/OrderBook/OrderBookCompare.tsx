@@ -1,0 +1,60 @@
+import React from "react";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useOrderBookStore } from "@/store/trade/orderbook";
+
+const OrderBookCompare = () => {
+  const bids = useOrderBookStore((state) => state.bids);
+  const asks = useOrderBookStore((state) => state.asks);
+
+  const bidVolume = bids
+    .slice(0, 20)
+    .reduce((acc, [, amount]) => acc + Number(amount), 0);
+  const askVolume = asks
+    .slice(0, 20)
+    .reduce((acc, [, amount]) => acc + Number(amount), 0);
+
+  const totalVolume = bidVolume + askVolume;
+
+  const bidPercentage = totalVolume ? (bidVolume / totalVolume) * 100 : 0;
+  const askPercentage = totalVolume ? (askVolume / totalVolume) * 100 : 0;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger className="w-full py-2">
+        <div className="w-full flex items-center gap-x-1 px-4 text-xs">
+          <div className="shrink-0 size-5 rounded text-buy border border-buy bg-buy/20 grid place-content-center">
+            B
+          </div>
+          <p className="lining-nums">{bidPercentage.toFixed(2)}%</p>
+          <div className="flex-1 flex gap-x-0.5">
+            <div
+              style={{ width: `${bidPercentage}%` }}
+              className="h-2 w-full bg-buy rounded-l-full"
+            />
+            <div
+              style={{ width: `${askPercentage}%` }}
+              className="h-2 w-full bg-sell rounded-r-full"
+            />
+          </div>
+          <p className="lining-nums">{askPercentage.toFixed(2)}%</p>
+          <div className="shrink-0 size-5 rounded text-sell border border-sell bg-sell/20 grid place-content-center">
+            S
+          </div>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-80 text-xs font-medium text-wrap text-gray-300">
+        <p>
+          Track the contents of the first 20 data tranches of the Spot Order
+          book and update the data in real time.
+        </p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+export default OrderBookCompare;
