@@ -3,6 +3,7 @@
 import { memo } from "react";
 
 import { OrderBookType } from "@/types/orderbook";
+import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -48,12 +49,7 @@ const OrderBookTableRow = ({
       <p className="text-right flex-1">
         {formatNumber(amount, { maximumFractionDigits: 5 })}
       </p>
-      <p className="text-right flex-1">
-        {formatNumber(total, {
-          maximumFractionDigits: 5,
-          notation: "compact",
-        })}
-      </p>
+      <PriceLevelTotal total={total} />
 
       {/* Progress */}
       <div
@@ -63,6 +59,19 @@ const OrderBookTableRow = ({
         })}
       />
     </div>
+  );
+};
+
+const PriceLevelTotal = ({ total }: { total: number }) => {
+  const rounding = useOrderBookStore((state) => state.settings.rounding);
+
+  return (
+    <p className="text-right flex-1">
+      {formatNumber(total, {
+        maximumFractionDigits: 5,
+        notation: rounding ? "compact" : undefined,
+      })}
+    </p>
   );
 };
 

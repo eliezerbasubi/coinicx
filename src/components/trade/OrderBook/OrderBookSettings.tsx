@@ -3,6 +3,7 @@
 import React from "react";
 import { MoreVertical } from "lucide-react";
 
+import { IOrderBookSettings } from "@/types/orderbook";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,11 +12,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useOrderBookStore } from "@/store/trade/orderbook";
 
 const OrderBookSettings = () => {
-  const onCheckedChange = (name: string, value: string | boolean) => {
-    console.log("🚨 - OrderBookSettings.tsx - 18", { name, value });
-  };
+  const setSettings = useOrderBookStore((state) => state.setSettings);
+  const onDepthVisualizerChange = useOrderBookStore(
+    (state) => state.onDepthVisualizerChange,
+  );
+
+  const settings = useOrderBookStore((state) => state.settings);
+
+  const onCheckedChange = (name: string, value: boolean) =>
+    setSettings({ [name]: value });
 
   return (
     <Popover>
@@ -29,16 +37,19 @@ const OrderBookSettings = () => {
           </p>
 
           <CheckboxTile
+            checked={settings.averageAndSum}
             name="averageAndSum"
             label="Display Avg.&Sum"
             onCheckedChange={onCheckedChange}
           />
           <CheckboxTile
-            name="buyAndShowRatio"
+            checked={settings.showBuyAndSellRatio}
+            name="showBuyAndSellRatio"
             label="Show Buy/Sell Ratio"
             onCheckedChange={onCheckedChange}
           />
           <CheckboxTile
+            checked={settings.rounding}
             name="rounding"
             label="Rounding"
             onCheckedChange={onCheckedChange}
@@ -50,18 +61,27 @@ const OrderBookSettings = () => {
           </p>
 
           <RadioGroup
+            value={settings.depthVisualizer}
+            name="depthVisualizer"
             defaultValue="amount"
-            onValueChange={(value) => {
-              console.log("🚨 - OrderBookSettings.tsx - 60", { value });
-            }}
+            onValueChange={(value) =>
+              onDepthVisualizerChange(
+                value as IOrderBookSettings["depthVisualizer"],
+              )
+            }
+            className="w-full"
           >
-            <div className="flex items-center gap-2">
+            <div className="w-full flex items-center gap-2">
               <RadioGroupItem value="amount" id="amount" />
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount" className="w-full cursor-pointer">
+                Amount
+              </Label>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="w-full flex items-center gap-2">
               <RadioGroupItem value="cumulative" id="cumulative" />
-              <Label htmlFor="cumulative">Cumulative</Label>
+              <Label htmlFor="cumulative" className="w-full cursor-pointer">
+                Cumulative
+              </Label>
             </div>
           </RadioGroup>
         </div>
@@ -73,20 +93,29 @@ const OrderBookSettings = () => {
 type CheckboxTileProps = {
   name: string;
   label: string;
+  checked?: boolean;
   onCheckedChange?: (name: string, value: boolean) => void;
 };
 
-const CheckboxTile = ({ name, label, onCheckedChange }: CheckboxTileProps) => {
+const CheckboxTile = ({
+  name,
+  label,
+  checked,
+  onCheckedChange,
+}: CheckboxTileProps) => {
   return (
     <div className="flex items-center gap-2">
       <Checkbox
         id={name}
         name={name}
+        checked={checked}
         onCheckedChange={(checked) => onCheckedChange?.(name, !!checked)}
       />
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={name} className="w-full cursor-pointer">
+        {label}
+      </Label>
     </div>
   );
 };
 
-export default OrderBookSettings;
+export default React.memo(OrderBookSettings);

@@ -8,6 +8,16 @@ import {
 import { useOrderBookStore } from "@/store/trade/orderbook";
 
 const OrderBookCompare = () => {
+  const showBuyAndSellRatio = useOrderBookStore(
+    (state) => state.settings.showBuyAndSellRatio,
+  );
+
+  if (!showBuyAndSellRatio) return null;
+
+  return <Compare />;
+};
+
+const Compare = () => {
   const bids = useOrderBookStore((state) => state.bids);
   const asks = useOrderBookStore((state) => state.asks);
 
@@ -57,4 +67,4 @@ const OrderBookCompare = () => {
   );
 };
 
-export default OrderBookCompare;
+export default React.memo(OrderBookCompare);

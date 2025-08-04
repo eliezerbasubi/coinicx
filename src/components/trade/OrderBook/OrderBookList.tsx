@@ -20,12 +20,15 @@ const OrderBookList = ({ side }: Props) => {
   const priceLevels = useOrderBookStore((state) => state[side]);
 
   const layout = useOrderBookStore((state) => state.layout);
+  const averageAndSum = useOrderBookStore(
+    (state) => state.settings.averageAndSum,
+  );
+  const depthVisualizer = useOrderBookStore(
+    (state) => state.settings.depthVisualizer,
+  );
 
   const [hoverIndex, setHoverIndex] = useState(0);
   const scrollHeight = useRef(0);
-
-  // // We use the max amount to get the width of each individual volume bar
-  // const maxAmount = Math.max(...orders.map(([_, amount]) => Number(amount)));
 
   const isOrderbookLayout = layout === "orderBook";
   const containerHeight = !isOrderbookLayout ? 718 : 351;
@@ -60,7 +63,7 @@ const OrderBookList = ({ side }: Props) => {
           >
             {Row}
           </FixedSizeList>
-          {!!priceLevels.length && (
+          {!!priceLevels.length && averageAndSum && (
             <AveragePriceTooltip
               hoveredIndex={hoverIndex}
               rowHeight={ROW_HEIGHT}
@@ -74,7 +77,7 @@ const OrderBookList = ({ side }: Props) => {
         </>
       );
     },
-    [priceLevels, layout, hoverIndex, side],
+    [priceLevels, layout, hoverIndex, averageAndSum, side],
   );
 
   const Row = useCallback(
@@ -89,20 +92,32 @@ const OrderBookList = ({ side }: Props) => {
     }) => {
       if (!data.length) return null;
 
-      const isAsks = side === "asks";
-      // Read items in reverse to align them from the lowest to the highest
-      const element = isAsks ? data?.[itemCount - 1 - index] : data?.[index];
+      // For Asks, Read items in reverse to align them from the lowest to the highest
+      const element =
+        side === "asks" ? data?.[itemCount - 1 - index] : data?.[index];
 
       // We add fragment to push asks to the bottom when the number of items is less than the visible rows
+      // React-window will consider these fragments as items but they won't be rendered as elements on the DOM
       if (!element) {
         return <React.Fragment key={index} />;
       }
 
       const [price, amount] = element;
 
-      // We consider the first item for the highest amount
-      const highestAmount = data[0][1];
-      const progress = Number(amount) / Number(highestAmount);
+      let progress = 0;
+
+      if (depthVisualizer === "cumulative") {
+        const maxCumAmount = data[data.length - 1][2];
+        const cumAmount = element[2];
+
+        if (maxCumAmount && cumAmount) {
+          progress = cumAmount / maxCumAmount;
+        }
+      } else {
+        // We consider the first item for the highest amount
+        const highestAmount = data[0][1];
+        progress = Number(amount) / Number(highestAmount);
+      }
 
       return (
         <OrderBookTableRow
@@ -116,7 +131,7 @@ const OrderBookList = ({ side }: Props) => {
         />
       );
     },
-    [itemCount],
+    [itemCount, depthVisualizer],
   );
 
   return (
