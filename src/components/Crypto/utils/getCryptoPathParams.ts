@@ -1,9 +1,10 @@
 import { MarketType } from "@/types/market";
+
 import {
   defaultAssetsCode,
   defaultMarketType,
   supportedPaths,
-} from "@/constants/markets";
+} from "../constants";
 
 export const getCryptoPathParams = (slug?: string[]) => {
   const [marketType, fiat, crypto] = slug ?? [];

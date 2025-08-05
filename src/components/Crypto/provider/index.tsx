@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 
 import { ICryptoCurrency, ICurrency, MarketType } from "@/types/market";
 import FIAT_CURRENCIES from "@/lib/mocks/fiat.json";
-import { defaultAssetsCode } from "@/constants/markets";
 import { ROUTES } from "@/constants/routes";
 import CryptoMarketStoreProvider from "@/store/markets/provider";
 import { AssetsByTokenInputType } from "@/store/markets/store";
 
+import { defaultAssetsCode } from "../constants";
 import { useFetchData } from "../hooks";
 import { mapCryptoToAssetCurrency } from "../utils/mapCryptoToAssetCurrency";
 
