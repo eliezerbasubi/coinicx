@@ -1,10 +1,16 @@
 import React from "react";
 
 import SpotTrade from "@/components/trade";
+import { getTradePathParams } from "@/components/trade/utils/getTradePathParams";
 
-type Props = {};
+type Props = {
+  params: Promise<{ slug: string[] }>;
+};
 
-const SpotTradePage = (props: Props) => {
+const SpotTradePage = async ({ params }: Props) => {
+  const { slug } = await params;
+  const pathParams = getTradePathParams(slug);
+
   return <SpotTrade />;
 };
 

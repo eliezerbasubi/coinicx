@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { VOrderBook, VOrderBookType } from "@/components/vectors/orderbook";
 import { QUERY_KEYS } from "@/constants/queryKeys";
+import { useSpotTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 
@@ -42,13 +43,12 @@ const TICKS = [0.01, 0.1, 1, 10, 50, 100];
 const OrderBookHeader = () => {
   const [open, setOpen] = useState(false);
 
-  const onTickSizeChange = useOrderBookStore(
-    (selector) => selector.onTickSizeChange,
-  );
-  const setLayout = useOrderBookStore((selector) => selector.setLayout);
+  const onTickSizeChange = useOrderBookStore((s) => s.onTickSizeChange);
+  const setLayout = useOrderBookStore((s) => s.setLayout);
 
-  const layout = useOrderBookStore((selector) => selector.layout);
-  const tickSize = useOrderBookStore((selector) => selector.tickSize);
+  const layout = useOrderBookStore((s) => s.layout);
+  const tickSize = useOrderBookStore((s) => s.tickSize);
+  const symbol = useSpotTradeContext((s) => s.symbol);
 
   const queryClient = useQueryClient();
 
@@ -91,7 +91,7 @@ const OrderBookHeader = () => {
                   // Load previous data
                   const data = queryClient.getQueryData<OrderBookData>([
                     QUERY_KEYS.orderbook,
-                    "BTCUSDT",
+                    symbol,
                   ]);
 
                   if (!data) return;

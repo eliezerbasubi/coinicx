@@ -6,6 +6,7 @@ import { ArrowUp } from "lucide-react";
 
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import { getOrderBookDepth } from "@/services/orderbook";
+import { useSpotTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -16,13 +17,14 @@ import OrderBookList from "./OrderBookList";
 const OrderBookTable = () => {
   const setSnapshot = useOrderBookStore((state) => state.setSnapshot);
   const layout = useOrderBookStore((state) => state.layout);
-
-  const pair = "BTCUSDT";
+  const symbol = useSpotTradeContext((state) => state.symbol);
+  const baseAsset = useSpotTradeContext((state) => state.baseAsset);
+  const quoteAsset = useSpotTradeContext((state) => state.quoteAsset);
 
   const { data } = useQuery({
-    queryKey: [QUERY_KEYS.orderbook, pair],
+    queryKey: [QUERY_KEYS.orderbook, symbol],
     staleTime: Infinity,
-    queryFn: () => getOrderBookDepth({ symbol: pair }),
+    queryFn: () => getOrderBookDepth({ symbol: symbol }),
   });
 
   useStream();
@@ -37,13 +39,13 @@ const OrderBookTable = () => {
     <div className="w-full">
       <div className="flex items-center justify-between text-xs font-medium text-neutral-gray-400 px-4 py-1">
         <div className="flex-1">
-          <p>Price (USDT)</p>
+          <p>Price ({quoteAsset})</p>
         </div>
         <div className="flex-1 text-right">
-          <p>Amount (BTC)</p>
+          <p>Amount ({baseAsset})</p>
         </div>
         <div className="flex-1 text-right">
-          <p>Total (BTC)</p>
+          <p>Total ({baseAsset})</p>
         </div>
       </div>
 

@@ -1,17 +1,23 @@
+"use client";
+
 import React from "react";
 
+import { useSpotTradeContext } from "@/store/trade/hooks";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
-type Props = {};
+const TickerOverview = () => {
+  const baseAsset = useSpotTradeContext((state) => state.baseAsset);
+  const quoteAsset = useSpotTradeContext((state) => state.quoteAsset);
 
-const TickerOverview = (props: Props) => {
   return (
     <div className="w-full flex items-center gap-x-6 bg-primary-dark p-4 rounded-md">
       <div className="flex items-center space-x-2">
         <div className="size-8 rounded-full bg-teal-500" />
         <div className="flex-1">
-          <p className="text-xl font-bold">BTC/USDT</p>
+          <p className="text-xl font-bold">
+            {baseAsset}/{quoteAsset}
+          </p>
           <p className="text-xs text-neutral-gray-300">Spot</p>
         </div>
       </div>
@@ -27,8 +33,8 @@ const TickerOverview = (props: Props) => {
         <TickerItem label="24H Change" value={2408.56} percentage={12.5} />
         <TickerItem label="24H High" value={1126854} />
         <TickerItem label="24H Low" value={2408.56} />
-        <TickerItem label="24H Volume(BTC)" value={2408.56} />
-        <TickerItem label="24H Volume(USDT)" value={2408.56} />
+        <TickerItem label={`24H Volume(${baseAsset})`} value={2408.56} />
+        <TickerItem label={`24H Volume(${quoteAsset})`} value={2408.56} />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from "react";
 
 import { OrderBookType, PriceLevel } from "@/types/orderbook";
+import { useSpotTradeContext } from "@/store/trade/hooks";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -77,7 +78,7 @@ const AveragePriceTooltip = ({
           </p>
         </div>
         <div className="flex items-center justify-between">
-          <p>Sum BTC:</p>
+          <SumLabel type="baseAsset" />
           <p>
             {formatNumber(cumulativeTotals.amountSum, {
               maximumFractionDigits: 5,
@@ -85,7 +86,7 @@ const AveragePriceTooltip = ({
           </p>
         </div>
         <div className="flex items-center justify-between">
-          <p>Sum USDT:</p>
+          <SumLabel type="quoteAsset" />
           <p>
             {formatNumber(cumulativeTotals.total, {
               maximumFractionDigits: 5,
@@ -102,6 +103,12 @@ const AveragePriceTooltip = ({
       </div>
     </div>
   );
+};
+
+const SumLabel = ({ type }: { type: "baseAsset" | "quoteAsset" }) => {
+  const asset = useSpotTradeContext((s) => s[type]);
+
+  return <p>Sum {asset}:</p>;
 };
 
 export default memo(AveragePriceTooltip);

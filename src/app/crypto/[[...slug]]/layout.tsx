@@ -1,6 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 
+import CryptoMarketProvider from "@/components/Crypto/provider";
 import { getCryptoPathParams } from "@/components/Crypto/utils/getCryptoPathParams";
 
 type Props = {
@@ -15,12 +16,21 @@ const BuySellCryptoLayout = async ({
 
   const pathParams = getCryptoPathParams(slug);
 
-  if (pathParams.redirect)
+  if (pathParams.redirect) {
     redirect(
       `${pathParams.marketType}/${pathParams.fiat}/${pathParams.crypto}`,
     );
+  }
 
-  return <div className="w-full">{children}</div>;
+  return (
+    <CryptoMarketProvider
+      marketType={pathParams.marketType}
+      fiatAssetCode={pathParams.fiat}
+      cryptoAssetCode={pathParams.crypto}
+    >
+      {children}
+    </CryptoMarketProvider>
+  );
 };
 
 export default BuySellCryptoLayout;
