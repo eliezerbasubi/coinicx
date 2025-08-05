@@ -1,6 +1,6 @@
 import React from "react";
 
-import TransactCrypto from "@/components/Crypto";
+import TransactCrypto from "@/components/crypto";
 
 const BuySellCryptoPage = async () => {
   return <TransactCrypto />;

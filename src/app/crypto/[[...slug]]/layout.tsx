@@ -1,8 +1,8 @@
 import React from "react";
 import { redirect } from "next/navigation";
 
-import CryptoMarketProvider from "@/components/Crypto/provider";
-import { getCryptoPathParams } from "@/components/Crypto/utils/getCryptoPathParams";
+import CryptoMarketProvider from "@/components/crypto/provider";
+import { getCryptoPathParams } from "@/components/crypto/utils/getCryptoPathParams";
 
 type Props = {
   params: Promise<{ slug: string[] }>;
