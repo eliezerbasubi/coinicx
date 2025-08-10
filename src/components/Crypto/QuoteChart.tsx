@@ -9,16 +9,15 @@ import {
   DeepPartial,
   TickMarkFormatter,
   Time,
-  TimeChartOptions,
 } from "lightweight-charts";
 
 import { GraphPeriod } from "@/types/market";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getQuotes } from "@/services/markets";
 import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
 
-import { Skeleton } from "../ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { useCurrentAssets } from "./hooks";
 import { useExchangeRate } from "./hooks/useExchangeRate";
 import { getTimeRange } from "./utils";
@@ -66,7 +65,7 @@ const chartOptions: DeepPartial<ChartOptions> = {
     pinch: true,
   },
   layout: {
-    fontFamily: "Inter",
+    fontFamily: "'IBM Plex Sans', sans-serif",
     attributionLogo: false,
     fontSize: 12,
     background: { type: ColorType.Solid, color: "transparent" },

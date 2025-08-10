@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUp } from "lucide-react";
 
 import { QUERY_KEYS } from "@/constants/queryKeys";
-import { getOrderBookDepth } from "@/services/orderbook";
+import { getOrderBookDepth } from "@/services/trade";
 import { useSpotTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { formatNumber } from "@/utils/formatting/numbers";
