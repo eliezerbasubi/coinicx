@@ -12,8 +12,8 @@ type Props = {
   side: OrderBookType;
 };
 
-const VISIBLE_ROWS = 17;
-const MAX_VISIBLE_ROWS = 36;
+const VISIBLE_ROWS = 10;
+const MAX_VISIBLE_ROWS = 17;
 const ROW_HEIGHT = 20;
 
 const OrderBookList = ({ side }: Props) => {
@@ -31,7 +31,7 @@ const OrderBookList = ({ side }: Props) => {
   const scrollHeight = useRef(0);
 
   const isOrderbookLayout = layout === "orderBook";
-  const containerHeight = !isOrderbookLayout ? 718 : 351;
+  const containerHeight = !isOrderbookLayout ? 420 : 200;
   const priceLevelsSize = priceLevels.length;
 
   let itemCount = priceLevelsSize;
