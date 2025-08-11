@@ -136,7 +136,7 @@ const OrderBookList = ({ side }: Props) => {
 
   return (
     <div
-      className="relative will-change-transform group/orderbook-list"
+      className="relative z-10 will-change-transform group/orderbook-list"
       style={{ height: containerHeight }}
     >
       <AutoSizer>{List}</AutoSizer>

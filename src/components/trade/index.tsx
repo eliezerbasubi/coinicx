@@ -5,9 +5,7 @@ import OrderBook from "./OrderBook";
 import OrderForm from "./OrderForm";
 import TickerOverview from "./TickerOverview";
 
-type Props = {};
-
-const SpotTrade = (props: Props) => {
+const SpotTrade = () => {
   return (
     <div className="bg-trade-dark w-full flex gap-1 p-1">
       <div className="w-full space-y-1">

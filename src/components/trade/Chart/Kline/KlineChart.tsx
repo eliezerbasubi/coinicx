@@ -220,7 +220,7 @@ const KlineChart = ({ interval }: Props) => {
       className="relative size-full border-l border-neutral-gray-200"
       ref={chartWrapperRef}
     >
-      <div className="absolute left-0 top-0 h-0 w-full z-[2000]">
+      <div className="absolute left-0 top-0 h-0 w-full z-5">
         <div className="w-full pt-1 pl-1 absolute">
           <KlineTooltipTitle ref={candleTooltipRefs} />
           <KlineCandleIndicatorTitle ref={candleTooltipRefs} />

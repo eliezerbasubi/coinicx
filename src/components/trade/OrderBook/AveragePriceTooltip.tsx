@@ -63,7 +63,7 @@ const AveragePriceTooltip = ({
   return (
     <div className="absolute right-0 z-50 hidden group-hover/orderbook-list:block">
       <div
-        className="absolute min-w-52 rounded-md px-3 py-1.5 bg-neutral-gray-200 text-xs text-gray-300 space-y-1"
+        className="absolute z-50 min-w-52 rounded-md px-3 py-1.5 bg-neutral-gray-200 text-xs text-gray-300 space-y-1"
         style={{
           transform: `translate(0px, calc(-50% - ${y}px))`,
         }}

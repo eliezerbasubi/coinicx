@@ -29,3 +29,14 @@ export type Kline = [
   `${number}`,
   `${number}`,
 ];
+
+export type OrderType =
+  | "limit"
+  | "market"
+  | "stopLimit"
+  | "stopMarket"
+  | "trailingStop"
+  | "oco"
+  | "twap";
+
+export type OrderFormLimitOffsetType = "offset" | "pnl";

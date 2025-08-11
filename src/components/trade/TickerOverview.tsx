@@ -18,7 +18,7 @@ const TickerOverview = () => {
           <p className="text-xl font-bold">
             {baseAsset}/{quoteAsset}
           </p>
-          <p className="text-xs text-neutral-gray-300">Spot</p>
+          <p className="text-xs text-neutral-gray-400 font-medium">Spot</p>
         </div>
       </div>
 
@@ -49,7 +49,7 @@ type TickerItemProps = {
 const TickerItem = ({ label, value, percentage }: TickerItemProps) => {
   return (
     <div className="w-fit text-xs">
-      <p className="text-neutral-gray-300 mb-1">{label}</p>
+      <p className="text-neutral-gray-400 mb-1">{label}</p>
 
       <div
         className={cn("flex items-center font-medium space-x-1", {
