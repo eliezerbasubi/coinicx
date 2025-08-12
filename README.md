@@ -1,4 +1,5 @@
-# Coinicx
+### Coinicx
+A high-performance, crypto-native trading platform designed for next-generation traders. Built for speed, transparency, and scalability, CoinicX empowers users to trade digital assets with confidence — beyond the limits of traditional exchanges.
 
 > **⚠️ Development Notice**  
 > This project is currently under active development. Some features may not work as expected, and the codebase is subject to frequent changes. More updates and improvements are coming soon!
