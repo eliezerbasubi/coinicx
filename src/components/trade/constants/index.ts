@@ -1,6 +1,6 @@
 import { ChartInterval, TradeType } from "@/types/trade";
 
-export const defaultSpotAsset = {
+export const defaultTradeAsset = {
   baseAsset: "BTC",
   quoteAsset: "USDC",
 };

@@ -10,7 +10,7 @@ import { useTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { formatNumber } from "@/utils/formatting/numbers";
 
-import { useStream } from "../hooks";
+import { useOrderBookStream } from "../hooks";
 import OrderBookCompare from "./OrderBookCompare";
 import OrderBookList from "./OrderBookList";
 
@@ -27,7 +27,7 @@ const OrderBookTable = () => {
     queryFn: () => getOrderBookDepth({ symbol: symbol }),
   });
 
-  useStream();
+  useOrderBookStream();
 
   useEffect(() => {
     if (data) {

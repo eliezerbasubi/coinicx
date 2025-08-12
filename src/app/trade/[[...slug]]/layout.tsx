@@ -1,9 +1,9 @@
 import React from "react";
 import { redirect } from "next/navigation";
 
+import TradeProvider from "@/components/trade/provider";
 import { getTradePathParams } from "@/components/trade/utils/getTradePathParams";
 import { ROUTES } from "@/constants/routes";
-import TradeStoreProvider from "@/store/trade/provider";
 
 type Props = {
   params: Promise<{ slug: string[] }>;
@@ -24,13 +24,13 @@ const TradeLayout = async ({
   }
 
   return (
-    <TradeStoreProvider
+    <TradeProvider
       tradeType={pathParams.type}
       baseAsset={pathParams.baseAsset}
       quoteAsset={pathParams.quoteAsset}
     >
       {children}
-    </TradeStoreProvider>
+    </TradeProvider>
   );
 };
 

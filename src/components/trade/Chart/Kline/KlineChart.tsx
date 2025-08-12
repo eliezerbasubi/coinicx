@@ -33,6 +33,7 @@ const KlineChart = ({ interval }: Props) => {
   const candleTooltipRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
   const symbol = useTradeContext((s) => s.symbol);
+  const setMarketTicker = useTradeContext((s) => s.setMarketTicker);
 
   const handleCandleTooltip = useCallback(
     (klineData: KLineData, lastKlineData: KLineData) => {
@@ -143,8 +144,8 @@ const KlineChart = ({ interval }: Props) => {
 
     chart.setSymbol({
       ticker: symbol,
-      pricePrecision: 0,
-      volumePrecision: 0,
+      pricePrecision: 2,
+      volumePrecision: 2,
     });
 
     chart.setPeriod({ span: interval.span, type: interval.type });
@@ -189,6 +190,14 @@ const KlineChart = ({ interval }: Props) => {
             volume: Number(data.k.v),
           };
           callback(bar);
+
+          setMarketTicker({
+            o: bar.open,
+            h: bar.high,
+            l: bar.low,
+            c: bar.close,
+            v: bar.volume,
+          });
         };
       },
     });

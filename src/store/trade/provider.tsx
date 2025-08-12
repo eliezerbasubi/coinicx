@@ -21,12 +21,10 @@ const TradeStoreProvider = ({
 
   useEffect(() => {
     storeRef.current?.setState({
-      baseAsset: props.baseAsset,
-      quoteAsset: props.quoteAsset,
       symbol: props.baseAsset + props.quoteAsset,
-      tradeType: props.tradeType,
+      ...props,
     });
-  }, [props.baseAsset, props.quoteAsset, props.tradeType]);
+  }, [props.baseAsset, props.quoteAsset, props.tradeType, props.marketTicker]);
 
   return (
     <TradeContext.Provider value={storeRef.current}>
