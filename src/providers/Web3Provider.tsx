@@ -25,7 +25,7 @@ const Web3Provider = ({ children }: Props) => {
           theme={{
             ...rkTheme,
             fonts: {
-              body: "var(--font-inter)",
+              body: "var(--font-ibm-plex-sans)",
             },
             colors: {
               ...rkTheme.colors,

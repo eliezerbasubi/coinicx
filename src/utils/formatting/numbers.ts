@@ -8,3 +8,16 @@ export const formatNumber = (
     currency: rest.currency ?? "USD",
   });
 };
+
+export const formatInputValue = (
+  value: string,
+  options?: { locale?: string } & Intl.NumberFormatOptions,
+) => {
+  let formatted = formatNumber(Number(value), options);
+
+  if (value.endsWith(".")) {
+    formatted += ".";
+  }
+
+  return formatted;
+};

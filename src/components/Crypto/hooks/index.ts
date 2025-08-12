@@ -1,8 +1,7 @@
 import { useParams } from "next/navigation";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 
-import { IExchangeRate } from "@/types/market";
-import { getCryptoPathParams } from "@/components/Crypto/utils/getCryptoPathParams";
+import { getCryptoPathParams } from "@/components/crypto/utils/getCryptoPathParams";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import { getCryptoCurrencies, getExchangeRates } from "@/services/markets";
 import { useCryptoMarketContext } from "@/store/markets/hook";
