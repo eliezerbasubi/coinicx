@@ -12,7 +12,7 @@ const KlineVolIndicatorTitle = ({ ref, wrapperRef }: Props) => {
   return (
     <div
       ref={wrapperRef}
-      className="absolute w-full max-w-2xl xl:max-w-3xl mt-1"
+      className="absolute w-full max-w-sm md:max-w-2xl xl:max-w-3xl mt-1"
     >
       <TooltipTitleWrapper>
         <TooltipTitleTile ref={ref} titleKey={"volume"} label={"VOL"} />

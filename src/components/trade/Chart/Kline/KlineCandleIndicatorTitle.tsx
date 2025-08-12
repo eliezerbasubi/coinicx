@@ -18,7 +18,7 @@ const KlineCandleIndicatorTitle = ({ ref }: Props) => {
   if (!candleLayout || !candleLayout.indicators.length) return null;
 
   return (
-    <div className="w-full max-w-2xl xl:max-w-3xl">
+    <div className="w-full max-w-sm md:max-w-2xl xl:max-w-3xl">
       <TooltipTitleWrapper>
         {candleLayout.indicators.map((indicator) => (
           <div key={indicator.name} className="inline-flex gap-2">

@@ -17,7 +17,7 @@ const TITLES = [
 
 const KlineTooltipTitle = (props: Props) => {
   return (
-    <div className="w-full max-w-2xl xl:max-w-3xl">
+    <div className="w-full max-w-sm md:max-w-2xl xl:max-w-3xl">
       <TooltipTitleWrapper>
         <TooltipTitleTile
           titleKey="timestamp"

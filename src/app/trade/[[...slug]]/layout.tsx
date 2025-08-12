@@ -1,4 +1,5 @@
 import React from "react";
+import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import TradeProvider from "@/components/trade/provider";
@@ -7,6 +8,11 @@ import { ROUTES } from "@/constants/routes";
 
 type Props = {
   params: Promise<{ slug: string[] }>;
+};
+
+export const metadata: Metadata = {
+  title: "CoinicX Spot Trading",
+  description: "Trade beyond the edge",
 };
 
 const TradeLayout = async ({

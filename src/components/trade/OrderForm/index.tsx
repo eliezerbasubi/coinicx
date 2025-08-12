@@ -48,7 +48,7 @@ const OrderForm = () => {
   const isBuyOrder = state.orderSide === "buy";
 
   return (
-    <div className="w-full max-w-80 bg-primary-dark rounded-md">
+    <div className="w-full md:max-w-80 bg-primary-dark rounded-md pb-12 md:pb-0">
       <div className="w-full border-b border-neutral-gray-200 px-4 h-11 flex items-center justify-between">
         <p className="text-sm font-semibold">Trade</p>
       </div>
