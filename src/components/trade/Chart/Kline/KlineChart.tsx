@@ -10,7 +10,11 @@ import KlineCandleIndicatorTitle from "./KlineCandleIndicatorTitle";
 import KlineTooltipTitle from "./KlineTooltipTitle";
 import KlineVolIndicatorTitle from "./KlineVolIndicatorTitle";
 import { useKlineStore } from "./store/kLineStore";
-import { CrosshairEventData, KlineIndicatorEventData } from "./types";
+import {
+  CrosshairEventData,
+  KlineIndicatorEventData,
+  KLineStreamData,
+} from "./types";
 import { getIndicatorCalc } from "./utils/getIndicatorCalc";
 import kLineStyles from "./utils/kLineStyles";
 import { waitForIndicatorResults } from "./utils/waitForIndicatorResults";
@@ -167,6 +171,25 @@ const KlineChart = ({ interval }: Props) => {
         waitForIndicatorResults(chart, (latestDataValue) => {
           handleIndicatorTooltip(latestDataValue as KlineIndicatorEventData);
         });
+      },
+      subscribeBar: ({ period, symbol, callback }) => {
+        const ws = new WebSocket(
+          `wss://stream.binance.com:9443/ws/${symbol.ticker.toLowerCase()}@kline_${period.span + period.type.slice(0, 1)}`,
+        );
+
+        ws.onmessage = (event) => {
+          const data: KLineStreamData = JSON.parse(event.data);
+
+          const bar: KLineData = {
+            timestamp: data.k.t,
+            open: Number(data.k.o),
+            high: Number(data.k.h),
+            low: Number(data.k.l),
+            close: Number(data.k.c),
+            volume: Number(data.k.v),
+          };
+          callback(bar);
+        };
       },
     });
 
