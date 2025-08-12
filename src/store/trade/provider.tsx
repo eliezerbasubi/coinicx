@@ -3,20 +3,20 @@
 import React, { useEffect, useRef } from "react";
 
 import {
-  createSpotTradeStore,
-  SpotTradeContext,
-  SpotTradeProps,
-  SpotTradeStore,
-} from "./spot";
+  createTradeStore,
+  TradeContext,
+  TradeStore,
+  TradeStoreProps,
+} from "./store";
 
-const SpotTradeStoreProvider = ({
+const TradeStoreProvider = ({
   children,
   ...props
-}: React.PropsWithChildren<SpotTradeProps>) => {
-  const storeRef = useRef<SpotTradeStore>(null);
+}: React.PropsWithChildren<TradeStoreProps>) => {
+  const storeRef = useRef<TradeStore>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createSpotTradeStore(props);
+    storeRef.current = createTradeStore(props);
   }
 
   useEffect(() => {
@@ -24,14 +24,15 @@ const SpotTradeStoreProvider = ({
       baseAsset: props.baseAsset,
       quoteAsset: props.quoteAsset,
       symbol: props.baseAsset + props.quoteAsset,
+      tradeType: props.tradeType,
     });
-  }, [props.baseAsset, props.quoteAsset]);
+  }, [props.baseAsset, props.quoteAsset, props.tradeType]);
 
   return (
-    <SpotTradeContext.Provider value={storeRef.current}>
+    <TradeContext.Provider value={storeRef.current}>
       {children}
-    </SpotTradeContext.Provider>
+    </TradeContext.Provider>
   );
 };
 
-export default SpotTradeStoreProvider;
+export default TradeStoreProvider;

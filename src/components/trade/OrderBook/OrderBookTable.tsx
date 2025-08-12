@@ -6,7 +6,7 @@ import { ArrowUp } from "lucide-react";
 
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import { getOrderBookDepth } from "@/services/trade";
-import { useSpotTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -17,9 +17,9 @@ import OrderBookList from "./OrderBookList";
 const OrderBookTable = () => {
   const setSnapshot = useOrderBookStore((state) => state.setSnapshot);
   const layout = useOrderBookStore((state) => state.layout);
-  const symbol = useSpotTradeContext((state) => state.symbol);
-  const baseAsset = useSpotTradeContext((state) => state.baseAsset);
-  const quoteAsset = useSpotTradeContext((state) => state.quoteAsset);
+  const symbol = useTradeContext((state) => state.symbol);
+  const baseAsset = useTradeContext((state) => state.baseAsset);
+  const quoteAsset = useTradeContext((state) => state.quoteAsset);
 
   const { data } = useQuery({
     queryKey: [QUERY_KEYS.orderbook, symbol],

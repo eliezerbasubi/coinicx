@@ -2,13 +2,14 @@ import React from "react";
 import { redirect } from "next/navigation";
 
 import { getTradePathParams } from "@/components/trade/utils/getTradePathParams";
-import SpotTradeStoreProvider from "@/store/trade/provider";
+import { ROUTES } from "@/constants/routes";
+import TradeStoreProvider from "@/store/trade/provider";
 
 type Props = {
   params: Promise<{ slug: string[] }>;
 };
 
-const TradeSpotLayout = async ({
+const TradeLayout = async ({
   params,
   children,
 }: React.PropsWithChildren<Props>) => {
@@ -17,17 +18,20 @@ const TradeSpotLayout = async ({
   const pathParams = getTradePathParams(slug);
 
   if (pathParams.redirect) {
-    redirect(`/${pathParams.baseAsset}/${pathParams.quoteAsset}`);
+    redirect(
+      `${ROUTES.trade.index}/${pathParams.type}/${pathParams.baseAsset}/${pathParams.quoteAsset}`,
+    );
   }
 
   return (
-    <SpotTradeStoreProvider
+    <TradeStoreProvider
+      tradeType={pathParams.type}
       baseAsset={pathParams.baseAsset}
       quoteAsset={pathParams.quoteAsset}
     >
       {children}
-    </SpotTradeStoreProvider>
+    </TradeStoreProvider>
   );
 };
 
-export default TradeSpotLayout;
+export default TradeLayout;

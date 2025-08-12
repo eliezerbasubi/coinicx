@@ -3,7 +3,7 @@ import { Chart, dispose, init, KLineData } from "klinecharts";
 
 import { ChartInterval } from "@/types/trade";
 import { getKlines } from "@/services/trade";
-import { useSpotTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/store/trade/hooks";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 import KlineCandleIndicatorTitle from "./KlineCandleIndicatorTitle";
@@ -28,7 +28,7 @@ const KlineChart = ({ interval }: Props) => {
   const volIndicatorWrapperRef = useRef<HTMLDivElement>(null);
   const candleTooltipRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
-  const symbol = useSpotTradeContext((s) => s.symbol);
+  const symbol = useTradeContext((s) => s.symbol);
 
   const handleCandleTooltip = useCallback(
     (klineData: KLineData, lastKlineData: KLineData) => {
@@ -83,7 +83,11 @@ const KlineChart = ({ interval }: Props) => {
 
   const handleIndicatorTooltip = useCallback(
     (indicatorEventData: KlineIndicatorEventData) => {
+      if (!indicatorEventData) return;
+
       Object.values(indicatorEventData).forEach((data) => {
+        if (!data) return;
+
         Object.entries(data).forEach(([key, value]) => {
           const element = candleTooltipRefs.current[key];
 
@@ -194,9 +198,21 @@ const KlineChart = ({ interval }: Props) => {
   useEffect(() => {
     if (!chartWrapperRef.current) return;
 
+    const controller = new AbortController();
+    const { signal } = controller;
+
     // Update top position of the volume indicator
     handleVolIndicatorPosition(
       chartWrapperRef.current.getBoundingClientRect().height,
+    );
+
+    // TODO: Look into why the chart is distorted after requesting fullscreen
+    document.addEventListener(
+      "fullscreenchange",
+      () => {
+        chartRef.current?.resize();
+      },
+      { signal },
     );
 
     const observer = new ResizeObserver((entries) => {
@@ -211,13 +227,16 @@ const KlineChart = ({ interval }: Props) => {
 
     observer.observe(chartWrapperRef.current);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      controller.abort();
+    };
   }, [chartRef.current, chartWrapperRef.current]);
 
   return (
     <div
       id="klinechart"
-      className="relative size-full border-l border-neutral-gray-200"
+      className="relative size-full flex-1 border-l border-neutral-gray-200"
       ref={chartWrapperRef}
     >
       <div className="absolute left-0 top-0 h-0 w-full z-5">

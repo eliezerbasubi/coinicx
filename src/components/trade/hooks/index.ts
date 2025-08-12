@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { DepthUpdate } from "@/types/orderbook";
 import { QUERY_KEYS } from "@/constants/queryKeys";
-import { useSpotTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 
 import { createBatchedDiffApplier } from "../utils/batchDiffApplier";
@@ -13,7 +13,7 @@ export const useStream = () => {
   const queryClient = useQueryClient();
   const applyDiff = useOrderBookStore((s) => s.applyDiff);
 
-  const symbol = useSpotTradeContext((s) => s.symbol);
+  const symbol = useTradeContext((s) => s.symbol);
 
   // Create a debounced batched diff applier
   const batchedApplyDiff = createBatchedDiffApplier(applyDiff);

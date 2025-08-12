@@ -40,3 +40,5 @@ export type OrderType =
   | "twap";
 
 export type OrderFormLimitOffsetType = "offset" | "pnl";
+
+export type TradeType = "spot" | "isolated" | "cross" | "grid";

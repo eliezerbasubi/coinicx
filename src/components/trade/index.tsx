@@ -5,7 +5,7 @@ import OrderBook from "./OrderBook";
 import OrderForm from "./OrderForm";
 import TickerOverview from "./TickerOverview";
 
-const SpotTrade = () => {
+const Trade = () => {
   return (
     <div className="bg-trade-dark w-full flex gap-1 p-1">
       <div className="w-full space-y-1">
@@ -21,4 +21,4 @@ const SpotTrade = () => {
   );
 };
 
-export default SpotTrade;
+export default Trade;

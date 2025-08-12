@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from "react";
 
 import { OrderBookType, PriceLevel } from "@/types/orderbook";
-import { useSpotTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/store/trade/hooks";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -106,7 +106,7 @@ const AveragePriceTooltip = ({
 };
 
 const SumLabel = ({ type }: { type: "baseAsset" | "quoteAsset" }) => {
-  const asset = useSpotTradeContext((s) => s[type]);
+  const asset = useTradeContext((s) => s[type]);
 
   return <p>Sum {asset}:</p>;
 };

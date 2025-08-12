@@ -2,13 +2,13 @@
 
 import React from "react";
 
-import { useSpotTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/store/trade/hooks";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 const TickerOverview = () => {
-  const baseAsset = useSpotTradeContext((state) => state.baseAsset);
-  const quoteAsset = useSpotTradeContext((state) => state.quoteAsset);
+  const baseAsset = useTradeContext((state) => state.baseAsset);
+  const quoteAsset = useTradeContext((state) => state.quoteAsset);
 
   return (
     <div className="w-full flex items-center gap-x-6 bg-primary-dark p-4 rounded-md">

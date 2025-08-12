@@ -5,7 +5,7 @@ import React, { useReducer } from "react";
 import { OrderType } from "@/types/trade";
 import UnderlineTooltip from "@/components/common/UnderlineTooltip";
 import { Button } from "@/components/ui/button";
-import { useSpotTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/store/trade/hooks";
 import { cn } from "@/utils/cn";
 
 import LimitOrderTPSL from "./LimitOrderTPSL";
@@ -13,7 +13,7 @@ import LimitOrderTPSLForm from "./LimitOrderTPSLForm";
 import OrderFormInput from "./OrderFormInput";
 import OrderFormSlider from "./OrderFormSlider";
 import OrderFormType from "./OrderFormType";
-import TradeType from "./TradeType";
+import TradeTypeTab from "./TradeTypeTab";
 
 type State = {
   orderType: OrderType;
@@ -42,8 +42,8 @@ const OrderForm = () => {
     },
   );
 
-  const baseAsset = useSpotTradeContext((s) => s.baseAsset);
-  const quoteAsset = useSpotTradeContext((s) => s.quoteAsset);
+  const baseAsset = useTradeContext((s) => s.baseAsset);
+  const quoteAsset = useTradeContext((s) => s.quoteAsset);
 
   const isBuyOrder = state.orderSide === "buy";
 
@@ -53,7 +53,7 @@ const OrderForm = () => {
         <p className="text-sm font-semibold">Trade</p>
       </div>
 
-      <TradeType />
+      <TradeTypeTab />
       <div className="w-full px-4 mb-1 mt-4">
         <div className="bg-neutral-gray-200 rounded h-9 flex justify-between items-center gap-x-1">
           {ORDER_FORM_SIDES.map((side) => (

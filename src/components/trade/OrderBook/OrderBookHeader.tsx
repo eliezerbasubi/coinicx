@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { VOrderBook, VOrderBookType } from "@/components/vectors/orderbook";
 import { QUERY_KEYS } from "@/constants/queryKeys";
-import { useSpotTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 
@@ -48,7 +48,7 @@ const OrderBookHeader = () => {
 
   const layout = useOrderBookStore((s) => s.layout);
   const tickSize = useOrderBookStore((s) => s.tickSize);
-  const symbol = useSpotTradeContext((s) => s.symbol);
+  const symbol = useTradeContext((s) => s.symbol);
 
   const queryClient = useQueryClient();
 

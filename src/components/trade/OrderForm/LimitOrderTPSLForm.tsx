@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useSpotTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/store/trade/hooks";
 
 import OrderFormInput from "./OrderFormInput";
 
@@ -131,7 +131,7 @@ const OffsetTypeInput = ({
   onValueChange,
   onTypeChange,
 }: OffsetInputProps) => {
-  const quoteAsset = useSpotTradeContext((s) => s.quoteAsset);
+  const quoteAsset = useTradeContext((s) => s.quoteAsset);
 
   const [open, setOpen] = useState(false);
 

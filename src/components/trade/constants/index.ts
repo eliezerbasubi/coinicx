@@ -1,4 +1,4 @@
-import { ChartInterval } from "@/types/trade";
+import { ChartInterval, TradeType } from "@/types/trade";
 
 export const defaultSpotAsset = {
   baseAsset: "BTC",
@@ -13,4 +13,11 @@ export const CHART_TIME_INTERVALS: Array<ChartInterval> = [
   { label: "4H", value: "4h", type: "hour", span: 4 },
   { label: "1D", value: "1d", type: "day", span: 1 },
   { label: "1W", value: "1w", type: "week", span: 1 },
+];
+
+export const TRADE_TYPES: Array<{ label: string; value: TradeType }> = [
+  { label: "Spot", value: "spot" },
+  { label: "Cross", value: "cross" },
+  { label: "Isolated", value: "isolated" },
+  { label: "Grid", value: "grid" },
 ];

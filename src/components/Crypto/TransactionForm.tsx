@@ -42,11 +42,11 @@ const replaceUrlPath = (args: {
 
   const newPath = [
     mainPath,
-    `/${args.fiatAssetCode.toUpperCase()}`,
-    `/${args.cryptoAssetCode.toUpperCase()}`,
+    args.fiatAssetCode.toUpperCase(),
+    args.cryptoAssetCode.toUpperCase(),
   ];
 
-  window.history.replaceState({}, "", newPath.join(""));
+  window.history.replaceState({}, "", newPath.join("/"));
 };
 
 const TransactionForm = () => {
