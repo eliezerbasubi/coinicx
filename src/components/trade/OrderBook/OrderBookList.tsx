@@ -131,7 +131,7 @@ const OrderBookList = ({ side }: Props) => {
         />
       );
     },
-    [itemCount, depthVisualizer],
+    [itemCount, depthVisualizer, side],
   );
 
   return (

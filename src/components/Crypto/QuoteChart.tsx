@@ -164,7 +164,7 @@ const QuoteChart = () => {
       resizeObserver.disconnect();
       chart.remove();
     };
-  }, [data, chartRef.current]);
+  }, [data, currentTab]);
 
   return (
     <div className="w-full">

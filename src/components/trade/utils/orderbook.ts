@@ -48,7 +48,7 @@ export const updateSide = (
   tickSize: number,
   isCumulativeDepth: boolean,
 ) => {
-  let newSide = side.slice();
+  const newSide = side.slice();
 
   let sumAmount = 0;
 

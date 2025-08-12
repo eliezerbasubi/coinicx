@@ -16,7 +16,6 @@ const TradeTypeTab = () => {
           key={type.value}
           role="button"
           tabIndex={0}
-          aria-selected={type.value === tradeType}
           className={cn(
             "text-sm text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
             {

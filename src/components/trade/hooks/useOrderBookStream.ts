@@ -38,5 +38,5 @@ export const useOrderBookStream = () => {
     return () => {
       websocket.current?.close();
     };
-  }, [symbol]);
+  }, [symbol, queryClient]);
 };

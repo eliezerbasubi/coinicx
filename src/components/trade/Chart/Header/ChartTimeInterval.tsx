@@ -17,7 +17,6 @@ const ChartTimeInterval = ({ value, onValueChange }: Props) => {
           key={interval.value}
           role="button"
           tabIndex={0}
-          aria-selected={value === interval}
           className={cn(
             "text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
             {

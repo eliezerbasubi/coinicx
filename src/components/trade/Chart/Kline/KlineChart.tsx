@@ -263,7 +263,7 @@ const KlineChart = ({ interval }: Props) => {
       observer.disconnect();
       controller.abort();
     };
-  }, [chartRef.current, chartWrapperRef.current]);
+  }, []);
 
   return (
     <div

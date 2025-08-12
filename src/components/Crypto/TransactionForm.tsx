@@ -87,7 +87,7 @@ const TransactionForm = () => {
       tokenIn: cryptoToFiat,
       tokenOut: fiatToCrypto,
     };
-  }, [marketType, amountsByAssetType.current, fiatAssetCode, cryptoAssetCode]);
+  }, [marketType, fiatAssetCode, cryptoAssetCode]);
 
   const { computeExchangeRate } = useExchangeRate();
 
@@ -110,12 +110,7 @@ const TransactionForm = () => {
       ...state,
       [outputTokenInputType]: amount,
     }));
-  }, [
-    amountsByAssetType.current,
-    amountsByAssetType.tokenIn,
-    amountsByAssetType.tokenOut,
-    exchangeRateOpts,
-  ]);
+  }, [amountsByAssetType.current, exchangeRateOpts]);
 
   useEffect(() => {
     handleExchange();
@@ -318,5 +313,7 @@ const NavItem = React.memo(
     );
   },
 );
+
+NavItem.displayName = "NavItem";
 
 export default TransactionForm;

@@ -24,7 +24,7 @@ const TradeStoreProvider = ({
       symbol: props.baseAsset + props.quoteAsset,
       ...props,
     });
-  }, [props.baseAsset, props.quoteAsset, props.tradeType, props.marketTicker]);
+  }, [props]);
 
   return (
     <TradeContext.Provider value={storeRef.current}>

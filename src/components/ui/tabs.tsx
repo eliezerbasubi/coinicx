@@ -5,7 +5,7 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/utils/cn";
 
-function Tabs<T>({
+function Tabs({
   className,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Root>) {

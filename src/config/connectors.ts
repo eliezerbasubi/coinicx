@@ -5,7 +5,6 @@ import {
   injectedWallet,
   metaMaskWallet,
   trustWallet,
-  walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 
 const projectId = `${process.env.NEXT_PUBLIC_PROJECT_ID}`;

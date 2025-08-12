@@ -42,7 +42,6 @@ const ChartCategories = ({
               key={category.value}
               role="button"
               tabIndex={0}
-              aria-selected={category.value === value}
               className={cn(
                 "text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
                 {

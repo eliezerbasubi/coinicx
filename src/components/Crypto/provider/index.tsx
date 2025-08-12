@@ -66,7 +66,7 @@ const CryptoMarketProvider = ({
           },
         },
       };
-    }, [marketType, cryptoList]);
+    }, [cryptoList]);
 
   const assetsByTokenType = marketAssets[marketType];
 
