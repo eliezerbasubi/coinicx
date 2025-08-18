@@ -86,6 +86,7 @@ const QuoteChart = () => {
     queryKey: ["quotes", currentTab, cryptoAsset?.id, fiatAsset?.id],
     refetchOnWindowFocus: false,
     enabled: !!cryptoAsset?.id && !!fiatAsset?.id,
+    retry: 3,
     queryFn: () =>
       getQuotes(cryptoAsset!.id, {
         vs_currency: fiatAsset!.assetCode,
@@ -153,13 +154,12 @@ const QuoteChart = () => {
 
     chart.timeScale().fitContent();
 
-    // Responsive resize observer
     const resizeObserver = new window.ResizeObserver(() => {
-      chart.resize(chartElement.clientWidth, 360); // 360 is the fixed height
+      chart.resize(chartElement.clientWidth, 360);
     });
+
     resizeObserver.observe(chartElement);
 
-    // Cleanup on unmount
     return () => {
       resizeObserver.disconnect();
       chart.remove();
@@ -265,8 +265,8 @@ const QuoteChartLegend = () => {
 
           {(isLoadingAssets && <Skeleton className="w-20" />) || (
             <p
-              className={cn("text-2xl font-bold text-green-400", {
-                "text-red-400": percentageChange24h < 0,
+              className={cn("text-2xl font-bold text-buy", {
+                "text-sell": percentageChange24h < 0,
               })}
             >
               {percentageChange24h.toFixed(2)}%
