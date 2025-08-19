@@ -111,10 +111,10 @@ const MarketDetailItem = ({
 const ConversionItem = ({ title, value }: { title: string; value: number }) => {
   return (
     <MarketDetailItem
-      className={cn("bg-[#0080001c]", { "bg-[#ff120012]": value < 0 })}
+      className={cn("bg-buy/10", { "bg-sell/10": value < 0 })}
       title={title}
       details={
-        <p className={cn("text-green-400", { "text-red-400": value < 0 })}>
+        <p className={cn("text-buy", { "text-sell": value < 0 })}>
           {value >= 0 && "+"}
           {value.toFixed(2)}%
         </p>

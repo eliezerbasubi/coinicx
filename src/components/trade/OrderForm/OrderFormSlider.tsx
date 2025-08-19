@@ -31,13 +31,14 @@ const OrderFormSlider = ({ value, onValueChange }: Props) => {
           aria-valuetext="0 units"
           max={100}
           min={0}
-          className="flex-1 my-1 appearance-none outline-none bg-transparent relative z-[2] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:bg-primary-dark [&::-webkit-slider-thumb]:border-3 [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:rounded-full"
+          className="flex-1 my-1 appearance-none outline-none bg-transparent relative z-[2] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:bg-primary-dark [&::-webkit-slider-thumb]:border-3 [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:hover:ring-4 [&::-webkit-slider-thumb]:hover:ring-primary/30 [&::-webkit-slider-thumb]:hover:cursor-grab"
           value={value}
           onChange={({ target: { valueAsNumber } }) =>
             onValueChange?.(valueAsNumber)
           }
         />
         <div className="w-[calc(100%-1px)] flex justify-between h-1 bg-neutral-gray-200 absolute top-[calc(50%-2px)] z-[1]">
+          {/* Track */}
           <div
             className="absolute inset-0 bg-primary rounded-full"
             style={{ width: `${value}%` }}
@@ -60,6 +61,7 @@ const OrderFormSlider = ({ value, onValueChange }: Props) => {
             </div>
           </div>
 
+          {/* Track snap points */}
           {Array.from({ length: 5 }).map((_, index) => {
             const progress = 25 * index;
 

@@ -255,7 +255,10 @@ const TransactionForm = () => {
           />
         </div>
         <div className="p-6 mt-32">
-          <Button size="lg" className="font-bold text-xl">
+          <Button
+            size="lg"
+            className="font-bold text-lg md:text-xl h-12 md:h-14"
+          >
             Buy
           </Button>
         </div>

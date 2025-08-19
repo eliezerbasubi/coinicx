@@ -2,24 +2,28 @@
 
 import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUp } from "lucide-react";
+import { useMediaQuery } from "usehooks-ts";
 
+import Visibility from "@/components/common/Visibility";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import { getOrderBookDepth } from "@/services/trade";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
-import { formatNumber } from "@/utils/formatting/numbers";
+import { cn } from "@/utils/cn";
 
 import { useOrderBookStream } from "../hooks";
 import OrderBookCompare from "./OrderBookCompare";
 import OrderBookList from "./OrderBookList";
+import OrderBookTicker from "./OrderBookTicker";
 
 const OrderBookTable = () => {
   const setSnapshot = useOrderBookStore((state) => state.setSnapshot);
   const layout = useOrderBookStore((state) => state.layout);
   const symbol = useTradeContext((state) => state.symbol);
-  const baseAsset = useTradeContext((state) => state.baseAsset);
-  const quoteAsset = useTradeContext((state) => state.quoteAsset);
+
+  const isMobile = useMediaQuery("(max-width: 768px)", {
+    initializeWithValue: false,
+  });
 
   const { data } = useQuery({
     queryKey: [QUERY_KEYS.orderbook, symbol],
@@ -37,38 +41,63 @@ const OrderBookTable = () => {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between text-xs font-medium text-neutral-gray-400 px-4 py-1">
-        <div className="flex-1">
-          <p>Price ({quoteAsset})</p>
+      <Visibility visible={isMobile} fallback={<OrderBookTableHeader />}>
+        <div className="grid grid-cols-2 gap-2 px-4">
+          <OrderBookTableHeaderMobile />
+          <OrderBookTableHeaderMobile />
         </div>
-        <div className="flex-1 text-right">
-          <p>Amount ({baseAsset})</p>
-        </div>
-        <div className="flex-1 text-right">
-          <p>Total ({baseAsset})</p>
-        </div>
-      </div>
+      </Visibility>
 
-      <div className="w-full">
-        {layout !== "buyOrder" && <OrderBookList side="asks" />}
+      <div className="w-full grid grid-cols-2 gap-2 md:block px-4 md:px-0">
+        {layout !== "buyOrder" && (
+          <OrderBookList side="asks" className={cn({ "p-0": isMobile })} />
+        )}
 
-        <div className="w-full flex items-center py-3 px-4">
-          <p className="text-xl text-buy font-bold">
-            {formatNumber(117485.55, { maximumFractionDigits: 2 })}
-          </p>
-          <ArrowUp key="arrow" className="text-buy size-5 rotate-180" />
-          <p className="text-sm text-neutral-gray-400 ml-2">
-            {formatNumber(117485.55, {
-              style: "currency",
-              maximumFractionDigits: 2,
-            })}
-          </p>
-        </div>
+        {!isMobile && <OrderBookTicker />}
 
-        {layout !== "sellOrder" && <OrderBookList side="bids" />}
+        {layout !== "sellOrder" && (
+          <OrderBookList side="bids" className={cn({ "p-0": isMobile })} />
+        )}
       </div>
 
       {layout === "orderBook" && <OrderBookCompare />}
+    </div>
+  );
+};
+
+const OrderBookTableHeader = () => {
+  const baseAsset = useTradeContext((state) => state.baseAsset);
+  const quoteAsset = useTradeContext((state) => state.quoteAsset);
+
+  return (
+    <div className="flex items-center justify-between text-xs font-medium text-neutral-gray-400 px-4 py-1">
+      <div className="flex-1">
+        <p>Price ({quoteAsset})</p>
+      </div>
+      <div className="flex-1 text-right">
+        <p>Amount ({baseAsset})</p>
+      </div>
+      <div className="flex-1 text-right hidden md:block">
+        <p>Total ({baseAsset})</p>
+      </div>
+    </div>
+  );
+};
+
+const OrderBookTableHeaderMobile = ({ className }: { className?: string }) => {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-between text-xs font-medium text-neutral-gray-400 py-1",
+        className,
+      )}
+    >
+      <div className="flex-1">
+        <p>Price </p>
+      </div>
+      <div className="flex-1 text-right">
+        <p>Amount </p>
+      </div>
     </div>
   );
 };

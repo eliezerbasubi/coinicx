@@ -1,22 +1,25 @@
 import React, { useCallback, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
+import { useMediaQuery } from "usehooks-ts";
 
 import { OrderBookType, PriceLevel } from "@/types/orderbook";
 import { useOrderBookStore } from "@/store/trade/orderbook";
+import { cn } from "@/utils/cn";
 
 import AveragePriceTooltip from "./AveragePriceTooltip";
 import OrderBookTableRow from "./OrderBookTableRow";
 
 type Props = {
   side: OrderBookType;
+  className?: string;
 };
 
 const VISIBLE_ROWS = 10;
 const MAX_VISIBLE_ROWS = 17;
 const ROW_HEIGHT = 20;
 
-const OrderBookList = ({ side }: Props) => {
+const OrderBookList = ({ side, className }: Props) => {
   const priceLevels = useOrderBookStore((state) => state[side]);
 
   const layout = useOrderBookStore((state) => state.layout);
@@ -27,11 +30,15 @@ const OrderBookList = ({ side }: Props) => {
     (state) => state.settings.depthVisualizer,
   );
 
+  const isMobile = useMediaQuery("(max-width: 768px)", {
+    initializeWithValue: false,
+  });
+
   const [hoverIndex, setHoverIndex] = useState(0);
   const scrollHeight = useRef(0);
 
   const isOrderbookLayout = layout === "orderBook";
-  const containerHeight = !isOrderbookLayout ? 420 : 200;
+  let containerHeight = !isOrderbookLayout ? 420 : 200;
   const priceLevelsSize = priceLevels.length;
 
   let itemCount = priceLevelsSize;
@@ -45,6 +52,11 @@ const OrderBookList = ({ side }: Props) => {
     itemCount = MAX_VISIBLE_ROWS;
   }
 
+  if (isMobile) {
+    itemCount = 22;
+    containerHeight = 440;
+  }
+
   const List = useCallback(
     (props: { width: number; height: number }) => {
       return (
@@ -56,7 +68,6 @@ const OrderBookList = ({ side }: Props) => {
             itemSize={ROW_HEIGHT}
             layout="vertical"
             // overscanCount={2}
-            className="group/bids"
             onScroll={({ scrollOffset }) => {
               scrollHeight.current = scrollOffset;
             }}
@@ -136,7 +147,10 @@ const OrderBookList = ({ side }: Props) => {
 
   return (
     <div
-      className="relative z-10 will-change-transform group/orderbook-list"
+      className={cn(
+        "relative z-10 will-change-transform group/orderbook-list",
+        className,
+      )}
       style={{ height: containerHeight }}
     >
       <AutoSizer>{List}</AutoSizer>

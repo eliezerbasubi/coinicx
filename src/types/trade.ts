@@ -1,5 +1,12 @@
 export type ChartType = "standard" | "tradingView" | "depth";
 
+export type ChartAreaTabValue =
+  | "chart"
+  | "orderbook"
+  | "info"
+  | "tradingData"
+  | "tradingAnalysis";
+
 export type ChartIntervalType =
   | "second"
   | "minute"
@@ -38,6 +45,8 @@ export type OrderType =
   | "trailingStop"
   | "oco"
   | "twap";
+
+export type OrderSide = "buy" | "sell";
 
 export type OrderFormLimitOffsetType = "offset" | "pnl";
 

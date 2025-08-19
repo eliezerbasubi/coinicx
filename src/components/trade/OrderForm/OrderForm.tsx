@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 
-import { OrderType } from "@/types/trade";
+import { OrderSide, OrderType } from "@/types/trade";
 import UnderlineTooltip from "@/components/common/UnderlineTooltip";
 import { Button } from "@/components/ui/button";
 import { useTradeContext } from "@/store/trade/hooks";
@@ -20,16 +20,20 @@ type State = {
   price: string;
   amount: string;
   percentage: number;
-  orderSide: "buy" | "sell";
+  orderSide: OrderSide;
   showLimitOrderTPSL: boolean;
 };
 
-const ORDER_FORM_SIDES: Array<{ label: string; value: "buy" | "sell" }> = [
+type Props = {
+  side?: OrderSide;
+};
+
+const ORDER_FORM_SIDES: Array<{ label: string; value: OrderSide }> = [
   { label: "Buy", value: "buy" },
   { label: "Sell", value: "sell" },
 ];
 
-const OrderForm = () => {
+const OrderForm = ({ side }: Props) => {
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     {
@@ -47,15 +51,22 @@ const OrderForm = () => {
 
   const isBuyOrder = state.orderSide === "buy";
 
+  useEffect(() => {
+    if (side) {
+      dispatch({ orderSide: side });
+    }
+  }, [side]);
+
   return (
-    <div className="w-full md:max-w-80 bg-primary-dark rounded-md pb-12 md:pb-0">
+    <div className="w-full md:max-w-80 bg-primary-dark md:rounded-md pb-12 md:pb-0">
       <div className="w-full border-b border-neutral-gray-200 px-4 h-11 flex items-center justify-between">
         <p className="text-sm font-semibold">Trade</p>
       </div>
 
       <TradeTypeTab />
+
       <div className="w-full px-4 mb-1 mt-4">
-        <div className="bg-neutral-gray-200 rounded h-9 flex justify-between items-center gap-x-1">
+        <div className="bg-neutral-gray-200 rounded h-7 md:h-9 flex justify-between items-center gap-x-1">
           {ORDER_FORM_SIDES.map((side) => (
             <button
               key={side.value}
@@ -129,7 +140,7 @@ const OrderForm = () => {
           <div className="w-full flex items-center justify-between">
             <p className="text-xs text-neutral-gray-400">Available Balance</p>
             <p className="text-xs font-medium">
-              --{isBuyOrder ? quoteAsset : baseAsset}
+              -- {isBuyOrder ? quoteAsset : baseAsset}
             </p>
           </div>
           <div className="w-full flex items-center justify-between">
@@ -141,7 +152,7 @@ const OrderForm = () => {
             </UnderlineTooltip>
 
             <p className="text-xs font-medium">
-              --{isBuyOrder ? baseAsset : quoteAsset}
+              -- {isBuyOrder ? baseAsset : quoteAsset}
             </p>
           </div>
         </div>

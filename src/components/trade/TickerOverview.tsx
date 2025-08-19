@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
 import { useTradeContext } from "@/store/trade/hooks";
@@ -8,7 +8,9 @@ import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 const TickerOverview = () => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery("(max-width: 768px)", {
+    initializeWithValue: false,
+  });
 
   const baseAsset = useTradeContext((state) => state.baseAsset);
   const quoteAsset = useTradeContext((state) => state.quoteAsset);
@@ -28,8 +30,8 @@ const TickerOverview = () => {
   }, [marketTicker, baseAsset, quoteAsset]);
 
   return (
-    <div className="w-full flex md:items-center md:flex-wrap md:gap-6 bg-primary-dark p-4 rounded-md">
-      <div className="flex flex-wrap md:flex-nowrap md:gap-6">
+    <div className="w-full flex md:items-center md:flex-wrap md:gap-6 bg-primary-dark p-4 md:rounded-md">
+      <div className="flex flex-col md:flex-row md:gap-6 flex-1 md:flex-auto">
         <div className="flex items-center space-x-2">
           <div className="size-5 md:size-8 rounded-full bg-teal-500" />
           <div className="flex-1">
@@ -54,7 +56,7 @@ const TickerOverview = () => {
 
           <div className="flex items-center">
             <p className="text-xs md:font-semibold">
-              {/* Use correct dollar converted value here */}
+              {/* TODO: Use correct dollar conversion here */}
               {(close &&
                 formatNumber(close, {
                   style: "currency",
@@ -79,19 +81,24 @@ const TickerOverview = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:flex items-center md:gap-4">
+      <div className="grid grid-cols-2 md:flex items-center gap-2 md:gap-4">
         {!isMobile && (
           <TickerItem label="24H Change" percentage={change} percentageOnly />
         )}
         <TickerItem label="24H High" value={marketTicker?.h} />
         <TickerItem label="24H Low" value={marketTicker?.l} />
         <TickerItem
-          label={`24H Volume(${baseAsset})`}
+          label={
+            isMobile ? `24H Vol(${baseAsset})` : `24H Volume(${baseAsset})`
+          }
           value={marketTicker?.v}
         />
         <TickerItem
-          label={`24H Volume(${quoteAsset})`}
+          label={
+            isMobile ? `24H Vol(${quoteAsset})` : `24H Volume(${quoteAsset})`
+          }
           value={marketTicker?.qv}
+          compactNumbers={isMobile && Number(marketTicker?.qv ?? 0) >= 1e6}
         />
       </div>
     </div>
@@ -103,6 +110,7 @@ type TickerItemProps = {
   value?: number;
   percentage?: number;
   percentageOnly?: boolean;
+  compactNumbers?: boolean;
 };
 
 const TickerItem = ({
@@ -110,14 +118,17 @@ const TickerItem = ({
   value,
   percentage,
   percentageOnly,
+  compactNumbers,
 }: TickerItemProps) => {
   return (
-    <div className="w-fit text-xs">
-      <p className="text-neutral-gray-400 mb-1">{label}</p>
+    <div className="w-fit">
+      <p className="text-neutral-gray-400 text-[10px] md:text-xs pb-0.5 md:mb-1">
+        {label}
+      </p>
 
       <div
         className={cn(
-          "flex items-center font-medium space-x-1 lining-nums tabular-nums",
+          "flex items-center text-xs font-medium space-x-1 lining-nums tabular-nums",
           {
             "text-sell": percentage !== undefined && percentage < 0,
             "text-buy": percentage !== undefined && percentage >= 0,
@@ -127,7 +138,10 @@ const TickerItem = ({
         {!percentageOnly && (
           <p>
             {(value !== undefined &&
-              formatNumber(value, { minimumFractionDigits: 2 })) ||
+              formatNumber(value, {
+                minimumFractionDigits: 2,
+                notation: compactNumbers ? "compact" : undefined,
+              })) ||
               "--"}
           </p>
         )}
