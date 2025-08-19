@@ -8,14 +8,11 @@ import { ChartAreaTabValue, ChartInterval, ChartType } from "@/types/trade";
 import { cn } from "@/utils/cn";
 
 import { CHART_TIME_INTERVALS } from "../constants";
-import ChartCategories from "./Header/ChartCategories";
-import ChartHeader from "./Header/ChartHeader";
-import KlineChart from "./Kline/KlineChart";
 
-// const OrderBook = dynamic(() => import("../OrderBook"));
-// const ChartCategories = dynamic(() => import("./Header/ChartCategories"));
-// const ChartHeader = dynamic(() => import("./Header/ChartHeader"));
-// const KlineChart = dynamic(() => import("./Kline/KlineChart"));
+const OrderBook = dynamic(() => import("../OrderBook"));
+const ChartCategories = dynamic(() => import("./Header/ChartCategories"));
+const ChartHeader = dynamic(() => import("./Header/ChartHeader"));
+const KlineChart = dynamic(() => import("./Kline/KlineChart"));
 
 type State = {
   chartType: ChartType;
@@ -25,9 +22,9 @@ type State = {
 };
 
 const SpotChart = () => {
-  // const isMobile = useMediaQuery("(max-width: 768px)", {
-  //   initializeWithValue: false,
-  // });
+  const isMobile = useMediaQuery("(max-width: 768px)", {
+    initializeWithValue: false,
+  });
 
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
@@ -52,11 +49,11 @@ const SpotChart = () => {
   };
 
   // Set current tab to chart if user was visiting orderbook tab and moves to tablet viewport
-  // useEffect(() => {
-  //   if (!isMobile && state.currentTab === "orderbook") {
-  //     dispatch({ currentTab: "chart" });
-  //   }
-  // }, [isMobile, state.currentTab]);
+  useEffect(() => {
+    if (!isMobile && state.currentTab === "orderbook") {
+      dispatch({ currentTab: "chart" });
+    }
+  }, [isMobile, state.currentTab]);
 
   return (
     <div ref={wrapperRef} className="w-full bg-primary-dark md:rounded-md">
@@ -67,27 +64,7 @@ const SpotChart = () => {
         onFullScreen={handleFullscreen}
       />
 
-      <ChartCategories
-        interval={state.interval}
-        value={state.chartType}
-        onValueChange={(chartType) => dispatch({ chartType })}
-        onIntervalChange={(interval) => dispatch({ interval })}
-      />
-
       <div
-        id="chartArea"
-        className={cn("w-full h-[480px]", { "h-full": state.fullscreen })}
-      >
-        <div
-          className={cn("w-full h-full", {
-            hidden: state.chartType !== "standard",
-          })}
-        >
-          <KlineChart interval={state.interval} />
-        </div>
-      </div>
-
-      {/* <div
         role="tabpanel"
         className={cn("w-full", {
           hidden: state.currentTab !== "chart",
@@ -145,7 +122,7 @@ const SpotChart = () => {
         })}
       >
         <p>Coming Soon</p>
-      </div> */}
+      </div>
     </div>
   );
 };
