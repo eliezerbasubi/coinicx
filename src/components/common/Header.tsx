@@ -20,13 +20,18 @@ import SideBarMenu from "./Sidebar";
 
 const LINKS = [
   {
-    href: ROUTES.crypto.buy,
+    href: `${ROUTES.crypto.buy}/USD/BTC`,
     label: "Buy Crypto",
     id: "buyCrypto",
     icon: <Bitcoin />,
     subPaths: [ROUTES.crypto.index, ROUTES.crypto.sell],
   },
-  { href: ROUTES.trade.index, label: "Trade", id: "trade", icon: <Coins /> },
+  {
+    href: `${ROUTES.trade.spot}/BTC/USDC`,
+    label: "Trade",
+    id: "trade",
+    icon: <Coins />,
+  },
   { href: ROUTES.swap.index, label: "Swap", id: "swap", icon: <Replace /> },
   {
     href: ROUTES.portfolio.index,

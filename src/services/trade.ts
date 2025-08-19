@@ -52,13 +52,3 @@ export const getProductBySymbol = async (
     cs: data.cs,
   };
 };
-
-export const getTokenInfo = async (symbol: string) => {
-  const response = await fetch(
-    `https://www.binance.com/bapi/apex/v1/friendly/apex/marketing/web/token-info?symbol=${symbol}`,
-  );
-
-  const result = await response.json();
-
-  return result;
-};

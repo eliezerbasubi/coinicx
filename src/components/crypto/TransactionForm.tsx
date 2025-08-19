@@ -1,7 +1,6 @@
 import React, {
   CSSProperties,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -15,12 +14,12 @@ import {
   MarketType,
   TokenInputType,
 } from "@/types/market";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
 import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
 
-import { Button } from "../ui/button";
-import { Skeleton } from "../ui/skeleton";
 import { useCurrentAssets } from "./hooks";
 import { useExchangeRate } from "./hooks/useExchangeRate";
 import TokenInput from "./TokenInput";
@@ -61,10 +60,11 @@ const TransactionForm = () => {
 
   const setSelectedAssets = useCryptoMarketContext((s) => s.setSelectedAssets);
   const setMarketType = useCryptoMarketContext((s) => s.setMarketType);
+  const { computeExchangeRate } = useExchangeRate();
 
   const [amountsByAssetType, setAmountsByAssetType] = useState<
-    Record<TokenInputType, string> & { current: TokenInputType }
-  >({ tokenIn: "", tokenOut: "", current: "tokenIn" });
+    Record<TokenInputType, string>
+  >({ tokenIn: "", tokenOut: "" });
 
   const exchangeRateOpts = useMemo(() => {
     const fiatToCrypto = {
@@ -89,16 +89,16 @@ const TransactionForm = () => {
     };
   }, [marketType, fiatAssetCode, cryptoAssetCode]);
 
-  const { computeExchangeRate } = useExchangeRate();
-
-  const handleExchange = useCallback(() => {
-    const value = amountsByAssetType[amountsByAssetType.current];
+  /**
+   * Function to calculate the exchange rate based on the current input the user is interacting with.
+   * If the user changes the value of the base asset (tokenIn), we output the converted value in the quote asset (tokenOut).
+   */
+  const handleExchangeRate = (tokenInput: TokenInputType, value: string) => {
+    // We flip the current tokenInput to get the output input
     const outputTokenInputType: TokenInputType =
-      amountsByAssetType.current === "tokenIn" ? "tokenOut" : "tokenIn";
+      tokenInput === "tokenIn" ? "tokenOut" : "tokenIn";
 
-    const exchangeRate = computeExchangeRate(
-      exchangeRateOpts[amountsByAssetType.current],
-    );
+    const exchangeRate = computeExchangeRate(exchangeRateOpts[tokenInput]);
 
     if (!exchangeRate) return;
 
@@ -108,13 +108,10 @@ const TransactionForm = () => {
 
     setAmountsByAssetType((state) => ({
       ...state,
+      [tokenInput]: value,
       [outputTokenInputType]: amount,
     }));
-  }, [amountsByAssetType.current, exchangeRateOpts]);
-
-  useEffect(() => {
-    handleExchange();
-  }, [handleExchange]);
+  };
 
   const onValueChange = (args: {
     currency: ICurrency;
@@ -163,17 +160,12 @@ const TransactionForm = () => {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    // Limit amount to a million
     if (Number(value) >= 1e9) {
       e.preventDefault();
       return;
     }
 
-    setAmountsByAssetType((state) => ({
-      ...state,
-      [name]: value,
-      current: name as TokenInputType,
-    }));
+    handleExchangeRate(name as TokenInputType, value);
   };
 
   return (
