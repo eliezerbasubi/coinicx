@@ -1,29 +1,11 @@
-"use client";
-
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronDown, Search } from "lucide-react";
-import { useMediaQuery } from "usehooks-ts";
+import { Search } from "lucide-react";
 
 import { ICryptoCurrency, ICurrency } from "@/types/market";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/utils/cn";
 
-import { mapCryptoToAssetCurrency } from "./utils/mapCryptoToAssetCurrency";
+import { mapCryptoToAssetCurrency } from "../utils/mapCryptoToAssetCurrency";
 
 type Props = {
   value: ICurrency;
@@ -33,95 +15,6 @@ type Props = {
     value: ICurrency,
     cryptoAssetDetails?: ICryptoCurrency,
   ) => void;
-};
-
-const CurrencySelector = ({
-  value,
-  currencies,
-  collisionBoundary,
-  onValueChange,
-}: Props) => {
-  const [open, setOpen] = useState(false);
-
-  const isMobile = useMediaQuery("(max-width: 768px)");
-
-  const onClick = (value: ICurrency, cryptoAssetDetails?: ICryptoCurrency) => {
-    onValueChange?.(value, cryptoAssetDetails);
-    setOpen(false);
-  };
-
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerTrigger className="w-fit flex items-center shrink-0">
-          {value.assetLogo && (
-            <Image
-              unoptimized
-              src={value.assetLogo}
-              alt={value.assetName}
-              width={20}
-              height={20}
-              className="size-5 rounded-full"
-            />
-          )}
-          <span className="uppercase font-semibold mx-1">
-            {value.assetCode}
-          </span>
-          <ChevronDown />
-        </DrawerTrigger>
-        <DrawerContent className="h-full !max-h-[90vh]">
-          <DrawerHeader className="sr-only">
-            <DrawerTitle />
-            <DrawerDescription />
-          </DrawerHeader>
-
-          <SelectorContent
-            currencies={currencies}
-            value={value}
-            onValueChange={onClick}
-            className="pt-4 overflow-y-auto [&::-webkit-scrollbar]:hidden"
-            contentClassName="px-4 h-[calc(100%-55px)] overflow-y-auto"
-            searchClassName="px-4"
-          />
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="w-fit flex items-center shrink-0">
-        {value.assetLogo && (
-          <Image
-            unoptimized
-            src={value.assetLogo}
-            alt={value.assetName}
-            width={20}
-            height={20}
-            className="size-5 rounded-full"
-          />
-        )}
-        <span className="uppercase font-semibold mx-1">{value.assetCode}</span>
-        <ChevronDown />
-      </PopoverTrigger>
-      <PopoverContent
-        side="bottom"
-        align="end"
-        collisionPadding={0}
-        sideOffset={24}
-        className="w-[398px] -mr-4"
-        avoidCollisions={false}
-        collisionBoundary={collisionBoundary}
-      >
-        <SelectorContent
-          currencies={currencies}
-          value={value}
-          onValueChange={onClick}
-          contentClassName="h-60 overflow-y-auto"
-        />
-      </PopoverContent>
-    </Popover>
-  );
 };
 
 const SelectorContent = ({
@@ -230,4 +123,4 @@ const SelectorContent = ({
   );
 };
 
-export default CurrencySelector;
+export default SelectorContent;

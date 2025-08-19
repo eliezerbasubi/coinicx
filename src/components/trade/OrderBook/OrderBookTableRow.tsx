@@ -31,7 +31,7 @@ const OrderBookTableRow = ({
   return (
     <div
       className={cn(
-        "w-full relative isolate overflow-hidden flex items-center justify-between text-xs py-0.5 px-4 border-dashed border-neutral-gray-200 hover:bg-neutral-gray-200/25 cursor-pointer",
+        "w-full relative isolate overflow-hidden flex items-center justify-between text-xs py-0.5 md:px-4 border-dashed border-neutral-gray-200 hover:bg-neutral-gray-200/25 cursor-pointer",
         {
           "peer/ask peer-hover/ask:bg-neutral-gray-200/25 hover:border-t":
             side === "asks",
@@ -66,7 +66,7 @@ const PriceLevelTotal = ({ total }: { total: number }) => {
   const rounding = useOrderBookStore((state) => state.settings.rounding);
 
   return (
-    <p className="text-right flex-1">
+    <p className="text-right flex-1 hidden md:block">
       {formatNumber(total, {
         maximumFractionDigits: 5,
         notation: rounding ? "compact" : undefined,

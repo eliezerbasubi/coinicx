@@ -7,7 +7,7 @@ import OrderBookTable from "./OrderBookTable";
 const OrderBook = () => {
   return (
     <div className="w-full h-full flex flex-col md:max-w-full xl:max-w-80 bg-primary-dark rounded-md">
-      <div className="w-full border-b border-neutral-gray-200 px-4 h-11 flex items-center justify-between">
+      <div className="w-full border-b border-neutral-gray-200 px-4 h-11 hidden md:flex items-center justify-between">
         <p className="text-sm font-semibold">Order Book</p>
 
         <OrderBookSettings />
