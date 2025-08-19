@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { Chart, dispose, init, KLineData } from "klinecharts";
+import { Chart, dispose, init, KLineData, LayoutChild } from "klinecharts";
 
 import { ChartInterval } from "@/types/trade";
 import { getKlines } from "@/services/trade";
@@ -108,33 +108,36 @@ const KlineChart = ({ interval }: Props) => {
   useEffect(() => {
     chartRef.current = init("klinechart", {
       // TODO: Improve and Expand this implement
-      layout: indicatorsLayout.map((layout) => {
-        if (layout.type === "CANDLE") {
-          return {
-            type: "candle",
-            content: layout.indicators.map((indicator) => ({
-              name: indicator.name,
-              shortName: indicator.name,
-              visible: indicator.showSeries,
-              series: "price",
-              precision: 2,
-              calcParams: indicator.params,
-              figures: indicator.params.map((param, index) => ({
-                type: "line",
-                title: `${indicator.name}(${param.period})`,
-                key: `${indicator.name}[${index}]`,
-                styles: () => ({
-                  color: param.color,
-                  size: param.lineWidth,
-                }),
+      layout: [
+        { type: "xAxis", options: { order: 9 } },
+        ...(indicatorsLayout.map((layout) => {
+          if (layout.type === "CANDLE") {
+            return {
+              type: "candle",
+              content: layout.indicators.map((indicator) => ({
+                name: indicator.name,
+                shortName: indicator.name,
+                visible: indicator.showSeries,
+                series: "price",
+                precision: 2,
+                calcParams: indicator.params,
+                figures: indicator.params.map((param, index) => ({
+                  type: "line",
+                  title: `${indicator.name}(${param.period})`,
+                  key: `${indicator.name}[${index}]`,
+                  styles: () => ({
+                    color: param.color,
+                    size: param.lineWidth,
+                  }),
+                })),
+                calc: getIndicatorCalc,
               })),
-              calc: getIndicatorCalc,
-            })),
-            options: { order: Number.MIN_SAFE_INTEGER },
-          };
-        }
-        return { type: "indicator", content: ["VOL"] };
-      }),
+              options: { order: Number.MIN_SAFE_INTEGER },
+            };
+          }
+          return { type: "indicator", content: ["VOL"] };
+        }) as LayoutChild[]),
+      ],
       styles: kLineStyles,
     });
 
