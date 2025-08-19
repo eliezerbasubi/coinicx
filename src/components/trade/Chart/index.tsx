@@ -78,7 +78,7 @@ const SpotChart = () => {
         />
         <div
           id="chartArea"
-          className={cn("w-full h-[480px]", {
+          className={cn("w-full h-[500]", {
             "h-dvh": state.fullscreen,
           })}
         >
