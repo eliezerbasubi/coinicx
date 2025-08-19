@@ -40,7 +40,7 @@ const ChartHeader = ({
       <div
         role="tablist"
         aria-orientation="horizontal"
-        className="h-full flex items-center gap-x-4"
+        className="h-full flex items-center gap-x-4 overflow-x-auto [&::-webkit-scrollbar]:hidden"
       >
         {TABS.map((tab, index) => {
           const selected = currentTab === tab.value;
