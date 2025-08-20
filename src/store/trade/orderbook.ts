@@ -82,6 +82,7 @@ export const useOrderBookStore = create<OrderBookState>((set, get) => ({
   setSnapshot: ({ lastUpdateId, bids, asks }) => {
     const { tickSize } = get();
 
+    // We keep a minimum amount of {MAX_ORDERBOOK_SIZE = 400}  orders to keep the UI responsive
     set(() => ({
       bids: groupPriceLevels(bids.slice(0, MAX_ORDERBOOK_SIZE), tickSize),
       asks: groupPriceLevels(

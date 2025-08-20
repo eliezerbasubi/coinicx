@@ -68,7 +68,8 @@ const PriceLevelTotal = ({ total }: { total: number }) => {
   return (
     <p className="text-right flex-1 hidden md:block">
       {formatNumber(total, {
-        maximumFractionDigits: 5,
+        // We limit fraction digits to 2 from thousands and above
+        maximumFractionDigits: rounding && total >= 1e3 ? 2 : 5,
         notation: rounding ? "compact" : undefined,
       })}
     </p>

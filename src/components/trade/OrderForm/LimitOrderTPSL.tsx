@@ -19,7 +19,7 @@ const LimitOrderTPSL = ({ checked, onCheckedChange }: Props) => {
       <Checkbox
         id="takeProfitAndStopLoss"
         checked={checked}
-        className="data-[state=checked]:bg-white data-[state=checked]:text-primary-dark data-[state=checked]:border-white"
+        className="border-neutral-gray-500 data-[state=checked]:bg-white data-[state=checked]:text-primary-dark data-[state=checked]:border-white"
         onCheckedChange={onCheckedChange}
       />
       <Label htmlFor="takeProfitAndStopLoss">

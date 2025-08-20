@@ -29,9 +29,9 @@ const Web3Provider = ({ children }: Props) => {
             },
             colors: {
               ...rkTheme.colors,
-              accentColor: "#fcd535",
-              accentColorForeground: "#181a20",
-              connectButtonBackground: "#181a20",
+              accentColor: "var(--color-primary)",
+              accentColorForeground: "var(--color-background)",
+              connectButtonBackground: "var(--color-background)",
             },
             shadows: {
               ...rkTheme.shadows,
@@ -39,7 +39,6 @@ const Web3Provider = ({ children }: Props) => {
             },
             radii: {
               ...rkTheme.radii,
-              modal: "0px",
             },
           }}
         >

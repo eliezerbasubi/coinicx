@@ -21,7 +21,8 @@ const TickerOverview = () => {
 
   const isBuyOrder = close > open;
 
-  const change = ((close - open) / close) * 100;
+  const change = close - open;
+  const changeInPercentage = (change / close) * 100;
 
   useEffect(() => {
     if (!marketTicker) return;
@@ -71,10 +72,11 @@ const TickerOverview = () => {
                   "text-sell": !isBuyOrder,
                 })}
               >
-                {formatNumber(change, {
-                  style: "currency",
+                {formatNumber(changeInPercentage, {
                   minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
                 })}
+                %
               </p>
             )}
           </div>
@@ -83,7 +85,11 @@ const TickerOverview = () => {
 
       <div className="grid grid-cols-2 md:flex items-center gap-2 md:gap-4">
         {!isMobile && (
-          <TickerItem label="24H Change" percentage={change} percentageOnly />
+          <TickerItem
+            label="24H Change"
+            value={change}
+            percentage={changeInPercentage}
+          />
         )}
         <TickerItem label="24H High" value={marketTicker?.h} />
         <TickerItem label="24H Low" value={marketTicker?.l} />
@@ -109,7 +115,6 @@ type TickerItemProps = {
   label: string;
   value?: number;
   percentage?: number;
-  percentageOnly?: boolean;
   compactNumbers?: boolean;
 };
 
@@ -117,7 +122,6 @@ const TickerItem = ({
   label,
   value,
   percentage,
-  percentageOnly,
   compactNumbers,
 }: TickerItemProps) => {
   return (
@@ -135,21 +139,19 @@ const TickerItem = ({
           },
         )}
       >
-        {!percentageOnly && (
-          <p>
-            {(value !== undefined &&
-              formatNumber(value, {
-                minimumFractionDigits: 2,
-                notation: compactNumbers ? "compact" : undefined,
-              })) ||
-              "--"}
-          </p>
-        )}
+        <p>
+          {(value !== undefined &&
+            formatNumber(value, {
+              minimumFractionDigits: 2,
+              notation: compactNumbers ? "compact" : undefined,
+            })) ||
+            "--"}
+        </p>
 
         {percentage !== undefined && (
           <p>
             {percentage >= 0 && "+"}
-            {percentage.toFixed(2)}
+            {percentage.toFixed(2)}%
           </p>
         )}
       </div>

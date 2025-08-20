@@ -28,6 +28,9 @@ const KlineChart = ({ interval }: Props) => {
 
   const chartRef = useRef<Chart>(null);
 
+  // A flag to detect when the crosshair changes in order to avoid updating indicator values
+  const isCrosshairChange = useRef(false);
+
   const chartWrapperRef = useRef<HTMLDivElement>(null);
   const volIndicatorWrapperRef = useRef<HTMLDivElement>(null);
   const candleTooltipRefs = useRef<Record<string, HTMLSpanElement | null>>({});
@@ -35,56 +38,44 @@ const KlineChart = ({ interval }: Props) => {
   const symbol = useTradeContext((s) => s.symbol);
   const setMarketTicker = useTradeContext((s) => s.setMarketTicker);
 
-  const handleCandleTooltip = useCallback(
-    (klineData: KLineData, lastKlineData: KLineData) => {
-      Object.entries(klineData).forEach(([key, value]) => {
-        const element = candleTooltipRefs.current[key];
-        const changeElement = candleTooltipRefs.current["change"];
+  const handleCandleTooltip = useCallback((klineData: KLineData) => {
+    Object.entries(klineData).forEach(([key, value]) => {
+      const element = candleTooltipRefs.current[key];
+      const changeElement = candleTooltipRefs.current["change"];
 
-        // If the closing price is higher than the opening price, the candle is considered bullish (buy candle) — indicating buying pressure, price is going up during the interval.
-        // If the closing price is lower than the opening price, the candle is considered bearish (sell candle) — indicating selling pressure, price is going down during the interval.
-        const close = klineData.close;
-        const open = klineData.close;
+      // If the closing price is higher than the opening price, the candle is considered bullish (buy candle) — indicating buying pressure, price is going up during the interval.
+      // If the closing price is lower than the opening price, the candle is considered bearish (sell candle) — indicating selling pressure, price is going down during the interval.
+      const close = klineData.close;
+      const open = klineData.open;
 
-        const isBuyCandle = close > open;
+      const isBuyCandle = close > open;
 
-        let change = 0;
+      const change = ((close - open) / open) * 100;
 
-        // TODO: Review this calculation
-        if (isBuyCandle) {
-          change = ((lastKlineData.open - open) / open) * 100;
-        } else {
-          change = ((lastKlineData.close - close) / close) * 100;
+      // Set change percentage and color
+      if (changeElement) {
+        changeElement.innerHTML = `${change.toFixed(2)}%`;
+        changeElement.style.color =
+          change >= 0 ? "var(--color-buy)" : "var(--color-sell)";
+      }
+
+      if (element) {
+        // Set colors
+        if (key !== "timestamp") {
+          element.style.color = isBuyCandle
+            ? "var(--color-buy)"
+            : "var(--color-sell)";
+          element.innerHTML = formatNumber(Number(value), {
+            minimumFractionDigits: 2,
+          });
         }
 
-        // Set change percentage and color
-        if (changeElement) {
-          changeElement.innerHTML = `${change.toFixed(2)}%`;
-          changeElement.style.color =
-            change >= 0 ? "var(--color-buy)" : "var(--color-sell)";
+        if (key === "timestamp") {
+          element.innerHTML = new Date(Number(value)).toLocaleString("en-US");
         }
-
-        if (element) {
-          // Set colors
-          if (key !== "timestamp") {
-            element.style.color = isBuyCandle
-              ? "var(--color-buy)"
-              : "var(--color-sell)";
-            element.innerHTML = formatNumber(value as number, {
-              minimumFractionDigits: 2,
-            });
-          }
-
-          if (key === "timestamp") {
-            element.innerHTML = new Date(value as number).toLocaleString(
-              "en-US",
-            );
-          }
-        }
-      });
-    },
-    [],
-  );
+      }
+    });
+  }, []);
 
   const handleIndicatorTooltip = useCallback(
     (indicatorEventData: KlineIndicatorEventData) => {
@@ -170,7 +161,7 @@ const KlineChart = ({ interval }: Props) => {
 
         const lastKlineData = klines[klines.length - 1];
 
-        handleCandleTooltip(lastKlineData, lastKlineData);
+        handleCandleTooltip(lastKlineData);
 
         waitForIndicatorResults(chart, (latestDataValue) => {
           handleIndicatorTooltip(latestDataValue as KlineIndicatorEventData);
@@ -192,7 +183,13 @@ const KlineChart = ({ interval }: Props) => {
             close: Number(data.k.c),
             volume: Number(data.k.v),
           };
+
           callback(bar);
+
+          // Update candle tooltip if user is not hovering on the chart
+          if (!isCrosshairChange.current) {
+            handleCandleTooltip(bar);
+          }
 
           setMarketTicker({
             o: bar.open,
@@ -208,11 +205,10 @@ const KlineChart = ({ interval }: Props) => {
     chart.subscribeAction("onCrosshairChange", (data) => {
       const payload = data as unknown as CrosshairEventData;
 
-      const dataList = chart.getDataList();
-      const lastKlineData = dataList[dataList.length - 1];
-
-      handleCandleTooltip(payload.crosshair.kLineData, lastKlineData);
+      handleCandleTooltip(payload.crosshair.kLineData);
       handleIndicatorTooltip(payload.indicatorData[payload.crosshair.paneId]);
+
+      isCrosshairChange.current = true;
     });
 
     return () => {
@@ -254,7 +250,10 @@ const KlineChart = ({ interval }: Props) => {
       const [entry] = entries;
 
       if (entry) {
-        chartRef.current?.resize();
+        // We debounce resize for 500ms to avoid frequent calls which may affect performance
+        new Promise((resolve) => setTimeout(resolve, 500)).then(() => {
+          chartRef.current?.resize();
+        });
 
         handleVolIndicatorPosition(entry.contentRect.height);
       }
@@ -273,9 +272,13 @@ const KlineChart = ({ interval }: Props) => {
       id="klinechart"
       className="relative size-full flex-1 border-l border-neutral-gray-200"
       ref={chartWrapperRef}
+      onPointerLeave={() => (isCrosshairChange.current = false)}
     >
       <div className="absolute left-0 top-0 h-0 w-full z-5">
-        <div className="w-full pt-1 pl-1 absolute">
+        <div
+          className="pt-1 pl-1 absolute"
+          onPointerEnter={() => (isCrosshairChange.current = false)}
+        >
           <KlineTooltipTitle ref={candleTooltipRefs} />
           <KlineCandleIndicatorTitle ref={candleTooltipRefs} />
           <KlineVolIndicatorTitle

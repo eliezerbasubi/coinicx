@@ -83,9 +83,13 @@ const SpotChart = () => {
           })}
         >
           <div
-            className={cn("w-full h-full", {
-              hidden: state.chartType !== "standard",
-            })}
+            className={cn(
+              "w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-full",
+              {
+                hidden: state.chartType !== "standard",
+                "w-full": state.fullscreen,
+              },
+            )}
           >
             <KlineChart interval={state.interval} />
           </div>

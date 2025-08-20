@@ -20,7 +20,10 @@ const OrderBookTicker = () => {
           "text-sell": !isBuyOrder,
         })}
       >
-        {formatNumber(close, { maximumFractionDigits: 2 })}
+        {formatNumber(close, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
       </p>
       <ArrowUp
         key="arrow"
@@ -31,6 +34,7 @@ const OrderBookTicker = () => {
       <p className="text-sm text-neutral-gray-400 ml-2">
         {formatNumber(close, {
           style: "currency",
+          minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}
       </p>

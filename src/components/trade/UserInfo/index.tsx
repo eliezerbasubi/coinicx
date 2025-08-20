@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
 
+import Visibility from "@/components/common/Visibility";
 import { cn } from "@/utils/cn";
 
 const TABS = [
@@ -10,6 +13,9 @@ const TABS = [
 
 const TradeUserInfo = () => {
   const [currentTab, setCurrentTab] = useState("openOrders");
+  const { openConnectModal } = useConnectModal();
+  const { address } = useAccount();
+
   return (
     <div className="w-full bg-primary-dark md:rounded-md">
       <div
@@ -44,10 +50,22 @@ const TradeUserInfo = () => {
       </div>
 
       <div role="tabpanel" className="h-64 flex items-center justify-center">
-        <p className="text-sm">
-          Please <span className="text-primary">connect</span> your wallet
-          first.
-        </p>
+        <Visibility
+          visible={!address}
+          fallback={<p className="text-sm">You orders will appear here</p>}
+        >
+          <p className="text-sm">
+            Please &nbsp;
+            <span
+              role="button"
+              className="text-primary cursor-pointer"
+              onClick={openConnectModal}
+            >
+              connect
+            </span>
+            &nbsp; your wallet first.
+          </p>
+        </Visibility>
       </div>
     </div>
   );
