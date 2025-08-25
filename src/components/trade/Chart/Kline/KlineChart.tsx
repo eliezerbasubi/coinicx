@@ -168,6 +168,7 @@ const KlineChart = ({ interval }: Props) => {
         });
       },
       subscribeBar: ({ period, symbol, callback }) => {
+        // TODO: Remove this implementation and unsubscribe to web socket
         const ws = new WebSocket(
           `wss://stream.binance.com:9443/ws/${symbol.ticker.toLowerCase()}@kline_${period.span + period.type.slice(0, 1)}`,
         );
@@ -237,7 +238,6 @@ const KlineChart = ({ interval }: Props) => {
       chartWrapperRef.current.getBoundingClientRect().height,
     );
 
-    // TODO: Look into why the chart is distorted after requesting fullscreen
     document.addEventListener(
       "fullscreenchange",
       () => {

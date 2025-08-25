@@ -5,14 +5,16 @@ import dynamic from "next/dynamic";
 import { useMediaQuery } from "usehooks-ts";
 
 import { ChartAreaTabValue, ChartInterval, ChartType } from "@/types/trade";
+import Visibility from "@/components/common/Visibility";
 import { cn } from "@/utils/cn";
 
 import { CHART_TIME_INTERVALS } from "../constants";
 
-const OrderBook = dynamic(() => import("../OrderBook"));
+const OrderBook = dynamic(() => import("../OrderBook"), { ssr: false });
 const ChartCategories = dynamic(() => import("./Header/ChartCategories"));
 const ChartHeader = dynamic(() => import("./Header/ChartHeader"));
-const KlineChart = dynamic(() => import("./Kline/KlineChart"));
+const TradingViewChart = dynamic(() => import("./TradingView"), { ssr: false });
+const KlineChart = dynamic(() => import("./Kline/KlineChart"), { ssr: false });
 
 type State = {
   chartType: ChartType;
@@ -35,6 +37,9 @@ const SpotChart = () => {
       fullscreen: false,
     },
   );
+
+  // Keeps track of loaded components to render tab content only once and hide it when switching to other tabs
+  const loadedChartTabs = useRef<Array<ChartType>>(["standard"]);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -73,26 +78,41 @@ const SpotChart = () => {
         <ChartCategories
           interval={state.interval}
           value={state.chartType}
-          onValueChange={(chartType) => dispatch({ chartType })}
+          onValueChange={(chartType) => {
+            if (!loadedChartTabs.current.includes(chartType)) {
+              loadedChartTabs.current.push(chartType);
+            }
+            dispatch({ chartType });
+          }}
           onIntervalChange={(interval) => dispatch({ interval })}
         />
         <div
           id="chartArea"
-          className={cn("w-full h-[500]", {
-            "h-dvh": state.fullscreen,
-          })}
+          className={cn(
+            "w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-[500]",
+            {
+              "h-dvh": state.fullscreen,
+            },
+          )}
         >
-          <div
-            className={cn(
-              "w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-full",
-              {
+          <Visibility visible={loadedChartTabs.current.includes("standard")}>
+            <div
+              className={cn("w-full h-full", {
                 hidden: state.chartType !== "standard",
-                "w-full": state.fullscreen,
-              },
-            )}
-          >
-            <KlineChart interval={state.interval} />
-          </div>
+              })}
+            >
+              <KlineChart interval={state.interval} />
+            </div>
+          </Visibility>
+          <Visibility visible={loadedChartTabs.current.includes("tradingView")}>
+            <div
+              className={cn("w-full h-full", {
+                hidden: state.chartType !== "tradingView",
+              })}
+            >
+              <TradingViewChart />
+            </div>
+          </Visibility>
         </div>
       </div>
 
