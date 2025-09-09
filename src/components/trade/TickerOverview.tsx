@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Image from "next/image";
 import { useMediaQuery } from "usehooks-ts";
 
 import { useTradeContext } from "@/store/trade/hooks";
@@ -32,9 +33,16 @@ const TickerOverview = () => {
 
   return (
     <div className="w-full flex md:items-center md:flex-wrap md:gap-6 bg-primary-dark p-4 md:rounded-md">
-      <div className="flex flex-col md:flex-row md:gap-6 flex-1 md:flex-auto">
+      <div className="flex flex-col md:flex-row md:gap-6 flex-1 md:flex-none">
         <div className="flex items-center space-x-2">
-          <div className="size-5 md:size-8 rounded-full bg-teal-500" />
+          <Image
+            unoptimized
+            src="https://assets.coingecko.com/coins/images/1/standard/bitcoin.png?1696501400"
+            alt="BTC-USD"
+            className="size-5 md:size-8 rounded-full"
+            width={32}
+            height={32}
+          />
           <div className="flex-1">
             <p className="text-lg md:text-xl font-bold">
               {baseAsset}/{quoteAsset}

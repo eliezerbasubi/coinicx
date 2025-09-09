@@ -26,7 +26,7 @@ export const groupPriceLevels = (
       `${Number(groupedMap.get(tickPrice) || 0) + Number(qty)}`,
     );
   }
-
+  return Array.from(groupedMap.entries());
   return Array.from(groupedMap.entries()).sort((a, b) => +b[0] - +a[0]);
 };
 

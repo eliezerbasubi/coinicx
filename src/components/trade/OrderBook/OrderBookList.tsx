@@ -101,11 +101,11 @@ const OrderBookList = ({ side, className }: Props) => {
       index: number;
       style: React.CSSProperties;
     }) => {
-      if (!data.length) return null;
+      if (!data?.length) return null;
 
       // For Asks, Read items in reverse to align them from the lowest to the highest
       const element =
-        side === "asks" ? data?.[itemCount - 1 - index] : data?.[index];
+        side === "asks" ? data[itemCount - 1 - index] : data[index];
 
       // We add fragment to push asks to the bottom when the number of items is less than the visible rows
       // React-window will consider these fragments as items but they won't be rendered as elements on the DOM

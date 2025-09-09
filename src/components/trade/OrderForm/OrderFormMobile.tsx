@@ -20,7 +20,7 @@ const OrderFormMobile = () => {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <div className="fixed bottom-0 inset-x-0 h-14 px-4">
+        <div className="fixed bottom-0 inset-x-0 z-10 h-14 px-4">
           <div className="w-full flex items-center gap-2">
             <Button
               type="button"

@@ -85,10 +85,7 @@ export const useOrderBookStore = create<OrderBookState>((set, get) => ({
     // We keep a minimum amount of {MAX_ORDERBOOK_SIZE = 400}  orders to keep the UI responsive
     set(() => ({
       bids: groupPriceLevels(bids.slice(0, MAX_ORDERBOOK_SIZE), tickSize),
-      asks: groupPriceLevels(
-        asks.slice(0, MAX_ORDERBOOK_SIZE).reverse(),
-        tickSize,
-      ),
+      asks: groupPriceLevels(asks.slice(0, MAX_ORDERBOOK_SIZE), tickSize),
       lastUpdateId,
     }));
   },
