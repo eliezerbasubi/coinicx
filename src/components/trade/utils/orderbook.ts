@@ -27,7 +27,6 @@ export const groupPriceLevels = (
     );
   }
   return Array.from(groupedMap.entries());
-  return Array.from(groupedMap.entries()).sort((a, b) => +b[0] - +a[0]);
 };
 
 export const getTickPrice = (price: string, tickSize: number) => {
@@ -42,6 +41,7 @@ export const getDecimalPlaces = (num: number) => {
   return s.includes(".") ? s.split(".")[1].length : 0;
 };
 
+// TODO: Review this implementation for asks
 export const updateSide = (
   side: PriceLevel[],
   updates: PriceLevel[],
@@ -75,9 +75,7 @@ export const updateSide = (
         // Insert new price level at the correct position
         const insertPos = -(index + 1);
 
-        if (insertPos < MAX_ORDERBOOK_SIZE) {
-          newSide.splice(insertPos, 0, newPriceLevel);
-        }
+        newSide.splice(insertPos, 0, newPriceLevel);
       }
     }
   }
