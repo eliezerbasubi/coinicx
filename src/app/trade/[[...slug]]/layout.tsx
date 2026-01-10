@@ -2,9 +2,9 @@ import React from "react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import TradeProvider from "@/components/trade/provider";
-import { getTradePathParams } from "@/components/trade/utils/getTradePathParams";
 import { ROUTES } from "@/constants/routes";
+import TradeProvider from "@/features/trade/provider";
+import { getTradePathParams } from "@/features/trade/utils/getTradePathParams";
 
 type Props = {
   params: Promise<{ slug: string[] }>;

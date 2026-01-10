@@ -12,7 +12,7 @@ import {
   mapCumulativeDepthVisualizer,
   MAX_ORDERBOOK_SIZE,
   updateSide,
-} from "@/components/trade/utils";
+} from "@/features/trade/utils";
 
 interface OrderBookState {
   bids: PriceLevel[];

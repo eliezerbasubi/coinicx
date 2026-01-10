@@ -1,6 +1,6 @@
 import React from "react";
 
-import Trade from "@/components/trade";
+import Trade from "@/features/trade";
 
 const TradePage = async () => {
   return <Trade />;

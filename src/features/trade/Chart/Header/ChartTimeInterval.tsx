@@ -1,7 +1,7 @@
 import React from "react";
 
 import { ChartInterval } from "@/types/trade";
-import { CHART_TIME_INTERVALS } from "@/components/trade/constants";
+import { CHART_TIME_INTERVALS } from "@/features/trade/constants";
 import { cn } from "@/utils/cn";
 
 type Props = {
