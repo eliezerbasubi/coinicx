@@ -1,30 +1,28 @@
-import { DepthUpdate, PriceLevel } from "@/types/orderbook";
+import { PriceLevel } from "@/types/orderbook";
 import { debounce } from "@/utils/debounce";
+import { L2BookWsEvent } from "@nktkas/hyperliquid";
 
 export function createBatchedDiffApplier(
-  applyDiff: (diff: DepthUpdate, syncSnapshot?: () => void) => void,
+  applyDiff: (diff: L2BookWsEvent, syncSnapshot?: () => void) => void,
 ) {
-  let bufferedUpdates: DepthUpdate[] = [];
+  let bufferedUpdates: L2BookWsEvent[] = [];
 
   const flushUpdates = (syncSnapshot?: () => void) => {
     if (bufferedUpdates.length === 0) return false;
 
-    // Merge buffered updates into one by taking smallest U, biggest u and merging bids & asks:
-    const merged = bufferedUpdates.reduce<DepthUpdate>((acc, cur) => {
-      acc.U = Math.min(acc.U, cur.U);
-      acc.u = Math.max(acc.u, cur.u);
+    const merged = bufferedUpdates.reduce<L2BookWsEvent>((acc, cur) => {
+      acc.time = Math.min(acc.time, cur.time);
 
       const mergeLevels = (levelsA: PriceLevel[], levelsB: PriceLevel[]) => {
-        const map = new Map<string, string>();
+        const map = new Map<string, PriceLevel>();
 
-        levelsA.forEach(([p, q]) => map.set(p, q));
-        levelsB.forEach(([p, q]) => map.set(p, q));
+        levelsA.forEach((level) => map.set(level.px, level));
+        levelsB.forEach((level) => map.set(level.px, level));
 
-        return Array.from(map.entries());
+        return Array.from(map.values());
       };
 
-      acc.b = mergeLevels(acc.b, cur.b);
-      acc.a = mergeLevels(acc.a, cur.a);
+      acc.levels = [mergeLevels(acc.levels[0], cur.levels[0]), mergeLevels(acc.levels[1], cur.levels[1])] as L2BookWsEvent["levels"];
 
       return acc;
     }, bufferedUpdates[0]);
@@ -35,7 +33,7 @@ export function createBatchedDiffApplier(
 
   const debouncedFlush = debounce(flushUpdates, 50);
 
-  return (diff: DepthUpdate, syncSnapshot?: () => void) => {
+  return (diff: L2BookWsEvent, syncSnapshot?: () => void) => {
     bufferedUpdates.push(diff);
     debouncedFlush(syncSnapshot);
   };

@@ -4,15 +4,28 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "usehooks-ts";
 
-import SpotChart from "./Chart";
-import TickerOverview from "./TickerOverview";
-import TradeUserInfo from "./UserInfo";
+import SpotChart from "./components/Chart";
+import TickerOverview from "./components/TickerOverview";
+import TradeUserInfo from "./components/UserInfo";
 
-const OrderBook = dynamic(() => import("./OrderBook"));
-const OrderForm = dynamic(() => import("./OrderForm/OrderForm"));
-const OrderFormMobile = dynamic(() => import("./OrderForm/OrderFormMobile"), {
+const OrderBook = dynamic(() => import("./components/OrderBook"), {
   ssr: false,
+  loading: () => (
+    <div className="w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-125 flex flex-col md:max-w-full xl:max-w-80 bg-primary-dark rounded-md" />
+  ),
 });
+const OrderForm = dynamic(() => import("./components/OrderForm/OrderForm"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-145.5 md:max-w-80 bg-primary-dark md:rounded-md pb-12 md:pb-0" />
+  ),
+});
+const OrderFormMobile = dynamic(
+  () => import("./components/OrderForm/OrderFormMobile"),
+  {
+    ssr: false,
+  },
+);
 
 const Trade = () => {
   const isMobile = useMediaQuery("(max-width: 768px)", {

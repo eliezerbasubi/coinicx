@@ -22,7 +22,7 @@ const SelectorDrawer = ({ open, onOpenChange, trigger, children }: Props) => {
       <DrawerTrigger className="w-fit flex items-center shrink-0">
         {trigger}
       </DrawerTrigger>
-      <DrawerContent className="h-full !max-h-[90vh]">
+      <DrawerContent className="h-full max-h-[90vh]!">
         <DrawerHeader className="sr-only">
           <DrawerTitle />
           <DrawerDescription />

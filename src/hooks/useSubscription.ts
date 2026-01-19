@@ -2,10 +2,7 @@ import { DependencyList, useCallback, useEffect, useRef } from "react";
 import { ISubscription } from "@nktkas/hyperliquid";
 
 export const useSubscription = (
-  subscribe: () =>
-    | Promise<ISubscription>
-    | ISubscription
-    | undefined,
+  subscribe: () => Promise<ISubscription> | ISubscription | undefined,
   deps: DependencyList,
 ) => {
   const subscriptionRef = useRef<ISubscription | null>(null);
@@ -44,7 +41,6 @@ export const useSubscription = (
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   useEffect(() => {
@@ -63,9 +59,7 @@ export const useSubscription = (
 };
 
 export const useSubscriptions = (
-  subscribes: Array<
-    () => Promise<ISubscription> | ISubscription | undefined
-  >,
+  subscribes: Array<() => Promise<ISubscription> | ISubscription | undefined>,
   deps: React.DependencyList,
 ) => {
   const subsRef = useRef<Set<ISubscription>>(new Set());
@@ -105,7 +99,6 @@ export const useSubscriptions = (
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   useEffect(() => {

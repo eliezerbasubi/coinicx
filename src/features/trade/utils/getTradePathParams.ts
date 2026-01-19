@@ -1,28 +1,41 @@
-import { TradeType } from "@/types/trade";
+import { InstrumentType } from "@/types/trade";
 
-import { defaultTradeAsset, TRADE_TYPES } from "../constants";
+import { DEFAULT_PERPS_ASSETS, DEFAULT_SPOT_ASSETS } from "../constants";
 
-export const getTradePathParams = (slug?: string[]) => {
+export const getTradePathParams = (
+  slug?: string[],
+): {
+  base: string;
+  quote?: string;
+  type: InstrumentType;
+  redirect: boolean;
+} => {
   const slugs = slug ?? [];
 
-  const [tradeType, ...assets] = slugs;
+  const [type, ...assets] = slugs;
 
-  const [baseAsset, quoteAsset] = assets;
+  const [base, quote] = assets;
 
-  const type = TRADE_TYPES.find((type) => type.value === tradeType);
-
-  if (!type) {
-    return { ...defaultTradeAsset, type: "spot" as TradeType, redirect: true };
+  if (type !== "perps" && type !== "spot") {
+    return {
+      base: DEFAULT_PERPS_ASSETS.base,
+      type: type as InstrumentType,
+      redirect: true,
+    };
   }
 
-  if (assets.length > 2 || !baseAsset || !quoteAsset) {
-    return { ...defaultTradeAsset, type: type.value, redirect: true };
+  if (type === "spot" && (!base || !quote)) {
+    return { ...DEFAULT_SPOT_ASSETS, type, redirect: true };
+  }
+
+  if (type === "perps" && base && quote) {
+    return { base, type, redirect: true };
   }
 
   return {
-    type: type.value,
-    baseAsset,
-    quoteAsset,
+    type,
+    base: decodeURIComponent(base),
+    quote: quote ? decodeURIComponent(quote) : quote,
     redirect: false,
   };
 };

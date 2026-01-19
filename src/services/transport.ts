@@ -3,7 +3,6 @@ import {
   ExchangeClient,
   HttpTransport,
   InfoClient,
-  InfoConfig,
   SubscriptionClient,
   WebSocketTransport,
 } from "@nktkas/hyperliquid";
@@ -17,19 +16,9 @@ const transport = new HttpTransport({
   isTestnet,
 });
 
-export const infoClient = new InfoClient({ transport });
+export const hlInfoClient = new InfoClient({ transport });
 
-export const getInfoClient = (
-  fetchOptions?: InfoConfig<HttpTransport>["transport"]["fetchOptions"],
-) =>
-  new InfoClient({
-    transport: new HttpTransport({
-      isTestnet,
-      fetchOptions,
-    }),
-  });
-
-export const exchangeClient = async (args?: {
+export const hlExchangeClient = async (args?: {
   wallet: AbstractWallet;
   signatureChainId?: `0x${string}`;
 }) => {
@@ -45,4 +34,4 @@ export const exchangeClient = async (args?: {
 
 const ws = new WebSocketTransport({ isTestnet });
 
-export const subsClient = new SubscriptionClient({ transport: ws });
+export const hlSubClient = new SubscriptionClient({ transport: ws });

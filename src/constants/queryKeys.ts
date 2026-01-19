@@ -1,6 +1,8 @@
 export const QUERY_KEYS = {
   cryptoList: "cryptoList",
   exchangeRates: "exchangeRates",
-  orderbook: "orderbook",
+  allPerpMetas: "allPerpMetas",
+  spotMeta: "spotMeta",
+  perpDexs: "perpDexs",
   tradeTicker: "tradeTicker",
 } as const;
