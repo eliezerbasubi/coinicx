@@ -8,9 +8,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROUTES } from "@/constants/routes";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
+import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
 
+import { getPriceDecimals } from "../../utils";
 import Badge from "../Badge";
 import TokenImage from "../TokenImage";
 import { useTickerSelector } from "./TickerSelectorProvider";
@@ -43,6 +45,9 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
   const isMobile = useIsMobile();
   const metaAndAssetCtxs = useTickerSelector();
   const instrumentType = useTradeContext((s) => s.instrumentType);
+  const decimals = useTradeContext((s) => s.decimals);
+
+  const setDecimals = useTradeContext((s) => s.setDecimals);
 
   const onAssetChange = useTradeContext((s) => s.onAssetChange);
 
@@ -128,18 +133,10 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
     });
   }, [state.search, state.sortBy, assetsByTab]);
 
-  const formatValue = (
-    value: number,
-    options?: Intl.NumberFormatOptions & {
-      szDecimals?: number;
-      maxDecimals?: number;
-    },
-  ) => {
-    const { szDecimals, ...intlOptions } = options ?? {};
-
+  const formatValueToDecimals = (value: number) => {
     return formatNumberWithFallback(value, {
-      ...intlOptions,
-      maximumSignificantDigits: szDecimals,
+      minimumFractionDigits: decimals || 0,
+      maximumSignificantDigits: decimals || 10,
     });
   };
 
@@ -149,15 +146,27 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
       ? [ROUTES.trade.spot, meta.base, meta.quote]
       : [ROUTES.trade.perps, meta.coin];
 
+    const price = ctx.midPx ?? ctx.markPx;
+    const szDecimals = meta.szDecimals;
+
     onAssetChange({
       base: meta.base,
       quote: meta.quote,
       instrumentType: isSpot ? "spot" : "perps",
     });
+
+    // Update asset meta and context
     useInstrumentStore.setState({
       assetMeta: meta,
       assetCtx: ctx,
     });
+
+    // Ensure ticks are only loaded once asset is selected
+    useOrderBookStore.getState().setTicks(price, szDecimals, isSpot);
+
+    const pxDecimals = getPriceDecimals(price, szDecimals, isSpot);
+
+    setDecimals(pxDecimals);
 
     onSelect?.();
 
@@ -322,8 +331,6 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
               {data.slice(0, 50).map((datum) => {
                 const { meta, ctx, isSpot } = datum;
 
-                const szDecimals = meta.szDecimals;
-
                 const hasPricing = ctx.prevDayPx && ctx.midPx;
                 const change = hasPricing ? ctx.prevDayPx - ctx.midPx : 0;
                 const changeInPercentage = change
@@ -380,7 +387,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                             <p className="space-x-1 text-[11px] text-neutral-gray-400 font-medium">
                               <span>Vol.</span>
                               <span>
-                                {formatValue(ctx.dayNtlVlm, {
+                                {formatNumberWithFallback(ctx.dayNtlVlm, {
                                   style: "currency",
                                   // notation: "compact",
                                 })}
@@ -391,7 +398,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                       </div>
                     </td>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
-                      {formatValue(ctx.midPx, { szDecimals })}
+                      {formatValueToDecimals(ctx.midPx)}
                     </td>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
                       <p
@@ -402,11 +409,11 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                       >
                         <span>
                           {change >= 0 && "+"}
-                          {formatValue(change, { szDecimals })}
+                          {formatValueToDecimals(change)}
                         </span>
                         <span>/</span>
                         <span>
-                          {formatValue(changeInPercentage, {
+                          {formatNumberWithFallback(changeInPercentage / 100, {
                             style: "percent",
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
@@ -416,34 +423,45 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     </td>
                     <Visibility visible={isPerpsInstrument}>
                       <td className="pr-3 py-0.5 hidden md:table-cell">
-                        {formatValue(ctx.funding ?? 0, {
-                          style: "percent",
-                          minimumFractionDigits: 4,
-                          maximumFractionDigits: 4,
-                        })}
+                        {formatNumberWithFallback(
+                          ctx.funding ? ctx.funding : 0,
+                          {
+                            style: "percent",
+                            minimumFractionDigits: 4,
+                            maximumFractionDigits: 4,
+                          },
+                        )}
                       </td>
                     </Visibility>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
-                      {formatValue(ctx.dayNtlVlm, { style: "currency" })}
+                      {formatNumberWithFallback(ctx.dayNtlVlm, {
+                        style: "currency",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
                     </td>
                     <Visibility visible={isPerpsInstrument}>
                       <td className="pr-3 py-0.5 hidden md:table-cell">
-                        {formatValue(ctx.openInterest ?? 0, {
+                        {formatNumberWithFallback(ctx.openInterest ?? 0, {
                           style: "currency",
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
                         })}
                       </td>
                     </Visibility>
                     <Visibility visible={!isPerpsInstrument}>
                       <td className="py-0.5 hidden md:table-cell">
-                        {formatValue(ctx.marketCap ?? 0, {
+                        {formatNumberWithFallback(ctx.marketCap ?? 0, {
                           style: "currency",
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
                         })}
                       </td>
                     </Visibility>
                     <Visibility visible={isMobile}>
                       <td className="py-0.5 text-right">
                         <p className="text-white font-semibold">
-                          {formatValue(ctx.midPx, { szDecimals })}
+                          {formatValueToDecimals(ctx.midPx)}
                         </p>
                         <p
                           className={cn("text-buy space-x-1 text-[11px]", {
@@ -453,15 +471,18 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                         >
                           <span>
                             {change >= 0 && "+"}
-                            {formatValue(change, { szDecimals })}
+                            {formatValueToDecimals(change)}
                           </span>
                           <span>/</span>
                           <span>
-                            {formatValue(changeInPercentage, {
-                              style: "percent",
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
+                            {formatNumberWithFallback(
+                              changeInPercentage / 100,
+                              {
+                                style: "percent",
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              },
+                            )}
                           </span>
                         </p>
                       </td>

@@ -2,7 +2,8 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import { useMediaQuery } from "usehooks-ts";
+
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 import SpotChart from "./components/Chart";
 import TickerOverview from "./components/TickerOverview";
@@ -28,9 +29,7 @@ const OrderFormMobile = dynamic(
 );
 
 const Trade = () => {
-  const isMobile = useMediaQuery("(max-width: 768px)", {
-    initializeWithValue: false,
-  });
+  const isMobile = useIsMobile();
 
   return (
     <div className="w-full">

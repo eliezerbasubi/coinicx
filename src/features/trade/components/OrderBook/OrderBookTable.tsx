@@ -5,6 +5,7 @@ import { useMediaQuery } from "usehooks-ts";
 
 import { useSubscription } from "@/hooks/useSubscription";
 import Visibility from "@/components/common/Visibility";
+import { getNSigFigsAndMantissa } from "@/features/trade/utils";
 import { hlSubClient } from "@/services/transport";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
@@ -28,8 +29,7 @@ const OrderBookTable = () => {
   useSubscription(() => {
     if (!coin) return;
 
-    const nSigFigs = tickSize > 5 ? tickSize.toString().charAt(0) : tickSize;
-    const mantissa = tickSize > 5 ? tickSize.toString().charAt(1) : null;
+    const { nSigFigs, mantissa } = getNSigFigsAndMantissa(tickSize);
 
     return hlSubClient.l2Book({ coin, nSigFigs, mantissa }, (data) => {
       setSnapshot({ bids: data.levels[0], asks: data.levels[1] });

@@ -1,4 +1,4 @@
-type FormatOptions = { locale?: string } & Intl.NumberFormatOptions;
+export type FormatOptions = { locale?: string } & Intl.NumberFormatOptions;
 
 export const formatNumber = (value: number, options?: FormatOptions) => {
   const { locale, ...rest } = options ?? {};

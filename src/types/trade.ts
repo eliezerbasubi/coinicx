@@ -74,7 +74,6 @@ export type AssetMeta = {
   quote: string;
   symbol: string;
   dex: string | null;
-  weiDecimals?: number;
   onlyIsolated?: boolean;
   isDelisted?: boolean;
   isCanonical?: boolean;

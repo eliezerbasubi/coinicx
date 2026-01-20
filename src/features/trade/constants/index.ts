@@ -12,6 +12,7 @@ export const DEFAULT_PERPS_ASSETS = {
 
 export const MAX_PERPS_DECIMALS = 6;
 export const MAX_SPOT_DECIMALS = 8;
+export const MAX_SIGNIFICANT_DECIMALS = 5;
 
 export const PRIMARY_SUPPORTED_DEXS = ["", "xyz", "flx", "vtnl", "hyna"];
 

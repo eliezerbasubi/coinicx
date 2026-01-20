@@ -8,6 +8,7 @@ import {
   OrderBookType,
   PriceLevel,
 } from "@/types/orderbook";
+import { useTradeContext } from "@/store/trade/hooks";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 
@@ -33,6 +34,7 @@ const OrderBookList = ({ side, className }: Props) => {
   const depthVisualizer = useOrderBookStore(
     (state) => state.settings.depthVisualizer,
   );
+  const decimals = useTradeContext((state) => state.decimals);
 
   const isMobile = useMediaQuery("(max-width: 768px)", {
     initializeWithValue: false,
@@ -141,13 +143,14 @@ const OrderBookList = ({ side, className }: Props) => {
           side={side}
           price={Number(price)}
           amount={Number(amount)}
+          decimals={decimals}
           progress={progress >= 1 ? 1 : progress}
           style={style}
           onMouseEnter={() => setHoverIndex(index)}
         />
       );
     },
-    [itemCount, depthVisualizer, side],
+    [itemCount, depthVisualizer, decimals, side],
   );
 
   return (

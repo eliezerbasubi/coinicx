@@ -5,6 +5,7 @@ import { Chart, dispose, init, KLineData } from "klinecharts";
 import { getChartTimeRange } from "@/features/trade/utils";
 import { hlInfoClient, hlSubClient } from "@/services/transport";
 import { useChartSettingsStore } from "@/store/trade/chart-settings";
+import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -30,6 +31,7 @@ const KlineChart = () => {
   const candleTooltipRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
   const coin = useInstrumentStore((s) => s.assetMeta?.coin);
+  const decimals = useTradeContext((s) => s.decimals);
 
   const handleCandleTooltip = useCallback((klineData: KLineData) => {
     Object.entries(klineData).forEach(([key, value]) => {
@@ -140,8 +142,8 @@ const KlineChart = () => {
 
     chart.setSymbol({
       ticker: coin,
-      pricePrecision: 2,
-      volumePrecision: 2,
+      pricePrecision: decimals ?? 2,
+      volumePrecision: decimals ?? 2,
     });
 
     const period = getKlinePeriod(interval);

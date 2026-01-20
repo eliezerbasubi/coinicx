@@ -7,6 +7,7 @@ import {
 import { AssetMeta } from "@/types/trade";
 
 import { MAX_PERPS_DECIMALS, MAX_SPOT_DECIMALS } from "../constants";
+import { formatSymbol } from "./formatting";
 import { parseQuoteAsset } from "./perps";
 
 export const mapSpotDataToAssetMeta = (
@@ -20,14 +21,16 @@ export const mapSpotDataToAssetMeta = (
     index: token.index,
     base: token.name,
     fullName: token.fullName,
-    szDecimals: MAX_SPOT_DECIMALS - token.szDecimals,
-    weiDecimals: token.weiDecimals,
+    szDecimals: Math.min(
+      token.szDecimals,
+      MAX_SPOT_DECIMALS - token.szDecimals,
+    ),
     coin: universe.name,
     isCanonical: universe.isCanonical,
     maxLeverage: 0,
     quote,
     dex: null,
-    symbol: token.name + "/" + quote,
+    symbol: formatSymbol(token.name, quote, true),
   };
 };
 
@@ -54,13 +57,16 @@ export const mapPerpDataToAssetMeta = (data: {
     base,
     coin: universe.name,
     quote,
-    symbol: base + "-" + quote,
+    symbol: formatSymbol(base, quote, false),
     dex,
     maxLeverage: universe.maxLeverage,
     isDelisted: universe.isDelisted,
     onlyIsolated: universe.onlyIsolated,
     marginMode: universe.marginMode,
-    szDecimals: MAX_PERPS_DECIMALS - universe.szDecimals,
+    szDecimals: Math.min(
+      universe.szDecimals,
+      MAX_PERPS_DECIMALS - universe.szDecimals,
+    ),
     tokenId: null,
   };
 };

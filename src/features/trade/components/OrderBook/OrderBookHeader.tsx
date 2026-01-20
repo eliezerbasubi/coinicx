@@ -35,28 +35,22 @@ const LAYOUTS: Array<{
   },
 ];
 
-/**
- * Concatenate nSigFigs with mantissa for 5 as it is the only value that support mantissa.
- */
-const TICKS = [
-  { label: "1", value: 5 },
-  { label: "2", value: 52 },
-  { label: "5", value: 55 },
-  { label: "10", value: 4 },
-  { label: "100", value: 3 },
-  { label: "1000", value: 2 },
-];
-
 const OrderBookHeader = () => {
   const [open, setOpen] = useState(false);
 
   const layout = useOrderBookStore((s) => s.layout);
   const tickSize = useOrderBookStore((s) => s.tickSize);
+  const ticks = useOrderBookStore((s) => s.ticks);
 
   const currentTick = useMemo(
-    () => TICKS.find((tick) => tick.value === tickSize),
-    [tickSize],
+    () => ticks.find((tick) => tick.value === tickSize) || ticks[0],
+    [tickSize, ticks],
   );
+
+  const onTickSizeChange = (value: number) => {
+    useOrderBookStore.getState().onTickSizeChange(value);
+    setOpen(false);
+  };
 
   return (
     <div className="flex items-center justify-between py-2 px-4">
@@ -88,21 +82,21 @@ const OrderBookHeader = () => {
           sideOffset={10}
           className="w-32 px-0 py-1"
         >
-          {TICKS.map((tick) => {
+          {ticks.map((tick) => {
             return (
               <div
                 key={tick.value}
                 role="button"
                 tabIndex={0}
                 onKeyDown={() => null}
-                onClick={() => {
-                  useOrderBookStore.getState().onTickSizeChange(tick.value);
-                  setOpen(false);
-                }}
+                onClick={() => onTickSizeChange(tick.value)}
                 className={cn(
                   "flex items-center space-x-2 p-2 cursor-pointer hover:bg-neutral-gray-200",
                   {
-                    "bg-neutral-gray-200": tick.value === tickSize,
+                    "bg-neutral-gray-200":
+                      tickSize === null
+                        ? ticks[0].value === tick.value
+                        : tick.value === tickSize,
                   },
                 )}
               >

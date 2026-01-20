@@ -3,6 +3,7 @@
 import { memo } from "react";
 
 import { OrderBookType } from "@/types/orderbook";
+import { formatPriceToDecimal } from "@/features/trade/utils";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
@@ -12,6 +13,7 @@ type OrderBookTableRowProps = {
   price: number;
   amount: number;
   progress: number;
+  decimals: number | null;
   style?: React.CSSProperties;
   className?: string;
   onMouseEnter?: () => void;
@@ -20,6 +22,7 @@ type OrderBookTableRowProps = {
 const OrderBookTableRow = ({
   price,
   amount,
+  decimals,
   side,
   progress,
   style,
@@ -44,7 +47,7 @@ const OrderBookTableRow = ({
       onMouseEnter={onMouseEnter}
     >
       <p className={cn("flex-1 text-buy", { "text-sell": side === "asks" })}>
-        {formatNumber(price, { maximumFractionDigits: 2 })}
+        {formatPriceToDecimal(price, decimals)}
       </p>
       <p className="text-right flex-1">
         {formatNumber(amount, { maximumFractionDigits: 5 })}

@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
+import { formatSymbol } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 
@@ -18,9 +19,12 @@ const AssetsSelector = () => {
   const isMobile = useIsMobile();
 
   const tokenMeta = useInstrumentStore((state) => state.assetMeta);
+  const base = useTradeContext((state) => state.base);
+  const quote = useTradeContext((state) => state.quote);
   const instrumentType = useTradeContext((state) => state.instrumentType);
 
   const triggerRef = useRef(null);
+  const symbol = formatSymbol(base, quote, instrumentType === "spot");
 
   return (
     <>
@@ -32,15 +36,15 @@ const AssetsSelector = () => {
         onClick={() => setOpen(!open)}
       >
         <TokenImage
-          key={tokenMeta?.base}
-          name={tokenMeta?.base ?? ""}
+          key={base}
+          name={base}
           instrumentType={instrumentType}
           className="size-5 md:size-8"
         />
 
         <div className="flex-1">
           <div className="flex items-center space-x-1">
-            <p className="text-md md:text-xl font-bold">{tokenMeta?.symbol}</p>
+            <p className="text-md md:text-xl font-bold">{symbol}</p>
 
             <ChevronDown
               strokeWidth={2.5}

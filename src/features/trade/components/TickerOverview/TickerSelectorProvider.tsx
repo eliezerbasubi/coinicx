@@ -145,7 +145,6 @@ const TickerSelectorProvider = ({ children }: Props) => {
               universe,
               quote,
               ...deployedAsset,
-              collateralToken,
               index,
               marginTable: marginTables.get(universe.marginTableId),
             }),

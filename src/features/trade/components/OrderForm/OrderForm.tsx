@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useReducer } from "react";
+import React, { useReducer } from "react";
 
 import { OrderSide, OrderType } from "@/types/trade";
 import UnderlineTooltip from "@/components/common/UnderlineTooltip";
 import { Button } from "@/components/ui/button";
-import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
 
@@ -42,7 +41,7 @@ const OrderForm = ({ side }: Props) => {
       price: "",
       amount: "",
       percentage: 0,
-      orderSide: "buy",
+      orderSide: side || "buy",
       showLimitOrderTPSL: false,
     },
   );
@@ -52,11 +51,11 @@ const OrderForm = ({ side }: Props) => {
 
   const isBuyOrder = state.orderSide === "buy";
 
-  useEffect(() => {
-    if (side) {
-      dispatch({ orderSide: side });
-    }
-  }, [side]);
+  // useEffect(() => {
+  //   if (side) {
+  //     dispatch({ orderSide: side });
+  //   }
+  // }, [side]);
 
   return (
     <div className="w-full md:max-w-80 bg-primary-dark md:rounded-md pb-12 md:pb-0">

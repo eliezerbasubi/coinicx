@@ -4,22 +4,23 @@ import {
   IOrderBookSettings,
   OrderBookLayout,
   PriceLevel,
+  Tick,
 } from "@/types/orderbook";
 import {
+  generateTicks,
   mapAmountDepthVisualizer,
   mapCumulativeDepthVisualizer,
-} from "@/features/trade/utils";
+} from "@/features/trade/utils/orderbook";
 
 interface OrderBookState {
   bids: PriceLevel[];
   asks: PriceLevel[];
-  lastUpdateId: number;
-  tickSize: number;
+  ticks: Tick[];
+  tickSize: number | null;
   layout: OrderBookLayout;
   settings: IOrderBookSettings;
-  onTickSizeChange: (
-    tick: number,
-  ) => void;
+  setTicks: (price: number, szDecimals: number, isSpot: boolean) => void;
+  onTickSizeChange: (tick: number) => void;
   onDepthVisualizerChange: (
     visualizer: IOrderBookSettings["depthVisualizer"],
   ) => void;
@@ -31,8 +32,8 @@ interface OrderBookState {
 export const useOrderBookStore = create<OrderBookState>((set, get) => ({
   bids: [],
   asks: [],
-  lastUpdateId: 0,
-  tickSize: 5,
+  ticks: [],
+  tickSize: null,
   layout: "orderBook",
   settings: {
     averageAndSum: true,
@@ -61,6 +62,10 @@ export const useOrderBookStore = create<OrderBookState>((set, get) => ({
     set({
       tickSize,
     }),
+  setTicks(price, szDecimals, isSpot) {
+    const ticks = generateTicks(price, szDecimals, isSpot);
+    set({ ticks, tickSize: ticks[0].value });
+  },
   setLayout: (layout) => set({ layout }),
   setSettings: (data) => {
     const { settings } = get();
@@ -71,6 +76,13 @@ export const useOrderBookStore = create<OrderBookState>((set, get) => ({
 
     const isCumulativeDepth = settings.depthVisualizer === "cumulative";
 
-    set({ bids: isCumulativeDepth ? mapCumulativeDepthVisualizer(bids) : mapAmountDepthVisualizer(bids), asks: isCumulativeDepth ? mapCumulativeDepthVisualizer(asks) : mapAmountDepthVisualizer(asks) })
+    set({
+      bids: isCumulativeDepth
+        ? mapCumulativeDepthVisualizer(bids)
+        : mapAmountDepthVisualizer(bids),
+      asks: isCumulativeDepth
+        ? mapCumulativeDepthVisualizer(asks)
+        : mapAmountDepthVisualizer(asks),
+    });
   },
 }));
