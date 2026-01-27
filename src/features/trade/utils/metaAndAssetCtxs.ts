@@ -21,10 +21,11 @@ export const mapSpotDataToAssetMeta = (
     index: token.index,
     base: token.name,
     fullName: token.fullName,
-    szDecimals: Math.min(
-      token.szDecimals,
-      MAX_SPOT_DECIMALS - token.szDecimals,
-    ),
+    szDecimals: token.szDecimals,
+    // szDecimals: Math.min(
+    //   token.szDecimals,
+    //   MAX_SPOT_DECIMALS - token.szDecimals,
+    // ),
     coin: universe.name,
     isCanonical: universe.isCanonical,
     maxLeverage: 0,
@@ -63,10 +64,11 @@ export const mapPerpDataToAssetMeta = (data: {
     isDelisted: universe.isDelisted,
     onlyIsolated: universe.onlyIsolated,
     marginMode: universe.marginMode,
-    szDecimals: Math.min(
-      universe.szDecimals,
-      MAX_PERPS_DECIMALS - universe.szDecimals,
-    ),
+    szDecimals: universe.szDecimals,
+    // szDecimals: Math.min(
+    //   universe.szDecimals,
+    //   MAX_PERPS_DECIMALS - universe.szDecimals,
+    // ),
     tokenId: null,
   };
 };

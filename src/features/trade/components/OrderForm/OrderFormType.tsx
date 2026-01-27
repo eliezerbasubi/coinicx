@@ -1,5 +1,6 @@
 import React from "react";
 import { Check, ChevronDown } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 
 import { OrderType } from "@/types/trade";
 import {
@@ -7,16 +8,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTradeContext } from "@/store/trade/hooks";
 import { cn } from "@/utils/cn";
 
-type Props = {
-  type: OrderType;
-  onValueChange?: (type: OrderType) => void;
-};
-
 const ORDER_TYPES: Record<OrderType, { label: string; value: OrderType }> = {
-  limit: { label: "Limit", value: "limit" },
   market: { label: "Market", value: "market" },
+  limit: { label: "Limit", value: "limit" },
   stopLimit: { label: "Stop Limit", value: "stopLimit" },
   stopMarket: { label: "Stop Market", value: "stopMarket" },
   trailingStop: { label: "Trailing Stop", value: "trailingStop" },
@@ -24,25 +21,30 @@ const ORDER_TYPES: Record<OrderType, { label: string; value: OrderType }> = {
   twap: { label: "TWAP", value: "twap" },
 };
 
-const OrderFormType = ({ type, onValueChange }: Props) => {
-  const isNonPrimaryType = type !== "limit" && type !== "market";
+const OrderFormType = () => {
+  const orderType = useTradeContext(
+    useShallow((s) => s.orderFormSettings.orderType),
+  );
+  const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
+
+  const isNonPrimaryType = orderType !== "limit" && orderType !== "market";
 
   return (
-    <div className="flex items-center gap-4 px-4 h-11">
-      {[ORDER_TYPES.limit, ORDER_TYPES.market].map((orderType) => (
+    <div className="flex items-center gap-4 px-4 h-11 border-b border-neutral-gray-200">
+      {[ORDER_TYPES.market, ORDER_TYPES.limit].map((type) => (
         <span
-          key={orderType.value}
+          key={type.value}
           className={cn(
             "text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
-            { "text-white": type === orderType.value },
+            { "text-white": orderType === type.value },
           )}
-          onClick={() => onValueChange?.(orderType.value)}
+          onClick={() => setOrderFormSettings({ orderType: type.value })}
         >
-          {orderType.label}
+          {type.label}
         </span>
       ))}
 
-      <Tooltip>
+      <Tooltip delayDuration={720}>
         <TooltipTrigger
           className={cn(
             "w-fit py-2 flex items-center gap-x-1 text-xs font-semibold text-neutral-gray-400 cursor-pointer",
@@ -51,7 +53,7 @@ const OrderFormType = ({ type, onValueChange }: Props) => {
         >
           <p>
             {isNonPrimaryType
-              ? ORDER_TYPES[type].label
+              ? ORDER_TYPES[orderType].label
               : ORDER_TYPES.stopLimit.label}
           </p>
           <ChevronDown
@@ -70,17 +72,19 @@ const OrderFormType = ({ type, onValueChange }: Props) => {
                 (orderType) =>
                   orderType.value !== "limit" && orderType.value !== "market",
               )
-              .map((orderType) => (
+              .map((type) => (
                 <li
-                  key={orderType.value}
-                  onClick={() => onValueChange?.(orderType.value)}
+                  key={type.value}
+                  onClick={() =>
+                    setOrderFormSettings({ orderType: type.value })
+                  }
                   className={cn("py-2 px-2 cursor-pointer", {
                     "flex items-center justify-between font-semibold text-white bg-neutral-gray-200":
-                      orderType.value === type,
+                      type.value === orderType,
                   })}
                 >
-                  <span>{orderType.label}</span>
-                  {type === orderType.value && (
+                  <span>{type.label}</span>
+                  {type.value === orderType && (
                     <Check className="size-4" strokeWidth={3} />
                   )}
                 </li>

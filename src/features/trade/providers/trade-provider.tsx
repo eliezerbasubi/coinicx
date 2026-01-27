@@ -55,6 +55,7 @@ const TradeProvider = ({
   return (
     <TradeStoreProvider
       {...props}
+      coin={props.base}
       base={parseBuilderDeployedAsset(props.base).base}
     >
       {children}

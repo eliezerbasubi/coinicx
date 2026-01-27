@@ -15,8 +15,12 @@ export const getPriceDecimals = (
 ) => {
   const px = Math.abs(price);
   const maxSzDecimals = getMaxSizeDecimals(isSpot);
+
+  const minDecimals = Math.min(szDecimals, maxSzDecimals - szDecimals);
+
   const scale = MAX_SIGNIFICANT_DECIMALS - Math.floor(Math.log10(px)) - 1;
-  return Math.max(0, Math.min(scale, maxSzDecimals - szDecimals));
+
+  return Math.max(0, Math.min(scale, maxSzDecimals - minDecimals));
 };
 
 export const getPriceSigFigs = (
@@ -27,11 +31,13 @@ export const getPriceSigFigs = (
   const px = Math.abs(price);
   const maxSzDecimals = getMaxSizeDecimals(isSpot);
 
+  const minDecimals = Math.min(szDecimals, maxSzDecimals - szDecimals);
+
   return Math.max(
     2,
     Math.min(
       MAX_SIGNIFICANT_DECIMALS,
-      maxSzDecimals - szDecimals + Math.floor(Math.log10(px)) + 1,
+      maxSzDecimals - minDecimals + Math.floor(Math.log10(px)) + 1,
     ),
   );
 };

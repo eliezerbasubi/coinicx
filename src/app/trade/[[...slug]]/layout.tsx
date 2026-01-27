@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 
 import { ROUTES } from "@/constants/routes";
 import { DEFAULT_SPOT_ASSETS } from "@/features/trade/constants";
-import TradeProvider from "@/features/trade/provider";
+import TradeProvider from "@/features/trade/providers/trade-provider";
+import UserTradeProvider from "@/features/trade/providers/user-trade-provider";
 import { getTradePathParams } from "@/features/trade/utils/getTradePathParams";
 
 type Props = {
@@ -38,7 +39,7 @@ const TradeLayout = async ({
       base={pathParams.base}
       quote={pathParams.quote ?? DEFAULT_SPOT_ASSETS.quote}
     >
-      {children}
+      <UserTradeProvider>{children}</UserTradeProvider>
     </TradeProvider>
   );
 };

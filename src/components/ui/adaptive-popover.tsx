@@ -1,6 +1,9 @@
 import React from "react";
 import dynamic from "next/dynamic";
+import { ChevronDown } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
+
+import { cn } from "@/utils/cn";
 
 type Props = {
   open?: boolean;
@@ -37,6 +40,32 @@ const AdaptivePopover = ({
       collisionBoundary={collisionBoundary}
       collisionPadding={collisionPadding}
     />
+  );
+};
+
+type AdaptivePopoverTriggerProps = {
+  open?: boolean;
+  className?: string;
+  children: React.ReactNode;
+} & React.ComponentProps<"div">;
+
+export const AdaptivePopoverTrigger = ({
+  className,
+  children,
+  open,
+  ...props
+}: AdaptivePopoverTriggerProps) => {
+  return (
+    <div
+      {...props}
+      data-slot="popover-trigger"
+      data-state={open ? "open" : "closed"}
+      className={cn("group/selector flex items-center space-x-1", className)}
+    >
+      {children}
+
+      <ChevronDown className="text-white transition-transform group-data-[state=open]/selector:rotate-180" />
+    </div>
   );
 };
 

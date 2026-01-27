@@ -34,6 +34,8 @@ const KlineChart = () => {
   const decimals = useTradeContext((s) => s.decimals);
 
   const handleCandleTooltip = useCallback((klineData: KLineData) => {
+    if (!klineData) return;
+
     Object.entries(klineData).forEach(([key, value]) => {
       const element = candleTooltipRefs.current[key];
       const changeElement = candleTooltipRefs.current["change"];
@@ -195,9 +197,9 @@ const KlineChart = () => {
             callback(bar);
 
             // Update candle tooltip if user is not hovering on the chart
-            // if (!isCrosshairChange.current) {
-            //   handleCandleTooltip(bar);
-            // }
+            if (!isCrosshairChange.current) {
+              handleCandleTooltip(bar);
+            }
           },
         );
       },

@@ -22,12 +22,12 @@ const OrderFormInput = ({
     <label
       htmlFor={props.id}
       className={cn(
-        "w-full h-11 flex items-center gap-x-1 border-1 border-neutral-gray-200 focus-within:border-primary rounded-md px-3",
+        "w-full h-11 flex items-center gap-x-1 border border-neutral-gray-200 focus-within:border-primary rounded-md px-3",
         wrapperClassName,
       )}
     >
       {label && (
-        <p className="text-sm text-neutral-gray-400 font-semibold whitespace-nowrap">
+        <p className="text-sm text-neutral-gray-400 font-medium whitespace-nowrap">
           {label}
         </p>
       )}
@@ -35,7 +35,7 @@ const OrderFormInput = ({
       <InputNumberFormatter
         {...props}
         className={cn(
-          "w-full caret-primary text-white font-semibold text-right outline-0",
+          "w-full caret-primary text-white font-medium text-right outline-0",
           props.className,
         )}
       />

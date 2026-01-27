@@ -1,61 +1,58 @@
 "use client";
 
-import React, { useReducer } from "react";
+import React from "react";
 
-import { OrderSide, OrderType } from "@/types/trade";
-import UnderlineTooltip from "@/components/common/UnderlineTooltip";
+import { OrderSide } from "@/types/trade";
+import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
+import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
+import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
 
+import AdjustTradeSettings from "./AdjustTradeSettings";
+import AvailableBalance from "./AvailableBalance";
 import LimitOrderTPSL from "./LimitOrderTPSL";
-import LimitOrderTPSLForm from "./LimitOrderTPSLForm";
+import OrderDetails from "./OrderDetails";
 import OrderFormInput from "./OrderFormInput";
 import OrderFormSlider from "./OrderFormSlider";
 import OrderFormType from "./OrderFormType";
-import TradeTypeTab from "./TradeTypeTab";
-
-type State = {
-  orderType: OrderType;
-  price: string;
-  amount: string;
-  percentage: number;
-  orderSide: OrderSide;
-  showLimitOrderTPSL: boolean;
-};
+import ReduceOnly from "./ReduceOnly";
+import SizeCoinSelector from "./SizeCoinSelector";
+import TIFSelector from "./TIFSelector";
 
 type Props = {
   side?: OrderSide;
 };
 
-const ORDER_FORM_SIDES: Array<{ label: string; value: OrderSide }> = [
-  { label: "Buy", value: "buy" },
-  { label: "Sell", value: "sell" },
-];
+const ORDER_FORM_SIDES: Record<OrderSide, { spot: string; perp: string }> = {
+  buy: {
+    spot: "Buy",
+    perp: "Long",
+  },
+  sell: {
+    spot: "Sell",
+    perp: "Short",
+  },
+};
 
 const OrderForm = ({ side }: Props) => {
-  const [state, dispatch] = useReducer(
-    (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
-    {
-      orderType: "limit",
-      price: "",
-      amount: "",
-      percentage: 0,
-      orderSide: side || "buy",
-      showLimitOrderTPSL: false,
-    },
-  );
+  const {
+    state,
+    showLimitPrice,
+    isBuyOrder,
+    dispatch,
+    onOrderSideChange,
+    onMidClick,
+    onPercentChange,
+    onSizeChange,
+    onSizeCoinChange,
+  } = useOrderForm({ side });
 
-  const base = useInstrumentStore((s) => s.assetMeta?.base);
   const quote = useInstrumentStore((s) => s.assetMeta?.quote);
+  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
-  const isBuyOrder = state.orderSide === "buy";
-
-  // useEffect(() => {
-  //   if (side) {
-  //     dispatch({ orderSide: side });
-  //   }
-  // }, [side]);
+  const labelKey = isPerps ? "perp" : "spot";
 
   return (
     <div className="w-full md:max-w-80 bg-primary-dark md:rounded-md pb-12 md:pb-0">
@@ -63,108 +60,107 @@ const OrderForm = ({ side }: Props) => {
         <p className="text-sm font-semibold">Trade</p>
       </div>
 
-      <TradeTypeTab />
+      <Visibility visible={isPerps}>
+        <AdjustTradeSettings />
+      </Visibility>
 
-      <div className="w-full px-4 mb-1 mt-4">
-        <div className="bg-neutral-gray-200 rounded h-7 md:h-9 flex justify-between items-center gap-x-1">
-          {ORDER_FORM_SIDES.map((side) => (
+      <OrderFormType />
+
+      <div className="w-full px-4 my-2">
+        <div className="bg-neutral-gray-200 rounded h-7 flex justify-between items-center gap-x-1">
+          {Object.entries(ORDER_FORM_SIDES).map(([side, label]) => (
             <button
-              key={side.value}
+              key={side}
               className={cn(
-                "w-full h-full flex items-center justify-center rounded text-center text-neutral-gray-400 cursor-pointer",
+                "w-full h-full flex items-center justify-center rounded text-center text-neutral-gray-400 cursor-pointer transition-colors",
                 {
                   "bg-sell text-white":
-                    side.value === state.orderSide &&
-                    state.orderSide === "sell",
+                    side === state.orderSide && state.orderSide === "sell",
                   "bg-buy text-white":
-                    side.value === state.orderSide && state.orderSide === "buy",
+                    side === state.orderSide && state.orderSide === "buy",
                 },
               )}
-              onClick={() => dispatch({ orderSide: side.value })}
+              onClick={() => onOrderSideChange(side as OrderSide)}
             >
-              <p className="text-sm font-semibold">{side.label}</p>
+              <p className="text-sm font-medium">{label[labelKey]}</p>
             </button>
           ))}
         </div>
       </div>
 
-      <OrderFormType
-        type={state.orderType}
-        onValueChange={(type) => dispatch({ orderType: type })}
-      />
+      <form className="w-full px-4 space-y-2 overflow-x-hidden">
+        <AvailableBalance isBuyOrder={isBuyOrder} />
 
-      <form className="w-full px-4 space-y-4 overflow-x-hidden">
+        <Visibility visible={showLimitPrice}>
+          <OrderFormInput
+            name="limitPrice"
+            id="limitPrice"
+            value={state.limitPrice}
+            label="Price"
+            className="text-sm"
+            trailing={
+              <div className="flex items-center gap-x-2">
+                <span className="text-neutral-300 text-sm font-medium">
+                  {quote}
+                </span>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="size-6 bg-neutral-gray-200 text-neutral-300 text-xs font-semibold"
+                  onClick={onMidClick}
+                >
+                  Mid
+                </Button>
+              </div>
+            }
+            onChange={({ target: { value } }) =>
+              dispatch({ limitPrice: value })
+            }
+          />
+        </Visibility>
+
         <OrderFormInput
-          name="price"
-          id="price"
-          value={state.price}
-          label="Price"
-          trailing={
-            <span className="text-white text-sm font-semibold">{quote}</span>
-          }
-          onChange={({ target: { value } }) => dispatch({ price: value })}
-        />
-        <OrderFormInput
-          name="amount"
-          id="amount"
-          value={state.amount}
-          label="Amount"
-          trailing={
-            <span className="text-white text-sm font-semibold">{base}</span>
-          }
-          onChange={({ target: { value } }) => dispatch({ amount: value })}
+          name="size"
+          id="size"
+          value={state.size}
+          label="Size"
+          className="text-sm"
+          trailing={<SizeCoinSelector onValueChange={onSizeCoinChange} />}
+          onChange={(e) => onSizeChange(e.target.value)}
         />
 
         <OrderFormSlider
-          value={state.percentage}
-          onValueChange={(value) => dispatch({ percentage: value })}
+          value={state.szPercent}
+          onValueChange={onPercentChange}
         />
 
-        {state.orderType === "limit" && (
-          <>
-            <LimitOrderTPSL
-              checked={state.showLimitOrderTPSL}
-              onCheckedChange={(checked) =>
-                dispatch({ showLimitOrderTPSL: checked })
-              }
-            />
-            {state.showLimitOrderTPSL && <LimitOrderTPSLForm />}
-          </>
-        )}
+        <div className="w-full flex items-center justify-between">
+          <Visibility visible={isPerps}>
+            <ReduceOnly />
+          </Visibility>
 
-        <div className="w-full space-y-2">
-          <div className="w-full flex items-center justify-between">
-            <p className="text-xs text-neutral-gray-400">Available Balance</p>
-            <p className="text-xs font-medium">
-              -- {isBuyOrder ? quote : base}
-            </p>
-          </div>
-          <div className="w-full flex items-center justify-between">
-            <UnderlineTooltip
-              className="text-xs text-neutral-gray-400"
-              content="The Max buy or Max sell amount depends on your available balance and the price at which you want to trade. The Max buy or Max sell will be calculated automatically when you input a limit price."
-            >
-              <p>Max. {isBuyOrder ? "buying" : "selling"} amount</p>
-            </UnderlineTooltip>
-
-            <p className="text-xs font-medium">
-              -- {isBuyOrder ? base : quote}
-            </p>
-          </div>
+          <TIFSelector />
         </div>
+
+        <Visibility visible={isPerps}>
+          <LimitOrderTPSL />
+        </Visibility>
 
         <Button
           type="button"
           size="default"
           className={cn(
-            "font-bold bg-buy hover:bg-buy/70 text-white capitalize mt-1",
+            "font-bold bg-buy hover:bg-buy/70 text-white capitalize mt-1 transition-colors",
             {
               "bg-sell hover:bg-sell/70": state.orderSide === "sell",
             },
           )}
         >
-          {state.orderSide}
+          {ORDER_FORM_SIDES[state.orderSide][labelKey]}
         </Button>
+
+        <OrderDetails isBuyOrder={isBuyOrder} />
       </form>
     </div>
   );
