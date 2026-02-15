@@ -3,10 +3,12 @@ import { useMemo } from "react";
 import UnderlineTooltip from "@/components/common/UnderlineTooltip";
 import Visibility from "@/components/common/Visibility";
 import { DEFAULT_ORDER_MAX_SLIPPAGE } from "@/features/trade/constants";
+import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { useUserFees } from "@/features/trade/hooks/useUserFees";
 import {
   calculateMarginRequired,
   calculateOrderValue,
+  estimateLiquidationPrice,
   estimateSlippagePercent,
 } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
@@ -22,10 +24,56 @@ export const LiquidationPrice = ({
   size: number;
   limitPrice?: string;
 }) => {
-  console.log("🚨 - OrderDetails.tsx - 26", { size, limitPrice });
   const isPerp = useTradeContext((s) => s.instrumentType === "perps");
+  const isBuyOrder = useTradeContext((s) => s.orderSide === "buy");
+  const coin = useTradeContext((s) => s.coin);
+  const { data } = useMetaAndAssetCtxs();
 
-  const liquidationPrice = 0;
+  const assetMeta = useShallowInstrumentStore((s) => s.assetMeta);
+  const assetCtx = useShallowInstrumentStore((s) => s.assetCtx);
+  const decimals = useTradeContext((s) => s.decimals ?? 10);
+  const reduceOnly = useTradeContext((s) => s.orderFormSettings.reduceOnly);
+  const maxSlippage = useTradeContext(
+    (s) => s.orderFormSettings.maxSlippage || DEFAULT_ORDER_MAX_SLIPPAGE,
+  );
+
+  const liquidationPrice = useMemo(() => {
+    const leverage = useUserTradeStore.getState().leverage;
+
+    if (
+      !isPerp ||
+      !leverage ||
+      !data.perpMetas ||
+      assetMeta?.perpDexIndex === undefined ||
+      reduceOnly
+    )
+      return 0;
+
+    const perpDexState = data.perpMetas[assetMeta.perpDexIndex];
+    const perpAssetMeta = perpDexState.universe[assetMeta.index];
+
+    return estimateLiquidationPrice({
+      leverage,
+      assetName: coin,
+      entryPrice: limitPrice ? parseFloat(limitPrice) : assetCtx?.markPx || 0,
+      midPx: assetCtx?.midPx || 0,
+      maxLeverage: perpAssetMeta.maxLeverage,
+      orderSize: size,
+      clearinghouseState: useUserTradeStore.getState().clearinghouseState,
+      isBuyOrder,
+    });
+  }, [
+    size,
+    limitPrice,
+    assetCtx?.markPx,
+    isPerp,
+    coin,
+    assetMeta?.perpDexIndex,
+    data.perpMetas,
+    reduceOnly,
+    maxSlippage,
+    isBuyOrder,
+  ]);
 
   if (!isPerp) return null;
 
@@ -39,7 +87,11 @@ export const LiquidationPrice = ({
       </UnderlineTooltip>
 
       <p className="text-xs font-medium">
-        {formatNumberWithFallback(liquidationPrice)}
+        {formatNumberWithFallback(liquidationPrice || 0, {
+          style: "currency",
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        })}{" "}
       </p>
     </div>
   );
@@ -83,6 +135,7 @@ export const OrderValueAndMarginRequired = ({
     midPx,
     orderFormSettings.orderType,
     orderFormSettings.isSzInNtl,
+    orderFormSettings.reduceOnly,
   ]);
 
   return (
