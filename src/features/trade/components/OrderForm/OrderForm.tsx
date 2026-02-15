@@ -13,17 +13,19 @@ import { cn } from "@/utils/cn";
 import AdjustTradeSettings from "./AdjustTradeSettings";
 import AvailableBalance from "./AvailableBalance";
 import LimitOrderTPSL from "./LimitOrderTPSL";
-import OrderDetails from "./OrderDetails";
+import {
+  Fees,
+  LiquidationPrice,
+  MaxOrderSize,
+  OrderSlippage,
+  OrderValueAndMarginRequired,
+} from "./OrderDetails";
 import OrderFormInput from "./OrderFormInput";
 import OrderFormSlider from "./OrderFormSlider";
 import OrderFormType from "./OrderFormType";
 import ReduceOnly from "./ReduceOnly";
 import SizeCoinSelector from "./SizeCoinSelector";
 import TIFSelector from "./TIFSelector";
-
-type Props = {
-  side?: OrderSide;
-};
 
 const ORDER_FORM_SIDES: Record<OrderSide, { spot: string; perp: string }> = {
   buy: {
@@ -36,18 +38,20 @@ const ORDER_FORM_SIDES: Record<OrderSide, { spot: string; perp: string }> = {
   },
 };
 
-const OrderForm = ({ side }: Props) => {
+const OrderForm = () => {
   const {
     state,
     showLimitPrice,
     isBuyOrder,
+    orderSide,
+    orderSizeInBase,
     dispatch,
     onOrderSideChange,
     onMidClick,
     onPercentChange,
     onSizeChange,
     onSizeCoinChange,
-  } = useOrderForm({ side });
+  } = useOrderForm();
 
   const quote = useInstrumentStore((s) => s.assetMeta?.quote);
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
@@ -74,10 +78,8 @@ const OrderForm = ({ side }: Props) => {
               className={cn(
                 "w-full h-full flex items-center justify-center rounded text-center text-neutral-gray-400 cursor-pointer transition-colors",
                 {
-                  "bg-sell text-white":
-                    side === state.orderSide && state.orderSide === "sell",
-                  "bg-buy text-white":
-                    side === state.orderSide && state.orderSide === "buy",
+                  "bg-sell text-white": side === orderSide && !isBuyOrder,
+                  "bg-buy text-white": side === orderSide && isBuyOrder,
                 },
               )}
               onClick={() => onOrderSideChange(side as OrderSide)}
@@ -89,7 +91,7 @@ const OrderForm = ({ side }: Props) => {
       </div>
 
       <form className="w-full px-4 space-y-2 overflow-x-hidden">
-        <AvailableBalance isBuyOrder={isBuyOrder} />
+        <AvailableBalance />
 
         <Visibility visible={showLimitPrice}>
           <OrderFormInput
@@ -153,14 +155,26 @@ const OrderForm = ({ side }: Props) => {
           className={cn(
             "font-bold bg-buy hover:bg-buy/70 text-white capitalize mt-1 transition-colors",
             {
-              "bg-sell hover:bg-sell/70": state.orderSide === "sell",
+              "bg-sell hover:bg-sell/70": !isBuyOrder,
             },
           )}
         >
-          {ORDER_FORM_SIDES[state.orderSide][labelKey]}
+          {ORDER_FORM_SIDES[orderSide][labelKey]}
         </Button>
 
-        <OrderDetails isBuyOrder={isBuyOrder} />
+        <div className="w-full space-y-2">
+          <LiquidationPrice
+            size={orderSizeInBase}
+            limitPrice={state.limitPrice}
+          />
+          <OrderValueAndMarginRequired
+            size={orderSizeInBase}
+            limitPrice={state.limitPrice}
+          />
+          <MaxOrderSize />
+          <OrderSlippage size={orderSizeInBase} />
+          <Fees />
+        </div>
       </form>
     </div>
   );

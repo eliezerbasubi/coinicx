@@ -1,12 +1,7 @@
-import {
-  AllPerpMetasResponse,
-  MarginTableResponse,
-  SpotMetaResponse,
-} from "@nktkas/hyperliquid";
+import { AllPerpMetasResponse, SpotMetaResponse } from "@nktkas/hyperliquid";
 
 import { AssetMeta } from "@/types/trade";
 
-import { MAX_PERPS_DECIMALS, MAX_SPOT_DECIMALS } from "../constants";
 import { formatSymbol } from "./formatting";
 import { parseQuoteAsset } from "./perps";
 
@@ -22,10 +17,6 @@ export const mapSpotDataToAssetMeta = (
     base: token.name,
     fullName: token.fullName,
     szDecimals: token.szDecimals,
-    // szDecimals: Math.min(
-    //   token.szDecimals,
-    //   MAX_SPOT_DECIMALS - token.szDecimals,
-    // ),
     coin: universe.name,
     isCanonical: universe.isCanonical,
     maxLeverage: 0,
@@ -42,7 +33,6 @@ export const mapPerpDataToAssetMeta = (data: {
   dex: string;
   base: string;
   index: number;
-  marginTable?: MarginTableResponse;
 }): AssetMeta => {
   const { universe, dex, base, index } = data;
 
@@ -54,21 +44,17 @@ export const mapPerpDataToAssetMeta = (data: {
       data.perpDexIndex !== undefined
         ? 100000 + data.perpDexIndex * 10000 + index
         : null,
-    marginTable: data.marginTable,
     base,
     coin: universe.name,
     quote,
     symbol: formatSymbol(base, quote, false),
     dex,
+    perpDexIndex: data.perpDexIndex,
     maxLeverage: universe.maxLeverage,
     isDelisted: universe.isDelisted,
     onlyIsolated: universe.onlyIsolated,
     marginMode: universe.marginMode,
     szDecimals: universe.szDecimals,
-    // szDecimals: Math.min(
-    //   universe.szDecimals,
-    //   MAX_PERPS_DECIMALS - universe.szDecimals,
-    // ),
     tokenId: null,
   };
 };

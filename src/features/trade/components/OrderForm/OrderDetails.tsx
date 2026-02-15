@@ -1,39 +1,101 @@
+import { useMemo } from "react";
+
 import UnderlineTooltip from "@/components/common/UnderlineTooltip";
 import Visibility from "@/components/common/Visibility";
+import { DEFAULT_ORDER_MAX_SLIPPAGE } from "@/features/trade/constants";
 import { useUserFees } from "@/features/trade/hooks/useUserFees";
+import {
+  calculateMarginRequired,
+  calculateOrderValue,
+  estimateSlippagePercent,
+} from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
-import { useMaxTradeSz } from "@/store/trade/user-trade";
+import { useShallowInstrumentStore } from "@/store/trade/instrument";
+import { useOrderBookStore } from "@/store/trade/orderbook";
+import { useMaxTradeSz, useUserTradeStore } from "@/store/trade/user-trade";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
 
-type Props = {
-  isBuyOrder: boolean;
-};
-
-const OrderDetails = ({ isBuyOrder }: Props) => {
-  const quote = useInstrumentStore((s) => s.assetMeta?.quote);
-
+export const LiquidationPrice = ({
+  size,
+  limitPrice,
+}: {
+  size: number;
+  limitPrice?: string;
+}) => {
+  console.log("🚨 - OrderDetails.tsx - 26", { size, limitPrice });
   const isPerp = useTradeContext((s) => s.instrumentType === "perps");
 
-  return (
-    <div className="w-full space-y-2">
-      <Visibility visible={isPerp}>
-        <div className="w-full flex items-center justify-between">
-          <UnderlineTooltip
-            className="text-xs text-neutral-gray-400"
-            content="The liquidation price is the price at which your position will be liquidated if it is not closed."
-          >
-            <p>Liquidation Price</p>
-          </UnderlineTooltip>
+  const liquidationPrice = 0;
 
-          <p className="text-xs font-medium">{formatNumberWithFallback(0)}</p>
-        </div>
-      </Visibility>
+  if (!isPerp) return null;
+
+  return (
+    <div className="w-full flex items-center justify-between">
+      <UnderlineTooltip
+        className="text-xs text-neutral-gray-400"
+        content="The liquidation price is the price at which your position will be liquidated if it is not closed."
+      >
+        <p>Liquidation Price</p>
+      </UnderlineTooltip>
+
+      <p className="text-xs font-medium">
+        {formatNumberWithFallback(liquidationPrice)}
+      </p>
+    </div>
+  );
+};
+
+export const OrderValueAndMarginRequired = ({
+  size,
+  limitPrice,
+}: {
+  size: number;
+  limitPrice?: string;
+}) => {
+  const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);
+  const isPerp = useTradeContext((s) => s.instrumentType === "perps");
+  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
+  const orderFormSettings = useTradeContext((s) => s.orderFormSettings);
+
+  const data = useMemo(() => {
+    const leverage = useUserTradeStore.getState().leverage;
+
+    const orderValue = calculateOrderValue({
+      orderType: orderFormSettings.orderType,
+      orderSize: size,
+      limitPx: parseFloat(limitPrice || "0"),
+      midPx,
+    });
+
+    const marginRequired = calculateMarginRequired({
+      orderValue,
+      userLeverage: leverage?.value || 0,
+      isReduceOnly: orderFormSettings.reduceOnly,
+    });
+
+    return {
+      orderValue,
+      marginRequired,
+    };
+  }, [
+    limitPrice,
+    size,
+    midPx,
+    orderFormSettings.orderType,
+    orderFormSettings.isSzInNtl,
+  ]);
+
+  return (
+    <>
       <div className="w-full flex items-center justify-between">
         <p className="text-xs text-neutral-gray-400">Order Value</p>
 
         <p className="text-xs font-medium">
-          {formatNumberWithFallback(0)} {quote}
+          {formatNumberWithFallback(data.orderValue, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}{" "}
+          {quote}
         </p>
       </div>
       <Visibility visible={isPerp}>
@@ -41,20 +103,22 @@ const OrderDetails = ({ isBuyOrder }: Props) => {
           <p className="text-xs text-neutral-gray-400">Margin</p>
 
           <p className="text-xs font-medium">
-            {formatNumberWithFallback(0)} {quote}
+            {formatNumberWithFallback(data.marginRequired, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{" "}
+            {quote}
           </p>
         </div>
       </Visibility>
-      <MaxOrderSize isBuyOrder={isBuyOrder} />
-      <Fees />
-    </div>
+    </>
   );
 };
 
-export default OrderDetails;
+export const MaxOrderSize = () => {
+  const base = useShallowInstrumentStore((s) => s.assetMeta?.base);
+  const isBuyOrder = useTradeContext((s) => s.orderSide === "buy");
 
-const MaxOrderSize = ({ isBuyOrder }: { isBuyOrder: boolean }) => {
-  const base = useInstrumentStore((s) => s.assetMeta?.base);
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
 
   return (
@@ -68,7 +132,7 @@ const MaxOrderSize = ({ isBuyOrder }: { isBuyOrder: boolean }) => {
   );
 };
 
-const Fees = () => {
+export const Fees = () => {
   const { data } = useUserFees();
 
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
@@ -104,4 +168,47 @@ const formatFee = (fee?: string) => {
     minimumFractionDigits: 4,
     maximumFractionDigits: 4,
   });
+};
+
+export const OrderSlippage = ({ size }: { size: number }) => {
+  const orderType = useTradeContext((s) => s.orderFormSettings.orderType);
+  const isBuyOrder = useTradeContext((s) => s.orderSide === "buy");
+  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
+
+  const maxSlippage = useTradeContext(
+    (s) => s.orderFormSettings.maxSlippage || DEFAULT_ORDER_MAX_SLIPPAGE,
+  );
+
+  const slippage = useMemo(() => {
+    if (orderType !== "market") return 0;
+
+    const orderBook = useOrderBookStore.getState().getBook();
+
+    return estimateSlippagePercent({
+      orderBook,
+      orderSize: size,
+      midPx,
+      isBuyOrder,
+    });
+  }, [isBuyOrder, orderType, size, midPx]);
+
+  if (orderType !== "market") return null;
+
+  return (
+    <div className="w-full flex items-center justify-between">
+      <UnderlineTooltip
+        className="text-xs text-neutral-gray-400"
+        content="Average execution price compared to mid price based on current order book"
+        contentClassName="max-w-fit"
+      >
+        <p>Slippage</p>
+      </UnderlineTooltip>
+
+      <p className="text-xs text-primary font-medium space-x-1">
+        <span>Est. {(slippage ?? 0).toFixed(4)}%</span>
+        <span>/</span>
+        <span>Max: {maxSlippage.toFixed(2)}%</span>
+      </p>
+    </div>
+  );
 };

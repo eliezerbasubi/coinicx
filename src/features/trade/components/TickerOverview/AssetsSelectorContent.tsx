@@ -6,13 +6,13 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROUTES } from "@/constants/routes";
+import { getPriceDecimals } from "@/features/trade/utils/prices";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
 
-import { getPriceDecimals } from "../../utils";
 import Badge from "../Badge";
 import TokenImage from "../TokenImage";
 import { useTickerSelector } from "./TickerSelectorProvider";
@@ -72,8 +72,9 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
     }
     if (state.currentTab === "spot") return metaAndAssetCtxs.spot;
 
-    if (state.currentTab === "perps")
+    if (state.currentTab === "perps") {
       return metaAndAssetCtxs.perps.filter((ast) => !ast.meta.dex);
+    }
     return metaAndAssetCtxs.perps.filter(
       (ast) => ast.meta.dex === state.currentTab,
     );
@@ -328,7 +329,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
               </tr>
             </thead>
             <tbody className="w-full">
-              {data.slice(0, 50).map((datum) => {
+              {data.slice(0, 25).map((datum) => {
                 const { meta, ctx, isSpot } = datum;
 
                 const hasPricing = ctx.prevDayPx && ctx.midPx;

@@ -3,6 +3,7 @@ import {
   ActiveSpotAssetCtxWsEvent,
 } from "@nktkas/hyperliquid";
 import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 
 import { AssetCxt, AssetMeta } from "@/types/trade";
 
@@ -45,3 +46,9 @@ export const useInstrumentStore = create<InstrumentStoreState>()((set) => ({
     set({ assetCtx: ctx });
   },
 }));
+
+export const useShallowInstrumentStore = <T>(
+  selector: (state: InstrumentStoreState) => T,
+) => {
+  return useInstrumentStore(useShallow(selector));
+};

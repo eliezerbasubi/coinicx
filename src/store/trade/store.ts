@@ -2,7 +2,7 @@ import { createContext } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { InstrumentType, OrderType } from "@/types/trade";
+import { InstrumentType, OrderSide, OrderType } from "@/types/trade";
 
 export interface TradeStoreProps {
   base: string;
@@ -17,18 +17,21 @@ type OrderFormSettings = {
   showTpSl: boolean;
   reduceOnly: boolean;
   timeInForce: string;
+  maxSlippage?: number;
 };
 
 export interface TradeStoreState extends TradeStoreProps {
   /** Decimals for the selected asset */
   decimals: number | null;
   orderFormSettings: OrderFormSettings;
+  orderSide: OrderSide;
   onAssetChange: (data: {
     base: string;
     quote: string;
     instrumentType: InstrumentType;
   }) => void;
   setDecimals: (decimals: number) => void;
+  setOrderSide: (orderSide: OrderSide) => void;
   setOrderFormSettings: (settings: Partial<OrderFormSettings>) => void;
 }
 
@@ -38,6 +41,7 @@ export const createTradeStore = (initialProps: TradeStoreProps) => {
       (set) => ({
         ...initialProps,
         decimals: null,
+        orderSide: "buy",
         orderFormSettings: {
           isSzInNtl: false,
           orderType: "limit",
@@ -47,6 +51,7 @@ export const createTradeStore = (initialProps: TradeStoreProps) => {
         },
         onAssetChange: (data) => set({ ...data }),
         setDecimals: (decimals) => set({ decimals }),
+        setOrderSide: (orderSide) => set({ orderSide }),
         setOrderFormSettings: (settings) =>
           set((state) => ({
             orderFormSettings: { ...state.orderFormSettings, ...settings },

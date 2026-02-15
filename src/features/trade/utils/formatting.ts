@@ -18,3 +18,16 @@ export const formatPriceToDecimal = (
     ...options,
   });
 };
+
+export const formatSize = (rawSize: string, szDecimals: number) => {
+  return removeTrailingZeros(Math.abs(Number(rawSize)).toFixed(szDecimals));
+};
+
+export const removeTrailingZeros = (value: string) => {
+  if (!value.includes(".")) return value;
+
+  const [intPart, fracPart] = value.split(".");
+  const newFrac = fracPart.replace(/0+$/, "");
+
+  return newFrac ? `${intPart}.${newFrac}` : intPart;
+};

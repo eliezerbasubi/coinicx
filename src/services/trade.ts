@@ -1,10 +1,10 @@
-import { OrderBookData } from "@/types/orderbook";
+import { OrderBook } from "@/types/orderbook";
 import { Kline, TradeMarketTicker } from "@/types/trade";
 
 export const getOrderBookDepth = async (params: {
   symbol: string;
   limit?: number;
-}): Promise<OrderBookData> => {
+}): Promise<OrderBook> => {
   const response = await fetch(
     `https://www.binance.com/api/v3/depth?symbol=${params.symbol}&limit=${params.limit ?? 1000}`,
   );

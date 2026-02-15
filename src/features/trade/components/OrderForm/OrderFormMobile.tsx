@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-import { OrderSide } from "@/types/trade";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -10,12 +9,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useTradeContext } from "@/store/trade/hooks";
 
 import OrderForm from "./OrderForm";
 
 const OrderFormMobile = () => {
-  const [orderSide, setOrderSide] = useState<OrderSide>();
   const [open, setOpen] = useState(false);
+
+  const setOrderSide = useTradeContext((s) => s.setOrderSide);
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -47,7 +48,7 @@ const OrderFormMobile = () => {
           <DrawerDescription />
         </DrawerHeader>
 
-        <OrderForm side={orderSide} />
+        <OrderForm />
       </DrawerContent>
     </Drawer>
   );

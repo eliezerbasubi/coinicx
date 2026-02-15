@@ -1,5 +1,11 @@
-import { ActiveAssetDataResponse, SpotStateWsEvent } from "@nktkas/hyperliquid";
+import {
+  ActiveAssetDataResponse,
+  AllDexsClearinghouseStateWsEvent,
+  SpotStateWsEvent,
+  WebData3WsEvent,
+} from "@nktkas/hyperliquid";
 import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 
 import { useInstrumentStore } from "./instrument";
 
@@ -16,6 +22,10 @@ interface UserTradeState {
   availableQuoteToTrade: number;
   leverage: ActiveAssetDataResponse["leverage"] | null;
   spotBalances: SpotBalances;
+  webData: WebData3WsEvent | null;
+  clearinghouseState:
+    | AllDexsClearinghouseStateWsEvent["clearinghouseStates"][number][1]
+    | null;
 }
 
 interface UserTradeStoreActions {
@@ -23,8 +33,10 @@ interface UserTradeStoreActions {
     isBuyOrder: boolean;
     isSpot: boolean;
   }) => number;
-  onActiveAssetDataChange: (data: ActiveAssetDataResponse) => void;
-  onSpotStateChange: (data: SpotStateWsEvent) => void;
+  applyActiveAssetData: (data: ActiveAssetDataResponse) => void;
+  applySpotState: (data: SpotStateWsEvent) => void;
+  applyWebData: (data: WebData3WsEvent) => void;
+  applyClearinghouseState: (data: AllDexsClearinghouseStateWsEvent) => void;
 }
 
 interface UserTradeStore extends UserTradeState, UserTradeStoreActions {}
@@ -36,6 +48,8 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   availableQuoteToTrade: 0,
   leverage: null,
   spotBalances: [],
+  webData: null,
+  clearinghouseState: null,
   getOrderAvailableBalance(args) {
     const {
       maxBaseTradeSz,
@@ -49,7 +63,7 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
     }
     return args.isBuyOrder ? maxQuoteTradeSz : maxBaseTradeSz;
   },
-  onActiveAssetDataChange(data) {
+  applyActiveAssetData(data) {
     const { maxTradeSzs, availableToTrade, leverage } = data;
     const [maxBaseTradeSz, maxQuoteTradeSz] = maxTradeSzs;
     const [availableBaseToTrade, availableQuoteToTrade] = availableToTrade;
@@ -62,7 +76,7 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       leverage,
     });
   },
-  onSpotStateChange(data) {
+  applySpotState(data) {
     const assetMeta = useInstrumentStore.getState().assetMeta;
 
     let availableBaseToTrade = 0;
@@ -85,10 +99,34 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       spotBalances: data.spotState.balances,
     });
   },
+  applyWebData(data) {
+    set({
+      webData: data,
+    });
+  },
+  applyClearinghouseState(data) {
+    const assetMeta = useInstrumentStore.getState().assetMeta;
+
+    if (!assetMeta || assetMeta.dex === null) return;
+
+    const clearinghouseState = new Map(data.clearinghouseStates).get(
+      assetMeta.dex,
+    );
+
+    if (!clearinghouseState) return;
+
+    set({ clearinghouseState });
+  },
 }));
 
+export const useShallowUserTradeStore = <T>(
+  selector: (state: UserTradeStore) => T,
+) => {
+  return useUserTradeStore(useShallow(selector));
+};
+
 export const useMaxTradeSz = (isBuyOrder: boolean) => {
-  const maxBaseTradeSz = useUserTradeStore((s) =>
+  const maxBaseTradeSz = useShallowUserTradeStore((s) =>
     isBuyOrder ? s.maxQuoteTradeSz : s.maxBaseTradeSz,
   );
 
@@ -96,7 +134,7 @@ export const useMaxTradeSz = (isBuyOrder: boolean) => {
 };
 
 export const useAvailableToTrade = (isBuyOrder: boolean) => {
-  const availableBaseToTrade = useUserTradeStore((s) =>
+  const availableBaseToTrade = useShallowUserTradeStore((s) =>
     isBuyOrder ? s.availableQuoteToTrade : s.availableBaseToTrade,
   );
   return availableBaseToTrade;

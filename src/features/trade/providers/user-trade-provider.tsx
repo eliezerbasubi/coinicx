@@ -28,7 +28,7 @@ const UserTradeProvider = ({ children }: Props) => {
   useSubscription(() => {
     if (instrumentType !== "perps" || !coin) return;
     return hlSubClient.activeAssetData({ user, coin }, (data) => {
-      useUserTradeStore.getState().onActiveAssetDataChange(data);
+      useUserTradeStore.getState().applyActiveAssetData(data);
     });
   }, [user, coin, instrumentType]);
 
@@ -38,7 +38,23 @@ const UserTradeProvider = ({ children }: Props) => {
     if (!address || instrumentType !== "spot") return;
 
     return hlSubClient.spotState({ user: address }, (data) => {
-      useUserTradeStore.getState().onSpotStateChange(data);
+      useUserTradeStore.getState().applySpotState(data);
+    });
+  }, [address, instrumentType]);
+
+  useSubscription(() => {
+    if (!address || instrumentType !== "perps") return;
+
+    return hlSubClient.webData3({ user: address }, (data) => {
+      useUserTradeStore.getState().applyWebData(data);
+    });
+  }, [address, instrumentType]);
+
+  useSubscription(() => {
+    if (!address || instrumentType !== "perps") return;
+
+    return hlSubClient.allDexsClearinghouseState({ user: address }, (data) => {
+      useUserTradeStore.getState().applyClearinghouseState(data);
     });
   }, [address, instrumentType]);
 

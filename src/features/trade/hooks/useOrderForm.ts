@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useReducer } from "react";
 
 import { OrderSide } from "@/types/trade";
 import { useTradeContext } from "@/store/trade/hooks";
@@ -13,45 +13,40 @@ type State = {
   limitPrice: string;
   size: string;
   szPercent: number;
-  orderSide: OrderSide;
 };
 
 const initialState: State = {
   limitPrice: "",
   size: "",
   szPercent: 0,
-  orderSide: "buy",
 };
 
-export const useOrderForm = (args?: { side?: OrderSide }) => {
+export const useOrderForm = () => {
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
-    { ...initialState, orderSide: args?.side || "buy" },
+    { ...initialState },
   );
 
-  const isBuyOrder = state.orderSide === "buy";
-
-  const maxTradeSz = useMaxTradeSz(isBuyOrder);
-  const availableToTrade = useAvailableToTrade(isBuyOrder);
   const isSpot = useTradeContext((s) => s.instrumentType === "spot");
   const szDecimals = useInstrumentStore((s) => s.assetMeta?.szDecimals || 0);
   const orderFormSettings = useTradeContext((s) => s.orderFormSettings);
-  const base = useTradeContext((s) => s.base);
+  const orderSide = useTradeContext((s) => s.orderSide);
+
+  const isBuyOrder = orderSide === "buy";
+
+  const maxTradeSz = useMaxTradeSz(isBuyOrder);
+  const availableToTrade = useAvailableToTrade(isBuyOrder);
 
   const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
+  const setOrderSide = useTradeContext((s) => s.setOrderSide);
 
-  // const markPx = useInstrumentStore((s) => s.assetCtx?.markPx || 0);
   const midPx = useInstrumentStore((s) => s.assetCtx?.midPx || 0);
 
   const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 
-  // TODO: Refactor this to pass a key to the OrderForm component so that state is reset when the base changes
-  // This is a temporary fix
-  useEffect(() => {
-    return () => {
-      dispatch({ limitPrice: "", size: "", szPercent: 0 });
-    };
-  }, [base]);
+  const orderSizeInBase = orderFormSettings.isSzInNtl
+    ? parseFloat(state.size || "0") * midPx
+    : parseFloat(state.size || "0");
 
   const onSizeCoinChange = (isNtl: boolean) => {
     const currentSize = parseFloat(state.size);
@@ -82,28 +77,32 @@ export const useOrderForm = (args?: { side?: OrderSide }) => {
   };
 
   const onSizeChange = (size: string) => {
-    const percent = (parseFloat(size) / availableBalance) * 100;
+    const percent = (parseFloat(size || "0") / availableBalance) * 100;
 
     dispatch({ size, szPercent: Math.min(percent, 100) });
   };
 
   const onOrderSideChange = (orderSide: OrderSide) => {
     const isBuyOrder = orderSide === "buy";
-    const availableBalance = useUserTradeStore
-      .getState()
-      .getOrderAvailableBalance({ isBuyOrder, isSpot });
 
-    const maxOrderSize = getOrderMaxSize({
-      isBuyOrder: orderSide === "buy",
-      isSpot,
-      isSzInNtl: orderFormSettings.isSzInNtl,
-      availableBalance,
-      midPx,
-    });
+    if (parseFloat(state.size)) {
+      const availableBalance = useUserTradeStore
+        .getState()
+        .getOrderAvailableBalance({ isBuyOrder, isSpot });
 
-    const percent = (parseFloat(state.size) / maxOrderSize) * 100;
+      const maxOrderSize = getOrderMaxSize({
+        isBuyOrder: orderSide === "buy",
+        isSpot,
+        isSzInNtl: orderFormSettings.isSzInNtl,
+        availableBalance,
+        midPx,
+      });
 
-    dispatch({ orderSide, szPercent: Math.min(percent, 100) });
+      const percent = (parseFloat(state.size) / maxOrderSize) * 100;
+      dispatch({ szPercent: Math.min(percent, 100) });
+    }
+
+    setOrderSide(orderSide);
   };
 
   const onMidClick = () => {
@@ -113,6 +112,8 @@ export const useOrderForm = (args?: { side?: OrderSide }) => {
   return {
     state,
     isBuyOrder,
+    orderSide,
+    orderSizeInBase,
     showLimitPrice: orderFormSettings.orderType === "limit",
     dispatch,
     onMidClick,

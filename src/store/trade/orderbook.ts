@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import {
   IOrderBookSettings,
+  OrderBook,
   OrderBookLayout,
   PriceLevel,
   Tick,
@@ -27,6 +28,7 @@ interface OrderBookState {
   setLayout: (layout: OrderBookLayout) => void;
   setSnapshot: (snapshot: { bids: PriceLevel[]; asks: PriceLevel[] }) => void;
   setSettings: (settings: Partial<IOrderBookSettings>) => void;
+  getBook: () => OrderBook;
 }
 
 export const useOrderBookStore = create<OrderBookState>((set, get) => ({
@@ -40,6 +42,10 @@ export const useOrderBookStore = create<OrderBookState>((set, get) => ({
     showBuyAndSellRatio: true,
     rounding: true,
     depthVisualizer: "amount",
+  },
+  getBook: () => {
+    const { asks, bids } = get();
+    return { asks, bids };
   },
   onDepthVisualizerChange: (visualizer) => {
     const { asks, bids, setSettings } = get();

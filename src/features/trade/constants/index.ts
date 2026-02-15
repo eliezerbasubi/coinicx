@@ -14,6 +14,8 @@ export const MAX_PERPS_DECIMALS = 6;
 export const MAX_SPOT_DECIMALS = 8;
 export const MAX_SIGNIFICANT_DECIMALS = 5;
 
+export const DEFAULT_ORDER_MAX_SLIPPAGE = 0.08;
+
 export const PRIMARY_SUPPORTED_DEXS = ["", "xyz", "flx", "vtnl", "hyna"];
 
 export const CHART_TIME_INTERVALS: Array<ChartInterval> = [

@@ -126,7 +126,6 @@ export const useMetaAndAssetCtxs = () => {
     for (const perpDex of data.perpMetas) {
       for (let index = 0; index < perpDex.universe.length; index++) {
         const universe = perpDex.universe[index];
-        const marginTables = new Map(perpDex.marginTables);
 
         const deployedAsset = parseBuilderDeployedAsset(universe.name);
         const quote = data.spotMeta?.tokens[perpDex.collateralToken].name;
@@ -136,7 +135,6 @@ export const useMetaAndAssetCtxs = () => {
             quote,
             ...deployedAsset,
             index,
-            marginTable: marginTables.get(universe.marginTableId),
           }),
         );
       }
@@ -188,7 +186,6 @@ export const useMetaAndAssetCtxs = () => {
         );
 
         const universe = perpDex.meta.universe[universeIndex];
-        const marginTables = new Map(perpDex.meta.marginTables);
 
         if (universe) {
           const quote =
@@ -198,7 +195,6 @@ export const useMetaAndAssetCtxs = () => {
             universe,
             quote,
             index: universeIndex,
-            marginTable: marginTables.get(universe.marginTableId),
             dex,
             base,
             perpDexIndex: perpDex.index,

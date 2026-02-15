@@ -74,24 +74,6 @@ const TickerSelectorProvider = ({ children }: Props) => {
             oraclePx: null,
           },
         });
-
-        // ctxs.push({
-        //   midPx: Number(datum.midPx),
-        //   dayNtlVlm: Number(datum.dayNtlVlm),
-        //   dayBaseVlm: Number(datum.dayBaseVlm),
-        //   prevDayPx: Number(datum.prevDayPx),
-        //   marketCap: Number(datum.midPx) * Number(datum.circulatingSupply),
-        //   isSpot: true,
-        //   coin: asset.coin,
-        //   dex: asset.dex,
-        //   funding: null,
-        //   openInterest: null,
-        //   maxLeverage: 0,
-        //   symbol: asset.symbol,
-        //   quote: asset.quote,
-        //   name: asset.name,
-        //   szDecimals: 0,
-        // });
       }
 
       dispatch({ spot: metaAndAssetCtxs });
@@ -146,7 +128,6 @@ const TickerSelectorProvider = ({ children }: Props) => {
               quote,
               ...deployedAsset,
               index,
-              marginTable: marginTables.get(universe.marginTableId),
             }),
           });
         }

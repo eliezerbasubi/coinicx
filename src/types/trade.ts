@@ -1,7 +1,4 @@
-import {
-  CandleSnapshotParameters,
-  MarginTableResponse,
-} from "@nktkas/hyperliquid";
+import { CandleSnapshotParameters, OrderParameters } from "@nktkas/hyperliquid";
 
 export type ChartType = "standard" | "tradingView" | "depth";
 
@@ -49,7 +46,7 @@ export type OrderType =
   | "stopLimit"
   | "stopMarket"
   | "trailingStop"
-  | "oco"
+  | "scale"
   | "twap";
 
 export type OrderSide = "buy" | "sell";
@@ -59,6 +56,10 @@ export type OrderFormLimitOffsetType = "offset" | "pnl";
 export type TradeType = "spot" | "isolated" | "cross" | "grid";
 
 export type InstrumentType = "spot" | "perps";
+
+export type HLOrder = OrderParameters["orders"][number];
+
+export type TimeInForce = Extract<HLOrder["t"], { limit: any }>["limit"]["tif"];
 
 export type AssetMeta = {
   base: string;
@@ -74,11 +75,11 @@ export type AssetMeta = {
   quote: string;
   symbol: string;
   dex: string | null;
+  perpDexIndex?: number;
   onlyIsolated?: boolean;
   isDelisted?: boolean;
   isCanonical?: boolean;
   marginMode?: "strictIsolated" | "noCross";
-  marginTable?: MarginTableResponse;
 };
 
 export type AssetCxt = {
@@ -108,4 +109,25 @@ export type MetaAndAssetCtx = {
   meta: AssetMeta;
   ctx: AssetCxt;
   isSpot: boolean;
+};
+
+export type Order = {
+  assetId: number;
+  side: OrderSide;
+  type: OrderType | "stopLoss" | "takeProfit";
+  price: string;
+  size: string;
+  reduceOnly?: boolean;
+  timeInForce?: TimeInForce;
+  triggerPrice?: string;
+  grouping?: OrderParameters["grouping"];
+  isMarket?: boolean;
+  clientOrderId?: string;
+};
+
+export type MarginTier = {
+  lowerBound: number;
+  upperBound?: number;
+  maxLeverage: number;
+  maintenanceDeduction: number;
 };

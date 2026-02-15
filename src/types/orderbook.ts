@@ -5,7 +5,7 @@ export type CumulativePriceLevel = AmountPriceLevel & { total: number };
 export type PriceLevel = AmountPriceLevel | CumulativePriceLevel;
 export type OrderBookLayout = "orderBook" | "buyOrder" | "sellOrder";
 
-export type OrderBookData = Record<OrderBookType, PriceLevel[]>;
+export type OrderBook = Record<OrderBookType, PriceLevel[]>;
 
 export interface IOrderBookSettings {
   averageAndSum: boolean;
