@@ -9,6 +9,8 @@ export const formatNumber = (value: number, options?: FormatOptions) => {
 };
 
 export const formatInputValue = (value: string, options?: FormatOptions) => {
+  if (!value) return "";
+
   let formatted = formatNumber(Number(value), options);
 
   if (value.endsWith(".")) {
