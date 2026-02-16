@@ -9,6 +9,7 @@ import { useDocumentTitle } from "usehooks-ts";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useSubscription } from "@/hooks/useSubscription";
+import UnderlineTooltip from "@/components/common/UnderlineTooltip";
 import Visibility from "@/components/common/Visibility";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 import { getPriceDecimals } from "@/features/trade/utils/prices";
@@ -20,6 +21,7 @@ import { cn } from "@/utils/cn";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
 
 import AssetsSelector from "./AssetsSelector";
+import FundingCountdown from "./FundingCountdown";
 
 const TickerOverview = () => {
   const isMobile = useIsMobile();
@@ -210,18 +212,30 @@ const TickerOverview = () => {
             })}
           />
           <TickerItem
-            label="Funding"
+            label={
+              <UnderlineTooltip content="Funding rate is the interest rate paid between long and short positions in a perpetual futures contract.">
+                <p className="space-x-0.5">
+                  <span>Funding Rate</span>
+                  <span>/</span>
+                  <span>Countdown</span>
+                </p>
+              </UnderlineTooltip>
+            }
             value={
-              <span
-                className={cn("text-buy", {
-                  "text-sell": Number(tokenCtx?.funding ?? 0) < 0,
-                })}
-              >
-                {formatNumberWithFallback(tokenCtx?.funding ?? 0, {
-                  style: "percent",
-                  minimumFractionDigits: 4,
-                  maximumFractionDigits: 4,
-                })}
+              <span className="flex items-center gap-1">
+                <span
+                  className={cn("text-buy", {
+                    "text-sell": Number(tokenCtx?.funding ?? 0) < 0,
+                  })}
+                >
+                  {formatNumberWithFallback(tokenCtx?.funding ?? 0, {
+                    style: "percent",
+                    minimumFractionDigits: 4,
+                    maximumFractionDigits: 4,
+                  })}
+                </span>
+                <span>/</span>
+                <FundingCountdown />
               </span>
             }
           />
@@ -241,7 +255,7 @@ const TickerOverview = () => {
 };
 
 type TickerItemProps = {
-  label: string;
+  label: React.ReactNode;
   value?: React.ReactNode;
   suffix?: React.ReactNode;
   className?: string;
@@ -250,9 +264,9 @@ type TickerItemProps = {
 const TickerItem = ({ label, value, className, suffix }: TickerItemProps) => {
   return (
     <div className="w-fit">
-      <p className="text-neutral-gray-400 text-[10px] md:text-xs pb-0.5 md:mb-1 md:whitespace-nowrap">
+      <div className="text-neutral-gray-400 text-[10px] md:text-xs pb-0.5 md:mb-1 md:whitespace-nowrap">
         {label}
-      </p>
+      </div>
 
       <div
         className={cn(
