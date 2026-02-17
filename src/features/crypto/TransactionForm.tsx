@@ -172,7 +172,7 @@ const TransactionForm = () => {
     <div className="w-full max-w-md mx-auto border border-neutral-gray-200 rounded-2xl overflow-hidden">
       <div
         className={cn(
-          "h-[84px] bg-linear-[90deg] from-primary-dark from-50% to-neutral-gray-200 to-0%",
+          "h-21 bg-linear-[90deg] from-primary-dark from-50% to-neutral-gray-200 to-0%",
           { "from-neutral-gray-200 to-primary-dark": marketType === "sell" },
         )}
       >
@@ -294,9 +294,9 @@ const NavItem = React.memo(
           className={cn(
             "relative w-full h-full flex justify-center items-center font-extrabold text-neutral-gray-300 bg-neutral-gray-200",
             {
-              "after:block after:absolute after:inset-y-0 after:-right-6 after:w-6 after:rounded-2xl after:bg-[var(--color-current)] after:skew-x-[var(--skew-x)]":
+              "after:block after:absolute after:inset-y-0 after:-right-6 after:w-6 after:rounded-2xl after:bg-(--color-current) after:skew-x-(--skew-x)":
                 marketType === "buy",
-              "before:block before:absolute before:inset-y-0 before:-left-6 before:w-6 before:rounded-2xl before:bg-[var(--color-current)] before:skew-x-[var(--skew-x)]":
+              "before:block before:absolute before:inset-y-0 before:-left-6 before:w-6 before:rounded-2xl before:bg-(--color-current) before:skew-x-(--skew-x)":
                 marketType === "sell",
               "bg-primary-dark text-white": isCurrent,
             },

@@ -102,8 +102,6 @@ const TickerSelectorProvider = ({ children }: Props) => {
 
           if (!ctx) continue;
 
-          const marginTables = new Map(perpDex.meta.marginTables);
-
           const deployedAsset = parseBuilderDeployedAsset(universe.name);
           const quote = parseQuoteAsset(spotMeta?.tokens[collateralToken].name);
 

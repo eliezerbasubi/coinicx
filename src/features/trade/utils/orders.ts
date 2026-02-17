@@ -1,10 +1,6 @@
 import { OrderParameters } from "@nktkas/hyperliquid";
 
-import { OrderBook } from "@/types/orderbook";
-import { HLOrder, MarginTier, Order, OrderType } from "@/types/trade";
-
-import { DEFAULT_ORDER_MAX_SLIPPAGE } from "../constants";
-import { isLimitOrder } from "./orderTypes";
+import { HLOrder, Order } from "@/types/trade";
 
 export function buildOrder(order: Order): HLOrder {
   let orderTypePayload: HLOrder["t"] = { limit: { tif: "Gtc" } };

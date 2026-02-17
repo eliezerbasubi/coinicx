@@ -8,10 +8,6 @@ import TradeProvider from "@/features/trade/providers/trade-provider";
 import UserTradeProvider from "@/features/trade/providers/user-trade-provider";
 import { getTradePathParams } from "@/features/trade/utils/getTradePathParams";
 
-type Props = {
-  params: Promise<{ slug: string[] }>;
-};
-
 export const metadata: Metadata = {
   title: "CoinicX Spot Trading",
   description: "Trade beyond the edge",
@@ -20,7 +16,7 @@ export const metadata: Metadata = {
 const TradeLayout = async ({
   params,
   children,
-}: React.PropsWithChildren<Props>) => {
+}: LayoutProps<"/trade/[[...slug]]">) => {
   const { slug } = await params;
 
   const pathParams = getTradePathParams(slug);

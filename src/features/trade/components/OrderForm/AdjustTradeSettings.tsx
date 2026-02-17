@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import ConnectButton from "@/components/common/ConnectButton";
@@ -111,7 +111,11 @@ const AdjustLeverage = () => {
   );
 
   const [open, setOpen] = useState(false);
-  const [assetLeverage, setAssetLeverage] = useState(() => leverage.toString());
+  const [assetLeverage, setAssetLeverage] = useState(leverage.toString());
+
+  useEffect(() => {
+    setAssetLeverage(leverage.toString());
+  }, [leverage]);
 
   const onValueChange = (value: string) => {
     const numValue = Number(value);

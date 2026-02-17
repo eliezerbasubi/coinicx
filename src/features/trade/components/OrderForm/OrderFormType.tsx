@@ -17,7 +17,7 @@ const ORDER_TYPES: Record<OrderType, { label: string; value: OrderType }> = {
   stopLimit: { label: "Stop Limit", value: "stopLimit" },
   stopMarket: { label: "Stop Market", value: "stopMarket" },
   trailingStop: { label: "Trailing Stop", value: "trailingStop" },
-  oco: { label: "OCO", value: "oco" },
+  scale: { label: "Scale", value: "scale" },
   twap: { label: "TWAP", value: "twap" },
 };
 

@@ -31,7 +31,7 @@ const SelectorPopover = ({
         align="end"
         collisionPadding={0}
         sideOffset={24}
-        className="w-[398px] -mr-4"
+        className="w-99.5 -mr-4"
         avoidCollisions={false}
         collisionBoundary={collisionBoundary}
       >
