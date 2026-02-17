@@ -1,9 +1,9 @@
-import { PopoverClose } from "@radix-ui/react-popover";
 import { ChevronDown } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
 import {
   Popover,
+  PopoverClose,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
