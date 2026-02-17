@@ -21,7 +21,6 @@ const TradeStoreProvider = ({
 
   useEffect(() => {
     storeRef.current?.setState({
-      symbol: props.baseAsset + props.quoteAsset,
       ...props,
     });
   }, [props]);

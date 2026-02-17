@@ -7,7 +7,7 @@ export const useTradeContext = <T>(
   selector: (state: TradeStoreState) => T,
 ): T => {
   const store = useContext(TradeContext);
-  if (!store) throw new Error("Missing SpotTradeContext.Provider in the tree");
+  if (!store) throw new Error("Missing TradeContext.Provider in the tree");
 
   return useStore(store, selector);
 };

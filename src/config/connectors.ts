@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {

@@ -1,7 +1,6 @@
-export const formatNumber = (
-  value: number,
-  options?: { locale?: string } & Intl.NumberFormatOptions,
-) => {
+export type FormatOptions = { locale?: string } & Intl.NumberFormatOptions;
+
+export const formatNumber = (value: number, options?: FormatOptions) => {
   const { locale, ...rest } = options ?? {};
   return value.toLocaleString(locale ?? "en-US", {
     ...rest,
@@ -9,10 +8,9 @@ export const formatNumber = (
   });
 };
 
-export const formatInputValue = (
-  value: string,
-  options?: { locale?: string } & Intl.NumberFormatOptions,
-) => {
+export const formatInputValue = (value: string, options?: FormatOptions) => {
+  if (!value) return "";
+
   let formatted = formatNumber(Number(value), options);
 
   if (value.endsWith(".")) {
@@ -20,4 +18,14 @@ export const formatInputValue = (
   }
 
   return formatted;
+};
+
+export const formatNumberWithFallback = (
+  value: number,
+  options?: FormatOptions,
+  fallback?: string,
+) => {
+  if (!value || !Number.isFinite(value)) return fallback ?? "--";
+
+  return formatNumber(value, options);
 };

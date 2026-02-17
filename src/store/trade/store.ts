@@ -1,59 +1,70 @@
 import { createContext } from "react";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-import { TradeMarketTicker, TradeType } from "@/types/trade";
-import { ROUTES } from "@/constants/routes";
-
-interface SelectedAsset {
-  baseAsset: string;
-  quoteAsset: string;
-}
+import { InstrumentType, OrderSide, OrderType } from "@/types/trade";
 
 export interface TradeStoreProps {
-  baseAsset: string;
-  quoteAsset: string;
-  tradeType: TradeType;
-  marketTicker?: TradeMarketTicker;
+  base: string;
+  quote: string;
+  coin: string;
+  instrumentType: InstrumentType;
 }
 
+type OrderFormSettings = {
+  isSzInNtl: boolean;
+  orderType: OrderType;
+  showTpSl: boolean;
+  reduceOnly: boolean;
+  timeInForce: string;
+  maxSlippage?: number;
+};
+
 export interface TradeStoreState extends TradeStoreProps {
-  symbol: string;
-  setSelectedAsset: (asset: SelectedAsset) => void;
-  onTradeTypeChange: (tradeType: TradeType) => void;
-  setMarketTicker: (ticker: Partial<TradeMarketTicker>) => void;
+  /** Decimals for the selected asset */
+  decimals: number | null;
+  orderFormSettings: OrderFormSettings;
+  orderSide: OrderSide;
+  onAssetChange: (data: {
+    base: string;
+    quote: string;
+    instrumentType: InstrumentType;
+  }) => void;
+  setDecimals: (decimals: number) => void;
+  setOrderSide: (orderSide: OrderSide) => void;
+  setOrderFormSettings: (settings: Partial<OrderFormSettings>) => void;
 }
 
 export const createTradeStore = (initialProps: TradeStoreProps) => {
-  return create<TradeStoreState>()((set, get) => ({
-    ...initialProps,
-    symbol: initialProps.baseAsset + initialProps.quoteAsset,
-    setSelectedAsset: (asset) =>
-      set({
-        baseAsset: asset.baseAsset,
-        quoteAsset: asset.quoteAsset,
-        symbol: asset.baseAsset + asset.quoteAsset,
+  return create<TradeStoreState>()(
+    persist(
+      (set) => ({
+        ...initialProps,
+        decimals: null,
+        orderSide: "buy",
+        orderFormSettings: {
+          isSzInNtl: false,
+          orderType: "limit",
+          showTpSl: false,
+          reduceOnly: false,
+          timeInForce: "Gtc",
+        },
+        onAssetChange: (data) => set({ ...data }),
+        setDecimals: (decimals) => set({ decimals }),
+        setOrderSide: (orderSide) => set({ orderSide }),
+        setOrderFormSettings: (settings) =>
+          set((state) => ({
+            orderFormSettings: { ...state.orderFormSettings, ...settings },
+          })),
       }),
-    setMarketTicker: (ticker) =>
-      set((state) => ({
-        marketTicker: state.marketTicker
-          ? { ...state.marketTicker, ...ticker }
-          : undefined,
-      })),
-    onTradeTypeChange: (tradeType) => {
-      const { baseAsset, quoteAsset } = get();
-
-      const newPath = [
-        ROUTES.trade.index,
-        tradeType,
-        baseAsset,
-        quoteAsset,
-      ].join("/");
-
-      window.history.replaceState({}, "", newPath);
-
-      set({ tradeType });
-    },
-  }));
+      {
+        name: "orderform-settings",
+        partialize: (state) => ({
+          orderFormSettings: state.orderFormSettings,
+        }),
+      },
+    ),
+  );
 };
 
 export type TradeStore = ReturnType<typeof createTradeStore>;

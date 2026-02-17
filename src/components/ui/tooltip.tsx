@@ -56,7 +56,7 @@ function TooltipContent({
       >
         {children}
         {!hideArrow && (
-          <TooltipPrimitive.Arrow className="bg-neutral-gray-200 fill-neutral-gray-200 z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]" />
+          <TooltipPrimitive.Arrow className="bg-neutral-gray-200 fill-neutral-gray-200 z-50 size-2.5 translate-y-[calc(-50%-2px)] rotate-45 rounded-xs" />
         )}
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>

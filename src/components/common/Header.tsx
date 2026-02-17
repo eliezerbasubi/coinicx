@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { ConnectButton as RainbowConnectButton } from "@rainbow-me/rainbowkit";
 import {
   Bitcoin,
   ChartCandlestick,
@@ -12,10 +12,12 @@ import {
   Wallet,
 } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
+import { useAccount } from "wagmi";
 
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/utils/cn";
 
+import ConnectButton from "./ConnectButton";
 import SideBarMenu from "./Sidebar";
 
 const LINKS = [
@@ -27,7 +29,8 @@ const LINKS = [
     subPaths: [ROUTES.crypto.index, ROUTES.crypto.sell],
   },
   {
-    href: `${ROUTES.trade.spot}/BTC/USDC`,
+    href: `${ROUTES.trade.perps}/BTC/USDC`,
+    subPaths: [ROUTES.trade.perps, ROUTES.trade.spot],
     label: "Trade",
     id: "trade",
     icon: <Coins />,
@@ -49,6 +52,7 @@ const LINKS = [
 
 const Header = () => {
   const pathname = usePathname();
+  const { isConnected } = useAccount();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
@@ -63,6 +67,7 @@ const Header = () => {
             prefetch
             className={cn("text-white hover:text-primary font-semibold", {
               "text-primary":
+                (link.href === "/" && pathname === "/") ||
                 link.subPaths?.some((path) => pathname.startsWith(path)) ||
                 pathname.startsWith(link.href),
             })}
@@ -73,9 +78,13 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-x-4">
-        <div className="min-w-36">
-          <ConnectButton />
-        </div>
+        {(!isConnected && <ConnectButton size="sm" />) || (
+          <RainbowConnectButton
+            showBalance={false}
+            chainStatus="none"
+            accountStatus="avatar"
+          />
+        )}
 
         {isMobile && <SideBarMenu links={LINKS} />}
       </div>

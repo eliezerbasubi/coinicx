@@ -19,7 +19,7 @@ const InputNumberFormatter = ({ formatOptions, ...props }: Props) => {
       inputMode="decimal"
       autoComplete="off"
       {...props}
-      value={formattedValue === "0" ? "" : formattedValue}
+      value={formattedValue}
       onInput={(e) => {
         const input = e.target as HTMLInputElement;
         // Remove all non-digit and non-dot characters

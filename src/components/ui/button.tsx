@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { LoaderCircle } from "lucide-react";
 
 import { cn } from "@/utils/cn";
 
@@ -15,7 +16,7 @@ const buttonVariants = cva(
         outline:
           "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+          "bg-neutral-gray-200 text-neutral-gray-400 shadow-xs hover:bg-neutral-gray-200/60",
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
@@ -39,10 +40,14 @@ function Button({
   variant,
   size,
   asChild = false,
+  label,
+  loading,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    loading?: boolean;
+    label?: React.ReactNode;
   }) {
   const Comp = asChild ? Slot : "button";
 
@@ -51,7 +56,10 @@ function Button({
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {loading && <LoaderCircle className="animate-spin size-5 mr-1" />}
+      {props.children || label}
+    </Comp>
   );
 }
 

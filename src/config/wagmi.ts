@@ -1,13 +1,15 @@
 import { Config, createConfig, CreateConfigParameters, http } from "wagmi";
 
-import { CHAINS_CONFIG } from "./chains";
+import { CHAINS_CONFIG_ENV } from "./chains";
 import { connectors } from "./connectors";
 
+const supportedChains = Object.values(CHAINS_CONFIG_ENV) as unknown as CreateConfigParameters["chains"];
+
 export const wagmiConfig: Config = createConfig({
-  chains: CHAINS_CONFIG as unknown as CreateConfigParameters["chains"],
+  chains: supportedChains,
   connectors,
   ssr: true,
-  transports: CHAINS_CONFIG.reduce(
+  transports: supportedChains.reduce(
     (obj, chain) => ({ ...obj, [chain.id]: http() }),
     {},
   ),

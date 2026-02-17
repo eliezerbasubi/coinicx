@@ -1,17 +1,12 @@
-import React from "react";
 import { redirect } from "next/navigation";
 
-import CryptoMarketProvider from "@/components/crypto/provider";
-import { getCryptoPathParams } from "@/components/crypto/utils/getCryptoPathParams";
-
-type Props = {
-  params: Promise<{ slug: string[] }>;
-};
+import CryptoMarketProvider from "@/features/crypto/provider";
+import { getCryptoPathParams } from "@/features/crypto/utils/getCryptoPathParams";
 
 const BuySellCryptoLayout = async ({
   params,
   children,
-}: React.PropsWithChildren<Props>) => {
+}: LayoutProps<"/crypto/[[...slug]]">) => {
   const { slug } = await params;
 
   const pathParams = getCryptoPathParams(slug);

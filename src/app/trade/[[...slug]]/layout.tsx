@@ -2,13 +2,11 @@ import React from "react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import TradeProvider from "@/components/trade/provider";
-import { getTradePathParams } from "@/components/trade/utils/getTradePathParams";
 import { ROUTES } from "@/constants/routes";
-
-type Props = {
-  params: Promise<{ slug: string[] }>;
-};
+import { DEFAULT_SPOT_ASSETS } from "@/features/trade/constants";
+import TradeProvider from "@/features/trade/providers/trade-provider";
+import UserTradeProvider from "@/features/trade/providers/user-trade-provider";
+import { getTradePathParams } from "@/features/trade/utils/getTradePathParams";
 
 export const metadata: Metadata = {
   title: "CoinicX Spot Trading",
@@ -18,24 +16,26 @@ export const metadata: Metadata = {
 const TradeLayout = async ({
   params,
   children,
-}: React.PropsWithChildren<Props>) => {
+}: LayoutProps<"/trade/[[...slug]]">) => {
   const { slug } = await params;
 
   const pathParams = getTradePathParams(slug);
 
   if (pathParams.redirect) {
-    redirect(
-      `${ROUTES.trade.index}/${pathParams.type}/${pathParams.baseAsset}/${pathParams.quoteAsset}`,
-    );
+    let path = `${ROUTES.trade.index}/${pathParams.type}/${pathParams.base}`;
+    if (pathParams.quote) {
+      path += `/${pathParams.quote}`;
+    }
+    redirect(path);
   }
 
   return (
     <TradeProvider
-      tradeType={pathParams.type}
-      baseAsset={pathParams.baseAsset}
-      quoteAsset={pathParams.quoteAsset}
+      instrumentType={pathParams.type}
+      base={pathParams.base}
+      quote={pathParams.quote ?? DEFAULT_SPOT_ASSETS.quote}
     >
-      {children}
+      <UserTradeProvider>{children}</UserTradeProvider>
     </TradeProvider>
   );
 };
