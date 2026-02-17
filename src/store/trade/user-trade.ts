@@ -29,6 +29,9 @@ interface UserTradeState {
 }
 
 interface UserTradeStoreActions {
+  updateLeverage: (
+    leverage: Partial<Omit<ActiveAssetDataResponse["leverage"], "rawUsd">>,
+  ) => void;
   getOrderAvailableBalance: (args: {
     isBuyOrder: boolean;
     isSpot: boolean;
@@ -50,6 +53,18 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   spotBalances: [],
   webData: null,
   clearinghouseState: null,
+  updateLeverage(leverage) {
+    const { leverage: currentLeverage } = get();
+
+    if (!currentLeverage) throw new Error("No leverage data to update");
+
+    set({
+      leverage: {
+        ...currentLeverage,
+        ...leverage,
+      } as ActiveAssetDataResponse["leverage"],
+    });
+  },
   getOrderAvailableBalance(args) {
     const {
       maxBaseTradeSz,

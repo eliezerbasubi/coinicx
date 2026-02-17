@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { ConnectButton as RainbowConnectButton } from "@rainbow-me/rainbowkit";
 import {
   Bitcoin,
   ChartCandlestick,
@@ -17,6 +17,7 @@ import { useAccount } from "wagmi";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/utils/cn";
 
+import ConnectButton from "./ConnectButton";
 import SideBarMenu from "./Sidebar";
 
 const LINKS = [
@@ -77,17 +78,13 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-x-4">
-        <div
-          className={cn("w-fit flex justify-end", {
-            "border-neutral-gray-200": isConnected,
-          })}
-        >
-          <ConnectButton
+        {(!isConnected && <ConnectButton size="sm" />) || (
+          <RainbowConnectButton
             showBalance={false}
             chainStatus="none"
             accountStatus="avatar"
           />
-        </div>
+        )}
 
         {isMobile && <SideBarMenu links={LINKS} />}
       </div>

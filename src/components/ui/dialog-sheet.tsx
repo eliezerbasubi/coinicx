@@ -1,13 +1,13 @@
 import React from "react";
 
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
 
 type PointerDownOutsideEvent = CustomEvent<{
@@ -26,11 +26,11 @@ type Props = {
   onOpenAutoFocus?: (event: Event) => void;
 };
 
-const DrawerSheet = ({
+const DialogSheet = ({
   open,
   className,
-  trigger,
   children,
+  trigger,
   title,
   description,
   onOpenChange,
@@ -38,22 +38,24 @@ const DrawerSheet = ({
   onOpenAutoFocus,
 }: Props) => {
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-      <DrawerContent
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      <DialogContent
+        showCloseButton={false}
         className={className}
         onPointerDownOutside={onPointerDownOutside}
         onOpenAutoFocus={onOpenAutoFocus}
       >
-        <DrawerHeader className={cn({ "sr-only": !title && !description })}>
-          <DrawerTitle>{title}</DrawerTitle>
-          <DrawerDescription>{description}</DrawerDescription>
-        </DrawerHeader>
-
+        <DialogHeader
+          className={cn("p-4", { "sr-only": !title && !description })}
+        >
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
         {children}
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default DrawerSheet;
+export default DialogSheet;

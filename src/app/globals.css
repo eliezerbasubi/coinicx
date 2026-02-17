@@ -52,3 +52,7 @@ button {
 .no-scrollbars::-webkit-scrollbar {
   display: none;
 }
+/* Avoids blocking events when rk modal is opened inside radix-ui modal */
+[aria-labelledby="rk_connect_title"] {
+  pointer-events: auto;
+}

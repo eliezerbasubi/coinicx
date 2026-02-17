@@ -5,37 +5,42 @@ import { useMediaQuery } from "usehooks-ts";
 
 import { cn } from "@/utils/cn";
 
+const DrawerSheet = dynamic(() => import("./drawer-sheet"), { ssr: false });
+const PopoverSheet = dynamic(() => import("./popover-sheet"), { ssr: false });
+
 type Props = {
   open?: boolean;
   children: React.ReactNode;
   trigger?: React.ReactNode;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
   className?: string;
   triggerRef?: React.Ref<HTMLElement>;
-  collisionBoundary?: Element | null;
-  collisionPadding?:
-    | number
-    | Partial<Record<"top" | "right" | "bottom" | "left", number>>;
   onOpenChange?: (open: boolean) => void;
-};
-
-const DrawerSheet = dynamic(() => import("./drawer-sheet"), { ssr: false });
-const PopoverSheet = dynamic(() => import("./popover-sheet"), { ssr: false });
+} & Pick<
+  React.ComponentProps<typeof PopoverSheet>,
+  "collisionBoundary" | "collisionPadding" | "align"
+>;
 
 const AdaptivePopover = ({
   triggerRef,
   collisionBoundary,
   collisionPadding,
+  align,
+  title,
+  description,
   ...props
 }: Props) => {
-  const isMobile = useMediaQuery("(max-width: 786px)");
+  const isDesktop = useMediaQuery("(min-width: 786px)");
 
-  if (isMobile) {
-    return <DrawerSheet {...props} />;
+  if (!isDesktop) {
+    return <DrawerSheet {...props} title={title} description={description} />;
   }
 
   return (
     <PopoverSheet
       {...props}
+      align={align}
       triggerRef={triggerRef}
       collisionBoundary={collisionBoundary}
       collisionPadding={collisionPadding}

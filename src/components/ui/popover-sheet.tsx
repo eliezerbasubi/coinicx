@@ -12,23 +12,16 @@ type Props = {
   children: React.ReactNode;
   trigger?: React.ReactNode;
   triggerRef?: React.Ref<HTMLElement>;
-  className?: string;
-  collisionBoundary?: Element | null;
-  collisionPadding?:
-    | number
-    | Partial<Record<"top" | "right" | "bottom" | "left", number>>;
   onOpenChange?: (open: boolean) => void;
-};
+} & React.ComponentProps<typeof PopoverContent>;
 
 const PopoverSheet = ({
   open,
   children,
-  className,
-  collisionBoundary,
-  collisionPadding,
   trigger,
   triggerRef,
   onOpenChange,
+  ...props
 }: Props) => {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -40,13 +33,7 @@ const PopoverSheet = ({
         </PopoverAnchor>
       )}
 
-      <PopoverContent
-        collisionPadding={collisionPadding}
-        collisionBoundary={collisionBoundary}
-        className={className}
-      >
-        {children}
-      </PopoverContent>
+      <PopoverContent {...props}>{children}</PopoverContent>
     </Popover>
   );
 };
