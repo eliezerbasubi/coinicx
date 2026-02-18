@@ -79,7 +79,9 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
     return args.isBuyOrder ? maxQuoteTradeSz : maxBaseTradeSz;
   },
   applyActiveAssetData(data) {
-    const { maxTradeSzs, availableToTrade, leverage } = data;
+    const { leverage } = get();
+
+    const { maxTradeSzs, availableToTrade, leverage: newLeverage } = data;
     const [maxBaseTradeSz, maxQuoteTradeSz] = maxTradeSzs;
     const [availableBaseToTrade, availableQuoteToTrade] = availableToTrade;
 
@@ -88,7 +90,9 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       maxQuoteTradeSz: Number(maxQuoteTradeSz),
       availableBaseToTrade: Number(availableBaseToTrade),
       availableQuoteToTrade: Number(availableQuoteToTrade),
-      leverage,
+
+      // We preserve the existing leverage state when updating leverage data from active asset data, since the data may take a few seconds to reflect the changes.
+      leverage: { ...newLeverage, ...leverage },
     });
   },
   applySpotState(data) {

@@ -47,3 +47,14 @@ export const TRADE_TYPES: Array<{ label: string; value: TradeType }> = [
   { label: "Isolated", value: "isolated" },
   { label: "Grid", value: "grid" },
 ];
+
+export const COINICX_BUILDER_SETTINGS = {
+  b: "0xCf7e559aDA0E979BbbFF1B263Ea60185a9A594e4",
+  f: 40,
+} as const;
+
+export const COINICX_AGENT_SETTINGS = {
+  agentName: "CoinicX",
+  agentAddress: "0x7344fe7714C7a16314ea35DdB1004C7574347D6E",
+  pk: "0xab6d6cd084b1c897a44f7525476f612d234ec892bed4537f8039532cd491e09e",
+} as const;

@@ -9,8 +9,6 @@ import { hlSubClient } from "@/services/transport";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useUserTradeStore } from "@/store/trade/user-trade";
 
-import { useUserFees } from "../hooks/useUserFees";
-
 type Props = {
   children: React.ReactNode;
 };
@@ -21,8 +19,6 @@ const UserTradeProvider = ({ children }: Props) => {
   const instrumentType = useTradeContext((s) => s.instrumentType);
 
   const user = address || zeroAddress;
-
-  useUserFees({ notifyOnChangeProps: [] });
 
   // Subscribe to user's active asset data for perps only
   useSubscription(() => {

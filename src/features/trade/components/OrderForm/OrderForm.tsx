@@ -3,6 +3,7 @@
 import React from "react";
 
 import { OrderSide } from "@/types/trade";
+import ConnectButton from "@/components/common/ConnectButton";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
@@ -45,7 +46,9 @@ const OrderForm = () => {
     isBuyOrder,
     orderSide,
     orderSizeInBase,
+    shouldEnableTrading,
     dispatch,
+    onPlaceOrder,
     onOrderSideChange,
     onMidClick,
     onPercentChange,
@@ -149,7 +152,7 @@ const OrderForm = () => {
           <LimitOrderTPSL />
         </Visibility>
 
-        <Button
+        <ConnectButton
           type="button"
           size="default"
           className={cn(
@@ -158,9 +161,12 @@ const OrderForm = () => {
               "bg-sell hover:bg-sell/70": !isBuyOrder,
             },
           )}
+          onClick={onPlaceOrder}
         >
-          {ORDER_FORM_SIDES[orderSide][labelKey]}
-        </Button>
+          {shouldEnableTrading
+            ? "Enable Trading"
+            : ORDER_FORM_SIDES[orderSide][labelKey]}
+        </ConnectButton>
 
         <div className="w-full space-y-2">
           <LiquidationPrice

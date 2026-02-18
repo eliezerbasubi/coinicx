@@ -1,4 +1,5 @@
 import { useReducer } from "react";
+import { toast } from "sonner";
 
 import { OrderSide } from "@/types/trade";
 import { useTradeContext } from "@/store/trade/hooks";
@@ -8,6 +9,8 @@ import {
   useMaxTradeSz,
   useUserTradeStore,
 } from "@/store/trade/user-trade";
+
+import { useEnableTrading } from "./useEnableTrading";
 
 type State = {
   limitPrice: string;
@@ -21,11 +24,15 @@ const initialState: State = {
   szPercent: 0,
 };
 
+const toastId = "order-form";
+
 export const useOrderForm = () => {
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     { ...initialState },
   );
+
+  const { shouldEnableTrading, enableTrading } = useEnableTrading({ toastId });
 
   const isSpot = useTradeContext((s) => s.instrumentType === "spot");
   const szDecimals = useInstrumentStore((s) => s.assetMeta?.szDecimals || 0);
@@ -109,11 +116,29 @@ export const useOrderForm = () => {
     dispatch({ limitPrice: midPx.toFixed(szDecimals) });
   };
 
+  const onPlaceOrder = async () => {
+    try {
+      if (shouldEnableTrading) {
+        return await enableTrading();
+      }
+
+      // Place order logic here
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to place order";
+
+      toast.error(message, {
+        id: toastId,
+      });
+    }
+  };
+
   return {
     state,
     isBuyOrder,
     orderSide,
     orderSizeInBase,
+    shouldEnableTrading,
     showLimitPrice: orderFormSettings.orderType === "limit",
     dispatch,
     onMidClick,
@@ -121,6 +146,7 @@ export const useOrderForm = () => {
     onSizeCoinChange,
     onSizeChange,
     onOrderSideChange,
+    onPlaceOrder,
   };
 };
 

@@ -3,6 +3,8 @@ import { IBM_Plex_Sans } from "next/font/google";
 
 import "./globals.css";
 
+import { Toaster } from "sonner";
+
 import Header from "@/components/common/Header";
 import Providers from "@/providers";
 
@@ -28,6 +30,13 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${ibmPlexSans.variable} ${ibmPlexSans.className} font-sans antialiased bg-primary-dark text-white`}
       >
+        <Toaster
+          toastOptions={{ className: "min-h-[32px]" }}
+          theme="dark"
+          position="top-center"
+          duration={3000}
+          className="font-sans text-sm m-0 items-center rounded-lg px-2 py-0 font-semibold"
+        />
         <Providers>
           <Header />
           {children}
