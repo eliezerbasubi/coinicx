@@ -20,7 +20,7 @@ const ConnectButton = forwardRef<
     if (!isConnected) {
       return "Connect wallet";
     }
-    return props.label;
+    return props.children || props.label;
   };
 
   const label = getLabel();
@@ -42,7 +42,7 @@ const ConnectButton = forwardRef<
         props.onClick?.(event);
       }}
     >
-      {props.children || label}
+      {label}
     </Button>
   );
 });

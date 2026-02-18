@@ -5,4 +5,6 @@ export const QUERY_KEYS = {
   spotMeta: "spotMeta",
   perpDexs: "perpDexs",
   tradeTicker: "tradeTicker",
+  extraAgents: "userExtraAgents",
+  maxBuilderFee: "maxBuilderFee",
 } as const;
