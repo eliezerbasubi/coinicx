@@ -1,11 +1,7 @@
 import { ChevronDown } from "lucide-react";
 
 import { OrderType } from "@/types/trade";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { useTradeContext } from "@/store/trade/hooks";
 import { cn } from "@/utils/cn";
 
@@ -39,54 +35,52 @@ const OrderFormType = () => {
         </span>
       ))}
 
-      <Tooltip>
-        <TooltipTrigger
-          className={cn(
-            "w-fit py-2 flex items-center gap-x-1 text-xs font-semibold text-neutral-gray-400 cursor-pointer",
-            { "text-white": isNonPrimaryType },
-          )}
-        >
-          <p>
-            {isNonPrimaryType
-              ? ORDER_TYPES[orderType].label
-              : ORDER_TYPES.stopLimit.label}
-          </p>
-          <ChevronDown
-            className="size-3 text-neutral-gray-400"
-            strokeWidth={4}
-          />
-        </TooltipTrigger>
-        <TooltipContent
-          hideArrow
-          side="bottom"
-          className="w-32 bg-primary-dark rounded-md border border-neutral-gray-200 shadow-md p-0"
-        >
-          <ul className="w-full text-xs text-neutral-gray-400 font-medium">
-            {Object.values(ORDER_TYPES)
-              .filter(
-                (orderType) =>
-                  orderType.value !== "limit" && orderType.value !== "market",
-              )
-              .map((type) => (
-                <li
-                  key={type.value}
-                  onClick={() =>
-                    setOrderFormSettings({ orderType: type.value })
-                  }
-                  className={cn(
-                    "py-2 px-2 cursor-pointer hover:bg-neutral-gray-200 hover:text-white",
-                    {
-                      "flex items-center justify-between font-semibold text-white bg-neutral-gray-200":
-                        type.value === orderType,
-                    },
-                  )}
-                >
-                  <span>{type.label}</span>
-                </li>
-              ))}
-          </ul>
-        </TooltipContent>
-      </Tooltip>
+      <AdaptiveTooltip
+        hideArrow
+        side="bottom"
+        title="Order Types"
+        trigger={
+          <div
+            className={cn(
+              "w-fit py-2 flex items-center gap-x-1 text-xs font-semibold text-neutral-gray-400 cursor-pointer",
+              { "text-white": isNonPrimaryType },
+            )}
+          >
+            <p>
+              {isNonPrimaryType
+                ? ORDER_TYPES[orderType].label
+                : ORDER_TYPES.stopLimit.label}
+            </p>
+            <ChevronDown
+              className="size-3 text-neutral-gray-400"
+              strokeWidth={4}
+            />
+          </div>
+        }
+      >
+        <ul className="w-full text-sm md:text-xs text-neutral-gray-400 font-medium">
+          {Object.values(ORDER_TYPES)
+            .filter(
+              (orderType) =>
+                orderType.value !== "limit" && orderType.value !== "market",
+            )
+            .map((type) => (
+              <li
+                key={type.value}
+                onClick={() => setOrderFormSettings({ orderType: type.value })}
+                className={cn(
+                  "py-2 px-4 md:px-2 cursor-pointer hover:bg-neutral-gray-200 hover:text-white",
+                  {
+                    "flex items-center justify-between font-semibold text-white bg-neutral-gray-200":
+                      type.value === orderType,
+                  },
+                )}
+              >
+                <span>{type.label}</span>
+              </li>
+            ))}
+        </ul>
+      </AdaptiveTooltip>
     </div>
   );
 };

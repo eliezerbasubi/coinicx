@@ -10,3 +10,9 @@ export const useIsMobile = (options?: UseMediaQueryOptions) => {
 
   return isMobile;
 };
+
+export const useIsDesktop = (options?: UseMediaQueryOptions) => {
+  const isDesktop = useMediaQuery("(min-width: 786px)", options);
+
+  return isDesktop;
+};
