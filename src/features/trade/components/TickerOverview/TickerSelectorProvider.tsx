@@ -125,6 +125,7 @@ const TickerSelectorProvider = ({ children }: Props) => {
               universe,
               quote,
               ...deployedAsset,
+              perpDexIndex: perpDex.index,
               index,
             }),
           });

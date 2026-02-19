@@ -47,15 +47,28 @@ export const parseOrderPrice = (entryPrice: number, decimals: number) => {
   return entryPrice.toFixed(decimals).replace(/\.?0+$/, "");
 };
 
-export const parseOrderPriceWithSlippage = (data: {
+export const calculateSlippageAdjustedPrice = (params: {
+  entryPrice: number;
+  isLong: boolean;
+  slippage?: number;
+}) => {
+  const slippage = params.slippage ?? DEFAULT_ORDER_MAX_SLIPPAGE;
+  const slippageAmount = params.isLong ? 1 + slippage : 1 - slippage;
+
+  return params.entryPrice * slippageAmount;
+};
+
+export const parseOrderPriceWithSlippage = (params: {
   entryPrice: number;
   decimals: number;
   isLong: boolean;
   slippage?: number;
 }) => {
-  const slippage = data.slippage ?? DEFAULT_ORDER_MAX_SLIPPAGE;
-  const slippageAmount = data.isLong ? 1 + slippage : 1 - slippage;
-  const priceWithSlippage = data.entryPrice * slippageAmount;
+  const priceWithSlippage = calculateSlippageAdjustedPrice({
+    entryPrice: params.entryPrice,
+    isLong: params.isLong,
+    slippage: params.slippage,
+  });
 
-  return parseOrderPrice(priceWithSlippage, data.decimals);
+  return parseOrderPrice(priceWithSlippage, params.decimals);
 };

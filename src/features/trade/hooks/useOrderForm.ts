@@ -1,30 +1,32 @@
-import { useReducer } from "react";
-import { toast } from "sonner";
+import { useMemo, useReducer } from "react";
 
 import { OrderSide } from "@/types/trade";
+import {
+  calculateMarginRequired,
+  calculateOrderValue,
+} from "@/features/trade/utils";
+import { isLimitOrder, isStopOrder } from "@/features/trade/utils/orderTypes";
 import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
+import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import {
   useAvailableToTrade,
   useMaxTradeSz,
   useUserTradeStore,
 } from "@/store/trade/user-trade";
 
-import { useEnableTrading } from "./useEnableTrading";
-
 type State = {
   limitPrice: string;
+  triggerPrice: string;
   size: string;
   szPercent: number;
 };
 
 const initialState: State = {
   limitPrice: "",
+  triggerPrice: "",
   size: "",
   szPercent: 0,
 };
-
-const toastId = "order-form";
 
 export const useOrderForm = () => {
   const [state, dispatch] = useReducer(
@@ -32,10 +34,10 @@ export const useOrderForm = () => {
     { ...initialState },
   );
 
-  const { shouldEnableTrading, enableTrading } = useEnableTrading({ toastId });
-
   const isSpot = useTradeContext((s) => s.instrumentType === "spot");
-  const szDecimals = useInstrumentStore((s) => s.assetMeta?.szDecimals || 0);
+  const szDecimals = useShallowInstrumentStore(
+    (s) => s.assetMeta?.szDecimals || 0,
+  );
   const orderFormSettings = useTradeContext((s) => s.orderFormSettings);
   const orderSide = useTradeContext((s) => s.orderSide);
 
@@ -47,13 +49,54 @@ export const useOrderForm = () => {
   const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
   const setOrderSide = useTradeContext((s) => s.setOrderSide);
 
-  const midPx = useInstrumentStore((s) => s.assetCtx?.midPx || 0);
+  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
 
   const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 
+  const numSize = parseFloat(state.size || "0");
   const orderSizeInBase = orderFormSettings.isSzInNtl
-    ? parseFloat(state.size || "0") * midPx
-    : parseFloat(state.size || "0");
+    ? numSize * midPx
+    : numSize;
+
+  const isLimitOrderType = isLimitOrder(orderFormSettings.orderType);
+
+  const orderValueAndMarginRequired = useMemo(() => {
+    const leverage = useUserTradeStore.getState().leverage;
+
+    const orderValue = calculateOrderValue({
+      orderType: orderFormSettings.orderType,
+      orderSize: numSize,
+      limitPx: parseFloat(state.limitPrice || "0"),
+      midPx,
+    });
+
+    const marginRequired = calculateMarginRequired({
+      orderValue,
+      userLeverage: leverage?.value || 0,
+      isReduceOnly: orderFormSettings.reduceOnly,
+    });
+
+    return {
+      orderValue,
+      marginRequired,
+    };
+  }, [
+    state.limitPrice,
+    numSize,
+    midPx,
+    orderFormSettings.orderType,
+    orderFormSettings.isSzInNtl,
+    orderFormSettings.reduceOnly,
+  ]);
+
+  const hasInsufficientMargin =
+    orderValueAndMarginRequired.marginRequired > availableBalance &&
+    !isStopOrder(orderFormSettings.orderType);
+
+  const disabled =
+    !numSize ||
+    !availableBalance ||
+    (isLimitOrderType && !parseFloat(state.limitPrice));
 
   const onSizeCoinChange = (isNtl: boolean) => {
     const currentSize = parseFloat(state.size);
@@ -116,37 +159,21 @@ export const useOrderForm = () => {
     dispatch({ limitPrice: midPx.toFixed(szDecimals) });
   };
 
-  const onPlaceOrder = async () => {
-    try {
-      if (shouldEnableTrading) {
-        return await enableTrading();
-      }
-
-      // Place order logic here
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to place order";
-
-      toast.error(message, {
-        id: toastId,
-      });
-    }
-  };
-
   return {
     state,
+    disabled,
     isBuyOrder,
     orderSide,
     orderSizeInBase,
-    shouldEnableTrading,
-    showLimitPrice: orderFormSettings.orderType === "limit",
+    orderType: orderFormSettings.orderType,
+    orderValueAndMarginRequired,
+    hasInsufficientMargin,
     dispatch,
     onMidClick,
     onPercentChange,
     onSizeCoinChange,
     onSizeChange,
     onOrderSideChange,
-    onPlaceOrder,
   };
 };
 

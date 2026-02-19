@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import { useReducer } from "react";
 
 // import { Check, ChevronDown } from "lucide-react";
 
@@ -27,7 +27,7 @@ type State = {
   slOffsetType: OrderFormLimitOffsetType;
 };
 
-const LimitOrderTPSLForm = () => {
+const OrderTPSLForm = () => {
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     {
@@ -198,4 +198,4 @@ const LimitOrderTPSLForm = () => {
 //   );
 // };
 
-export default LimitOrderTPSLForm;
+export default OrderTPSLForm;

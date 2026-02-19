@@ -118,30 +118,6 @@ export const useMetaAndAssetCtxs = () => {
     return allAssetsMetas;
   }, [data.spotMeta]);
 
-  const getAllPerpAssetsMetas = useCallback(() => {
-    if (!data.perpMetas) return [];
-
-    const allAssetsMetas: AssetMeta[] = [];
-
-    for (const perpDex of data.perpMetas) {
-      for (let index = 0; index < perpDex.universe.length; index++) {
-        const universe = perpDex.universe[index];
-
-        const deployedAsset = parseBuilderDeployedAsset(universe.name);
-        const quote = data.spotMeta?.tokens[perpDex.collateralToken].name;
-        allAssetsMetas.push(
-          mapPerpDataToAssetMeta({
-            universe,
-            quote,
-            ...deployedAsset,
-            index,
-          }),
-        );
-      }
-    }
-    return allAssetsMetas;
-  }, [data.perpMetas, data.spotMeta]);
-
   const getTokenMeta = useCallback(
     (
       instrumentType: InstrumentType,
@@ -211,7 +187,6 @@ export const useMetaAndAssetCtxs = () => {
     isLoading: loading,
     getTokenMeta,
     getAllPerpDexsAndMetas,
-    getAllPerpAssetsMetas,
     getAllSpotAssetsMetas,
     getSpotInstrumentQuotes,
   };

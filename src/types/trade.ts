@@ -45,7 +45,6 @@ export type OrderType =
   | "market"
   | "stopLimit"
   | "stopMarket"
-  | "trailingStop"
   | "scale"
   | "twap";
 
@@ -64,7 +63,7 @@ export type TimeInForce = Extract<HLOrder["t"], { limit: any }>["limit"]["tif"];
 export type AssetMeta = {
   base: string;
   fullName?: string | null;
-  assetId: number | null;
+  assetId: number;
   szDecimals: number;
   maxLeverage: number;
   tokenId: `0x${string}` | null;
@@ -120,7 +119,6 @@ export type Order = {
   reduceOnly?: boolean;
   timeInForce?: TimeInForce;
   triggerPrice?: string;
-  grouping?: OrderParameters["grouping"];
   isMarket?: boolean;
   clientOrderId?: string;
 };

@@ -9,9 +9,6 @@ export function isScaleOrder(type: OrderType) {
 export function isStopOrder(type: OrderType) {
   return type === "stopLimit" || type === "stopMarket";
 }
-export function isStopLossOrder(type: OrderType) {
-  return type === "stopLimit" || type === "stopMarket";
-}
 export function isLimitOrMarketOrder(type: OrderType) {
   return type === "limit" || type === "market";
 }

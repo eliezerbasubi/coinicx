@@ -1,19 +1,24 @@
 "use client";
 
-import React from "react";
+import { useMemo } from "react";
 
 import { OrderSide } from "@/types/trade";
 import ConnectButton from "@/components/common/ConnectButton";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
+import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
+import {
+  isLimitOrder,
+  isLimitOrMarketOrder,
+  isStopOrder,
+} from "@/features/trade/utils/orderTypes";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
 
 import AdjustTradeSettings from "./AdjustTradeSettings";
 import AvailableBalance from "./AvailableBalance";
-import LimitOrderTPSL from "./LimitOrderTPSL";
 import {
   Fees,
   LiquidationPrice,
@@ -24,6 +29,7 @@ import {
 import OrderFormInput from "./OrderFormInput";
 import OrderFormSlider from "./OrderFormSlider";
 import OrderFormType from "./OrderFormType";
+import OrderTPSL from "./OrderTPSL";
 import ReduceOnly from "./ReduceOnly";
 import SizeCoinSelector from "./SizeCoinSelector";
 import TIFSelector from "./TIFSelector";
@@ -42,13 +48,14 @@ const ORDER_FORM_SIDES: Record<OrderSide, { spot: string; perp: string }> = {
 const OrderForm = () => {
   const {
     state,
-    showLimitPrice,
+    disabled,
     isBuyOrder,
+    orderType,
     orderSide,
     orderSizeInBase,
-    shouldEnableTrading,
+    orderValueAndMarginRequired,
+    hasInsufficientMargin,
     dispatch,
-    onPlaceOrder,
     onOrderSideChange,
     onMidClick,
     onPercentChange,
@@ -56,10 +63,23 @@ const OrderForm = () => {
     onSizeCoinChange,
   } = useOrderForm();
 
+  const { shouldEnableTrading, processing, onPlaceOrder } = usePlaceOrder();
+
   const quote = useInstrumentStore((s) => s.assetMeta?.quote);
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const labelKey = isPerps ? "perp" : "spot";
+
+  const label = useMemo(() => {
+    if (shouldEnableTrading) {
+      return "Enable Trading";
+    }
+    if (hasInsufficientMargin) {
+      return "Deposit";
+    }
+
+    return ORDER_FORM_SIDES[orderSide][labelKey];
+  }, [hasInsufficientMargin, shouldEnableTrading, orderSide, labelKey]);
 
   return (
     <div className="w-full md:max-w-80 bg-primary-dark md:rounded-md pb-12 md:pb-0">
@@ -93,10 +113,32 @@ const OrderForm = () => {
         </div>
       </div>
 
-      <form className="w-full px-4 space-y-2 overflow-x-hidden">
+      <form
+        onSubmit={onPlaceOrder}
+        className="w-full px-4 space-y-2 overflow-x-hidden"
+      >
         <AvailableBalance />
 
-        <Visibility visible={showLimitPrice}>
+        <Visibility visible={isStopOrder(orderType)}>
+          <OrderFormInput
+            name="triggerPrice"
+            id="triggerPrice"
+            value={state.triggerPrice}
+            label="Stop Price"
+            className="text-sm"
+            trailing={
+              <div className="flex items-center gap-x-2">
+                <span className="text-neutral-300 text-sm font-medium">
+                  {quote}
+                </span>
+              </div>
+            }
+            onChange={({ target: { value } }) =>
+              dispatch({ triggerPrice: value })
+            }
+          />
+        </Visibility>
+        <Visibility visible={isLimitOrder(orderType)}>
           <OrderFormInput
             name="limitPrice"
             id="limitPrice"
@@ -112,7 +154,7 @@ const OrderForm = () => {
                 <Button
                   type="button"
                   variant="ghost"
-                  className="size-6 bg-neutral-gray-200 text-neutral-300 text-xs font-semibold"
+                  className="size-6 bg-neutral-gray-200 text-neutral-300 hover:text-primary hover:bg-primary/10 text-xs font-semibold"
                   onClick={onMidClick}
                 >
                   Mid
@@ -148,35 +190,32 @@ const OrderForm = () => {
           <TIFSelector />
         </div>
 
-        <Visibility visible={isPerps}>
-          <LimitOrderTPSL />
+        <Visibility visible={isPerps && isLimitOrMarketOrder(orderType)}>
+          <OrderTPSL />
         </Visibility>
 
         <ConnectButton
-          type="button"
+          type={shouldEnableTrading ? "button" : "submit"}
           size="default"
+          disabled={!shouldEnableTrading && (disabled || processing)}
+          loading={processing}
+          label={label}
           className={cn(
-            "font-bold bg-buy hover:bg-buy/70 text-white capitalize mt-1 transition-colors",
+            "font-bold bg-buy hover:bg-buy/90 text-white capitalize mt-1 transition-colors",
             {
-              "bg-sell hover:bg-sell/70": !isBuyOrder,
+              "bg-sell hover:bg-sell/90": !isBuyOrder,
+              "bg-primary text-background hover:bg-primary/90":
+                hasInsufficientMargin,
             },
           )}
-          onClick={onPlaceOrder}
-        >
-          {shouldEnableTrading
-            ? "Enable Trading"
-            : ORDER_FORM_SIDES[orderSide][labelKey]}
-        </ConnectButton>
+        />
 
         <div className="w-full space-y-2">
           <LiquidationPrice
             size={orderSizeInBase}
             limitPrice={state.limitPrice}
           />
-          <OrderValueAndMarginRequired
-            size={orderSizeInBase}
-            limitPrice={state.limitPrice}
-          />
+          <OrderValueAndMarginRequired data={orderValueAndMarginRequired} />
           <MaxOrderSize />
           <OrderSlippage size={orderSizeInBase} />
           <Fees />

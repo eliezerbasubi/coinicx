@@ -1,6 +1,4 @@
-import React from "react";
-import { Check, ChevronDown } from "lucide-react";
-import { useShallow } from "zustand/react/shallow";
+import { ChevronDown } from "lucide-react";
 
 import { OrderType } from "@/types/trade";
 import {
@@ -16,15 +14,12 @@ const ORDER_TYPES: Record<OrderType, { label: string; value: OrderType }> = {
   limit: { label: "Limit", value: "limit" },
   stopLimit: { label: "Stop Limit", value: "stopLimit" },
   stopMarket: { label: "Stop Market", value: "stopMarket" },
-  trailingStop: { label: "Trailing Stop", value: "trailingStop" },
   scale: { label: "Scale", value: "scale" },
   twap: { label: "TWAP", value: "twap" },
 };
 
 const OrderFormType = () => {
-  const orderType = useTradeContext(
-    useShallow((s) => s.orderFormSettings.orderType),
-  );
+  const orderType = useTradeContext((s) => s.orderFormSettings.orderType);
   const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
 
   const isNonPrimaryType = orderType !== "limit" && orderType !== "market";
@@ -44,7 +39,7 @@ const OrderFormType = () => {
         </span>
       ))}
 
-      <Tooltip delayDuration={720}>
+      <Tooltip>
         <TooltipTrigger
           className={cn(
             "w-fit py-2 flex items-center gap-x-1 text-xs font-semibold text-neutral-gray-400 cursor-pointer",
@@ -78,15 +73,15 @@ const OrderFormType = () => {
                   onClick={() =>
                     setOrderFormSettings({ orderType: type.value })
                   }
-                  className={cn("py-2 px-2 cursor-pointer", {
-                    "flex items-center justify-between font-semibold text-white bg-neutral-gray-200":
-                      type.value === orderType,
-                  })}
+                  className={cn(
+                    "py-2 px-2 cursor-pointer hover:bg-neutral-gray-200 hover:text-white",
+                    {
+                      "flex items-center justify-between font-semibold text-white bg-neutral-gray-200":
+                        type.value === orderType,
+                    },
+                  )}
                 >
                   <span>{type.label}</span>
-                  {type.value === orderType && (
-                    <Check className="size-4" strokeWidth={3} />
-                  )}
                 </li>
               ))}
           </ul>
