@@ -29,7 +29,7 @@ export const mapSpotDataToAssetMeta = (
 export const mapPerpDataToAssetMeta = (data: {
   universe: AllPerpMetasResponse[number]["universe"][number];
   quote?: string;
-  perpDexIndex?: number;
+  perpDexIndex: number;
   dex: string;
   base: string;
   index: number;
@@ -40,10 +40,9 @@ export const mapPerpDataToAssetMeta = (data: {
 
   return {
     index,
-    assetId:
-      data.perpDexIndex !== undefined
-        ? 100000 + data.perpDexIndex * 10000 + index
-        : null,
+    assetId: data.perpDexIndex
+      ? 100000 + data.perpDexIndex * 10000 + index
+      : index,
     base,
     coin: universe.name,
     quote,

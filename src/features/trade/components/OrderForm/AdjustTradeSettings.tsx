@@ -74,7 +74,7 @@ const AdjustMarginMode = () => {
     }
 
     try {
-      const asset = useInstrumentStore.getState().assetMeta?.index ?? -1;
+      const asset = useInstrumentStore.getState().assetMeta?.assetId ?? -1;
       const leverage = useUserTradeStore.getState().leverage?.value ?? -1;
 
       if (asset === -1) throw new Error("Asset is not available");
@@ -194,7 +194,7 @@ const AdjustLeverage = () => {
     }
 
     try {
-      const asset = useInstrumentStore.getState().assetMeta?.index ?? -1;
+      const asset = useInstrumentStore.getState().assetMeta?.assetId ?? -1;
 
       if (asset === -1) throw new Error("Asset is not available");
 

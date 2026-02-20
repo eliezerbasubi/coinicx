@@ -1,6 +1,3 @@
-import React from "react";
-import { useShallow } from "zustand/react/shallow";
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
@@ -10,12 +7,10 @@ import {
 } from "@/components/ui/tooltip";
 import { useTradeContext } from "@/store/trade/hooks";
 
-import LimitOrderTPSLForm from "./LimitOrderTPSLForm";
+import OrderTPSLForm from "./OrderTPSLForm";
 
-const LimitOrderTPSL = () => {
-  const showTpSl = useTradeContext(
-    useShallow((s) => s.orderFormSettings.showTpSl),
-  );
+const OrderTPSL = () => {
+  const showTpSl = useTradeContext((s) => s.orderFormSettings.showTpSl);
   const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
 
   return (
@@ -49,9 +44,9 @@ const LimitOrderTPSL = () => {
         </Label>
       </div>
 
-      {showTpSl && <LimitOrderTPSLForm />}
+      {showTpSl && <OrderTPSLForm />}
     </>
   );
 };
 
-export default LimitOrderTPSL;
+export default OrderTPSL;

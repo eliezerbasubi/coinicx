@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useShallow } from "zustand/react/shallow";
 
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { useTradeContext } from "@/store/trade/hooks";
@@ -27,9 +26,9 @@ const TIF_OPTIONS = [
 ];
 
 const TIFSelector = () => {
-  const timeInForce = useTradeContext(
-    useShallow((s) => s.orderFormSettings.timeInForce),
-  );
+  const timeInForce = useTradeContext((s) => s.orderFormSettings.timeInForce);
+  const orderType = useTradeContext((s) => s.orderFormSettings.orderType);
+
   const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
 
   const [open, setOpen] = useState(false);
@@ -38,6 +37,8 @@ const TIFSelector = () => {
     setOpen(false);
     setOrderFormSettings({ timeInForce: value });
   };
+
+  if (orderType !== "limit") return null;
 
   return (
     <AdaptivePopover

@@ -6,8 +6,6 @@ import { DEFAULT_ORDER_MAX_SLIPPAGE } from "@/features/trade/constants";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { useUserFees } from "@/features/trade/hooks/useUserFees";
 import {
-  calculateMarginRequired,
-  calculateOrderValue,
   estimateLiquidationPrice,
   estimateSlippagePercent,
 } from "@/features/trade/utils";
@@ -98,45 +96,12 @@ export const LiquidationPrice = ({
 };
 
 export const OrderValueAndMarginRequired = ({
-  size,
-  limitPrice,
+  data,
 }: {
-  size: number;
-  limitPrice?: string;
+  data: { orderValue: number; marginRequired: number };
 }) => {
   const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);
   const isPerp = useTradeContext((s) => s.instrumentType === "perps");
-  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
-  const orderFormSettings = useTradeContext((s) => s.orderFormSettings);
-
-  const data = useMemo(() => {
-    const leverage = useUserTradeStore.getState().leverage;
-
-    const orderValue = calculateOrderValue({
-      orderType: orderFormSettings.orderType,
-      orderSize: size,
-      limitPx: parseFloat(limitPrice || "0"),
-      midPx,
-    });
-
-    const marginRequired = calculateMarginRequired({
-      orderValue,
-      userLeverage: leverage?.value || 0,
-      isReduceOnly: orderFormSettings.reduceOnly,
-    });
-
-    return {
-      orderValue,
-      marginRequired,
-    };
-  }, [
-    limitPrice,
-    size,
-    midPx,
-    orderFormSettings.orderType,
-    orderFormSettings.isSzInNtl,
-    orderFormSettings.reduceOnly,
-  ]);
 
   return (
     <>
@@ -171,8 +136,11 @@ export const OrderValueAndMarginRequired = ({
 export const MaxOrderSize = () => {
   const base = useShallowInstrumentStore((s) => s.assetMeta?.base);
   const isBuyOrder = useTradeContext((s) => s.orderSide === "buy");
+  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
+
+  if (!isPerps) return null;
 
   return (
     <div className="w-full flex items-center justify-between">
@@ -260,7 +228,7 @@ export const OrderSlippage = ({ size }: { size: number }) => {
       <p className="text-xs text-primary font-medium space-x-1">
         <span>Est. {(slippage ?? 0).toFixed(4)}%</span>
         <span>/</span>
-        <span>Max: {maxSlippage.toFixed(2)}%</span>
+        <span>Max: {(maxSlippage * 100).toFixed(2)}%</span>
       </p>
     </div>
   );

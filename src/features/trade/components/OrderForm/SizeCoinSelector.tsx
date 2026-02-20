@@ -1,5 +1,4 @@
 import { ChevronDown } from "lucide-react";
-import { useShallow } from "zustand/react/shallow";
 
 import {
   Popover,
@@ -19,9 +18,7 @@ const SizeCoinSelector = ({ onValueChange }: Props) => {
   const base = useInstrumentStore((s) => s.assetMeta?.base || "");
   const quote = useInstrumentStore((s) => s.assetMeta?.quote || "");
 
-  const isSzInNtl = useTradeContext(
-    useShallow((s) => s.orderFormSettings.isSzInNtl),
-  );
+  const isSzInNtl = useTradeContext((s) => s.orderFormSettings.isSzInNtl);
 
   const options = [
     { label: base, value: false },

@@ -9,14 +9,14 @@ export function isScaleOrder(type: OrderType) {
 export function isStopOrder(type: OrderType) {
   return type === "stopLimit" || type === "stopMarket";
 }
-export function isStopLossOrder(type: OrderType) {
-  return type === "stopLimit" || type === "stopMarket";
-}
 export function isLimitOrMarketOrder(type: OrderType) {
   return type === "limit" || type === "market";
 }
 export function isLimitOrScaleOrder(type: OrderType) {
   return type === "limit" || type === "scale";
+}
+export function isMarketOrder(type: OrderType) {
+  return type === "market" || type === "stopMarket";
 }
 export function getOrderTif(type: OrderType) {
   return type === "market" ? "FrontendMarket" : "Gtc";
