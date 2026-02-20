@@ -136,8 +136,11 @@ export const OrderValueAndMarginRequired = ({
 export const MaxOrderSize = () => {
   const base = useShallowInstrumentStore((s) => s.assetMeta?.base);
   const isBuyOrder = useTradeContext((s) => s.orderSide === "buy");
+  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
+
+  if (!isPerps) return null;
 
   return (
     <div className="w-full flex items-center justify-between">

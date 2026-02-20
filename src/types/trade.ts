@@ -114,7 +114,7 @@ export type Order = {
   assetId: number;
   side: OrderSide;
   type: OrderType | "stopLoss" | "takeProfit";
-  price: string;
+  price: string | number;
   size: string;
   reduceOnly?: boolean;
   timeInForce?: TimeInForce;

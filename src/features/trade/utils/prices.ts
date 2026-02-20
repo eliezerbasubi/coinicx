@@ -44,16 +44,19 @@ export const getPriceSigFigs = (
 };
 
 export const parseOrderPrice = (entryPrice: number, decimals: number) => {
-  return entryPrice.toFixed(decimals).replace(/\.?0+$/, "");
+  const multiplier = Math.pow(10, decimals);
+  const epsilon = 0;
+
+  return Math.round(entryPrice * multiplier + epsilon) / multiplier;
 };
 
 export const calculateSlippageAdjustedPrice = (params: {
   entryPrice: number;
-  isLong: boolean;
+  isBuyOrder: boolean;
   slippage?: number;
 }) => {
   const slippage = params.slippage ?? DEFAULT_ORDER_MAX_SLIPPAGE;
-  const slippageAmount = params.isLong ? 1 + slippage : 1 - slippage;
+  const slippageAmount = params.isBuyOrder ? 1 + slippage : 1 - slippage;
 
   return params.entryPrice * slippageAmount;
 };
@@ -61,12 +64,12 @@ export const calculateSlippageAdjustedPrice = (params: {
 export const parseOrderPriceWithSlippage = (params: {
   entryPrice: number;
   decimals: number;
-  isLong: boolean;
+  isBuyOrder: boolean;
   slippage?: number;
 }) => {
   const priceWithSlippage = calculateSlippageAdjustedPrice({
     entryPrice: params.entryPrice,
-    isLong: params.isLong,
+    isBuyOrder: params.isBuyOrder,
     slippage: params.slippage,
   });
 

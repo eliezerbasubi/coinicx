@@ -2,9 +2,10 @@ import { useState } from "react";
 import { OrderParameters } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
 
-import { Order } from "@/types/trade";
+import { Order, OrderSide } from "@/types/trade";
 import {
   calculateSlippageAdjustedPrice,
+  formatPriceToDecimal,
   parseOrderPrice,
   removeTrailingZeros,
 } from "@/features/trade/utils";
@@ -13,7 +14,6 @@ import { isStopOrder } from "@/features/trade/utils/orderTypes";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { toParseableNumber } from "@/utils/formatting/normalize-input-number";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import { useApproveBuilderFee } from "./useApproveBuilderFee";
 import { useEnableTrading } from "./useEnableTrading";
@@ -26,6 +26,7 @@ export const usePlaceOrder = () => {
 
   const orderFormSettings = useTradeContext((s) => s.orderFormSettings);
   const orderSide = useTradeContext((s) => s.orderSide);
+  const decimals = useTradeContext((state) => state.decimals);
 
   const isBuyOrder = orderSide === "buy";
 
@@ -36,7 +37,9 @@ export const usePlaceOrder = () => {
     entryPrice?: string;
     type: Order["type"];
     isMarket?: boolean;
+    reduceOnly?: boolean;
     triggerPrice?: string;
+    orderSide?: OrderSide;
   }) => {
     const assetMeta = useInstrumentStore.getState().assetMeta;
     const assetCtx = useInstrumentStore.getState().assetCtx;
@@ -47,7 +50,6 @@ export const usePlaceOrder = () => {
 
     const midPx = assetCtx.midPx;
     const markPx = assetCtx.markPx;
-    const szDecimals = assetMeta.szDecimals;
 
     const size = parseFloat(params.size);
 
@@ -57,11 +59,11 @@ export const usePlaceOrder = () => {
 
     return buildOrder({
       assetId: assetMeta.assetId,
-      side: orderSide,
+      side: params.orderSide ?? orderSide,
       type: params.type,
-      price: parseOrderPrice(price, szDecimals),
+      price: parseOrderPrice(price, Number(decimals)),
       size: removeTrailingZeros(sizeInBase.toString()),
-      reduceOnly: orderFormSettings.reduceOnly,
+      reduceOnly: params.reduceOnly ?? orderFormSettings.reduceOnly,
       timeInForce:
         orderFormSettings.orderType === "limit"
           ? (orderFormSettings.timeInForce as Order["timeInForce"])
@@ -77,22 +79,49 @@ export const usePlaceOrder = () => {
     slPrice: string;
   }) => {
     const tspslOrders = [];
+    const tpslOrderSide = isBuyOrder ? "sell" : "buy";
 
     if (params.tpPrice) {
+      const tpPrice = parseFloat(params.tpPrice);
+
+      const entryPrice =
+        orderFormSettings.orderType === "market"
+          ? calculateSlippageAdjustedPrice({
+              entryPrice: tpPrice,
+              isBuyOrder: tpslOrderSide === "buy",
+            })
+          : tpPrice;
+
       tspslOrders.push(
         buildExchangeOrder({
+          reduceOnly: true,
+          orderSide: tpslOrderSide,
           size: params.size,
-          entryPrice: params.tpPrice,
+          entryPrice: entryPrice.toString(),
+          triggerPrice: tpPrice.toString(),
           type: "takeProfit",
         }),
       );
     }
 
     if (params.slPrice) {
+      const slPrice = parseFloat(params.slPrice);
+
+      const entryPrice =
+        orderFormSettings.orderType === "market"
+          ? calculateSlippageAdjustedPrice({
+              entryPrice: slPrice,
+              isBuyOrder: tpslOrderSide === "buy",
+            })
+          : slPrice;
+
       tspslOrders.push(
         buildExchangeOrder({
+          reduceOnly: true,
+          orderSide: tpslOrderSide,
           size: params.size,
-          entryPrice: params.slPrice,
+          entryPrice: entryPrice.toString(),
+          triggerPrice: slPrice.toString(),
           type: "stopLoss",
         }),
       );
@@ -112,7 +141,7 @@ export const usePlaceOrder = () => {
 
     const entryPrice = calculateSlippageAdjustedPrice({
       entryPrice: markPx,
-      isLong: params.isBuyOrder,
+      isBuyOrder: params.isBuyOrder,
     });
 
     const order = buildExchangeOrder({
@@ -145,7 +174,7 @@ export const usePlaceOrder = () => {
 
     const entryPrice = calculateSlippageAdjustedPrice({
       entryPrice: parseFloat(params.limitPrice),
-      isLong: params.isBuyOrder,
+      isBuyOrder: params.isBuyOrder,
     });
 
     const order = buildExchangeOrder({
@@ -184,12 +213,19 @@ export const usePlaceOrder = () => {
         `Stop price must be ${params.isBuyOrder ? "above" : "below"} the current price`,
       );
     }
+    const isMarket = orderFormSettings.orderType === "stopMarket";
+    const entryPrice = isMarket
+      ? calculateSlippageAdjustedPrice({
+          entryPrice: trigger,
+          isBuyOrder,
+        })
+      : trigger;
 
     const order = buildExchangeOrder({
       size,
-      entryPrice: params.triggerPrice,
+      entryPrice: entryPrice.toString(),
       type: orderFormSettings.orderType,
-      isMarket: orderFormSettings.orderType === "stopMarket",
+      isMarket,
       triggerPrice: params.triggerPrice,
     });
 
@@ -285,7 +321,9 @@ export const usePlaceOrder = () => {
         if (typeof status === "object") {
           if ("filled" in status) {
             const filled = status.filled;
-            message = `${filled.totalSz} ${base} ${isBuyOrder ? "bought" : "sold"} at ${formatNumber(Number(filled.avgPx), { style: "currency" })} avg. price`;
+            message = `${filled.totalSz} ${base} ${isBuyOrder ? "bought" : "sold"} at ${formatPriceToDecimal(Number(filled.avgPx), decimals, { style: "currency" })} avg. price`;
+
+            break;
           }
           if ("resting" in status) {
             if (isStopOrder(orderFormSettings.orderType)) {
@@ -293,6 +331,8 @@ export const usePlaceOrder = () => {
             } else {
               message = "Limit order placed successfully";
             }
+
+            break;
           }
         } else {
           message =

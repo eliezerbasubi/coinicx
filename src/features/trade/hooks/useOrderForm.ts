@@ -1,6 +1,6 @@
 import { useMemo, useReducer } from "react";
 
-import { OrderSide } from "@/types/trade";
+import { OrderSide, OrderType } from "@/types/trade";
 import {
   calculateMarginRequired,
   calculateOrderValue,
@@ -55,7 +55,7 @@ export const useOrderForm = () => {
 
   const numSize = parseFloat(state.size || "0");
   const orderSizeInBase = orderFormSettings.isSzInNtl
-    ? numSize * midPx
+    ? numSize / midPx
     : numSize;
 
   const isLimitOrderType = isLimitOrder(orderFormSettings.orderType);
@@ -65,10 +65,17 @@ export const useOrderForm = () => {
 
     const orderValue = calculateOrderValue({
       orderType: orderFormSettings.orderType,
-      orderSize: numSize,
+      orderSize: orderSizeInBase,
       limitPx: parseFloat(state.limitPrice || "0"),
       midPx,
     });
+
+    if (isSpot) {
+      return {
+        orderValue,
+        marginRequired: 0,
+      };
+    }
 
     const marginRequired = calculateMarginRequired({
       orderValue,
@@ -81,17 +88,31 @@ export const useOrderForm = () => {
       marginRequired,
     };
   }, [
+    isSpot,
     state.limitPrice,
-    numSize,
+    orderSizeInBase,
     midPx,
     orderFormSettings.orderType,
     orderFormSettings.isSzInNtl,
     orderFormSettings.reduceOnly,
   ]);
 
-  const hasInsufficientMargin =
-    orderValueAndMarginRequired.marginRequired > availableBalance &&
-    !isStopOrder(orderFormSettings.orderType);
+  const hasInsufficientMargin = checkInsufficientMargin({
+    ...orderValueAndMarginRequired,
+    balance: availableBalance,
+    isBuyOrder,
+    isSpot,
+    midPx,
+    orderType: orderFormSettings.orderType,
+  });
+
+  const maxOrderSize = getOrderMaxSize({
+    isBuyOrder,
+    isSpot,
+    isSzInNtl: orderFormSettings.isSzInNtl,
+    availableBalance,
+    midPx,
+  });
 
   const disabled =
     !numSize ||
@@ -109,14 +130,6 @@ export const useOrderForm = () => {
   };
 
   const onPercentChange = (percent: number) => {
-    const maxOrderSize = getOrderMaxSize({
-      isBuyOrder,
-      isSpot,
-      isSzInNtl: orderFormSettings.isSzInNtl,
-      availableBalance,
-      midPx,
-    });
-
     const size = (maxOrderSize * percent) / 100;
     const fractionDigits = orderFormSettings.isSzInNtl ? 2 : szDecimals;
 
@@ -127,7 +140,7 @@ export const useOrderForm = () => {
   };
 
   const onSizeChange = (size: string) => {
-    const percent = (parseFloat(size || "0") / availableBalance) * 100;
+    const percent = Math.floor((parseFloat(size || "0") / maxOrderSize) * 100);
 
     dispatch({ size, szPercent: Math.min(percent, 100) });
   };
@@ -175,6 +188,31 @@ export const useOrderForm = () => {
     onSizeChange,
     onOrderSideChange,
   };
+};
+
+const checkInsufficientMargin = (params: {
+  balance: number;
+  marginRequired: number;
+  orderValue: number;
+  midPx: number;
+  orderType: OrderType;
+  isSpot: boolean;
+  isBuyOrder: boolean;
+}) => {
+  let availableBalance = params.balance * params.midPx;
+
+  if (params.isSpot) {
+    availableBalance = params.isBuyOrder
+      ? params.balance
+      : params.balance * params.midPx;
+  }
+
+  const margin = params.isSpot ? params.orderValue : params.marginRequired;
+
+  const hasInsufficientMargin =
+    margin > availableBalance && !isStopOrder(params.orderType);
+
+  return hasInsufficientMargin;
 };
 
 const getOrderMaxSize = (args: {
