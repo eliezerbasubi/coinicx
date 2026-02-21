@@ -1,12 +1,12 @@
-import React from "react";
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useTradeContext } from "@/store/trade/hooks";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
 
 const ReduceOnly = () => {
-  const reduceOnly = useTradeContext((s) => s.orderFormSettings.reduceOnly);
-  const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
+  const reduceOnly = useShallowOrderFormStore((s) => s.settings.reduceOnly);
 
   return (
     <div className="flex-1 flex items-center gap-2">
@@ -15,10 +15,13 @@ const ReduceOnly = () => {
         checked={reduceOnly}
         className="size-3.5 border-neutral-gray-400 data-[state=checked]:bg-white data-[state=checked]:text-primary-dark data-[state=checked]:border-white"
         onCheckedChange={(checked) =>
-          setOrderFormSettings({ reduceOnly: !!checked, showTpSl: false })
+          useOrderFormStore.getState().setSettings({
+            reduceOnly: !!checked,
+            showTpSl: false,
+          })
         }
       />
-      <Label htmlFor="reduceOnly" className="text-neutral-gray-400 text-xs">
+      <Label htmlFor="reduceOnly" className="text-white text-xs">
         <p>Reduce Only</p>
       </Label>
     </div>

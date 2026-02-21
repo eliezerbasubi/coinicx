@@ -4,6 +4,10 @@ import { ChevronDown } from "lucide-react";
 import { OrderType } from "@/types/trade";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { useTradeContext } from "@/store/trade/hooks";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
 
 const ORDER_TYPES: Record<
@@ -26,12 +30,10 @@ const MORE_ORDER_TYPES = Object.values(ORDER_TYPES).filter(
 );
 
 const OrderFormType = () => {
-  const orderType = useTradeContext((s) => s.orderFormSettings.orderType);
+  const orderType = useShallowOrderFormStore((s) => s.settings.orderType);
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const [open, setOpen] = useState(false);
-
-  const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
 
   const isNonPrimaryType = orderType !== "limit" && orderType !== "market";
 
@@ -41,9 +43,13 @@ const OrderFormType = () => {
     ? MORE_ORDER_TYPES
     : MORE_ORDER_TYPES.filter((type) => !type.perpsOnly);
 
+  const onTypeChange = (type: OrderType) => {
+    useOrderFormStore.getState().setSettings({ orderType: type });
+  };
+
   useEffect(() => {
     if (currentOrderType.perpsOnly && !isPerps) {
-      setOrderFormSettings({ orderType: ORDER_TYPES.scale.value });
+      onTypeChange(ORDER_TYPES.scale.value);
     }
   }, [isPerps, currentOrderType]);
 
@@ -56,7 +62,7 @@ const OrderFormType = () => {
             "text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
             { "text-white": orderType === type.value },
           )}
-          onClick={() => setOrderFormSettings({ orderType: type.value })}
+          onClick={() => onTypeChange(type.value)}
         >
           {type.label}
         </span>
@@ -92,7 +98,7 @@ const OrderFormType = () => {
             <li
               key={type.value}
               onClick={() => {
-                setOrderFormSettings({ orderType: type.value });
+                onTypeChange(type.value);
                 setOpen(false);
               }}
               className={cn(

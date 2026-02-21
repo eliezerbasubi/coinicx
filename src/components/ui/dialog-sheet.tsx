@@ -41,7 +41,6 @@ const DialogSheet = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        showCloseButton={false}
         className={className}
         onPointerDownOutside={onPointerDownOutside}
         onOpenAutoFocus={onOpenAutoFocus}

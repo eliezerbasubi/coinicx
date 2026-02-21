@@ -22,7 +22,7 @@ const OrderFormInput = ({
     <label
       htmlFor={props.id}
       className={cn(
-        "w-full h-11 flex items-center gap-x-1 border border-neutral-gray-200 focus-within:border-primary rounded-md px-3",
+        "w-full h-9 flex items-center gap-x-1 border border-neutral-gray-200 focus-within:border-primary rounded-md px-3",
         wrapperClassName,
       )}
     >

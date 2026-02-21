@@ -1,6 +1,4 @@
-import { useMemo, useReducer } from "react";
-
-import { OrderSide, OrderType } from "@/types/trade";
+import { OrderType } from "@/types/trade";
 import {
   calculateMarginRequired,
   calculateOrderValue,
@@ -9,184 +7,72 @@ import { isLimitOrder, isStopOrder } from "@/features/trade/utils/orderTypes";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
+import {
   useAvailableToTrade,
   useMaxTradeSz,
-  useUserTradeStore,
+  useShallowUserTradeStore,
 } from "@/store/trade/user-trade";
 
-type State = {
-  limitPrice: string;
-  triggerPrice: string;
-  size: string;
-  szPercent: number;
-};
-
-const initialState: State = {
-  limitPrice: "",
-  triggerPrice: "",
-  size: "",
-  szPercent: 0,
-};
-
 export const useOrderForm = () => {
-  const [state, dispatch] = useReducer(
-    (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
-    { ...initialState },
-  );
-
   const isSpot = useTradeContext((s) => s.instrumentType === "spot");
-  const szDecimals = useShallowInstrumentStore(
-    (s) => s.assetMeta?.szDecimals || 0,
+  const { size, limitPrice, orderSide, settings } = useShallowOrderFormStore(
+    (s) => ({
+      size: s.size,
+      limitPrice: s.limitPrice,
+      orderSide: s.orderSide,
+      settings: s.settings,
+    }),
   );
-  const orderFormSettings = useTradeContext((s) => s.orderFormSettings);
-  const orderSide = useTradeContext((s) => s.orderSide);
 
   const isBuyOrder = orderSide === "buy";
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
   const availableToTrade = useAvailableToTrade(isBuyOrder);
 
-  const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
-  const setOrderSide = useTradeContext((s) => s.setOrderSide);
-
   const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
+  const leverage = useShallowUserTradeStore((s) => s.leverage?.value || 0);
 
   const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 
-  const numSize = parseFloat(state.size || "0");
-  const orderSizeInBase = orderFormSettings.isSzInNtl
-    ? numSize / midPx
-    : numSize;
+  const orderSizeInBase = useOrderFormStore.getState().getSizeInBase(midPx);
 
-  const isLimitOrderType = isLimitOrder(orderFormSettings.orderType);
+  const isLimitOrderType = isLimitOrder(settings.orderType);
 
-  const orderValueAndMarginRequired = useMemo(() => {
-    const leverage = useUserTradeStore.getState().leverage;
-
-    const orderValue = calculateOrderValue({
-      orderType: orderFormSettings.orderType,
-      orderSize: orderSizeInBase,
-      limitPx: parseFloat(state.limitPrice || "0"),
-      midPx,
-    });
-
-    if (isSpot) {
-      return {
-        orderValue,
-        marginRequired: 0,
-      };
-    }
-
-    const marginRequired = calculateMarginRequired({
-      orderValue,
-      userLeverage: leverage?.value || 0,
-      isReduceOnly: orderFormSettings.reduceOnly,
-    });
-
-    return {
-      orderValue,
-      marginRequired,
-    };
-  }, [
-    isSpot,
-    state.limitPrice,
-    orderSizeInBase,
+  const orderValueAndMargin = calculateOrderValueAndMargin({
+    orderType: settings.orderType,
+    orderSize: orderSizeInBase,
+    limitPx: parseFloat(limitPrice || "0"),
     midPx,
-    orderFormSettings.orderType,
-    orderFormSettings.isSzInNtl,
-    orderFormSettings.reduceOnly,
-  ]);
+    leverage,
+    isSpot,
+    reduceOnly: settings.reduceOnly,
+  });
 
   const hasInsufficientMargin = checkInsufficientMargin({
-    ...orderValueAndMarginRequired,
+    ...orderValueAndMargin,
     balance: availableBalance,
     isBuyOrder,
     isSpot,
     midPx,
-    orderType: orderFormSettings.orderType,
-  });
-
-  const maxOrderSize = getOrderMaxSize({
-    isBuyOrder,
-    isSpot,
-    isSzInNtl: orderFormSettings.isSzInNtl,
-    availableBalance,
-    midPx,
+    orderType: settings.orderType,
   });
 
   const disabled =
-    !numSize ||
+    !parseFloat(size) ||
     !availableBalance ||
-    (isLimitOrderType && !parseFloat(state.limitPrice));
-
-  const onSizeCoinChange = (isNtl: boolean) => {
-    const currentSize = parseFloat(state.size);
-    const newSize = isNtl ? currentSize * midPx : currentSize / midPx;
-
-    const fractionDigits = isNtl ? 2 : szDecimals;
-
-    dispatch({ size: newSize.toFixed(fractionDigits) });
-    setOrderFormSettings({ isSzInNtl: isNtl });
-  };
-
-  const onPercentChange = (percent: number) => {
-    const size = (maxOrderSize * percent) / 100;
-    const fractionDigits = orderFormSettings.isSzInNtl ? 2 : szDecimals;
-
-    dispatch({
-      szPercent: percent,
-      size: size.toFixed(fractionDigits),
-    });
-  };
-
-  const onSizeChange = (size: string) => {
-    const percent = Math.floor((parseFloat(size || "0") / maxOrderSize) * 100);
-
-    dispatch({ size, szPercent: Math.min(percent, 100) });
-  };
-
-  const onOrderSideChange = (orderSide: OrderSide) => {
-    const isBuyOrder = orderSide === "buy";
-
-    if (parseFloat(state.size)) {
-      const availableBalance = useUserTradeStore
-        .getState()
-        .getOrderAvailableBalance({ isBuyOrder, isSpot });
-
-      const maxOrderSize = getOrderMaxSize({
-        isBuyOrder: orderSide === "buy",
-        isSpot,
-        isSzInNtl: orderFormSettings.isSzInNtl,
-        availableBalance,
-        midPx,
-      });
-
-      const percent = (parseFloat(state.size) / maxOrderSize) * 100;
-      dispatch({ szPercent: Math.min(percent, 100) });
-    }
-
-    setOrderSide(orderSide);
-  };
-
-  const onMidClick = () => {
-    dispatch({ limitPrice: midPx.toFixed(szDecimals) });
-  };
+    (isLimitOrderType && !parseFloat(limitPrice));
 
   return {
-    state,
     disabled,
     isBuyOrder,
     orderSide,
     orderSizeInBase,
-    orderType: orderFormSettings.orderType,
-    orderValueAndMarginRequired,
+    orderType: settings.orderType,
+    orderValueAndMargin,
     hasInsufficientMargin,
-    dispatch,
-    onMidClick,
-    onPercentChange,
-    onSizeCoinChange,
-    onSizeChange,
-    onOrderSideChange,
   };
 };
 
@@ -215,19 +101,37 @@ const checkInsufficientMargin = (params: {
   return hasInsufficientMargin;
 };
 
-const getOrderMaxSize = (args: {
-  isSpot: boolean;
-  isSzInNtl: boolean;
-  isBuyOrder: boolean;
+const calculateOrderValueAndMargin = (params: {
+  orderType: OrderType;
+  orderSize: number;
+  limitPx: number;
   midPx: number;
-  availableBalance: number;
+  leverage: number;
+  isSpot: boolean;
+  reduceOnly: boolean;
 }) => {
-  const { isBuyOrder, isSpot, isSzInNtl, availableBalance, midPx } = args;
-  if (isSpot) {
-    if (isBuyOrder)
-      return isSzInNtl ? availableBalance : availableBalance / midPx;
-    return isSzInNtl ? availableBalance * midPx : availableBalance;
+  const orderValue = calculateOrderValue({
+    orderType: params.orderType,
+    orderSize: params.orderSize,
+    limitPx: params.limitPx,
+    midPx: params.midPx,
+  });
+
+  if (params.isSpot) {
+    return {
+      orderValue,
+      marginRequired: 0,
+    };
   }
 
-  return isSzInNtl ? availableBalance * midPx : availableBalance;
+  const marginRequired = calculateMarginRequired({
+    orderValue,
+    userLeverage: params.leverage,
+    isReduceOnly: params.reduceOnly,
+  });
+
+  return {
+    orderValue,
+    marginRequired,
+  };
 };

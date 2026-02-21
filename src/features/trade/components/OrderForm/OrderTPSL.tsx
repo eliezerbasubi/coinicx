@@ -5,13 +5,21 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useTradeContext } from "@/store/trade/hooks";
+import { isLimitOrMarketOrder } from "@/features/trade/utils/orderTypes";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
 
 import OrderTPSLForm from "./OrderTPSLForm";
 
 const OrderTPSL = () => {
-  const showTpSl = useTradeContext((s) => s.orderFormSettings.showTpSl);
-  const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
+  const { orderType, showTpSl } = useShallowOrderFormStore((s) => ({
+    orderType: s.settings.orderType,
+    showTpSl: s.settings.showTpSl,
+  }));
+
+  if (!isLimitOrMarketOrder(orderType)) return null;
 
   return (
     <>
@@ -21,7 +29,9 @@ const OrderTPSL = () => {
           checked={showTpSl}
           className="size-3.5 border-neutral-gray-400 data-[state=checked]:bg-white data-[state=checked]:text-primary-dark data-[state=checked]:border-white"
           onCheckedChange={(checked) =>
-            setOrderFormSettings({ showTpSl: Boolean(checked) })
+            useOrderFormStore
+              .getState()
+              .setSettings({ showTpSl: Boolean(checked) })
           }
         />
         <Label htmlFor="takeProfitAndStopLoss">
@@ -29,7 +39,7 @@ const OrderTPSL = () => {
             <TooltipTrigger
               asChild
               type="button"
-              className="cursor-help text-xs text-neutral-gray-400"
+              className="cursor-help text-xs text-white"
             >
               <p>TP/SL</p>
             </TooltipTrigger>

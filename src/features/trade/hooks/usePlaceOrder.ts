@@ -13,7 +13,10 @@ import { buildOrder } from "@/features/trade/utils/orders";
 import { isStopOrder } from "@/features/trade/utils/orderTypes";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
-import { toParseableNumber } from "@/utils/formatting/normalize-input-number";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
 
 import { useApproveBuilderFee } from "./useApproveBuilderFee";
 import { useEnableTrading } from "./useEnableTrading";
@@ -24,8 +27,11 @@ export const usePlaceOrder = () => {
   const { shouldEnableTrading, enableTrading } = useEnableTrading({ toastId });
   const { builder, approveBuilderFee } = useApproveBuilderFee();
 
-  const orderFormSettings = useTradeContext((s) => s.orderFormSettings);
-  const orderSide = useTradeContext((s) => s.orderSide);
+  const { settings, orderSide } = useShallowOrderFormStore((s) => ({
+    settings: s.settings,
+    orderSide: s.orderSide,
+  }));
+
   const decimals = useTradeContext((state) => state.decimals);
 
   const isBuyOrder = orderSide === "buy";
@@ -41,8 +47,7 @@ export const usePlaceOrder = () => {
     triggerPrice?: string;
     orderSide?: OrderSide;
   }) => {
-    const assetMeta = useInstrumentStore.getState().assetMeta;
-    const assetCtx = useInstrumentStore.getState().assetCtx;
+    const { assetMeta, assetCtx } = useInstrumentStore.getState();
 
     if (!assetMeta || !assetCtx) {
       throw new Error("Asset metadata is not available");
@@ -53,7 +58,7 @@ export const usePlaceOrder = () => {
 
     const size = parseFloat(params.size);
 
-    const sizeInBase = orderFormSettings.isSzInNtl ? size * midPx : size;
+    const sizeInBase = settings.isSzInNtl ? size * midPx : size;
 
     const price = params.entryPrice ? parseFloat(params.entryPrice) : markPx;
 
@@ -63,10 +68,10 @@ export const usePlaceOrder = () => {
       type: params.type,
       price: parseOrderPrice(price, Number(decimals)),
       size: removeTrailingZeros(sizeInBase.toString()),
-      reduceOnly: params.reduceOnly ?? orderFormSettings.reduceOnly,
+      reduceOnly: params.reduceOnly ?? settings.reduceOnly,
       timeInForce:
-        orderFormSettings.orderType === "limit"
-          ? (orderFormSettings.timeInForce as Order["timeInForce"])
+        settings.orderType === "limit"
+          ? (settings.timeInForce as Order["timeInForce"])
           : undefined,
       isMarket: params.isMarket,
       triggerPrice: params.triggerPrice,
@@ -85,7 +90,7 @@ export const usePlaceOrder = () => {
       const tpPrice = parseFloat(params.tpPrice);
 
       const entryPrice =
-        orderFormSettings.orderType === "market"
+        settings.orderType === "market"
           ? calculateSlippageAdjustedPrice({
               entryPrice: tpPrice,
               isBuyOrder: tpslOrderSide === "buy",
@@ -108,7 +113,7 @@ export const usePlaceOrder = () => {
       const slPrice = parseFloat(params.slPrice);
 
       const entryPrice =
-        orderFormSettings.orderType === "market"
+        settings.orderType === "market"
           ? calculateSlippageAdjustedPrice({
               entryPrice: slPrice,
               isBuyOrder: tpslOrderSide === "buy",
@@ -170,22 +175,20 @@ export const usePlaceOrder = () => {
     slPrice?: string;
     isBuyOrder: boolean;
   }) => {
-    const size = params.size;
-
     const entryPrice = calculateSlippageAdjustedPrice({
       entryPrice: parseFloat(params.limitPrice),
       isBuyOrder: params.isBuyOrder,
     });
 
     const order = buildExchangeOrder({
-      size,
+      size: params.size,
       entryPrice: entryPrice.toString(),
       type: "limit",
       isMarket: false,
     });
 
     const tspslOrders = buildTpSlOrders({
-      size,
+      size: params.size,
       tpPrice: params.tpPrice || "",
       slPrice: params.slPrice || "",
     });
@@ -213,7 +216,7 @@ export const usePlaceOrder = () => {
         `Stop price must be ${params.isBuyOrder ? "above" : "below"} the current price`,
       );
     }
-    const isMarket = orderFormSettings.orderType === "stopMarket";
+    const isMarket = settings.orderType === "stopMarket";
     const entryPrice = isMarket
       ? calculateSlippageAdjustedPrice({
           entryPrice: trigger,
@@ -224,7 +227,7 @@ export const usePlaceOrder = () => {
     const order = buildExchangeOrder({
       size,
       entryPrice: entryPrice.toString(),
-      type: orderFormSettings.orderType,
+      type: settings.orderType,
       isMarket,
       triggerPrice: params.triggerPrice,
     });
@@ -235,42 +238,37 @@ export const usePlaceOrder = () => {
     };
   };
 
-  const getExchangeOrders = (e: React.FormEvent<HTMLFormElement>) => {
-    const assetMeta = useInstrumentStore.getState().assetMeta;
-    const assetCtx = useInstrumentStore.getState().assetCtx;
+  const getExchangeOrders = () => {
+    const { assetMeta, assetCtx } = useInstrumentStore.getState();
 
     if (!assetMeta || !assetCtx) {
       throw new Error("Asset metadata is not available");
     }
 
-    const formData = new FormData(e.currentTarget);
-    const formValues = Object.fromEntries(formData.entries()) as Record<
-      string,
-      string
-    >;
+    const formValues = useOrderFormStore.getState();
 
     let orderPayload = {
       orders: [] as OrderParameters["orders"],
       grouping: "na",
     };
 
-    const size = toParseableNumber(formValues.size);
+    const size = formValues.size;
 
-    switch (orderFormSettings.orderType) {
+    switch (settings.orderType) {
       case "market":
         orderPayload = buildMarketOrder({
           size,
-          tpPrice: toParseableNumber(formValues.tpPrice),
-          slPrice: toParseableNumber(formValues.slPrice),
+          tpPrice: formValues.tpslState.tpPrice,
+          slPrice: formValues.tpslState.slPrice,
           isBuyOrder,
         });
         break;
       case "limit":
         orderPayload = buildLimitOrder({
           size,
-          limitPrice: toParseableNumber(formValues.limitPrice),
-          tpPrice: toParseableNumber(formValues.tpPrice),
-          slPrice: toParseableNumber(formValues.slPrice),
+          limitPrice: formValues.limitPrice,
+          tpPrice: formValues.tpslState.tpPrice,
+          slPrice: formValues.tpslState.slPrice,
           isBuyOrder,
         });
         break;
@@ -279,7 +277,7 @@ export const usePlaceOrder = () => {
         orderPayload = buildStopOrders({
           size,
           isBuyOrder,
-          triggerPrice: toParseableNumber(formValues.triggerPrice),
+          triggerPrice: formValues.triggerPrice,
         });
         break;
       default:
@@ -292,9 +290,9 @@ export const usePlaceOrder = () => {
     return orderPayload;
   };
 
-  const placeOrder = async (e: React.FormEvent<HTMLFormElement>) => {
+  const placeOrder = async () => {
     try {
-      const orderPayload = getExchangeOrders(e);
+      const orderPayload = getExchangeOrders();
 
       setProcessing(true);
 
@@ -326,8 +324,8 @@ export const usePlaceOrder = () => {
             break;
           }
           if ("resting" in status) {
-            if (isStopOrder(orderFormSettings.orderType)) {
-              message = `${orderFormSettings.orderType === "stopMarket" ? "Stop market" : "Limit market"} order placed successfully`;
+            if (isStopOrder(settings.orderType)) {
+              message = `${settings.orderType === "stopMarket" ? "Stop market" : "Limit market"} order placed successfully`;
             } else {
               message = "Limit order placed successfully";
             }
@@ -361,16 +359,14 @@ export const usePlaceOrder = () => {
     }
   };
 
-  const onPlaceOrder = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const onPlaceOrder = async () => {
     try {
       // If trading is not enabled, we approve the builder fee and enable trading before placing the order
       if (shouldEnableTrading) {
         return await approveFeeAndEnableTrading();
       }
 
-      await placeOrder(e);
+      await placeOrder();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to place order";
