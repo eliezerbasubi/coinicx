@@ -11,29 +11,28 @@ import {
 } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
+import { useShallowOrderFormStore } from "@/store/trade/order-form";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { useMaxTradeSz, useUserTradeStore } from "@/store/trade/user-trade";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
 
-export const LiquidationPrice = ({
-  size,
-  limitPrice,
-}: {
-  size: number;
-  limitPrice?: string;
-}) => {
+export const LiquidationPrice = ({ size }: { size: number }) => {
   const isPerp = useTradeContext((s) => s.instrumentType === "perps");
-  const isBuyOrder = useTradeContext((s) => s.orderSide === "buy");
   const coin = useTradeContext((s) => s.coin);
   const { data } = useMetaAndAssetCtxs();
 
   const assetMeta = useShallowInstrumentStore((s) => s.assetMeta);
   const assetCtx = useShallowInstrumentStore((s) => s.assetCtx);
   const decimals = useTradeContext((s) => s.decimals ?? 10);
-  const reduceOnly = useTradeContext((s) => s.orderFormSettings.reduceOnly);
-  const maxSlippage = useTradeContext(
-    (s) => s.orderFormSettings.maxSlippage || DEFAULT_ORDER_MAX_SLIPPAGE,
-  );
+
+  const { limitPrice, isBuyOrder, maxSlippage, reduceOnly, orderType } =
+    useShallowOrderFormStore((s) => ({
+      limitPrice: s.limitPrice,
+      isBuyOrder: s.orderSide === "buy",
+      maxSlippage: s.settings.maxSlippage || DEFAULT_ORDER_MAX_SLIPPAGE,
+      reduceOnly: s.settings.reduceOnly,
+      orderType: s.settings.orderType,
+    }));
 
   const liquidationPrice = useMemo(() => {
     const leverage = useUserTradeStore.getState().leverage;
@@ -73,7 +72,7 @@ export const LiquidationPrice = ({
     isBuyOrder,
   ]);
 
-  if (!isPerp) return null;
+  if (!isPerp || orderType === "scale") return null;
 
   return (
     <div className="w-full flex items-center justify-between">
@@ -135,7 +134,7 @@ export const OrderValueAndMarginRequired = ({
 
 export const MaxOrderSize = () => {
   const base = useShallowInstrumentStore((s) => s.assetMeta?.base);
-  const isBuyOrder = useTradeContext((s) => s.orderSide === "buy");
+  const isBuyOrder = useShallowOrderFormStore((s) => s.orderSide === "buy");
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
@@ -192,13 +191,14 @@ const formatFee = (fee?: string) => {
 };
 
 export const OrderSlippage = ({ size }: { size: number }) => {
-  const orderType = useTradeContext((s) => s.orderFormSettings.orderType);
-  const isBuyOrder = useTradeContext((s) => s.orderSide === "buy");
-  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
-
-  const maxSlippage = useTradeContext(
-    (s) => s.orderFormSettings.maxSlippage || DEFAULT_ORDER_MAX_SLIPPAGE,
+  const { isBuyOrder, orderType, maxSlippage } = useShallowOrderFormStore(
+    (s) => ({
+      isBuyOrder: s.orderSide === "buy",
+      orderType: s.settings.orderType,
+      maxSlippage: s.settings.maxSlippage || DEFAULT_ORDER_MAX_SLIPPAGE,
+    }),
   );
+  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
 
   const slippage = useMemo(() => {
     if (orderType !== "market") return 0;

@@ -1,8 +1,4 @@
-import { useReducer } from "react";
-
 // import { Check, ChevronDown } from "lucide-react";
-
-import { OrderFormLimitOffsetType } from "@/types/trade";
 
 // import {
 //   Popover,
@@ -16,32 +12,21 @@ import { OrderFormLimitOffsetType } from "@/types/trade";
 // } from "@/components/ui/tooltip";
 // import { useTradeContext } from "@/store/trade/hooks";
 
-import OrderFormInput from "./OrderFormInput";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
 
-type State = {
-  tpPrice: string;
-  tpLimitOffset: string;
-  slPrice: string;
-  slTriggerOffset: string;
-  tpOffsetType: OrderFormLimitOffsetType;
-  slOffsetType: OrderFormLimitOffsetType;
-};
+import { OrderFormInput } from "./OrderFormInput";
 
 const OrderTPSLForm = () => {
-  const [state, dispatch] = useReducer(
-    (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
-    {
-      tpPrice: "",
-      tpLimitOffset: "",
-      tpOffsetType: "offset",
-      slOffsetType: "offset",
-      slPrice: "",
-      slTriggerOffset: "",
-    },
-  );
+  const { tpPrice, slPrice } = useShallowOrderFormStore((s) => ({
+    tpPrice: s.tpslState.tpPrice,
+    slPrice: s.tpslState.slPrice,
+  }));
 
   const onValueChange = ({ name, value }: { name: string; value: string }) => {
-    dispatch({ [name]: value });
+    useOrderFormStore.getState().setTpslState({ [name]: value });
   };
 
   return (
@@ -56,7 +41,7 @@ const OrderTPSLForm = () => {
             label="TP Price"
             name="tpPrice"
             id="tpPrice"
-            value={state.tpPrice}
+            value={tpPrice}
             wrapperClassName="flex-1"
             onChange={({ target: { name, value } }) =>
               onValueChange?.({ name, value })
@@ -83,7 +68,7 @@ const OrderTPSLForm = () => {
             label="SL Price"
             name="slPrice"
             id="slPrice"
-            value={state.slPrice}
+            value={slPrice}
             wrapperClassName="flex-1"
             onChange={({ target: { name, value } }) =>
               onValueChange?.({ name, value })

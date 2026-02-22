@@ -41,13 +41,15 @@ const DialogSheet = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        showCloseButton={false}
         className={className}
         onPointerDownOutside={onPointerDownOutside}
         onOpenAutoFocus={onOpenAutoFocus}
       >
         <DialogHeader
-          className={cn("p-4", { "sr-only": !title && !description })}
+          className={cn({
+            "sr-only": !title && !description,
+            "gap-0": !title || !description,
+          })}
         >
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

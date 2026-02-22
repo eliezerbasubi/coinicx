@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { Drawer as DrawerPrimitive } from "vaul";
 
+import { OrderSide } from "@/types/trade";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -9,14 +11,16 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useTradeContext } from "@/store/trade/hooks";
+import { useOrderFormStore } from "@/store/trade/order-form";
 
 import OrderForm from "./OrderForm";
 
 const OrderFormMobile = () => {
   const [open, setOpen] = useState(false);
 
-  const setOrderSide = useTradeContext((s) => s.setOrderSide);
+  const onSideChange = (side: OrderSide) => {
+    useOrderFormStore.getState().setOrderSide(side);
+  };
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -27,7 +31,7 @@ const OrderFormMobile = () => {
               type="button"
               size="default"
               className="flex-1 font-bold bg-buy hover:bg-buy/70 text-white capitalize rounded-lg"
-              onClick={() => setOrderSide("buy")}
+              onClick={() => onSideChange("buy")}
             >
               Buy
             </Button>
@@ -35,20 +39,22 @@ const OrderFormMobile = () => {
               type="button"
               size="default"
               className="flex-1 font-bold bg-sell hover:bg-sell/70 text-white capitalize rounded-lg"
-              onClick={() => setOrderSide("sell")}
+              onClick={() => onSideChange("sell")}
             >
               Sell
             </Button>
           </div>
         </div>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-[90vh] p-0">
         <DrawerHeader className="sr-only">
           <DrawerTitle />
           <DrawerDescription />
         </DrawerHeader>
 
-        <OrderForm />
+        <DrawerPrimitive.NestedRoot>
+          <OrderForm className="flex-1 overflow-y-auto" />
+        </DrawerPrimitive.NestedRoot>
       </DrawerContent>
     </Drawer>
   );

@@ -6,8 +6,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
+import { useOrderFormStore } from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
 
 type Props = {
@@ -18,7 +18,7 @@ const SizeCoinSelector = ({ onValueChange }: Props) => {
   const base = useInstrumentStore((s) => s.assetMeta?.base || "");
   const quote = useInstrumentStore((s) => s.assetMeta?.quote || "");
 
-  const isSzInNtl = useTradeContext((s) => s.orderFormSettings.isSzInNtl);
+  const isSzInNtl = useOrderFormStore((s) => s.settings.isSzInNtl);
 
   const options = [
     { label: base, value: false },

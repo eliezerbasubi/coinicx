@@ -2,7 +2,11 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import AdaptivePopover from "@/components/ui/adaptive-popover";
-import { useTradeContext } from "@/store/trade/hooks";
+import { isLimitOrScaleOrder } from "@/features/trade/utils/orderTypes";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
 
 const TIF_OPTIONS = [
@@ -26,30 +30,33 @@ const TIF_OPTIONS = [
 ];
 
 const TIFSelector = () => {
-  const timeInForce = useTradeContext((s) => s.orderFormSettings.timeInForce);
-  const orderType = useTradeContext((s) => s.orderFormSettings.orderType);
-
-  const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
+  const { orderType, timeInForce } = useShallowOrderFormStore((s) => ({
+    orderType: s.settings.orderType,
+    timeInForce: s.settings.timeInForce,
+  }));
 
   const [open, setOpen] = useState(false);
 
   const onValueChange = (value: string) => {
     setOpen(false);
-    setOrderFormSettings({ timeInForce: value });
+    useOrderFormStore.getState().setSettings({ timeInForce: value });
   };
 
-  if (orderType !== "limit") return null;
+  if (!isLimitOrScaleOrder(orderType)) return null;
 
   return (
     <AdaptivePopover
       open={open}
       onOpenChange={setOpen}
       className="p-0"
+      align="start"
       collisionPadding={16}
+      title="Time in Force"
       trigger={
-        <div className="flex items-center text-neutral-gray-400 space-x-1">
-          <p className="text-xs font-medium cursor-pointer uppercase">
-            {timeInForce}
+        <div className="flex items-center text-white space-x-1">
+          <p className="text-xs font-medium cursor-pointer uppercase space-x-1">
+            <span className="text-neutral-gray-400">TIF</span>
+            <span>{timeInForce}</span>
           </p>
           <ChevronDown
             strokeWidth={2.5}
@@ -58,10 +65,6 @@ const TIFSelector = () => {
         </div>
       }
     >
-      <p className="text-sm text-neutral-gray-400 font-semibold block md:hidden">
-        Time in Force
-      </p>
-
       {TIF_OPTIONS.map((option) => (
         <button
           key={option.value}

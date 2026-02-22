@@ -56,7 +56,7 @@ const Header = () => {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <header className="w-full h-16 flex justify-between items-center px-6">
+    <header className="w-full h-16 flex justify-between items-center px-4 md:px-6">
       <p className="text-xl text-primary font-extrabold">CoinicX</p>
 
       <div className="hidden md:flex gap-x-6">
@@ -78,7 +78,7 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-x-4">
-        {(!isConnected && <ConnectButton size="sm" />) || (
+        {(!isConnected && <ConnectButton size="sm" className="w-fit" />) || (
           <RainbowConnectButton
             showBalance={false}
             chainStatus="none"

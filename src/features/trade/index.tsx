@@ -4,7 +4,6 @@ import React from "react";
 import dynamic from "next/dynamic";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { useTradeContext } from "@/store/trade/hooks";
 
 import SpotChart from "./components/Chart";
 import TickerOverview from "./components/TickerOverview";
@@ -31,7 +30,6 @@ const OrderFormMobile = dynamic(
 
 const Trade = () => {
   const isMobile = useIsMobile();
-  const base = useTradeContext((s) => s.base);
 
   return (
     <div className="w-full">
@@ -44,7 +42,7 @@ const Trade = () => {
             <SpotChart />
           </div>
         </div>
-        {isMobile ? <OrderFormMobile key={base} /> : <OrderForm key={base} />}
+        {isMobile ? <OrderFormMobile /> : <OrderForm />}
       </div>
       <TradeUserInfo />
     </div>

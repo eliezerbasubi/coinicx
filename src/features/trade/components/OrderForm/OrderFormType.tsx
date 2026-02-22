@@ -4,6 +4,10 @@ import { ChevronDown } from "lucide-react";
 import { OrderType } from "@/types/trade";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { useTradeContext } from "@/store/trade/hooks";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
 
 const ORDER_TYPES: Record<
@@ -20,30 +24,36 @@ const ORDER_TYPES: Record<
 
 const FEATURED_ORDER_TYPES = [ORDER_TYPES.market, ORDER_TYPES.limit];
 
-const MORE_ORDER_TYPES = Object.values(ORDER_TYPES).filter(
+const OTHER_ORDER_TYPES = Object.values(ORDER_TYPES).filter(
   (type) =>
     !FEATURED_ORDER_TYPES.some((featured) => featured.value === type.value),
 );
 
 const OrderFormType = () => {
-  const orderType = useTradeContext((s) => s.orderFormSettings.orderType);
+  const orderType = useShallowOrderFormStore((s) => s.settings.orderType);
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const [open, setOpen] = useState(false);
-
-  const setOrderFormSettings = useTradeContext((s) => s.setOrderFormSettings);
 
   const isNonPrimaryType = orderType !== "limit" && orderType !== "market";
 
   const currentOrderType = ORDER_TYPES[orderType];
 
   const orderTypes = isPerps
-    ? MORE_ORDER_TYPES
-    : MORE_ORDER_TYPES.filter((type) => !type.perpsOnly);
+    ? OTHER_ORDER_TYPES
+    : OTHER_ORDER_TYPES.filter((type) => !type.perpsOnly);
+
+  const [currentOtherType, setCurrentOtherType] = useState<OrderType>(
+    orderTypes[0].value,
+  );
+
+  const onTypeChange = (type: OrderType) => {
+    useOrderFormStore.getState().setSettings({ orderType: type });
+  };
 
   useEffect(() => {
     if (currentOrderType.perpsOnly && !isPerps) {
-      setOrderFormSettings({ orderType: ORDER_TYPES.scale.value });
+      onTypeChange(ORDER_TYPES.scale.value);
     }
   }, [isPerps, currentOrderType]);
 
@@ -56,7 +66,7 @@ const OrderFormType = () => {
             "text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
             { "text-white": orderType === type.value },
           )}
-          onClick={() => setOrderFormSettings({ orderType: type.value })}
+          onClick={() => onTypeChange(type.value)}
         >
           {type.label}
         </span>
@@ -74,12 +84,9 @@ const OrderFormType = () => {
               "w-fit py-2 flex items-center gap-x-1 text-xs font-semibold text-neutral-gray-400 cursor-pointer",
               { "text-white": isNonPrimaryType },
             )}
+            onClick={() => onTypeChange(currentOtherType)}
           >
-            <p>
-              {isNonPrimaryType
-                ? ORDER_TYPES[orderType].label
-                : orderTypes[0].label}
-            </p>
+            <p>{ORDER_TYPES[currentOtherType].label}</p>
             <ChevronDown
               className="size-3 text-neutral-gray-400"
               strokeWidth={4}
@@ -92,7 +99,8 @@ const OrderFormType = () => {
             <li
               key={type.value}
               onClick={() => {
-                setOrderFormSettings({ orderType: type.value });
+                onTypeChange(type.value);
+                setCurrentOtherType(type.value);
                 setOpen(false);
               }}
               className={cn(
