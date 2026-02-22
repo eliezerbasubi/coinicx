@@ -33,10 +33,7 @@ export const usePlaceOrder = () => {
     orderSide: s.orderSide,
   }));
 
-  const { decimals, quote } = useTradeContext((s) => ({
-    decimals: s.decimals,
-    quote: s.quote,
-  }));
+  const decimals = useTradeContext((s) => s.decimals);
 
   const isBuyOrder = orderSide === "buy";
 
@@ -251,16 +248,13 @@ export const usePlaceOrder = () => {
     );
 
     if (hasSmallestOrder) {
-      throw new Error(
-        `Smallest order must have a minimum value of 10 ${quote}`,
-      );
+      throw new Error("Smallest order must have a minimum value of 10 USD");
     }
 
     const orders = scaleOrder.map((order) => {
       return buildExchangeOrder({
         size: order.size.toString(),
         entryPrice: order.price.toString(),
-        triggerPrice: order.triggerPrice?.toString(),
         type: "limit",
         isMarket: false,
       });

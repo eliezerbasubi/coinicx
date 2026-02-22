@@ -25,7 +25,6 @@ type ExecutionOrder = {
 type ScaleOrder = {
   price: number;
   size: number;
-  triggerPrice: number | null;
 };
 
 type TPSLState = {
@@ -81,7 +80,7 @@ const initialState: OrderFormState = {
     reduceOnly: false,
     timeInForce: "Gtc",
   },
-  scaleDistribution: "normal",
+  scaleDistribution: "equal",
   scaleOrder: [],
 };
 

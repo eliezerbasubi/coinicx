@@ -119,6 +119,13 @@ const calculateOrderValueAndMargin = (params: {
   reduceOnly: boolean;
   scaleOrderValue: number;
 }) => {
+  if (params.orderType === "scale" && !params.scaleOrderValue) {
+    return {
+      orderValue: 0,
+      marginRequired: 0,
+    };
+  }
+
   const orderValue =
     params.scaleOrderValue ||
     calculateOrderValue({

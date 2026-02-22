@@ -56,7 +56,7 @@ export type TradeType = "spot" | "isolated" | "cross" | "grid";
 
 export type InstrumentType = "spot" | "perps";
 
-export type ScaleDistribution = "normal" | "sequential" | "conditional";
+export type ScaleDistribution = "equal" | "increasing" | "decreasing";
 
 export type HLOrder = OrderParameters["orders"][number];
 

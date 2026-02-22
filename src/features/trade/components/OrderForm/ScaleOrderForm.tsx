@@ -1,15 +1,11 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { ScaleDistribution } from "@/types/trade";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
-import {
-  formatPriceToDecimal,
-  formatSize,
-  parseOrderPrice,
-} from "@/features/trade/utils";
+import { formatPriceToDecimal, formatSize } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import {
@@ -29,18 +25,20 @@ type State = {
   endPrice: string;
   totalOrders: string;
   skew: string;
-  triggerDistance: string;
 };
 
 const ScaleOrderForm = () => {
   const orderType = useOrderFormStore((s) => s.settings.orderType);
 
-  const { scaleDistribution, isBuyOrder } = useShallowOrderFormStore((s) => ({
+  const { scaleDistribution, size } = useShallowOrderFormStore((s) => ({
     scaleDistribution: s.scaleDistribution,
-    isBuyOrder: s.orderSide === "buy",
+    size: s.size,
   }));
 
-  const totalSize = useOrderFormStore.getState().getSizeInBase();
+  const totalSize = useMemo(
+    () => useOrderFormStore.getState().getSizeInBase(),
+    [size],
+  );
 
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
@@ -49,7 +47,6 @@ const ScaleOrderForm = () => {
       endPrice: "",
       totalOrders: "",
       skew: "1",
-      triggerDistance: "",
     },
   );
 
@@ -67,7 +64,7 @@ const ScaleOrderForm = () => {
     });
   };
 
-  const scaleOrders = useMemo(() => {
+  const scaleOrder = useMemo(() => {
     const { startPrice, endPrice, totalOrders, skew } = state;
 
     const orderCount = parseFloat(totalOrders || "0");
@@ -75,6 +72,7 @@ const ScaleOrderForm = () => {
     if (!startPrice || !endPrice || orderCount < MIN_ORDERS || !totalSize) {
       return [];
     }
+
     const orders = [];
     const skewFactor = parseFloat(skew || "1");
 
@@ -82,20 +80,39 @@ const ScaleOrderForm = () => {
     const step =
       (parseFloat(endPrice) - parseFloat(startPrice)) / countMinusOne;
 
-    const baseSize = (2 * totalSize) / (orderCount * (1 + skewFactor));
-    const sizeStep = (baseSize * skewFactor - baseSize) / countMinusOne;
-
     for (let i = 0; i < orderCount; i++) {
       const price = parseFloat(startPrice) + i * step;
       if (!price) return [];
 
-      const size = baseSize + i * sizeStep;
+      let size: number;
+
+      if (scaleDistribution === "equal") {
+        size = totalSize / orderCount;
+      } else {
+        // Linear weights scaled by skew:
+        // - Increasing: weight grows with index (first order smallest, last largest)
+        // - Decreasing: weight shrinks with index (first order largest, last smallest)
+        // Skew of 0 → equal sizes; higher skew → steeper ramp.
+        const weight =
+          scaleDistribution === "increasing"
+            ? 1 + i * skewFactor
+            : 1 + (countMinusOne - i) * skewFactor;
+
+        size = weight;
+      }
 
       orders.push({
         price,
         size,
-        triggerPrice: null,
       });
+    }
+
+    // Normalize sizes so they sum to totalSize
+    if (scaleDistribution !== "equal") {
+      const rawTotal = orders.reduce((sum, o) => sum + o.size, 0);
+      for (const order of orders) {
+        order.size = (order.size / rawTotal) * totalSize;
+      }
     }
     return orders;
   }, [
@@ -103,38 +120,9 @@ const ScaleOrderForm = () => {
     state.startPrice,
     state.totalOrders,
     state.skew,
-    state.triggerDistance,
     scaleDistribution,
     totalSize,
   ]);
-
-  const scaleOrder = useMemo(() => {
-    if (scaleDistribution === "conditional") {
-      const offset = parseFloat(state.triggerDistance || "0");
-
-      return scaleOrders.map((order) => ({
-        ...order,
-        triggerPrice: isBuyOrder ? order.price + offset : order.price - offset,
-      }));
-    }
-
-    if (scaleDistribution === "sequential") {
-      let prevTriggerPrice: number | null = null;
-
-      return scaleOrders
-        .sort((a, b) => (isBuyOrder ? b.price - a.price : a.price - b.price))
-        .map((order) => {
-          const scaleOrder = {
-            ...order,
-            triggerPrice: prevTriggerPrice,
-          };
-
-          prevTriggerPrice = order.price;
-          return scaleOrder;
-        });
-    }
-    return scaleOrders;
-  }, [state.triggerDistance, scaleOrders, scaleDistribution, isBuyOrder]);
 
   useEffect(() => {
     useOrderFormStore.getState().setScaleOrder(scaleOrder);
@@ -187,42 +175,30 @@ const ScaleOrderForm = () => {
         />
       </div>
 
-      <SizeDistribution
-        triggerDistance={state.triggerDistance}
-        onValueChange={(value) => dispatch({ triggerDistance: value })}
-      />
+      <SizeDistribution />
     </div>
   );
 };
 
 const DISTRIBUTIONS = [
   {
-    title: "Normal",
-    value: "normal",
-    description: "All orders are placed at the same time",
+    title: "Equal",
+    value: "equal",
+    description: "All orders have equal size",
   },
   {
-    title: "Sequential",
-    value: "sequential",
-    description: "Orders are placed one after another",
+    title: "Increasing",
+    value: "increasing",
+    description: "Size increases linearly with price",
   },
   {
-    title: "Conditional",
-    value: "conditional",
-    description:
-      "Each order is visible on the order book only when its trigger price is hit.",
+    title: "Decreasing",
+    value: "decreasing",
+    description: "Size decreases linearly with price",
   },
 ] as const;
 
-type SizeDistributionProps = {
-  triggerDistance: string;
-  onValueChange: (value: string) => void;
-};
-
-const SizeDistribution = ({
-  triggerDistance,
-  onValueChange,
-}: SizeDistributionProps) => {
+const SizeDistribution = () => {
   const scaleDistribution = useShallowOrderFormStore(
     (s) => s.scaleDistribution,
   );
@@ -232,10 +208,6 @@ const SizeDistribution = ({
   const onDistributionChange = (value: ScaleDistribution) => {
     useOrderFormStore.getState().setScaleDistribution(value);
     setOpen(false);
-  };
-
-  const onTriggerDistanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onValueChange(e.target.value);
   };
 
   return (
@@ -286,17 +258,6 @@ const SizeDistribution = ({
           ))}
         </AdaptivePopover>
       </div>
-      <Visibility visible={scaleDistribution === "conditional"}>
-        <OrderFormInput
-          name="triggerDistance"
-          id="triggerDistance"
-          label="Trigger Distance"
-          className="text-sm"
-          trailing={<TrailingQuote />}
-          value={triggerDistance}
-          onChange={onTriggerDistanceChange}
-        />
-      </Visibility>
     </div>
   );
 };
@@ -319,20 +280,23 @@ const PreviewOrders = () => {
     isBuyOrder: s.orderSide === "buy",
   }));
 
-  const { orderValue, totalSize } = useMemo(() => {
+  const { orderValue, totalSize, hasSmallestOrder } = useMemo(() => {
     return scaleOrder.reduce(
       (acc, order) => {
+        const orderValue = order.price * order.size;
+
         return {
-          orderValue: acc.orderValue + order.price * order.size,
+          orderValue: acc.orderValue + orderValue,
           totalSize: acc.totalSize + order.size,
+          hasSmallestOrder: acc.hasSmallestOrder || orderValue < 10,
         };
       },
-      { orderValue: 0, totalSize: 0 },
+      { orderValue: 0, totalSize: 0, hasSmallestOrder: false },
     );
   }, [scaleOrder]);
 
-  const avgPrice = orderValue / totalSize;
-  const margin = orderValue / leverage;
+  const avgPrice = orderValue ? orderValue / totalSize : 0;
+  const margin = orderValue ? orderValue / leverage : 0;
 
   const [open, setOpen] = useState(false);
 
@@ -357,7 +321,7 @@ const PreviewOrders = () => {
             Size ({base})
           </p>
           <p className="text-xs font-medium text-neutral-gray-400">
-            Trigger Condition
+            Order Value ({quote})
           </p>
         </div>
         <div className="w-full max-h-[400px] overflow-y-auto">
@@ -380,12 +344,7 @@ const PreviewOrders = () => {
                     </span>
                   </p>
                   <p className="text-xs font-medium text-white">
-                    {order.triggerPrice
-                      ? `${isBuyOrder ? "Below" : "Above"} ${formatPriceToDecimal(
-                          order.triggerPrice,
-                          decimals,
-                        )}`
-                      : "Immediate"}
+                    {formatPriceToDecimal(order.price * order.size, decimals)}
                   </p>
                 </div>
               );
@@ -402,22 +361,25 @@ const PreviewOrders = () => {
             </p>
           </div>
         </Visibility>
+        <Visibility visible={hasSmallestOrder}>
+          <div className="w-full p-2 mt-3 rounded-lg text-primary text-center bg-primary/10 space-y-1">
+            <p className="text-xs font-medium">
+              Smallest order must have a minimum value of 10 USD
+            </p>
+          </div>
+        </Visibility>
 
         <div className="w-full p-2 mt-3 rounded-lg bg-neutral-gray-600 space-y-1">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-white">Average Price</p>
+            <p className="text-xs font-medium text-neutral-gray-400">
+              Average Price
+            </p>
             <p className="text-xs font-medium text-white">
               {formatPriceToDecimal(avgPrice, 2)} {quote}
             </p>
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-white">Total Value</p>
-            <p className="text-xs font-medium text-white">
-              {formatPriceToDecimal(orderValue, 2)} {quote}
-            </p>
-          </div>
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-white">Margin</p>
+            <p className="text-xs font-medium text-neutral-gray-400">Margin</p>
             <p className="text-xs font-medium text-white">
               {formatPriceToDecimal(margin, 2)} {quote}
             </p>
