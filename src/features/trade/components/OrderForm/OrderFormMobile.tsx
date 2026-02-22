@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Drawer as DrawerPrimitive } from "vaul";
 
 import { OrderSide } from "@/types/trade";
 import { Button } from "@/components/ui/button";
@@ -45,13 +46,15 @@ const OrderFormMobile = () => {
           </div>
         </div>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-[90vh]">
         <DrawerHeader className="sr-only">
           <DrawerTitle />
           <DrawerDescription />
         </DrawerHeader>
 
-        <OrderForm />
+        <DrawerPrimitive.NestedRoot>
+          <OrderForm className="flex-1 overflow-y-auto" />
+        </DrawerPrimitive.NestedRoot>
       </DrawerContent>
     </Drawer>
   );

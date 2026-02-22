@@ -13,6 +13,7 @@
   --color-neutral-gray-300: #5e6673;
   --color-neutral-gray-400: #848e9c;
   --color-neutral-gray-500: #b7bdc6;
+  --color-neutral-gray-600: #dedede0f;
 }
 
 @theme inline {

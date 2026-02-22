@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 
-import { OrderSide, OrderType } from "@/types/trade";
+import { OrderSide, OrderType, ScaleDistribution } from "@/types/trade";
 
 import { useInstrumentStore } from "./instrument";
 import { useUserTradeStore } from "./user-trade";
@@ -16,17 +16,16 @@ type OrderFormSettings = {
   maxSlippage?: number;
 };
 
-type ScaleFormState = {
-  startPrice: string;
-  endPrice: string;
-  totalOrders: string;
-  skew: string;
-};
-
-type ExecutionOrderParams = {
+type ExecutionOrder = {
   size: string;
   limitPrice: string;
   triggerPrice: string;
+};
+
+type ScaleOrder = {
+  price: number;
+  size: number;
+  triggerPrice: number | null;
 };
 
 type TPSLState = {
@@ -37,17 +36,19 @@ type TPSLState = {
 type OrderFormState = {
   orderSide: OrderSide;
   szPercent: number;
-  scaleFormState: ScaleFormState;
   settings: OrderFormSettings;
   tpslState: TPSLState;
-} & ExecutionOrderParams;
+  scaleDistribution: ScaleDistribution;
+  scaleOrder: ScaleOrder[];
+} & ExecutionOrder;
 
 type OrderFormActions = {
   setOrderSide: (orderSide: OrderSide) => void;
   setSettings: (settings: Partial<OrderFormSettings>) => void;
   setTpslState: (data: Partial<TPSLState>) => void;
-  setScaleFormState: (data: Partial<ScaleFormState>) => void;
-  setExecutionOrderParams: (data: Partial<ExecutionOrderParams>) => void;
+  setExecutionOrder: (data: Partial<ExecutionOrder>) => void;
+  setScaleDistribution: (value: ScaleDistribution) => void;
+  setScaleOrder: (value: ScaleOrder[]) => void;
   onSizeCoinChange: (isNtl: boolean) => void;
   onPercentChange: (percent: number) => void;
   onSizeChange: (size: string) => void;
@@ -80,12 +81,8 @@ const initialState: OrderFormState = {
     reduceOnly: false,
     timeInForce: "Gtc",
   },
-  scaleFormState: {
-    startPrice: "",
-    endPrice: "",
-    totalOrders: "",
-    skew: "",
-  },
+  scaleDistribution: "normal",
+  scaleOrder: [],
 };
 
 export const useOrderFormStore = create<OrderFormStore>()(
@@ -93,10 +90,14 @@ export const useOrderFormStore = create<OrderFormStore>()(
     (set, get) => ({
       ...initialState,
       setOrderSide: (orderSide) => set({ orderSide }),
+      setScaleOrder: (scaleOrder) => set({ scaleOrder }),
       setTpslState(data) {
         set((state) => ({ ...state, ...data }));
       },
-      setExecutionOrderParams(data) {
+      setScaleDistribution(value) {
+        set((state) => ({ ...state, scaleDistribution: value }));
+      },
+      setExecutionOrder(data) {
         set((state) => ({ ...state, ...data }));
       },
       getSizeInBase(midPx?: number) {
@@ -108,11 +109,6 @@ export const useOrderFormStore = create<OrderFormStore>()(
       setSettings(settings) {
         set((state) => ({
           settings: { ...state.settings, ...settings },
-        }));
-      },
-      setScaleFormState(data) {
-        set((state) => ({
-          scaleFormState: { ...state.scaleFormState, ...data },
         }));
       },
       calculateOrderSize({ isSpot, isBuyOrder }) {
@@ -142,13 +138,19 @@ export const useOrderFormStore = create<OrderFormStore>()(
         const { size, settings } = get();
         const { midPx, szDecimals } = getInstrumentData();
 
-        const currentSize = parseFloat(size);
-        const newSize = isNtl ? currentSize * midPx : currentSize / midPx;
+        let currentSize = size;
 
-        const fractionDigits = isNtl ? 2 : szDecimals;
+        if (currentSize) {
+          const parsedSize = parseFloat(currentSize);
+          const newSize = isNtl ? parsedSize * midPx : parsedSize / midPx;
+
+          const fractionDigits = isNtl ? 2 : szDecimals;
+
+          currentSize = newSize.toFixed(fractionDigits);
+        }
 
         set({
-          size: newSize.toFixed(fractionDigits),
+          size: currentSize,
           settings: { ...settings, isSzInNtl: isNtl },
         });
       },
@@ -178,8 +180,10 @@ export const useOrderFormStore = create<OrderFormStore>()(
           isBuyOrder: false,
         });
 
+        const maxOrderSizeValue = maxOrderSize || 1;
+
         const percent = Math.floor(
-          (parseFloat(size || "0") / maxOrderSize) * 100,
+          (parseFloat(size || "0") / maxOrderSizeValue) * 100,
         );
 
         set({ size, szPercent: Math.min(percent, 100) });
@@ -193,7 +197,9 @@ export const useOrderFormStore = create<OrderFormStore>()(
         if (parseFloat(size)) {
           const maxOrderSize = calculateOrderSize({ isSpot, isBuyOrder });
 
-          const percent = (parseFloat(size) / maxOrderSize) * 100;
+          const maxOrderSizeValue = maxOrderSize || 1;
+
+          const percent = (parseFloat(size) / maxOrderSizeValue) * 100;
           set({ szPercent: Math.min(percent, 100) });
         }
 
@@ -215,6 +221,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
     {
       name: "orderform-storage",
       partialize: (state) => ({
+        scaleDistribution: state.scaleDistribution,
         settings: state.settings,
       }),
     },

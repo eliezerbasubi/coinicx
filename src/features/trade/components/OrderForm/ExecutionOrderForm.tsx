@@ -9,9 +9,9 @@ import {
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 
-import OrderFormInput from "./OrderFormInput";
+import { OrderFormInput, TrailingQuote } from "./OrderFormInput";
 
-const LimitMarketOrderForm = () => {
+const ExecutionOrderForm = () => {
   const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);
   const { orderType, triggerPrice, limitPrice } = useShallowOrderFormStore(
     (s) => ({
@@ -24,7 +24,7 @@ const LimitMarketOrderForm = () => {
   const onValueChange = (
     args: Partial<{ triggerPrice: string; limitPrice: string }>,
   ) => {
-    useOrderFormStore.getState().setExecutionOrderParams(args);
+    useOrderFormStore.getState().setExecutionOrder(args);
   };
 
   if (orderType === "scale") return null;
@@ -38,13 +38,7 @@ const LimitMarketOrderForm = () => {
           value={triggerPrice}
           label="Stop Price"
           className="text-sm"
-          trailing={
-            <div className="flex items-center gap-x-2">
-              <span className="text-neutral-300 text-sm font-medium">
-                {quote}
-              </span>
-            </div>
-          }
+          trailing={<TrailingQuote />}
           onChange={(e) => onValueChange?.({ triggerPrice: e.target.value })}
         />
       </Visibility>
@@ -78,4 +72,4 @@ const LimitMarketOrderForm = () => {
   );
 };
 
-export default LimitMarketOrderForm;
+export default ExecutionOrderForm;

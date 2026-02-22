@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { OrderType } from "@/types/trade";
 import {
   calculateMarginRequired,
@@ -18,14 +20,14 @@ import {
 
 export const useOrderForm = () => {
   const isSpot = useTradeContext((s) => s.instrumentType === "spot");
-  const { size, limitPrice, orderSide, settings } = useShallowOrderFormStore(
-    (s) => ({
+  const { size, limitPrice, orderSide, settings, scaleOrder } =
+    useShallowOrderFormStore((s) => ({
       size: s.size,
       limitPrice: s.limitPrice,
       orderSide: s.orderSide,
       settings: s.settings,
-    }),
-  );
+      scaleOrder: s.scaleOrder,
+    }));
 
   const isBuyOrder = orderSide === "buy";
 
@@ -41,6 +43,11 @@ export const useOrderForm = () => {
 
   const isLimitOrderType = isLimitOrder(settings.orderType);
 
+  const scaleOrderValue = useMemo(() => {
+    if (scaleOrder.length === 0) return 0;
+    return scaleOrder.reduce((acc, order) => acc + order.price * order.size, 0);
+  }, [scaleOrder]);
+
   const orderValueAndMargin = calculateOrderValueAndMargin({
     orderType: settings.orderType,
     orderSize: orderSizeInBase,
@@ -49,6 +56,7 @@ export const useOrderForm = () => {
     leverage,
     isSpot,
     reduceOnly: settings.reduceOnly,
+    scaleOrderValue,
   });
 
   const hasInsufficientMargin = checkInsufficientMargin({
@@ -109,13 +117,16 @@ const calculateOrderValueAndMargin = (params: {
   leverage: number;
   isSpot: boolean;
   reduceOnly: boolean;
+  scaleOrderValue: number;
 }) => {
-  const orderValue = calculateOrderValue({
-    orderType: params.orderType,
-    orderSize: params.orderSize,
-    limitPx: params.limitPx,
-    midPx: params.midPx,
-  });
+  const orderValue =
+    params.scaleOrderValue ||
+    calculateOrderValue({
+      orderType: params.orderType,
+      orderSize: params.orderSize,
+      limitPx: params.limitPx,
+      midPx: params.midPx,
+    });
 
   if (params.isSpot) {
     return {

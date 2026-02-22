@@ -25,12 +25,13 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
   const assetCtx = useShallowInstrumentStore((s) => s.assetCtx);
   const decimals = useTradeContext((s) => s.decimals ?? 10);
 
-  const { limitPrice, isBuyOrder, maxSlippage, reduceOnly } =
+  const { limitPrice, isBuyOrder, maxSlippage, reduceOnly, orderType } =
     useShallowOrderFormStore((s) => ({
       limitPrice: s.limitPrice,
       isBuyOrder: s.orderSide === "buy",
       maxSlippage: s.settings.maxSlippage || DEFAULT_ORDER_MAX_SLIPPAGE,
       reduceOnly: s.settings.reduceOnly,
+      orderType: s.settings.orderType,
     }));
 
   const liquidationPrice = useMemo(() => {
@@ -71,7 +72,7 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
     isBuyOrder,
   ]);
 
-  if (!isPerp) return null;
+  if (!isPerp || orderType === "scale") return null;
 
   return (
     <div className="w-full flex items-center justify-between">

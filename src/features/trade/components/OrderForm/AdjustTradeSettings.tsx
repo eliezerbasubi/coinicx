@@ -241,7 +241,7 @@ const AdjustLeverage = () => {
       open={open}
       onOpenChange={setOpen}
       title="Adjust Leverage"
-      className="p-0 gap-0"
+      className="gap-0 pb-4 md:pb-0"
       trigger={
         <Button
           variant="secondary"
@@ -252,7 +252,7 @@ const AdjustLeverage = () => {
         </Button>
       }
     >
-      <div className="w-full px-4 pb-4">
+      <div className="w-full pt-4 px-4 md:px-0">
         <div className="flex items-center justify-between mb-4">
           <ChevronLeft
             role="button"

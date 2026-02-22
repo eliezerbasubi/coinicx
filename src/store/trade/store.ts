@@ -13,7 +13,7 @@ export interface TradeStoreProps {
 }
 
 export interface TradeStoreState extends TradeStoreProps {
-  /** Decimals for the selected asset */
+  /** Price decimals of the current asset */
   decimals: number | null;
   onAssetChange: (data: {
     base: string;

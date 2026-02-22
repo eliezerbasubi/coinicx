@@ -46,7 +46,10 @@ const DialogSheet = ({
         onOpenAutoFocus={onOpenAutoFocus}
       >
         <DialogHeader
-          className={cn("p-4", { "sr-only": !title && !description })}
+          className={cn({
+            "sr-only": !title && !description,
+            "gap-0": !title || !description,
+          })}
         >
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

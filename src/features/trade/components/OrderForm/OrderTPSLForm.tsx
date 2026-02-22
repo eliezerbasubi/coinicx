@@ -17,7 +17,7 @@ import {
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 
-import OrderFormInput from "./OrderFormInput";
+import { OrderFormInput } from "./OrderFormInput";
 
 const OrderTPSLForm = () => {
   const { tpPrice, slPrice } = useShallowOrderFormStore((s) => ({

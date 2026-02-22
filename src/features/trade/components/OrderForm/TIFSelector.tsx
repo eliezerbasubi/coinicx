@@ -51,6 +51,7 @@ const TIFSelector = () => {
       className="p-0"
       align="start"
       collisionPadding={16}
+      title="Time in Force"
       trigger={
         <div className="flex items-center text-white space-x-1">
           <p className="text-xs font-medium cursor-pointer uppercase space-x-1">
@@ -64,10 +65,6 @@ const TIFSelector = () => {
         </div>
       }
     >
-      <p className="text-sm text-neutral-gray-400 font-semibold block md:hidden">
-        Time in Force
-      </p>
-
       {TIF_OPTIONS.map((option) => (
         <button
           key={option.value}

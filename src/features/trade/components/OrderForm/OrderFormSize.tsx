@@ -5,7 +5,7 @@ import {
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 
-import OrderFormInput from "./OrderFormInput";
+import { OrderFormInput } from "./OrderFormInput";
 import OrderFormSlider from "./OrderFormSlider";
 import SizeCoinSelector from "./SizeCoinSelector";
 

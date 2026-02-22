@@ -16,11 +16,10 @@ import { cn } from "@/utils/cn";
 
 import AdjustTradeSettings from "./AdjustTradeSettings";
 import AvailableBalance from "./AvailableBalance";
-import LimitMarketOrderForm from "./LimitMarketOrderForm";
+import ExecutionOrderForm from "./ExecutionOrderForm";
 import {
   Fees,
   LiquidationPrice,
-  MaxOrderSize,
   OrderSlippage,
   OrderValueAndMarginRequired,
 } from "./OrderDetails";
@@ -42,11 +41,20 @@ const ORDER_FORM_SIDES: Record<OrderSide, { spot: string; perp: string }> = {
   },
 };
 
-const OrderForm = () => {
+type Props = {
+  className?: string;
+};
+
+const OrderForm = ({ className }: Props) => {
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   return (
-    <div className="w-full md:max-w-80 bg-primary-dark md:rounded-md pb-12 md:pb-0">
+    <div
+      className={cn(
+        "w-full md:max-w-80 bg-primary-dark md:rounded-md pb-6 md:pb-0",
+        className,
+      )}
+    >
       <div className="w-full border-b border-neutral-gray-200 px-4 h-11 flex items-center justify-between">
         <p className="text-sm font-semibold">Trade</p>
       </div>
@@ -62,7 +70,7 @@ const OrderForm = () => {
       <form className="w-full px-4 space-y-2 overflow-x-hidden">
         <AvailableBalance />
 
-        <LimitMarketOrderForm />
+        <ExecutionOrderForm />
 
         <OrderFormSize />
 
@@ -169,7 +177,6 @@ const OrderFormFooter = () => {
       <div className="w-full space-y-2">
         <LiquidationPrice size={orderSizeInBase} />
         <OrderValueAndMarginRequired data={orderValueAndMargin} />
-        <MaxOrderSize />
         <OrderSlippage size={orderSizeInBase} />
         <Fees />
       </div>

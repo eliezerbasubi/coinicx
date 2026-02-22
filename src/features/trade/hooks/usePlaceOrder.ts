@@ -6,6 +6,7 @@ import { Order, OrderSide } from "@/types/trade";
 import {
   calculateSlippageAdjustedPrice,
   formatPriceToDecimal,
+  formatSize,
   parseOrderPrice,
   removeTrailingZeros,
 } from "@/features/trade/utils";
@@ -32,7 +33,10 @@ export const usePlaceOrder = () => {
     orderSide: s.orderSide,
   }));
 
-  const decimals = useTradeContext((state) => state.decimals);
+  const { decimals, quote } = useTradeContext((s) => ({
+    decimals: s.decimals,
+    quote: s.quote,
+  }));
 
   const isBuyOrder = orderSide === "buy";
 
@@ -44,6 +48,7 @@ export const usePlaceOrder = () => {
     type: Order["type"];
     isMarket?: boolean;
     reduceOnly?: boolean;
+    isSzInNtl?: boolean;
     triggerPrice?: string;
     orderSide?: OrderSide;
   }) => {
@@ -58,7 +63,8 @@ export const usePlaceOrder = () => {
 
     const size = parseFloat(params.size);
 
-    const sizeInBase = settings.isSzInNtl ? size * midPx : size;
+    const isNtl = params.isSzInNtl ?? settings.isSzInNtl;
+    const sizeInBase = isNtl ? size * midPx : size;
 
     const price = params.entryPrice ? parseFloat(params.entryPrice) : markPx;
 
@@ -67,7 +73,7 @@ export const usePlaceOrder = () => {
       side: params.orderSide ?? orderSide,
       type: params.type,
       price: parseOrderPrice(price, Number(decimals)),
-      size: removeTrailingZeros(sizeInBase.toString()),
+      size: formatSize(sizeInBase.toString(), assetMeta.szDecimals),
       reduceOnly: params.reduceOnly ?? settings.reduceOnly,
       timeInForce:
         settings.orderType === "limit"
@@ -175,14 +181,9 @@ export const usePlaceOrder = () => {
     slPrice?: string;
     isBuyOrder: boolean;
   }) => {
-    const entryPrice = calculateSlippageAdjustedPrice({
-      entryPrice: parseFloat(params.limitPrice),
-      isBuyOrder: params.isBuyOrder,
-    });
-
     const order = buildExchangeOrder({
       size: params.size,
-      entryPrice: entryPrice.toString(),
+      entryPrice: params.limitPrice,
       type: "limit",
       isMarket: false,
     });
@@ -199,14 +200,11 @@ export const usePlaceOrder = () => {
     };
   };
 
-  const buildStopOrders = (params: {
-    size: string;
-    isBuyOrder: boolean;
-    triggerPrice: string;
-  }) => {
+  const buildStopOrders = (params: { size: string; isBuyOrder: boolean }) => {
     const size = params.size;
     const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
-    const trigger = parseFloat(params.triggerPrice);
+    const triggerPrice = useOrderFormStore.getState().triggerPrice;
+    const trigger = parseFloat(triggerPrice);
 
     if (
       (params.isBuyOrder && trigger < midPx) ||
@@ -229,7 +227,7 @@ export const usePlaceOrder = () => {
       entryPrice: entryPrice.toString(),
       type: settings.orderType,
       isMarket,
-      triggerPrice: params.triggerPrice,
+      triggerPrice,
     });
 
     return {
@@ -238,13 +236,43 @@ export const usePlaceOrder = () => {
     };
   };
 
-  const getExchangeOrders = () => {
-    const { assetMeta, assetCtx } = useInstrumentStore.getState();
+  const buildScaleOrders = () => {
+    const scaleOrder = useOrderFormStore.getState().scaleOrder;
 
-    if (!assetMeta || !assetCtx) {
-      throw new Error("Asset metadata is not available");
+    if (!scaleOrder.length) {
+      return {
+        orders: [],
+        grouping: "na",
+      };
     }
 
+    const hasSmallestOrder = scaleOrder.some(
+      (order) => order.price * order.size < 10,
+    );
+
+    if (hasSmallestOrder) {
+      throw new Error(
+        `Smallest order must have a minimum value of 10 ${quote}`,
+      );
+    }
+
+    const orders = scaleOrder.map((order) => {
+      return buildExchangeOrder({
+        size: order.size.toString(),
+        entryPrice: order.price.toString(),
+        triggerPrice: order.triggerPrice?.toString(),
+        type: "limit",
+        isMarket: false,
+      });
+    });
+
+    return {
+      orders,
+      grouping: "na",
+    };
+  };
+
+  const getExchangeOrders = () => {
     const formValues = useOrderFormStore.getState();
 
     let orderPayload = {
@@ -277,8 +305,10 @@ export const usePlaceOrder = () => {
         orderPayload = buildStopOrders({
           size,
           isBuyOrder,
-          triggerPrice: formValues.triggerPrice,
         });
+        break;
+      case "scale":
+        orderPayload = buildScaleOrders();
         break;
       default:
         throw new Error("Unsupported order type");
