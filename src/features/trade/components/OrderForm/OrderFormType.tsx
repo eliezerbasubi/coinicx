@@ -24,7 +24,7 @@ const ORDER_TYPES: Record<
 
 const FEATURED_ORDER_TYPES = [ORDER_TYPES.market, ORDER_TYPES.limit];
 
-const MORE_ORDER_TYPES = Object.values(ORDER_TYPES).filter(
+const OTHER_ORDER_TYPES = Object.values(ORDER_TYPES).filter(
   (type) =>
     !FEATURED_ORDER_TYPES.some((featured) => featured.value === type.value),
 );
@@ -40,8 +40,12 @@ const OrderFormType = () => {
   const currentOrderType = ORDER_TYPES[orderType];
 
   const orderTypes = isPerps
-    ? MORE_ORDER_TYPES
-    : MORE_ORDER_TYPES.filter((type) => !type.perpsOnly);
+    ? OTHER_ORDER_TYPES
+    : OTHER_ORDER_TYPES.filter((type) => !type.perpsOnly);
+
+  const [currentOtherType, setCurrentOtherType] = useState<OrderType>(
+    orderTypes[0].value,
+  );
 
   const onTypeChange = (type: OrderType) => {
     useOrderFormStore.getState().setSettings({ orderType: type });
@@ -80,12 +84,9 @@ const OrderFormType = () => {
               "w-fit py-2 flex items-center gap-x-1 text-xs font-semibold text-neutral-gray-400 cursor-pointer",
               { "text-white": isNonPrimaryType },
             )}
+            onClick={() => onTypeChange(currentOtherType)}
           >
-            <p>
-              {isNonPrimaryType
-                ? ORDER_TYPES[orderType].label
-                : orderTypes[0].label}
-            </p>
+            <p>{ORDER_TYPES[currentOtherType].label}</p>
             <ChevronDown
               className="size-3 text-neutral-gray-400"
               strokeWidth={4}
@@ -99,6 +100,7 @@ const OrderFormType = () => {
               key={type.value}
               onClick={() => {
                 onTypeChange(type.value);
+                setCurrentOtherType(type.value);
                 setOpen(false);
               }}
               className={cn(
