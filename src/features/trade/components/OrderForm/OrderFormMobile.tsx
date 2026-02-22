@@ -46,7 +46,7 @@ const OrderFormMobile = () => {
           </div>
         </div>
       </DrawerTrigger>
-      <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-[90vh]">
+      <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-[90vh] p-0">
         <DrawerHeader className="sr-only">
           <DrawerTitle />
           <DrawerDescription />

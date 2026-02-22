@@ -305,7 +305,7 @@ const PreviewOrders = () => {
       open={open}
       onOpenChange={setOpen}
       title="Preview Scaled Orders"
-      className="sm:max-w-md"
+      className="px-4 md:px-0 sm:max-w-md"
       trigger={
         <p className="text-primary text-xs font-semibold cursor-pointer">
           Preview
