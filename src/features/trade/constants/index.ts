@@ -51,7 +51,8 @@ export const TRADE_TYPES: Array<{ label: string; value: TradeType }> = [
 
 export const COINICX_BUILDER_SETTINGS = {
   b: "0xCf7e559aDA0E979BbbFF1B263Ea60185a9A594e4",
-  f: 40,
+  perps: 40,
+  spot: 20,
 } as const;
 
 export const COINICX_AGENT_SETTINGS = {
