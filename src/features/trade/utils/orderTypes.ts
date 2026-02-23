@@ -18,6 +18,12 @@ export function isLimitOrScaleOrder(type: OrderType) {
 export function isMarketOrder(type: OrderType) {
   return type === "market" || type === "stopMarket";
 }
+export function isExecutionOrder(type: OrderType) {
+  return isLimitOrder(type) || isMarketOrder(type) || isStopOrder(type);
+}
+export function isScaleOrTwapOrder(type: OrderType) {
+  return type === "scale" || type === "twap";
+}
 export function getOrderTif(type: OrderType) {
   return type === "market" ? "FrontendMarket" : "Gtc";
 }

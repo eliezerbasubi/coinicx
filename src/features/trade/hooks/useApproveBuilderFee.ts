@@ -45,7 +45,10 @@ export const useApproveBuilderFee = () => {
         maxFeeRate: toMaxFeeRate(MAX_FEE_RATE), // Let the user approve the max fee rate
       });
 
-      queryClient.setQueryData([QUERY_KEYS.maxBuilderFee, address], fee);
+      queryClient.setQueryData(
+        [QUERY_KEYS.maxBuilderFee, address],
+        MAX_FEE_RATE,
+      );
 
       return true;
     } catch (error) {

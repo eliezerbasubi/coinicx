@@ -32,6 +32,11 @@ type TPSLState = {
   slPrice: string;
 };
 
+type TwapOrder = {
+  minutes: number;
+  randomize: boolean;
+};
+
 type OrderFormState = {
   orderSide: OrderSide;
   szPercent: number;
@@ -39,6 +44,7 @@ type OrderFormState = {
   tpslState: TPSLState;
   scaleDistribution: ScaleDistribution;
   scaleOrder: ScaleOrder[];
+  twapOrder: TwapOrder;
 } & ExecutionOrder;
 
 type OrderFormActions = {
@@ -48,6 +54,7 @@ type OrderFormActions = {
   setExecutionOrder: (data: Partial<ExecutionOrder>) => void;
   setScaleDistribution: (value: ScaleDistribution) => void;
   setScaleOrder: (value: ScaleOrder[]) => void;
+  setTwapOrder: (value: Partial<TwapOrder>) => void;
   onSizeCoinChange: (isNtl: boolean) => void;
   onPercentChange: (percent: number) => void;
   onSizeChange: (size: string) => void;
@@ -80,6 +87,10 @@ const initialState: OrderFormState = {
     reduceOnly: false,
     timeInForce: "Gtc",
   },
+  twapOrder: {
+    minutes: 1,
+    randomize: false,
+  },
   scaleDistribution: "equal",
   scaleOrder: [],
 };
@@ -108,6 +119,12 @@ export const useOrderFormStore = create<OrderFormStore>()(
       setSettings(settings) {
         set((state) => ({
           settings: { ...state.settings, ...settings },
+        }));
+      },
+      setTwapOrder(value) {
+        set((state) => ({
+          ...state,
+          twapOrder: { ...state.twapOrder, ...value },
         }));
       },
       calculateOrderSize({ isSpot, isBuyOrder }) {

@@ -7,6 +7,7 @@ import ConnectButton from "@/components/common/ConnectButton";
 import Visibility from "@/components/common/Visibility";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
+import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
   useOrderFormStore,
@@ -20,8 +21,10 @@ import ExecutionOrderForm from "./ExecutionOrderForm";
 import {
   Fees,
   LiquidationPrice,
+  MaxOrderSize,
   OrderSlippage,
   OrderValueAndMarginRequired,
+  TwapDetails,
 } from "./OrderDetails";
 import OrderFormSize from "./OrderFormSize";
 import OrderFormType from "./OrderFormType";
@@ -29,6 +32,7 @@ import OrderTPSL from "./OrderTPSL";
 import ReduceOnly from "./ReduceOnly";
 import ScaleOrderForm from "./ScaleOrderForm";
 import TIFSelector from "./TIFSelector";
+import TwapOrderForm from "./TwapOrderForm";
 
 const ORDER_FORM_SIDES: Record<OrderSide, { spot: string; perp: string }> = {
   buy: {
@@ -47,6 +51,7 @@ type Props = {
 
 const OrderForm = ({ className }: Props) => {
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
+  const orderType = useOrderFormStore((s) => s.settings.orderType);
 
   return (
     <div
@@ -70,11 +75,19 @@ const OrderForm = ({ className }: Props) => {
       <form className="w-full px-4 space-y-2 overflow-x-hidden">
         <AvailableBalance />
 
-        <ExecutionOrderForm />
+        <Visibility visible={isExecutionOrder(orderType)}>
+          <ExecutionOrderForm />
+        </Visibility>
 
         <OrderFormSize />
 
-        <ScaleOrderForm />
+        <Visibility visible={orderType === "scale"}>
+          <ScaleOrderForm />
+        </Visibility>
+
+        <Visibility visible={orderType === "twap"}>
+          <TwapOrderForm />
+        </Visibility>
 
         <div className="w-full flex items-center justify-between">
           <Visibility visible={isPerps}>
@@ -133,6 +146,7 @@ const OrderFormFooter = () => {
     disabled,
     isBuyOrder,
     orderSide,
+    orderType,
     orderSizeInBase,
     orderValueAndMargin,
     hasInsufficientMargin,
@@ -176,8 +190,17 @@ const OrderFormFooter = () => {
 
       <div className="w-full space-y-2">
         <LiquidationPrice size={orderSizeInBase} />
+
         <OrderValueAndMarginRequired data={orderValueAndMargin} />
+
         <OrderSlippage size={orderSizeInBase} />
+
+        <Visibility visible={orderType === "twap"}>
+          <TwapDetails size={orderSizeInBase} />
+        </Visibility>
+
+        <MaxOrderSize />
+
         <Fees />
       </div>
     </>

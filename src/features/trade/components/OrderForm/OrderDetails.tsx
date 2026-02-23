@@ -9,9 +9,16 @@ import {
   estimateLiquidationPrice,
   estimateSlippagePercent,
 } from "@/features/trade/utils";
+import {
+  calculateNumberOfOrders,
+  calculateSubOrderSize,
+} from "@/features/trade/utils/twap";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { useShallowOrderFormStore } from "@/store/trade/order-form";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/store/trade/order-form";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { useMaxTradeSz, useUserTradeStore } from "@/store/trade/user-trade";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
@@ -72,7 +79,7 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
     isBuyOrder,
   ]);
 
-  if (!isPerp || orderType === "scale") return null;
+  if (!isPerp || orderType === "scale" || orderType === "twap") return null;
 
   return (
     <div className="w-full flex items-center justify-between">
@@ -101,6 +108,9 @@ export const OrderValueAndMarginRequired = ({
 }) => {
   const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);
   const isPerp = useTradeContext((s) => s.instrumentType === "perps");
+  const orderType = useShallowOrderFormStore((s) => s.settings.orderType);
+
+  if (orderType === "twap") return null;
 
   return (
     <>
@@ -230,6 +240,45 @@ export const OrderSlippage = ({ size }: { size: number }) => {
         <span>/</span>
         <span>Max: {(maxSlippage * 100).toFixed(2)}%</span>
       </p>
+    </div>
+  );
+};
+
+export const TwapDetails = ({ size }: { size: number }) => {
+  const base = useTradeContext((s) => s.base);
+
+  const minutes = useShallowOrderFormStore((s) => s.twapOrder.minutes);
+
+  const sizePerSuborder = calculateSubOrderSize({
+    size,
+    minutes,
+  });
+
+  const numOfOrders = calculateNumberOfOrders(minutes);
+
+  return (
+    <div className="w-full space-y-2">
+      <div className="w-full flex items-center justify-between">
+        <p className="text-xs text-neutral-gray-400">Frequency</p>
+
+        <p className="text-xs font-medium">30 seconds</p>
+      </div>
+      <div className="w-full flex items-center justify-between">
+        <p className="text-xs text-neutral-gray-400">Size per Suborder</p>
+
+        <p className="text-xs font-medium">
+          {formatNumberWithFallback(sizePerSuborder, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}{" "}
+          {base}
+        </p>
+      </div>
+      <div className="w-full flex items-center justify-between">
+        <p className="text-xs text-neutral-gray-400">Number of Orders</p>
+
+        <p className="text-xs font-medium">{numOfOrders || 1}</p>
+      </div>
     </div>
   );
 };

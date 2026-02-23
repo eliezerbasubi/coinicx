@@ -8,7 +8,6 @@ import {
   formatPriceToDecimal,
   formatSize,
   parseOrderPrice,
-  removeTrailingZeros,
 } from "@/features/trade/utils";
 import { buildOrder } from "@/features/trade/utils/orders";
 import { isStopOrder } from "@/features/trade/utils/orderTypes";
@@ -19,6 +18,7 @@ import {
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 
+import { calculateSubOrderSize, MAX_MINUTES, MIN_MINUTES } from "../utils/twap";
 import { useApproveBuilderFee } from "./useApproveBuilderFee";
 import { useEnableTrading } from "./useEnableTrading";
 
@@ -70,7 +70,7 @@ export const usePlaceOrder = () => {
       side: params.orderSide ?? orderSide,
       type: params.type,
       price: parseOrderPrice(price, Number(decimals)),
-      size: formatSize(sizeInBase.toString(), assetMeta.szDecimals),
+      size: formatSize(sizeInBase, assetMeta.szDecimals),
       reduceOnly: params.reduceOnly ?? settings.reduceOnly,
       timeInForce:
         settings.orderType === "limit"
@@ -266,6 +266,78 @@ export const usePlaceOrder = () => {
     };
   };
 
+  const placeTwapOrder = async () => {
+    try {
+      const { twapOrder, size, settings } = useOrderFormStore.getState();
+
+      const { assetCtx, assetMeta } = useInstrumentStore.getState();
+
+      if (!assetCtx || !assetMeta) {
+        throw new Error("Asset metadata is not available");
+      }
+
+      const parsedSize = parseFloat(size || "0");
+
+      const subOrderSize = calculateSubOrderSize({
+        size: parsedSize,
+        minutes: twapOrder.minutes,
+      });
+
+      const subOrderValue = subOrderSize * assetCtx.midPx;
+
+      if (subOrderValue < 10) {
+        throw new Error(
+          "Smallest TWAP suborder must have minimum value of 10 USD",
+        );
+      }
+
+      if (twapOrder.minutes < MIN_MINUTES) {
+        throw new Error(
+          `Running time must be greater than or equal to ${MIN_MINUTES} minutes`,
+        );
+      }
+
+      if (twapOrder.minutes > MAX_MINUTES) {
+        throw new Error("Running time must be less than or equal to 24 hours");
+      }
+
+      setProcessing(true);
+
+      toast.loading("Creating TWAP order", {
+        id: toastId,
+      });
+
+      // Ensure the user has approved the builder fee before placing the order
+      await approveBuilderFee();
+
+      const exchClient = await enableTrading();
+
+      await exchClient.twapOrder({
+        twap: {
+          a: assetMeta.assetId,
+          b: isBuyOrder,
+          m: twapOrder.minutes,
+          s: formatSize(parsedSize, assetMeta.szDecimals),
+          r: settings.reduceOnly,
+          t: twapOrder.randomize,
+        },
+      });
+
+      toast.success("TWAP order created successfully", {
+        id: toastId,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create TWAP order";
+
+      toast.error(message, {
+        id: toastId,
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const getExchangeOrders = () => {
     const formValues = useOrderFormStore.getState();
 
@@ -390,6 +462,9 @@ export const usePlaceOrder = () => {
         return await approveFeeAndEnableTrading();
       }
 
+      if (settings.orderType === "twap") {
+        return await placeTwapOrder();
+      }
       await placeOrder();
     } catch (error) {
       const message =
