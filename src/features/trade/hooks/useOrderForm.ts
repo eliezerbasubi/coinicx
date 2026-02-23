@@ -5,7 +5,12 @@ import {
   calculateMarginRequired,
   calculateOrderValue,
 } from "@/features/trade/utils";
-import { isLimitOrder, isStopOrder } from "@/features/trade/utils/orderTypes";
+import {
+  isLimitOrder,
+  isScaleOrTwapOrder,
+  isStopOrder,
+} from "@/features/trade/utils/orderTypes";
+import { isValidTwapMinutes } from "@/features/trade/utils/twap";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import {
@@ -20,13 +25,14 @@ import {
 
 export const useOrderForm = () => {
   const isSpot = useTradeContext((s) => s.instrumentType === "spot");
-  const { size, limitPrice, orderSide, settings, scaleOrder } =
+  const { size, limitPrice, orderSide, settings, scaleOrder, twapOrder } =
     useShallowOrderFormStore((s) => ({
       size: s.size,
       limitPrice: s.limitPrice,
       orderSide: s.orderSide,
       settings: s.settings,
       scaleOrder: s.scaleOrder,
+      twapOrder: s.twapOrder,
     }));
 
   const isBuyOrder = orderSide === "buy";
@@ -71,7 +77,8 @@ export const useOrderForm = () => {
   const disabled =
     !parseFloat(size) ||
     !availableBalance ||
-    (isLimitOrderType && !parseFloat(limitPrice));
+    (isLimitOrderType && !parseFloat(limitPrice)) ||
+    (settings.orderType === "twap" && !isValidTwapMinutes(twapOrder.minutes));
 
   return {
     disabled,
@@ -119,7 +126,7 @@ const calculateOrderValueAndMargin = (params: {
   reduceOnly: boolean;
   scaleOrderValue: number;
 }) => {
-  if (params.orderType === "scale" && !params.scaleOrderValue) {
+  if (isScaleOrTwapOrder(params.orderType) && !params.scaleOrderValue) {
     return {
       orderValue: 0,
       marginRequired: 0,

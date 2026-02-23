@@ -28,8 +28,6 @@ type State = {
 };
 
 const ScaleOrderForm = () => {
-  const orderType = useOrderFormStore((s) => s.settings.orderType);
-
   const { scaleDistribution, size } = useShallowOrderFormStore((s) => ({
     scaleDistribution: s.scaleDistribution,
     size: s.size,
@@ -127,8 +125,6 @@ const ScaleOrderForm = () => {
   useEffect(() => {
     useOrderFormStore.getState().setScaleOrder(scaleOrder);
   }, [scaleOrder]);
-
-  if (orderType !== "scale") return null;
 
   return (
     <div className="w-full space-y-2">

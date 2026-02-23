@@ -21,13 +21,11 @@ const ExecutionOrderForm = () => {
     }),
   );
 
-  const onValueChange = (
-    args: Partial<{ triggerPrice: string; limitPrice: string }>,
-  ) => {
-    useOrderFormStore.getState().setExecutionOrder(args);
+  const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    useOrderFormStore.getState().setExecutionOrder({
+      [e.target.name]: e.target.value,
+    });
   };
-
-  if (orderType === "scale") return null;
 
   return (
     <React.Fragment>
@@ -39,7 +37,7 @@ const ExecutionOrderForm = () => {
           label="Stop Price"
           className="text-sm"
           trailing={<TrailingQuote />}
-          onChange={(e) => onValueChange?.({ triggerPrice: e.target.value })}
+          onChange={onValueChange}
         />
       </Visibility>
       <Visibility visible={isLimitOrder(orderType)}>
@@ -65,7 +63,7 @@ const ExecutionOrderForm = () => {
               </Button>
             </div>
           }
-          onChange={(e) => onValueChange?.({ limitPrice: e.target.value })}
+          onChange={onValueChange}
         />
       </Visibility>
     </React.Fragment>

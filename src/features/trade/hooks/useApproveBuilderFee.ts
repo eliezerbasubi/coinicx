@@ -5,13 +5,21 @@ import { useAccount } from "wagmi";
 import { ERROR_NAME } from "@/constants/errors";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import { hlExchangeClient, hlInfoClient } from "@/services/transport";
+import { useTradeContext } from "@/store/trade/hooks";
 
 import { COINICX_BUILDER_SETTINGS } from "../constants";
+
+const MAX_FEE_RATE = 100;
 
 export const useApproveBuilderFee = () => {
   const { address } = useAccount();
 
   const builderAddress = getAddress(COINICX_BUILDER_SETTINGS.b);
+  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
+
+  const fee = isPerps
+    ? COINICX_BUILDER_SETTINGS.perps
+    : COINICX_BUILDER_SETTINGS.spot;
 
   const queryClient = useQueryClient();
 
@@ -28,18 +36,18 @@ export const useApproveBuilderFee = () => {
   });
 
   const approveBuilderFee = async () => {
-    if (maxBuilderFee === COINICX_BUILDER_SETTINGS.f) return true;
+    if (maxBuilderFee && maxBuilderFee >= MAX_FEE_RATE) return true;
 
     try {
       const exchClient = await hlExchangeClient();
       await exchClient.approveBuilderFee({
         builder: builderAddress,
-        maxFeeRate: toMaxFeeRate(COINICX_BUILDER_SETTINGS.f),
+        maxFeeRate: toMaxFeeRate(MAX_FEE_RATE), // Let the user approve the max fee rate
       });
 
       queryClient.setQueryData(
         [QUERY_KEYS.maxBuilderFee, address],
-        COINICX_BUILDER_SETTINGS.f,
+        MAX_FEE_RATE,
       );
 
       return true;
@@ -60,16 +68,13 @@ export const useApproveBuilderFee = () => {
   return {
     builder: {
       b: builderAddress,
-      f: COINICX_BUILDER_SETTINGS.f,
+      f: fee,
     },
     maxBuilderFeeStatus,
     approveBuilderFee,
   };
 };
 
-/**
- * Converts the builder fee from tenths of a basis point to a percentage string.
- */
 const toMaxFeeRate = (feeInTenthsOfBips: number): `${string}%` => {
   return `${feeInTenthsOfBips * 0.001}%`;
 };

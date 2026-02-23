@@ -19,7 +19,7 @@ export const formatPriceToDecimal = (
   });
 };
 
-export const formatSize = (rawSize: string, szDecimals: number) => {
+export const formatSize = (rawSize: string | number, szDecimals: number) => {
   return removeTrailingZeros(Math.abs(Number(rawSize)).toFixed(szDecimals));
 };
 
