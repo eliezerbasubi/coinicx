@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
-import UnderlineTooltip from "@/components/common/UnderlineTooltip";
 import Visibility from "@/components/common/Visibility";
+import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { DEFAULT_ORDER_MAX_SLIPPAGE } from "@/features/trade/constants";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { useUserFees } from "@/features/trade/hooks/useUserFees";
@@ -85,19 +85,25 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
 
   return (
     <div className="w-full flex items-center justify-between">
-      <UnderlineTooltip
-        className="text-xs text-neutral-gray-400"
-        content="The liquidation price is the price at which your position will be liquidated if it is not closed."
+      <AdaptiveTooltip
+        variant="underline"
+        title="Liquidation Price"
+        trigger={
+          <p className="text-xs text-neutral-gray-400">Liquidation Price</p>
+        }
       >
-        <p>Liquidation Price</p>
-      </UnderlineTooltip>
+        <p>
+          The liquidation price is the price at which your position will be
+          liquidated if it is not closed.
+        </p>
+      </AdaptiveTooltip>
 
       <p className="text-xs font-medium">
         {formatNumberWithFallback(liquidationPrice || 0, {
           style: "currency",
           minimumFractionDigits: decimals,
           maximumFractionDigits: decimals,
-        })}{" "}
+        })}
       </p>
     </div>
   );
@@ -119,24 +125,28 @@ export const OrderValueAndMarginRequired = ({
       <div className="w-full flex items-center justify-between">
         <p className="text-xs text-neutral-gray-400">Order Value</p>
 
-        <p className="text-xs font-medium">
-          {formatNumberWithFallback(data.orderValue, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}{" "}
-          {quote}
+        <p className="text-xs font-medium space-x-1">
+          <span>
+            {formatNumberWithFallback(data.orderValue, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </span>
+          <span>{quote}</span>
         </p>
       </div>
       <Visibility visible={isPerp}>
         <div className="w-full flex items-center justify-between">
           <p className="text-xs text-neutral-gray-400">Margin</p>
 
-          <p className="text-xs font-medium">
-            {formatNumberWithFallback(data.marginRequired, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
-            {quote}
+          <p className="text-xs font-medium space-x-1">
+            <span>
+              {formatNumberWithFallback(data.marginRequired, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+            <span>{quote}</span>
           </p>
         </div>
       </Visibility>
@@ -157,8 +167,9 @@ export const MaxOrderSize = () => {
     <div className="w-full flex items-center justify-between">
       <p className="text-xs text-neutral-gray-400">Max</p>
 
-      <p className="text-xs font-medium">
-        {formatNumberWithFallback(maxTradeSz)} {base}
+      <p className="text-xs font-medium space-x-1">
+        <span>{formatNumberWithFallback(maxTradeSz)}</span>
+        <span>{base}</span>
       </p>
     </div>
   );
@@ -177,13 +188,16 @@ export const Fees = () => {
 
   return (
     <div className="w-full flex items-center justify-between">
-      <UnderlineTooltip
-        className="text-xs text-neutral-gray-400"
-        content={`Taker orders pay a ${taker} fee. Maker orders pay a ${maker} fee.`}
-        contentClassName="max-w-fit"
+      <AdaptiveTooltip
+        variant="underline"
+        className="max-w-fit"
+        title="Fees"
+        trigger={<p className="text-xs text-neutral-gray-400">Fees</p>}
       >
-        <p>Fees</p>
-      </UnderlineTooltip>
+        <p>
+          Taker orders pay a {taker} fee. Maker orders pay a {maker} fee.
+        </p>
+      </AdaptiveTooltip>
 
       <p className="text-xs font-medium space-x-1">
         <span>{formatFee(fees.taker)}</span>
@@ -229,13 +243,17 @@ export const OrderSlippage = ({ size }: { size: number }) => {
 
   return (
     <div className="w-full flex items-center justify-between">
-      <UnderlineTooltip
-        className="text-xs text-neutral-gray-400"
-        content="Average execution price compared to mid price based on current order book"
-        contentClassName="max-w-fit"
+      <AdaptiveTooltip
+        variant="underline"
+        title="Slippage"
+        className="max-w-fit"
+        trigger={<p className="text-xs text-neutral-gray-400">Slippage</p>}
       >
-        <p>Slippage</p>
-      </UnderlineTooltip>
+        <p>
+          Average execution price compared to mid price based on current order
+          book
+        </p>
+      </AdaptiveTooltip>
 
       <p className="text-xs text-primary font-medium space-x-1">
         <span>Est. {(slippage ?? 0).toFixed(4)}%</span>

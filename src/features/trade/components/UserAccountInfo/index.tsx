@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import UnderlineTooltip from "@/components/common/UnderlineTooltip";
+import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
@@ -121,17 +121,16 @@ const PerpsEquity = () => {
       </div>
       <div className="w-full pl-2 space-y-1">
         <div className="flex items-center justify-between text-xs">
-          <UnderlineTooltip
-            contentClassName="max-w-fit"
-            content={
-              <p>
-                Total Net Transfers + Total Realized Profit + Total Net Funding
-                Fees
-              </p>
-            }
+          <AdaptiveTooltip
+            variant="underline"
+            className="max-w-fit"
+            trigger={<p className="text-neutral-gray-400">Balance</p>}
           >
-            <p className="text-neutral-gray-400">Balance</p>
-          </UnderlineTooltip>
+            <p>
+              Total Net Transfers + Total Realized Profit + Total Net Funding
+              Fees
+            </p>
+          </AdaptiveTooltip>
           <p className="text-white font-medium">
             {formatNumber(accountValue - unrealizedPnl, {
               style: "currency",
@@ -140,14 +139,17 @@ const PerpsEquity = () => {
         </div>
 
         <div className="flex items-center justify-between text-xs">
-          <UnderlineTooltip
-            contentClassName="max-w-fit"
-            content={
-              <p>Approximate account value if all positions were closed</p>
-            }
+          <AdaptiveTooltip
+            variant="underline"
+            className="max-w-fit"
+            title="Unrealized PnL"
+            trigger={<p className="text-neutral-gray-400">Unrealized PnL</p>}
           >
-            <p className="text-neutral-gray-400">Unrealized PnL</p>
-          </UnderlineTooltip>
+            <p>
+              Total Net Transfers + Total Realized Profit + Total Net Funding
+              Fees
+            </p>
+          </AdaptiveTooltip>
           <p className="text-white font-medium">
             {formatNumber(unrealizedPnl, { style: "currency" })}
           </p>
@@ -180,16 +182,19 @@ const AccountMargin = () => {
 
       <div className="w-full mt-1 space-y-1">
         <div className="flex items-center justify-between text-xs">
-          <UnderlineTooltip
-            content={
-              <p>
-                Maintenance Margin / Portfolio Value. Your cross positions will
-                be liquidated if Margin Ratio reaches 100%.
-              </p>
+          <AdaptiveTooltip
+            variant="underline"
+            className="max-w-fit"
+            title="Cross Margin Ratio"
+            trigger={
+              <p className="text-neutral-gray-400">Cross Margin Ratio</p>
             }
           >
-            <p className="text-neutral-gray-400">Cross Margin Ratio</p>
-          </UnderlineTooltip>
+            <p>
+              Maintenance Margin / Portfolio Value. Your cross positions will be
+              liquidated if Margin Ratio reaches 100%.
+            </p>
+          </AdaptiveTooltip>
           <p className="text-white font-medium">
             {formatNumber(crossMarginRatio * 100, {
               style: "percent",
@@ -200,33 +205,36 @@ const AccountMargin = () => {
         </div>
 
         <div className="flex items-center justify-between text-xs">
-          <UnderlineTooltip
-            contentClassName="max-w-fit"
-            content={
-              <p>
-                Minimum portfolio value required to keep your cross positions
-                open
-              </p>
+          <AdaptiveTooltip
+            variant="underline"
+            className="max-w-fit"
+            title="Maintenance Margin"
+            trigger={
+              <p className="text-neutral-gray-400">Maintenance Margin</p>
             }
           >
-            <p className="text-neutral-gray-400">Maintenance Margin</p>
-          </UnderlineTooltip>
+            <p>
+              Minimum portfolio value required to keep your cross positions open
+            </p>
+          </AdaptiveTooltip>
           <p className="text-white font-medium">
             {formatNumber(crossMaintenanceMarginUsed, { style: "currency" })}
           </p>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <UnderlineTooltip
-            contentClassName="max-w-fit"
-            content={
-              <p>
-                Cross Account Leverage = Total Cross Positions Value / Cross
-                Account Value
-              </p>
+          <AdaptiveTooltip
+            variant="underline"
+            className="max-w-fit"
+            title="Cross Account Leverage"
+            trigger={
+              <p className="text-neutral-gray-400">Cross Account Leverage</p>
             }
           >
-            <p className="text-neutral-gray-400">Cross Account Leverage</p>
-          </UnderlineTooltip>
+            <p>
+              Cross Account Leverage = Total Cross Positions Value / Cross
+              Account Value
+            </p>
+          </AdaptiveTooltip>
           <p className="text-white font-medium">
             {formatNumber(crossAccountLeverage, {
               minimumFractionDigits: 2,

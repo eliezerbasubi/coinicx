@@ -1,36 +1,69 @@
 import React from "react";
+import { cva, VariantProps } from "class-variance-authority";
 
 import { useIsDesktop } from "@/hooks/useIsMobile";
 import { cn } from "@/utils/cn";
 
-import DrawerSheet from "./drawer-sheet";
+import { Button } from "./button";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "./drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 type Props = {
   open?: boolean;
   title?: React.ReactNode;
   trigger: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   hideArrow?: boolean;
+  variant?: "default" | "underline";
   side?: React.ComponentProps<typeof TooltipContent>["side"];
   onOpenChange?: (open: boolean) => void;
 };
 
-const AdaptiveTooltip = ({ hideArrow, title, side, ...props }: Props) => {
+const adaptiveTooltipVariants = cva("bg-neutral-gray-200", {
+  variants: {
+    variant: {
+      default:
+        "w-32 bg-primary-dark rounded-md border border-neutral-gray-200 shadow-md p-0",
+      underline: "max-w-64 text-neutral-gray-500 font-medium",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+const AdaptiveTooltip = ({
+  hideArrow,
+  title,
+  side,
+  variant = "default",
+  ...props
+}: Props & VariantProps<typeof adaptiveTooltipVariants>) => {
   const isDesktop = useIsDesktop();
 
   if (isDesktop) {
     return (
       <Tooltip open={props.open} onOpenChange={props.onOpenChange}>
-        <TooltipTrigger asChild>{props.trigger}</TooltipTrigger>
+        <TooltipTrigger
+          asChild
+          className={cn({
+            "underline decoration-dashed cursor-help": variant === "underline",
+          })}
+        >
+          {props.trigger}
+        </TooltipTrigger>
         <TooltipContent
           hideArrow={hideArrow}
           side={side}
-          className={cn(
-            "w-32 bg-primary-dark rounded-md border border-neutral-gray-200 shadow-md p-0",
-            props.className,
-          )}
+          className={cn(adaptiveTooltipVariants({ variant }), props.className)}
         >
           {props.children}
         </TooltipContent>
@@ -38,7 +71,33 @@ const AdaptiveTooltip = ({ hideArrow, title, side, ...props }: Props) => {
     );
   }
 
-  return <DrawerSheet title={title} {...props} />;
+  return (
+    <Drawer open={props.open} onOpenChange={props.onOpenChange}>
+      <DrawerTrigger
+        asChild
+        className={cn({
+          "underline decoration-dashed cursor-help": variant === "underline",
+        })}
+      >
+        {props.trigger}
+      </DrawerTrigger>
+      <DrawerContent
+        className={cn({ "text-sm": variant === "underline" }, props.className)}
+      >
+        <DrawerHeader className={cn({ "sr-only": !title })}>
+          <DrawerTitle>{title}</DrawerTitle>
+        </DrawerHeader>
+
+        {props.children}
+
+        {variant === "underline" && (
+          <DrawerClose asChild>
+            <Button className="w-full mt-3">Got it</Button>
+          </DrawerClose>
+        )}
+      </DrawerContent>
+    </Drawer>
+  );
 };
 
 export default AdaptiveTooltip;

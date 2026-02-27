@@ -9,8 +9,8 @@ import { useDocumentTitle } from "usehooks-ts";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useSubscription } from "@/hooks/useSubscription";
-import UnderlineTooltip from "@/components/common/UnderlineTooltip";
 import Visibility from "@/components/common/Visibility";
+import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 import { getPriceDecimals } from "@/features/trade/utils/prices";
 import { hlSubClient } from "@/services/transport";
@@ -219,13 +219,22 @@ const TickerOverview = () => {
           />
           <TickerItem
             label={
-              <UnderlineTooltip content="Funding rate is the interest rate paid between long and short positions in a perpetual futures contract.">
-                <p className="space-x-0.5">
-                  <span>Funding Rate</span>
-                  <span>/</span>
-                  <span>Countdown</span>
+              <AdaptiveTooltip
+                variant="underline"
+                title="Funding Rate"
+                trigger={
+                  <p className="space-x-0.5">
+                    <span>Funding Rate</span>
+                    <span>/</span>
+                    <span>Countdown</span>
+                  </p>
+                }
+              >
+                <p>
+                  Funding rate is the interest rate paid between long and short
+                  positions in a perpetual futures contract.
                 </p>
-              </UnderlineTooltip>
+              </AdaptiveTooltip>
             }
             value={
               <span className="flex items-center gap-1">
