@@ -17,7 +17,6 @@ import kLineStyles from "./utils/kLineStyles";
 import { waitForIndicatorResults } from "./utils/waitForIndicatorResults";
 
 const KlineChart = () => {
-  // const indicatorsLayout = useKlineStore((s) => s.indicatorsLayout);
   const interval = useChartSettingsStore((s) => s.interval);
 
   const chartRef = useRef<Chart>(null);
