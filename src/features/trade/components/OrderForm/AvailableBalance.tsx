@@ -1,14 +1,16 @@
 import { PlusCircle } from "lucide-react";
 
 import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
+import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowOrderFormStore } from "@/store/trade/order-form";
 import { useAvailableToTrade } from "@/store/trade/user-trade";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 const AvailableBalance = () => {
-  const base = useInstrumentStore((s) => s.assetMeta?.base);
-  const quote = useInstrumentStore((s) => s.assetMeta?.quote);
+  const { base, quote } = useShallowInstrumentStore((s) => ({
+    base: s.assetMeta?.base,
+    quote: s.assetMeta?.quote,
+  }));
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
   const isBuyOrder = useShallowOrderFormStore((s) => s.orderSide === "buy");
   const availableBalance = useAvailableToTrade(isBuyOrder);

@@ -1,27 +1,26 @@
-import React, { createContext, useContext, useMemo, useReducer } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 
-import { MetaAndAssetCtx } from "@/types/trade";
-import { useSubscription } from "@/hooks/useSubscription";
+import { Asset } from "@/types/trade";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import {
-  mapPerpDataToAssetMeta,
+  formatSymbol,
   parseBuilderDeployedAsset,
   parseQuoteAsset,
 } from "@/features/trade/utils";
-import { hlSubClient } from "@/services/transport";
+import { useShallowInstrumentStore } from "@/store/trade/instrument";
 
 type Props = {
   children: React.ReactNode;
 };
 
-type InstrumentAssetCtxs = Record<"perps" | "spot", MetaAndAssetCtx[]>;
+type InstrumentAssetCtxs = Record<"perps" | "spot", Asset[]>;
 
 type State = {
-  metaAndAssetCtxs: InstrumentAssetCtxs;
+  assets: InstrumentAssetCtxs;
 };
 
 const TickerSelectorContext = createContext<State>({
-  metaAndAssetCtxs: { spot: [], perps: [] },
+  assets: { spot: [], perps: [] },
 });
 
 export const useTickerSelector = () => {
@@ -29,116 +28,121 @@ export const useTickerSelector = () => {
   if (!context)
     throw new Error("Missing TickerSelectorContext.Provider in the tree");
 
-  return context.metaAndAssetCtxs;
+  return context.assets;
 };
 
 const TickerSelectorProvider = ({ children }: Props) => {
-  const { data, getAllSpotAssetsMetas, getAllPerpDexsAndMetas } =
-    useMetaAndAssetCtxs();
+  const { spotMeta, perpMetas } = useMetaAndAssetCtxs();
 
-  const [state, dispatch] = useReducer(
-    (prev: InstrumentAssetCtxs, next: Partial<InstrumentAssetCtxs>) => ({
-      ...prev,
-      ...next,
+  const { spotAssetCtxs, allDexsAssetCtxs } = useShallowInstrumentStore(
+    (s) => ({
+      spotAssetCtxs: s.spotAssetCtxs,
+      allDexsAssetCtxs: s.allDexsAssetCtxs,
     }),
-    { perps: [], spot: [] },
   );
 
-  useSubscription(() => {
-    const allSpotAssetsMetas = getAllSpotAssetsMetas();
+  const spotAssets = useMemo(() => {
+    if (!spotMeta) return [];
 
-    if (!allSpotAssetsMetas) return;
+    const assets = [];
 
-    return hlSubClient.spotAssetCtxs((data) => {
-      const metaAndAssetCtxs: Array<MetaAndAssetCtx> = [];
+    for (let index = 0; index < spotMeta.universe.length; index++) {
+      const universe = spotMeta.universe[index];
+      const tokenIndex = universe.index;
+      const [baseIndex, quoteIndex] = universe.tokens;
 
-      for (const datum of data) {
-        const meta = allSpotAssetsMetas.get(datum.coin);
+      const token = spotMeta.tokens[tokenIndex];
+      const baseTokenMeta = spotMeta.tokens[baseIndex];
+      const quoteTokenMeta = spotMeta.tokens[quoteIndex];
+
+      const context = spotAssetCtxs[tokenIndex];
+
+      if (!context) continue;
+
+      assets.push({
+        isSpot: true,
+        dex: null,
+        index,
+        coin: universe.name,
+        base: baseTokenMeta.name,
+        quote: quoteTokenMeta.name,
+        szDecimals: token.szDecimals,
+        symbol: formatSymbol(baseTokenMeta.name, quoteTokenMeta.name, true),
+        markPx: Number(context.markPx),
+        midPx: Number(context.midPx),
+        dayNtlVlm: Number(context.dayNtlVlm),
+        dayBaseVlm: Number(context.dayBaseVlm),
+        prevDayPx: Number(context.prevDayPx),
+        marketCap: Number(context.midPx) * Number(context.circulatingSupply),
+        funding: null,
+        openInterest: null,
+        oraclePx: null,
+        maxLeverage: null,
+      });
+    }
+
+    return assets;
+  }, [spotAssetCtxs, spotMeta]);
+
+  const perpAssets = useMemo(() => {
+    if (!perpMetas) return [];
+
+    const assets = [];
+
+    const dexsAssetCtxs = new Map(allDexsAssetCtxs);
+
+    for (const perpDexState of perpMetas) {
+      const ctxs = dexsAssetCtxs.get(perpDexState.dex);
+
+      if (!ctxs) continue;
+
+      for (let index = 0; index < perpDexState.universe.length; index++) {
+        const universe = perpDexState.universe[index];
+        const collateralToken = perpDexState.collateralToken;
+        const ctx = ctxs[index];
+
+        if (!ctx || universe.isDelisted) continue;
+
+        const { dex, base } = parseBuilderDeployedAsset(universe.name);
+        const quote = parseQuoteAsset(spotMeta?.tokens[collateralToken].name);
+
+        const markPx = Number(ctx.markPx || 0);
+        const midPx = Number(ctx.midPx || 0);
+        const dayBaseVlm = Number(ctx.dayBaseVlm || 0);
 
         // skip assets with no data
-        if (!meta || !datum.midPx || !datum.markPx || !datum.dayBaseVlm)
-          continue;
+        if (!midPx || !markPx || !dayBaseVlm) continue;
 
-        metaAndAssetCtxs.push({
-          isSpot: true,
-          meta,
-          ctx: {
-            markPx: Number(datum.markPx),
-            midPx: Number(datum.midPx),
-            dayNtlVlm: Number(datum.dayNtlVlm),
-            dayBaseVlm: Number(datum.dayBaseVlm),
-            prevDayPx: Number(datum.prevDayPx),
-            marketCap: Number(datum.midPx) * Number(datum.circulatingSupply),
-            funding: null,
-            openInterest: null,
-            oraclePx: null,
-          },
+        assets.push({
+          isSpot: false,
+          dex,
+          base,
+          quote,
+          index,
+          coin: universe.name,
+          szDecimals: universe.szDecimals,
+          perpDexIndex: perpDexState.perpDexIndex,
+          symbol: formatSymbol(base, quote, false),
+          midPx,
+          markPx,
+          dayNtlVlm: Number(ctx.dayNtlVlm),
+          dayBaseVlm,
+          prevDayPx: Number(ctx.prevDayPx),
+          funding: 8 * Number(ctx.funding || 0) * 100,
+          openInterest: Number(ctx.openInterest || 0) * markPx,
+          oraclePx: Number(ctx.oraclePx),
+          marketCap: null,
+          maxLeverage: universe.maxLeverage,
         });
       }
+    }
 
-      dispatch({ spot: metaAndAssetCtxs });
-    });
-  }, [getAllSpotAssetsMetas]);
-
-  useSubscription(() => {
-    const perpDexsAndMeta = getAllPerpDexsAndMetas();
-    const spotMeta = data.spotMeta;
-
-    if (!perpDexsAndMeta.size) return;
-
-    return hlSubClient.allDexsAssetCtxs((data) => {
-      const dexsAssetCtxs = new Map(data.ctxs);
-      const metaAndAssetCtxs: Array<MetaAndAssetCtx> = [];
-
-      for (const [dex, ctxs] of dexsAssetCtxs) {
-        const perpDex = perpDexsAndMeta.get(dex);
-
-        if (!perpDex) continue;
-
-        for (let index = 0; index < perpDex.meta.universe.length; index++) {
-          const universe = perpDex.meta.universe[index];
-          const collateralToken = perpDex.meta.collateralToken;
-          const ctx = ctxs[index];
-
-          if (!ctx) continue;
-
-          const deployedAsset = parseBuilderDeployedAsset(universe.name);
-          const quote = parseQuoteAsset(spotMeta?.tokens[collateralToken].name);
-
-          // skip assets with no data
-          if (!ctx.midPx || !ctx.markPx || !ctx.dayBaseVlm) continue;
-
-          metaAndAssetCtxs.push({
-            isSpot: false,
-            ctx: {
-              midPx: Number(ctx.midPx ?? 0),
-              markPx: Number(ctx.markPx ?? 0),
-              dayNtlVlm: Number(ctx.dayNtlVlm),
-              dayBaseVlm: Number(ctx.dayBaseVlm),
-              prevDayPx: Number(ctx.prevDayPx),
-              funding: Number(ctx.funding),
-              openInterest: Number(ctx.openInterest),
-              oraclePx: Number(ctx.oraclePx),
-              marketCap: null,
-            },
-            meta: mapPerpDataToAssetMeta({
-              universe,
-              quote,
-              ...deployedAsset,
-              perpDexIndex: perpDex.index,
-              index,
-            }),
-          });
-        }
-      }
-
-      dispatch({ perps: metaAndAssetCtxs });
-    });
-  }, [getAllPerpDexsAndMetas, data.spotMeta]);
+    return assets;
+  }, [allDexsAssetCtxs, perpMetas]);
 
   const value = useMemo(
-    () => ({ metaAndAssetCtxs: state }),
-    [state.perps, state.spot],
+    () => ({ assets: { spot: spotAssets, perps: perpAssets } }),
+    [spotAssets, perpAssets],
   );
 
   return (

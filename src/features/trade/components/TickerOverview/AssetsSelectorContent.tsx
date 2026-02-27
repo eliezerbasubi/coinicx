@@ -1,20 +1,19 @@
-import React, { useMemo, useReducer } from "react";
-import { ChevronDown, ChevronUp, Search, Star } from "lucide-react";
+import { useMemo, useReducer } from "react";
+import { Search, Star } from "lucide-react";
 
-import { MetaAndAssetCtx } from "@/types/trade";
+import { Asset } from "@/types/trade";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROUTES } from "@/constants/routes";
-import { getPriceDecimals } from "@/features/trade/utils/prices";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
-import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
 
 import Badge from "../Badge";
 import TokenImage from "../TokenImage";
+import TableHeaderSorter from "./TableHeaderSorter";
 import { useTickerSelector } from "./TickerSelectorProvider";
 
 type State = {
@@ -43,13 +42,14 @@ const getFavourites = (): Array<string> => {
 
 const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
   const isMobile = useIsMobile();
-  const metaAndAssetCtxs = useTickerSelector();
-  const instrumentType = useTradeContext((s) => s.instrumentType);
-  const decimals = useTradeContext((s) => s.decimals);
 
-  const setDecimals = useTradeContext((s) => s.setDecimals);
+  const assets = useTickerSelector();
 
-  const onAssetChange = useTradeContext((s) => s.onAssetChange);
+  const { instrumentType, decimals, onAssetChange } = useTradeContext((s) => ({
+    instrumentType: s.instrumentType,
+    decimals: s.decimals,
+    onAssetChange: s.onAssetChange,
+  }));
 
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
@@ -61,24 +61,21 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
     },
   );
 
-  const isPerpsInstrument = state.currentTab !== "spot";
+  const isPerps = state.currentTab !== "spot";
 
   const assetsByTab = useMemo(() => {
     if (state.currentTab === "favourites") {
-      const assets = metaAndAssetCtxs.spot
-        .concat(metaAndAssetCtxs.perps)
-        .filter((ast) => state.favourites.includes(ast.meta.coin));
-      return assets;
+      return assets.spot
+        .concat(assets.perps)
+        .filter((ast) => state.favourites.includes(ast.coin));
     }
-    if (state.currentTab === "spot") return metaAndAssetCtxs.spot;
+    if (state.currentTab === "spot") return assets.spot;
 
     if (state.currentTab === "perps") {
-      return metaAndAssetCtxs.perps.filter((ast) => !ast.meta.dex);
+      return assets.perps.filter((ast) => !ast.dex);
     }
-    return metaAndAssetCtxs.perps.filter(
-      (ast) => ast.meta.dex === state.currentTab,
-    );
-  }, [state.currentTab, state.favourites, metaAndAssetCtxs]);
+    return assets.perps.filter((ast) => ast.dex === state.currentTab);
+  }, [state.currentTab, state.favourites, assets]);
 
   const data = useMemo(() => {
     const query = state.search.toLowerCase();
@@ -87,49 +84,43 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
     if (query) {
       assets = assetsByTab.filter(
         (ast) =>
-          ast.meta.base.toLowerCase().includes(query) ||
-          ast.meta.quote.toLowerCase().includes(query),
+          ast.base.toLowerCase().includes(query) ||
+          ast.quote.toLowerCase().includes(query),
       );
     }
 
     return assets.sort((a, b) => {
       switch (state.sortBy) {
         case "volAsc":
-          return Number(a.ctx.dayNtlVlm) - Number(b.ctx.dayNtlVlm);
+          return Number(a.dayNtlVlm) - Number(b.dayNtlVlm);
         case "volDesc":
-          return Number(b.ctx.dayNtlVlm) - Number(a.ctx.dayNtlVlm);
+          return Number(b.dayNtlVlm) - Number(a.dayNtlVlm);
         case "priceAsc":
-          return Number(a.ctx.midPx) - Number(b.ctx.midPx);
+          return Number(a.midPx) - Number(b.midPx);
         case "priceDesc":
-          return Number(b.ctx.midPx) - Number(a.ctx.midPx);
+          return Number(b.midPx) - Number(a.midPx);
         case "changeAsc":
-          return (
-            Number(a.ctx.prevDayPx - a.ctx.midPx) -
-            Number(b.ctx.prevDayPx - b.ctx.midPx)
-          );
+          return Number(a.prevDayPx - a.midPx) - Number(b.prevDayPx - b.midPx);
         case "changeDesc":
-          return (
-            Number(b.ctx.prevDayPx - b.ctx.midPx) -
-            Number(a.ctx.prevDayPx - a.ctx.midPx)
-          );
+          return Number(b.prevDayPx - b.midPx) - Number(a.prevDayPx - a.midPx);
         case "openInterestAsc":
-          return Number(a.ctx.openInterest) - Number(b.ctx.openInterest);
+          return Number(a.openInterest) - Number(b.openInterest);
         case "openInterestDesc":
-          return Number(b.ctx.openInterest) - Number(a.ctx.openInterest);
+          return Number(b.openInterest) - Number(a.openInterest);
         case "fundingAsc":
-          return Number(a.ctx.funding) - Number(b.ctx.funding);
+          return Number(a.funding) - Number(b.funding);
         case "fundingDesc":
-          return Number(b.ctx.funding) - Number(a.ctx.funding);
+          return Number(b.funding) - Number(a.funding);
         case "marketCapAsc":
-          return Number(a.ctx.marketCap) - Number(b.ctx.marketCap);
+          return Number(a.marketCap) - Number(b.marketCap);
         case "marketCapDesc":
-          return Number(b.ctx.marketCap) - Number(a.ctx.marketCap);
+          return Number(b.marketCap) - Number(a.marketCap);
         case "symbolAsc":
-          return a.meta.symbol.localeCompare(b.meta.symbol);
+          return a.symbol.localeCompare(b.symbol);
         case "symbolDesc":
-          return b.meta.symbol.localeCompare(a.meta.symbol);
+          return b.symbol.localeCompare(a.symbol);
         default:
-          return Number(b.ctx.dayNtlVlm) - Number(a.ctx.dayNtlVlm);
+          return Number(b.dayNtlVlm) - Number(a.dayNtlVlm);
       }
     });
   }, [state.search, state.sortBy, assetsByTab]);
@@ -141,33 +132,41 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
     });
   };
 
-  const onAssetSelected = (metaAndAssetCtx: MetaAndAssetCtx) => {
-    const { isSpot, meta, ctx } = metaAndAssetCtx;
-    const newPath = isSpot
-      ? [ROUTES.trade.spot, meta.base, meta.quote]
-      : [ROUTES.trade.perps, meta.coin];
+  const onAssetSelected = (asset: Asset) => {
+    const {
+      isSpot,
+      base,
+      quote,
+      coin,
+      index,
+      perpDexIndex,
+      dex,
+      midPx,
+      markPx,
+      szDecimals,
+    } = asset;
 
-    const price = ctx.midPx ?? ctx.markPx;
-    const szDecimals = meta.szDecimals;
+    const newPath = isSpot
+      ? [ROUTES.trade.spot, base, quote]
+      : [ROUTES.trade.perps, coin];
+
+    const price = midPx ?? markPx;
 
     onAssetChange({
-      base: meta.base,
-      quote: meta.quote,
+      base,
+      quote,
       instrumentType: isSpot ? "spot" : "perps",
+      price,
+      szDecimals,
     });
 
     // Update asset meta and context
-    useInstrumentStore.setState({
-      assetMeta: meta,
-      assetCtx: ctx,
+    useInstrumentStore.getState().setTokenMetaAndAssetCtx({
+      dex: dex ?? "",
+      perpDexIndex: perpDexIndex ?? 0,
+      assetIndex: index,
+      isSpot,
     });
-
-    // Ensure ticks are only loaded once asset is selected
-    useOrderBookStore.getState().setTicks(price, szDecimals, isSpot);
-
-    const pxDecimals = getPriceDecimals(price, szDecimals, isSpot);
-
-    setDecimals(pxDecimals);
 
     onSelect?.();
 
@@ -263,7 +262,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     24h Change
                   </TableHeaderSorter>
                 </td>
-                <Visibility visible={isPerpsInstrument}>
+                <Visibility visible={isPerps}>
                   <td className="pb-1 pr-4 hidden md:table-cell">
                     <TableHeaderSorter
                       id="funding"
@@ -283,7 +282,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     Volume
                   </TableHeaderSorter>
                 </td>
-                <Visibility visible={isPerpsInstrument}>
+                <Visibility visible={isPerps}>
                   <td className="pb-1 pr-4 hidden md:table-cell">
                     <TableHeaderSorter
                       id="openInterest"
@@ -294,7 +293,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     </TableHeaderSorter>
                   </td>
                 </Visibility>
-                <Visibility visible={!isPerpsInstrument}>
+                <Visibility visible={!isPerps}>
                   <td className="pb-1 hidden md:table-cell">
                     <TableHeaderSorter
                       id="marketCap"
@@ -330,18 +329,17 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
             </thead>
             <tbody className="w-full">
               {data.slice(0, 25).map((datum) => {
-                const { meta, ctx, isSpot } = datum;
-
-                const hasPricing = ctx.prevDayPx && ctx.midPx;
-                const change = hasPricing ? ctx.prevDayPx - ctx.midPx : 0;
+                const hasPricing = datum.prevDayPx && datum.markPx;
+                const change = hasPricing ? datum.markPx - datum.prevDayPx : 0;
                 const changeInPercentage = change
-                  ? (change / ctx.midPx) * 100
+                  ? (change / datum.prevDayPx) * 100
                   : 0;
-                const isFavourite = state.favourites.includes(meta.coin);
+
+                const isFavourite = state.favourites.includes(datum.coin);
 
                 return (
                   <tr
-                    key={meta.coin}
+                    key={datum.coin}
                     className={cn(
                       "text-white hover:bg-neutral-gray-200 cursor-pointer",
                       {
@@ -359,28 +357,28 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                           })}
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleFavourite(meta.coin);
+                            toggleFavourite(datum.coin);
                           }}
                         />
                         <Visibility visible={isMobile}>
                           <TokenImage
-                            name={meta.base}
+                            name={datum.base}
                             instrumentType={instrumentType}
                             className="bg-neutral-gray-200 border border-neutral-gray-200 text-trade-dark size-6 md:size-5"
                           />
                         </Visibility>
                         <div className="flex-1">
                           <div className="flex items-center gap-x-1">
-                            <p>{meta.symbol}</p>
-                            <Visibility visible={isSpot}>
+                            <p>{datum.symbol}</p>
+                            <Visibility visible={datum.isSpot}>
                               <Badge value="SPOT" />
                             </Visibility>
 
-                            <Visibility visible={!!meta.maxLeverage}>
-                              <Badge value={`${meta.maxLeverage}x`} />
+                            <Visibility visible={!!datum.maxLeverage}>
+                              <Badge value={`${datum.maxLeverage}x`} />
                             </Visibility>
-                            <Visibility visible={!!meta.dex}>
-                              <Badge value={meta.dex} />
+                            <Visibility visible={!!datum.dex}>
+                              <Badge value={datum.dex} />
                             </Visibility>
                           </div>
 
@@ -388,7 +386,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                             <p className="space-x-1 text-[11px] text-neutral-gray-400 font-medium">
                               <span>Vol.</span>
                               <span>
-                                {formatNumberWithFallback(ctx.dayNtlVlm, {
+                                {formatNumberWithFallback(datum.dayNtlVlm, {
                                   style: "currency",
                                   // notation: "compact",
                                 })}
@@ -399,12 +397,12 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                       </div>
                     </td>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
-                      {formatValueToDecimals(ctx.midPx)}
+                      {formatValueToDecimals(datum.midPx)}
                     </td>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
                       <p
                         className={cn("text-buy space-x-1", {
-                          "text-sell": changeInPercentage < 0,
+                          "text-sell": change < 0,
                           "text-neutral-gray-300": !hasPricing,
                         })}
                       >
@@ -422,10 +420,10 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                         </span>
                       </p>
                     </td>
-                    <Visibility visible={isPerpsInstrument}>
+                    <Visibility visible={isPerps}>
                       <td className="pr-3 py-0.5 hidden md:table-cell">
                         {formatNumberWithFallback(
-                          ctx.funding ? ctx.funding : 0,
+                          Number(datum.funding ?? 0) / 100,
                           {
                             style: "percent",
                             minimumFractionDigits: 4,
@@ -435,24 +433,24 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                       </td>
                     </Visibility>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
-                      {formatNumberWithFallback(ctx.dayNtlVlm, {
+                      {formatNumberWithFallback(datum.dayNtlVlm, {
                         style: "currency",
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </td>
-                    <Visibility visible={isPerpsInstrument}>
+                    <Visibility visible={isPerps}>
                       <td className="pr-3 py-0.5 hidden md:table-cell">
-                        {formatNumberWithFallback(ctx.openInterest ?? 0, {
+                        {formatNumberWithFallback(datum.openInterest ?? 0, {
                           style: "currency",
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
                       </td>
                     </Visibility>
-                    <Visibility visible={!isPerpsInstrument}>
+                    <Visibility visible={!isPerps}>
                       <td className="py-0.5 hidden md:table-cell">
-                        {formatNumberWithFallback(ctx.marketCap ?? 0, {
+                        {formatNumberWithFallback(datum.marketCap ?? 0, {
                           style: "currency",
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
@@ -462,7 +460,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     <Visibility visible={isMobile}>
                       <td className="py-0.5 text-right">
                         <p className="text-white font-semibold">
-                          {formatValueToDecimals(ctx.midPx)}
+                          {formatValueToDecimals(datum.midPx)}
                         </p>
                         <p
                           className={cn("text-buy space-x-1 text-[11px]", {
@@ -500,45 +498,3 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
 };
 
 export default AssetsSelectorContent;
-
-type TableHeaderSorterProps = {
-  children: React.ReactNode;
-  sorter?: string;
-  id: string;
-  onClick?: (value: string) => void;
-};
-
-const TableHeaderSorter = ({
-  children,
-  sorter,
-  id,
-  onClick,
-}: TableHeaderSorterProps) => {
-  const ascKey = id + "Asc";
-  const descKey = id + "Desc";
-
-  const onSort = () => {
-    const value = sorter ? (sorter === ascKey ? descKey : ascKey) : descKey;
-
-    onClick?.(value);
-  };
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      className="flex items-center gap-x-1"
-      onClick={onSort}
-    >
-      {children}
-      <div className="flex flex-col items-center justify-center -space-y-1.5">
-        <ChevronUp
-          className={cn("size-3", { "text-primary": sorter === ascKey })}
-        />
-        <ChevronDown
-          className={cn("size-3", { "text-primary": sorter === descKey })}
-        />
-      </div>
-    </div>
-  );
-};

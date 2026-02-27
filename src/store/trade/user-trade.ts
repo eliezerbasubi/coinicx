@@ -11,6 +11,9 @@ import { useInstrumentStore } from "./instrument";
 
 type SpotBalances = SpotStateWsEvent["spotState"]["balances"];
 
+type AllDexsClearinghouseState =
+  AllDexsClearinghouseStateWsEvent["clearinghouseStates"][number][1];
+
 interface UserTradeState {
   /** Max size in base asset. e.g. BTC for perps */
   maxBaseTradeSz: number;
@@ -23,9 +26,8 @@ interface UserTradeState {
   leverage: ActiveAssetDataResponse["leverage"] | null;
   spotBalances: SpotBalances;
   webData: WebData3WsEvent | null;
-  clearinghouseState:
-    | AllDexsClearinghouseStateWsEvent["clearinghouseStates"][number][1]
-    | null;
+  clearinghouseState: AllDexsClearinghouseState | null;
+  allDexsClearinghouseState: AllDexsClearinghouseState | null;
 }
 
 interface UserTradeStoreActions {
@@ -53,6 +55,7 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   spotBalances: [],
   webData: null,
   clearinghouseState: null,
+  allDexsClearinghouseState: null,
   updateLeverage(leverage) {
     const { leverage: currentLeverage } = get();
 
@@ -101,7 +104,7 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
     let availableBaseToTrade = 0;
     let availableQuoteToTrade = 0;
 
-    if (assetMeta) {
+    if (assetMeta && assetMeta.dex === null) {
       data.spotState.balances.forEach((balance) => {
         if (balance.coin === assetMeta.base) {
           availableBaseToTrade = Number(balance.total);
@@ -110,11 +113,14 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
           availableQuoteToTrade = Number(balance.total);
         }
       });
+
+      set({
+        availableBaseToTrade,
+        availableQuoteToTrade,
+      });
     }
 
     set({
-      availableBaseToTrade,
-      availableQuoteToTrade,
       spotBalances: data.spotState.balances,
     });
   },
@@ -126,15 +132,22 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   applyClearinghouseState(data) {
     const assetMeta = useInstrumentStore.getState().assetMeta;
 
-    if (!assetMeta || assetMeta.dex === null) return;
+    const clearinghouseStates = new Map(data.clearinghouseStates);
 
-    const clearinghouseState = new Map(data.clearinghouseStates).get(
-      assetMeta.dex,
+    let clearinghouseState = null;
+
+    if (assetMeta && assetMeta.dex !== null) {
+      clearinghouseState = clearinghouseStates.get(assetMeta.dex);
+    }
+
+    const allDexsClearinghouseState = aggregateClearinghouseStates(
+      Array.from(clearinghouseStates.values()),
     );
 
-    if (!clearinghouseState) return;
-
-    set({ clearinghouseState });
+    set({
+      clearinghouseState,
+      allDexsClearinghouseState,
+    });
   },
 }));
 
@@ -157,4 +170,75 @@ export const useAvailableToTrade = (isBuyOrder: boolean) => {
     isBuyOrder ? s.availableQuoteToTrade : s.availableBaseToTrade,
   );
   return availableBaseToTrade;
+};
+
+/**
+ * Aggregates clearinghouse states from all DEXs.
+ * @param data Array of clearinghouse states from all DEXs.
+ * @returns Aggregated clearinghouse state.
+ */
+export const aggregateClearinghouseStates = (
+  data: AllDexsClearinghouseState[],
+) => {
+  const initialClearinghouseState: AllDexsClearinghouseState = {
+    assetPositions: [],
+    crossMaintenanceMarginUsed: "0.0",
+    time: 0,
+    withdrawable: "0.0",
+    crossMarginSummary: {
+      accountValue: "0.0",
+      totalMarginUsed: "0.0",
+      totalNtlPos: "0.0",
+      totalRawUsd: "0.0",
+    },
+    marginSummary: {
+      accountValue: "0.0",
+      totalMarginUsed: "0.0",
+      totalNtlPos: "0.0",
+      totalRawUsd: "0.0",
+    },
+  };
+
+  const crossMarginSummaryKeys = Object.keys(
+    initialClearinghouseState.crossMarginSummary,
+  ) as Array<keyof typeof initialClearinghouseState.crossMarginSummary>;
+
+  const marginSummaryKeys = Object.keys(
+    initialClearinghouseState.marginSummary,
+  ) as Array<keyof typeof initialClearinghouseState.marginSummary>;
+
+  const aggregated = data.reduce((acc, clearinghouseState) => {
+    if (clearinghouseState.assetPositions?.length) {
+      acc.assetPositions.push(...clearinghouseState.assetPositions);
+    }
+
+    acc.time = clearinghouseState.time;
+
+    acc.withdrawable = (
+      Number(acc.withdrawable) + Number(clearinghouseState.withdrawable ?? 0)
+    ).toString();
+
+    acc.crossMaintenanceMarginUsed = (
+      Number(acc.crossMaintenanceMarginUsed) +
+      Number(clearinghouseState.crossMaintenanceMarginUsed ?? 0)
+    ).toString();
+
+    for (const key of crossMarginSummaryKeys) {
+      acc.crossMarginSummary[key] = (
+        Number(acc.crossMarginSummary[key]) +
+        Number(clearinghouseState.crossMarginSummary?.[key] ?? 0)
+      ).toString();
+    }
+
+    for (const key of marginSummaryKeys) {
+      acc.marginSummary[key] = (
+        Number(acc.marginSummary[key]) +
+        Number(clearinghouseState.marginSummary?.[key] ?? 0)
+      ).toString();
+    }
+
+    return acc;
+  }, initialClearinghouseState);
+
+  return aggregated;
 };

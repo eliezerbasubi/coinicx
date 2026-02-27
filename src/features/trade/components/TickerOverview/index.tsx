@@ -15,7 +15,10 @@ import { formatPriceToDecimal } from "@/features/trade/utils";
 import { getPriceDecimals } from "@/features/trade/utils/prices";
 import { hlSubClient } from "@/services/transport";
 import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
+import {
+  useInstrumentStore,
+  useShallowInstrumentStore,
+} from "@/store/trade/instrument";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
@@ -26,24 +29,27 @@ import FundingCountdown from "./FundingCountdown";
 const TickerOverview = () => {
   const isMobile = useIsMobile();
 
-  const base = useTradeContext((state) => state.base);
-  const quote = useTradeContext((state) => state.quote);
-  const instrumentType = useTradeContext((state) => state.instrumentType);
-  const setDecimals = useTradeContext((state) => state.setDecimals);
-  const decimals = useTradeContext((state) => state.decimals);
+  const { base, quote, instrumentType, setDecimals, decimals } =
+    useTradeContext((state) => ({
+      base: state.base,
+      quote: state.quote,
+      instrumentType: state.instrumentType,
+      decimals: state.decimals,
+      setDecimals: state.setDecimals,
+    }));
 
-  const tokenCtx = useInstrumentStore((state) => state.assetCtx);
-
-  const tokenMeta = useInstrumentStore((state) => state.assetMeta);
+  const { tokenCtx, tokenMeta } = useShallowInstrumentStore((state) => ({
+    tokenCtx: state.assetCtx,
+    tokenMeta: state.assetMeta,
+  }));
 
   const coin = tokenMeta?.coin;
-  const close = tokenCtx?.prevDayPx ?? 0;
-  const open = tokenCtx?.markPx ?? 0;
+  const prevDayPx = tokenCtx?.prevDayPx ?? 0;
+  const markPx = tokenCtx?.markPx ?? 0;
 
-  const isBuyOrder = close > open;
+  const change = markPx - prevDayPx;
+  const changeInPercentage = (change / prevDayPx) * 100;
 
-  const change = open - close;
-  const changeInPercentage = (change / close) * 100;
   const price = tokenCtx?.midPx ?? tokenCtx?.markPx ?? 0;
 
   const assetFullName = tokenMeta?.fullName ?? tokenMeta?.base;
@@ -58,15 +64,15 @@ const TickerOverview = () => {
   ) => {
     const price = Number(data.midPx ?? data.markPx);
     const szDecimals = Number(tokenMeta?.szDecimals);
+
+    // Update asset context
     useInstrumentStore.getState().setAssetCtx(data);
 
-    // Ensure ticks are only loaded once asset is selected
     const { ticks, setTicks } = useOrderBookStore.getState();
     if (ticks.length === 0) {
       setTicks(price, szDecimals, isSpot);
     }
 
-    // Ensure decimals is set once asset is selected
     if (decimals === null) {
       const priceDecimals = getPriceDecimals(price, szDecimals, isSpot);
       setDecimals(priceDecimals);
@@ -113,7 +119,7 @@ const TickerOverview = () => {
             </Visibility>
             <p
               className={cn("text-xl text-buy font-bold", {
-                "text-sell": !isBuyOrder,
+                "text-sell": markPx > prevDayPx,
               })}
             >
               {formatNumberWithFallback(price, {
@@ -133,7 +139,7 @@ const TickerOverview = () => {
               <Visibility visible={isMobile}>
                 <span
                   className={cn("text-xs text-buy ml-1", {
-                    "text-sell": !isBuyOrder,
+                    "text-sell": change < 0,
                   })}
                 >
                   {tokenCtx && change >= 0 && "+"}
@@ -184,7 +190,7 @@ const TickerOverview = () => {
               </p>
             }
             className={cn("text-buy", {
-              "text-sell": changeInPercentage < 0,
+              "text-sell": change < 0,
             })}
           />
         </Visibility>

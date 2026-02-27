@@ -15,22 +15,24 @@ import {
 } from "@/features/trade/utils/twap";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import {
-  useOrderFormStore,
-  useShallowOrderFormStore,
-} from "@/store/trade/order-form";
+import { useShallowOrderFormStore } from "@/store/trade/order-form";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { useMaxTradeSz, useUserTradeStore } from "@/store/trade/user-trade";
 import { formatNumberWithFallback } from "@/utils/formatting/numbers";
 
 export const LiquidationPrice = ({ size }: { size: number }) => {
-  const isPerp = useTradeContext((s) => s.instrumentType === "perps");
-  const coin = useTradeContext((s) => s.coin);
-  const { data } = useMetaAndAssetCtxs();
+  const { isPerps, coin, decimals } = useTradeContext((s) => ({
+    isPerps: s.instrumentType === "perps",
+    coin: s.coin,
+    decimals: s.decimals ?? 10,
+  }));
 
-  const assetMeta = useShallowInstrumentStore((s) => s.assetMeta);
-  const assetCtx = useShallowInstrumentStore((s) => s.assetCtx);
-  const decimals = useTradeContext((s) => s.decimals ?? 10);
+  const { perpMetas } = useMetaAndAssetCtxs();
+
+  const { assetMeta, assetCtx } = useShallowInstrumentStore((s) => ({
+    assetMeta: s.assetMeta,
+    assetCtx: s.assetCtx,
+  }));
 
   const { limitPrice, isBuyOrder, maxSlippage, reduceOnly, orderType } =
     useShallowOrderFormStore((s) => ({
@@ -45,15 +47,15 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
     const leverage = useUserTradeStore.getState().leverage;
 
     if (
-      !isPerp ||
+      !isPerps ||
       !leverage ||
-      !data.perpMetas ||
+      !perpMetas ||
       assetMeta?.perpDexIndex === undefined ||
       reduceOnly
     )
       return 0;
 
-    const perpDexState = data.perpMetas[assetMeta.perpDexIndex];
+    const perpDexState = perpMetas[assetMeta.perpDexIndex];
     const perpAssetMeta = perpDexState.universe[assetMeta.index];
 
     return estimateLiquidationPrice({
@@ -70,16 +72,16 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
     size,
     limitPrice,
     assetCtx?.markPx,
-    isPerp,
+    isPerps,
     coin,
     assetMeta?.perpDexIndex,
-    data.perpMetas,
+    perpMetas,
     reduceOnly,
     maxSlippage,
     isBuyOrder,
   ]);
 
-  if (!isPerp || orderType === "scale" || orderType === "twap") return null;
+  if (!isPerps || orderType === "scale" || orderType === "twap") return null;
 
   return (
     <div className="w-full flex items-center justify-between">

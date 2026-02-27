@@ -1,13 +1,13 @@
 "use client";
 
-import React from "react";
 import dynamic from "next/dynamic";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 import SpotChart from "./components/Chart";
 import TickerOverview from "./components/TickerOverview";
-import TradeUserInfo from "./components/UserInfo";
+import TradeUserInfo from "./components/TradeUserInfo";
+import UserAccountInfo from "./components/UserAccountInfo";
 
 const OrderBook = dynamic(() => import("./components/OrderBook"), {
   ssr: false,
@@ -44,7 +44,10 @@ const Trade = () => {
         </div>
         {isMobile ? <OrderFormMobile /> : <OrderForm />}
       </div>
-      <TradeUserInfo />
+      <div className="w-full bg-trade-dark flex gap-1 py-0.5 md:p-1 flex-wrap md:flex-nowrap">
+        <TradeUserInfo />
+        <UserAccountInfo />
+      </div>
     </div>
   );
 };
