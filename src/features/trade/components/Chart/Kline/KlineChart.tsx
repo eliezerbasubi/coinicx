@@ -8,6 +8,7 @@ import { useChartSettingsStore } from "@/store/trade/chart-settings";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { formatNumber } from "@/utils/formatting/numbers";
+import { getQueryClient } from "@/utils/getQueryClient";
 
 import KlineTooltipTitle from "./KlineTooltipTitle";
 import KlineVolIndicatorTitle from "./KlineVolIndicatorTitle";
@@ -155,10 +156,16 @@ const KlineChart = () => {
       getBars: async ({ callback, symbol }) => {
         const timeRange = getChartTimeRange(interval);
 
-        const data = await hlInfoClient.candleSnapshot({
-          coin: symbol.ticker,
-          interval,
-          startTime: timeRange.startTime,
+        const queryClient = getQueryClient();
+
+        const data = await queryClient.fetchQuery({
+          queryKey: ["asset-candle-snapshot", symbol.ticker],
+          queryFn: () =>
+            hlInfoClient.candleSnapshot({
+              coin: symbol.ticker,
+              interval,
+              startTime: timeRange.startTime,
+            }),
         });
 
         const klines = data.map((candle) => ({

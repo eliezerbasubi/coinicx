@@ -68,16 +68,18 @@ const OrderBookTable = () => {
 };
 
 const OrderBookTableHeader = () => {
-  const base = useTradeContext((state) => state.base);
-  const quote = useTradeContext((state) => state.quote);
+  const { base, quote } = useTradeContext((state) => ({
+    base: state.base,
+    quote: state.quote,
+  }));
 
   return (
     <div className="flex items-center justify-between text-xs font-medium text-neutral-gray-400 px-4 py-1">
       <div className="flex-1">
-        <p>Price ({base})</p>
+        <p>Price ({quote})</p>
       </div>
       <div className="flex-1 text-right">
-        <p>Amount ({quote})</p>
+        <p>Amount ({base})</p>
       </div>
       <div className="flex-1 text-right hidden md:block">
         <p>Total ({quote})</p>
