@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { AllPerpMetasResponse } from "@nktkas/hyperliquid";
 import { useQueries } from "@tanstack/react-query";
 
 import { AssetMeta, InstrumentType } from "@/types/trade";
@@ -18,57 +17,40 @@ export const useMetaAndAssetCtxs = () => {
         data: {
           perpMetas: result[0]?.data,
           spotMeta: result[1]?.data,
-          perpDexs: result[2]?.data,
         },
-        error: result[0]?.error || result[1]?.error || result[2]?.error,
-        loading:
-          result[0]?.isLoading || result[1]?.isLoading || result[2]?.isLoading,
+        error: result[0]?.error || result[1]?.error,
+        loading: result[0]?.isLoading || result[1]?.isLoading,
       };
     },
     queries: [
       {
         queryKey: [QUERY_KEYS.allPerpMetas],
         staleTime: Infinity,
-        queryFn: () => hlInfoClient.allPerpMetas(),
+        queryFn: async () => {
+          const data = await hlInfoClient.allPerpMetas();
+
+          const metas = [];
+
+          for (let index = 0; index < data.length; index++) {
+            const meta = data[index];
+            const { dex } = parseBuilderDeployedAsset(meta.universe[0].name);
+
+            metas.push({
+              ...meta,
+              perpDexIndex: index,
+              dex,
+            });
+          }
+          return metas;
+        },
       },
       {
         queryKey: [QUERY_KEYS.spotMeta],
         staleTime: Infinity,
         queryFn: () => hlInfoClient.spotMeta(),
       },
-      {
-        queryKey: [QUERY_KEYS.perpDexs],
-        staleTime: Infinity,
-        queryFn: () => hlInfoClient.perpDexs(),
-      },
     ],
   });
-
-  const getAllPerpDexsAndMetas = useCallback(() => {
-    const dexs = new Map<
-      string,
-      {
-        name: string;
-        fullName?: string;
-        index: number;
-        meta: AllPerpMetasResponse[number];
-      }
-    >();
-
-    if (data.perpDexs?.length && data.perpMetas?.length) {
-      data.perpDexs.forEach((dex, index) => {
-        const name = dex ? dex.name : "";
-
-        const meta = data.perpMetas?.[index];
-
-        if (meta) {
-          dexs.set(name, { name, index, fullName: dex?.fullName, meta });
-        }
-      });
-    }
-
-    return dexs;
-  }, [data.perpDexs, data.perpMetas]);
 
   const getSpotInstrumentQuotes = useCallback(() => {
     const quotes = new Map<
@@ -95,13 +77,15 @@ export const useMetaAndAssetCtxs = () => {
     return quotes;
   }, [data.spotMeta]);
 
-  /**
-   * Map spot assets to a coin from universe's name
-   */
-  const getAllSpotAssetsMetas = useCallback(() => {
-    if (!data.spotMeta) return;
+  const getSpotAssetsData = useCallback(() => {
+    const tokensToAssetsMetas = new Map<string, AssetMeta>();
+    const tokensToUniverseIndex = new Map<number, Map<number, number>>();
 
-    const allAssetsMetas = new Map<string, AssetMeta>();
+    if (!data.spotMeta)
+      return {
+        tokensToAssetsMetas,
+        tokensToUniverseIndex,
+      };
 
     for (const universe of data.spotMeta.universe) {
       const [baseIndex, quoteIndex] = universe.tokens;
@@ -109,13 +93,19 @@ export const useMetaAndAssetCtxs = () => {
       const baseTokenMeta = data.spotMeta.tokens[baseIndex];
       const quoteTokenMeta = data.spotMeta.tokens[quoteIndex];
 
-      allAssetsMetas.set(
+      tokensToAssetsMetas.set(
         universe.name,
         mapSpotDataToAssetMeta(universe, baseTokenMeta, quoteTokenMeta.name),
       );
+
+      if (!tokensToUniverseIndex.has(baseIndex)) {
+        tokensToUniverseIndex.set(baseIndex, new Map<number, number>());
+      }
+
+      tokensToUniverseIndex.get(baseIndex)?.set(quoteIndex, universe.index);
     }
 
-    return allAssetsMetas;
+    return { tokensToAssetsMetas, tokensToUniverseIndex };
   }, [data.spotMeta]);
 
   const getTokenMeta = useCallback(
@@ -150,30 +140,30 @@ export const useMetaAndAssetCtxs = () => {
       }
 
       // Handle perps meta
-      const perpDexsAndMeta = getAllPerpDexsAndMetas();
-      if (!perpDexsAndMeta.size) return;
+      const perpDexsAndMeta = data.perpMetas;
+      if (!perpDexsAndMeta?.length) return;
 
       const { dex, base } = parseBuilderDeployedAsset(baseAsset);
-      const perpDex = perpDexsAndMeta.get(dex);
+      const perpDexState = perpDexsAndMeta.find((meta) => meta.dex === dex);
 
-      if (perpDex) {
-        const universeIndex = perpDex.meta.universe.findIndex(
+      if (perpDexState) {
+        const index = perpDexState.universe.findIndex(
           (meta) => meta.name.toLowerCase() === baseAsset.toLowerCase(),
         );
 
-        const universe = perpDex.meta.universe[universeIndex];
+        const universe = perpDexState.universe[index];
 
         if (universe) {
           const quote =
-            data.spotMeta?.tokens[perpDex.meta.collateralToken].name;
+            data.spotMeta?.tokens[perpDexState.collateralToken].name;
 
           return mapPerpDataToAssetMeta({
             universe,
             quote,
-            index: universeIndex,
+            index,
             dex,
             base,
-            perpDexIndex: perpDex.index,
+            perpDexIndex: perpDexState.perpDexIndex,
           });
         }
       }
@@ -182,12 +172,12 @@ export const useMetaAndAssetCtxs = () => {
   );
 
   return {
-    data,
+    spotMeta: data.spotMeta,
+    perpMetas: data.perpMetas,
     error,
     isLoading: loading,
     getTokenMeta,
-    getAllPerpDexsAndMetas,
-    getAllSpotAssetsMetas,
+    getSpotAssetsData,
     getSpotInstrumentQuotes,
   };
 };

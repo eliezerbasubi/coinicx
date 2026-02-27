@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 
 import {
   IOrderBookSettings,
@@ -92,3 +93,9 @@ export const useOrderBookStore = create<OrderBookState>((set, get) => ({
     });
   },
 }));
+
+export const useShallowOrderBookStore = <T>(
+  selector: (state: OrderBookState) => T,
+) => {
+  return useOrderBookStore(useShallow(selector));
+};

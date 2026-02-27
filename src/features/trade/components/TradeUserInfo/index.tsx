@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
@@ -6,9 +6,13 @@ import Visibility from "@/components/common/Visibility";
 import { cn } from "@/utils/cn";
 
 const TABS = [
+  { label: "Balances", value: "balances" },
+  { label: "Positions", value: "positions", counter: true },
   { label: "Open Orders", value: "openOrders", counter: true },
+  { label: "TWAP", value: "twap", counter: true },
   { label: "Order History", value: "orderHistory" },
   { label: "Trade History", value: "tradeHistory" },
+  { label: "Funding History", value: "fundingHistory" },
 ];
 
 const TradeUserInfo = () => {

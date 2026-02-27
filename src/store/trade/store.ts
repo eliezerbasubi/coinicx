@@ -2,8 +2,10 @@ import { createContext } from "react";
 import { create } from "zustand";
 
 import { InstrumentType } from "@/types/trade";
+import { getPriceDecimals } from "@/features/trade/utils";
 
 import { useOrderFormStore } from "./order-form";
+import { useOrderBookStore } from "./orderbook";
 
 export interface TradeStoreProps {
   base: string;
@@ -19,6 +21,8 @@ export interface TradeStoreState extends TradeStoreProps {
     base: string;
     quote: string;
     instrumentType: InstrumentType;
+    price: number;
+    szDecimals: number;
   }) => void;
   setDecimals: (decimals: number) => void;
 }
@@ -28,9 +32,24 @@ export const createTradeStore = (initialProps: TradeStoreProps) => {
     ...initialProps,
     decimals: null,
     onAssetChange: (data) => {
-      set({ ...data });
+      const isSpot = data.instrumentType === "spot";
 
+      // Reset order form
       useOrderFormStore.getState().reset();
+
+      // Ensure ticks are only loaded once asset is selected
+      useOrderBookStore
+        .getState()
+        .setTicks(data.price, data.szDecimals, isSpot);
+
+      const pxDecimals = getPriceDecimals(data.price, data.szDecimals, isSpot);
+
+      set({
+        decimals: pxDecimals,
+        base: data.base,
+        quote: data.quote,
+        instrumentType: data.instrumentType,
+      });
     },
     setDecimals: (decimals) => set({ decimals }),
   }));

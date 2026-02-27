@@ -15,8 +15,10 @@ type Props = {
 
 const UserTradeProvider = ({ children }: Props) => {
   const { address } = useAccount();
-  const coin = useTradeContext((s) => s.coin);
-  const instrumentType = useTradeContext((s) => s.instrumentType);
+  const { coin, instrumentType } = useTradeContext((s) => ({
+    coin: s.coin,
+    instrumentType: s.instrumentType,
+  }));
 
   const user = address || zeroAddress;
 
@@ -28,15 +30,13 @@ const UserTradeProvider = ({ children }: Props) => {
     });
   }, [user, coin, instrumentType]);
 
-  // Subscribe to user's spot state for spot only
-  // Subscribe only when user is connected to avoid showing wrong data
   useSubscription(() => {
-    if (!address || instrumentType !== "spot") return;
+    if (!address) return;
 
     return hlSubClient.spotState({ user: address }, (data) => {
       useUserTradeStore.getState().applySpotState(data);
     });
-  }, [address, instrumentType]);
+  }, [address]);
 
   useSubscription(() => {
     if (!address || instrumentType !== "perps") return;
@@ -47,12 +47,12 @@ const UserTradeProvider = ({ children }: Props) => {
   }, [address, instrumentType]);
 
   useSubscription(() => {
-    if (!address || instrumentType !== "perps") return;
+    if (!address) return;
 
     return hlSubClient.allDexsClearinghouseState({ user: address }, (data) => {
       useUserTradeStore.getState().applyClearinghouseState(data);
     });
-  }, [address, instrumentType]);
+  }, [address]);
 
   return children;
 };

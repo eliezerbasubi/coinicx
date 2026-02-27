@@ -15,7 +15,7 @@ import TradeStoreProvider from "@/store/trade/provider";
 
 import { parseBuilderDeployedAsset } from "../utils";
 
-const TradeProvider = ({
+const TradingPairProvider = ({
   children,
   ...props
 }: React.PropsWithChildren<{
@@ -23,7 +23,7 @@ const TradeProvider = ({
   base: string;
   quote: string;
 }>) => {
-  const { data, getTokenMeta } = useMetaAndAssetCtxs();
+  const { spotMeta, perpMetas, getTokenMeta } = useMetaAndAssetCtxs();
 
   const tokenMeta = getTokenMeta(props.instrumentType, props.base, props.quote);
 
@@ -37,9 +37,9 @@ const TradeProvider = ({
 
   if (
     (props.instrumentType === "spot" &&
-      data.spotMeta?.tokens.length &&
+      spotMeta?.tokens.length &&
       !tokenMeta) ||
-    (props.instrumentType === "perps" && data.perpMetas?.length && !tokenMeta)
+    (props.instrumentType === "perps" && perpMetas?.length && !tokenMeta)
   ) {
     let path = `${ROUTES.trade.index}/${props.instrumentType}`;
 
@@ -63,4 +63,4 @@ const TradeProvider = ({
   );
 };
 
-export default TradeProvider;
+export default TradingPairProvider;

@@ -1,10 +1,10 @@
-import React from "react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ROUTES } from "@/constants/routes";
 import { DEFAULT_SPOT_ASSETS } from "@/features/trade/constants";
-import TradeProvider from "@/features/trade/providers/trade-provider";
+import TradingInstrumentProvider from "@/features/trade/providers/trading-instrument-provider";
+import TradingPairProvider from "@/features/trade/providers/trading-pair-provider";
 import UserTradeProvider from "@/features/trade/providers/user-trade-provider";
 import { getTradePathParams } from "@/features/trade/utils/getTradePathParams";
 
@@ -30,13 +30,15 @@ const TradeLayout = async ({
   }
 
   return (
-    <TradeProvider
+    <TradingPairProvider
       instrumentType={pathParams.type}
       base={pathParams.base}
       quote={pathParams.quote ?? DEFAULT_SPOT_ASSETS.quote}
     >
-      <UserTradeProvider>{children}</UserTradeProvider>
-    </TradeProvider>
+      <TradingInstrumentProvider>
+        <UserTradeProvider>{children}</UserTradeProvider>
+      </TradingInstrumentProvider>
+    </TradingPairProvider>
   );
 };
 

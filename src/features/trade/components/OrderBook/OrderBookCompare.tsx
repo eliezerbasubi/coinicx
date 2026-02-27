@@ -5,12 +5,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useOrderBookStore } from "@/store/trade/orderbook";
+import { useShallowOrderBookStore } from "@/store/trade/orderbook";
 
 const MAX_LEVELS = 10;
 
 const OrderBookCompare = () => {
-  const showBuyAndSellRatio = useOrderBookStore(
+  const showBuyAndSellRatio = useShallowOrderBookStore(
     (state) => state.settings.showBuyAndSellRatio,
   );
 
@@ -20,8 +20,10 @@ const OrderBookCompare = () => {
 };
 
 const Compare = () => {
-  const bids = useOrderBookStore((state) => state.bids);
-  const asks = useOrderBookStore((state) => state.asks);
+  const { bids, asks } = useShallowOrderBookStore((state) => ({
+    bids: state.bids,
+    asks: state.asks,
+  }));
 
   const bidVolume = bids
     .slice(0, MAX_LEVELS)

@@ -10,7 +10,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { VOrderBook, VOrderBookType } from "@/components/vectors/orderbook";
-import { useOrderBookStore } from "@/store/trade/orderbook";
+import {
+  useOrderBookStore,
+  useShallowOrderBookStore,
+} from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 
 const LAYOUTS: Array<{
@@ -38,9 +41,11 @@ const LAYOUTS: Array<{
 const OrderBookHeader = () => {
   const [open, setOpen] = useState(false);
 
-  const layout = useOrderBookStore((s) => s.layout);
-  const tickSize = useOrderBookStore((s) => s.tickSize);
-  const ticks = useOrderBookStore((s) => s.ticks);
+  const { layout, tickSize, ticks } = useShallowOrderBookStore((s) => ({
+    layout: s.layout,
+    tickSize: s.tickSize,
+    ticks: s.ticks,
+  }));
 
   const currentTick = useMemo(
     () => ticks.find((tick) => tick.value === tickSize) || ticks[0],

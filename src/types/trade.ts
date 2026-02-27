@@ -1,4 +1,8 @@
-import { CandleSnapshotParameters, OrderParameters } from "@nktkas/hyperliquid";
+import {
+  AllPerpMetasResponse,
+  CandleSnapshotParameters,
+  OrderParameters,
+} from "@nktkas/hyperliquid";
 
 export type ChartType = "standard" | "tradingView" | "depth";
 
@@ -106,10 +110,26 @@ export type AllAssetsMetas = {
   symbol: string;
 };
 
-export type MetaAndAssetCtx = {
-  meta: AssetMeta;
-  ctx: AssetCxt;
+export type Asset = {
   isSpot: boolean;
+  dex?: string | null;
+  perpDexIndex?: number;
+  index: number;
+  symbol: string;
+  coin: string;
+  base: string;
+  quote: string;
+  szDecimals: number;
+  markPx: number;
+  midPx: number;
+  dayNtlVlm: number;
+  dayBaseVlm: number;
+  prevDayPx: number;
+  funding: number | null;
+  openInterest: number | null;
+  oraclePx: number | null;
+  maxLeverage: number | null;
+  marketCap: number | null;
 };
 
 export type Order = {
@@ -131,3 +151,10 @@ export type MarginTier = {
   maxLeverage: number;
   maintenanceDeduction: number;
 };
+
+export type AllPerpMetas = Array<
+  AllPerpMetasResponse[number] & {
+    dex: string;
+    perpDexIndex: number;
+  }
+>;

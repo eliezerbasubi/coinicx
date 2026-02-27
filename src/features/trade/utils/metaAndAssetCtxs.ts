@@ -1,6 +1,11 @@
-import { AllPerpMetasResponse, SpotMetaResponse } from "@nktkas/hyperliquid";
+import {
+  ActiveAssetCtxWsEvent,
+  ActiveSpotAssetCtxWsEvent,
+  AllPerpMetasResponse,
+  SpotMetaResponse,
+} from "@nktkas/hyperliquid";
 
-import { AssetMeta } from "@/types/trade";
+import { AssetCxt, AssetMeta } from "@/types/trade";
 
 import { formatSymbol } from "./formatting";
 import { parseQuoteAsset } from "./perps";
@@ -56,4 +61,32 @@ export const mapPerpDataToAssetMeta = (data: {
     szDecimals: universe.szDecimals,
     tokenId: null,
   };
+};
+
+export const mapDataToAssetCtx = (
+  data: ActiveSpotAssetCtxWsEvent["ctx"] | ActiveAssetCtxWsEvent["ctx"],
+) => {
+  const markPx = Number(data.markPx);
+
+  const ctx: AssetCxt = {
+    markPx,
+    midPx: Number(data.midPx),
+    prevDayPx: Number(data.prevDayPx),
+    dayBaseVlm: Number(data.dayBaseVlm),
+    dayNtlVlm: Number(data.dayNtlVlm),
+    openInterest: null,
+    funding: null,
+    oraclePx: null,
+    marketCap: null,
+  };
+
+  if ("openInterest" in data) {
+    ctx.openInterest = Number(data.openInterest);
+    ctx.funding = Number(data.funding);
+    ctx.oraclePx = Number(data.oraclePx);
+  } else {
+    ctx.marketCap = Number(data.circulatingSupply) * markPx;
+  }
+
+  return ctx;
 };

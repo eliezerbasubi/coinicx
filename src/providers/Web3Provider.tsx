@@ -2,21 +2,24 @@
 
 import React from "react";
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 
 import { wagmiConfig } from "@/config/wagmi";
 
 import "@rainbow-me/rainbowkit/styles.css";
 
+import { getQueryClient } from "@/utils/getQueryClient";
+
 type Props = {
   children: React.ReactNode;
 };
 
-const queryClient = new QueryClient();
+const queryClient = getQueryClient();
 
 const Web3Provider = ({ children }: Props) => {
   const rkTheme = darkTheme();
+
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={wagmiConfig}>

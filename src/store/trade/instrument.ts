@@ -1,51 +1,111 @@
 import {
   ActiveAssetCtxWsEvent,
   ActiveSpotAssetCtxWsEvent,
+  AllDexsAssetCtxsWsEvent,
+  SpotAssetCtxsWsEvent,
+  SpotMetaResponse,
 } from "@nktkas/hyperliquid";
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-import { AssetCxt, AssetMeta } from "@/types/trade";
+import { AllPerpMetas, AssetCxt, AssetMeta } from "@/types/trade";
+import { QUERY_KEYS } from "@/constants/queryKeys";
+import {
+  mapDataToAssetCtx,
+  mapPerpDataToAssetMeta,
+  mapSpotDataToAssetMeta,
+  parseBuilderDeployedAsset,
+} from "@/features/trade/utils";
+import { getQueryClient } from "@/utils/getQueryClient";
 
 interface InstrumentStoreState {
   assetMeta: AssetMeta | null;
   assetCtx: AssetCxt | null;
-  setTokenMeta: (data: AssetMeta) => void;
+  spotAssetCtxs: SpotAssetCtxsWsEvent;
+  allDexsAssetCtxs: AllDexsAssetCtxsWsEvent["ctxs"];
+  setTokenMeta: (meta: AssetMeta) => void;
   setAssetCtx: (
     data: ActiveSpotAssetCtxWsEvent["ctx"] | ActiveAssetCtxWsEvent["ctx"],
   ) => void;
+  setTokenMetaAndAssetCtx: (params: {
+    dex: string;
+    perpDexIndex: number;
+    assetIndex: number;
+    isSpot: boolean;
+  }) => void;
+  applySpotAssetCtxs: (data: SpotAssetCtxsWsEvent) => void;
+  applyAllDexsAssetCtxs: (data: AllDexsAssetCtxsWsEvent["ctxs"]) => void;
 }
 
-export const useInstrumentStore = create<InstrumentStoreState>()((set) => ({
-  assetMeta: null,
-  assetCtx: null,
-  setTokenMeta: (data) => set({ assetMeta: data }),
-  setAssetCtx: (data) => {
-    const markPx = Number(data.markPx);
+export const useInstrumentStore = create<InstrumentStoreState>()(
+  (set, get) => ({
+    assetMeta: null,
+    assetCtx: null,
+    spotAssetCtxs: [],
+    allDexsAssetCtxs: [],
+    setTokenMeta: (meta) => set({ assetMeta: meta }),
+    setAssetCtx: (data) => {
+      set({ assetCtx: mapDataToAssetCtx(data) });
+    },
+    setTokenMetaAndAssetCtx(params) {
+      const { allDexsAssetCtxs, spotAssetCtxs } = get();
+      const queryClient = getQueryClient();
 
-    const ctx: AssetCxt = {
-      markPx,
-      midPx: Number(data.midPx),
-      prevDayPx: Number(data.prevDayPx),
-      dayBaseVlm: Number(data.dayBaseVlm),
-      dayNtlVlm: Number(data.dayNtlVlm),
-      openInterest: null,
-      funding: null,
-      oraclePx: null,
-      marketCap: null,
-    };
+      const allPerpMetas = queryClient.getQueryData<AllPerpMetas>([
+        QUERY_KEYS.allPerpMetas,
+      ]);
+      const spotMeta = queryClient.getQueryData<SpotMetaResponse>([
+        QUERY_KEYS.spotMeta,
+      ]);
 
-    if ("openInterest" in data) {
-      ctx.openInterest = Number(data.openInterest);
-      ctx.funding = Number(data.funding);
-      ctx.oraclePx = Number(data.oraclePx);
-    } else {
-      ctx.marketCap = Number(data.circulatingSupply) * markPx;
-    }
+      if (!allPerpMetas || !spotMeta) return;
 
-    set({ assetCtx: ctx });
-  },
-}));
+      if (params.isSpot) {
+        const universe = spotMeta.universe[params.assetIndex];
+        const ctx = spotAssetCtxs[universe.index];
+
+        if (!universe || !ctx) return;
+
+        const [baseIndex, quoteIndex] = universe.tokens;
+
+        set({
+          assetMeta: mapSpotDataToAssetMeta(
+            universe,
+            spotMeta.tokens[baseIndex],
+            spotMeta.tokens[quoteIndex].name,
+          ),
+          assetCtx: mapDataToAssetCtx(ctx),
+        });
+      } else {
+        const perpDexState = allPerpMetas[params.perpDexIndex];
+        const perpMeta = perpDexState.universe[params.assetIndex];
+
+        const dexCtxState = new Map(allDexsAssetCtxs).get(perpDexState.dex);
+
+        if (!perpMeta || !dexCtxState) return;
+
+        const ctx = dexCtxState[params.assetIndex];
+
+        set({
+          assetMeta: mapPerpDataToAssetMeta({
+            ...parseBuilderDeployedAsset(perpMeta.name),
+            universe: perpMeta,
+            index: params.assetIndex,
+            perpDexIndex: params.perpDexIndex,
+            quote: spotMeta.tokens[perpDexState.collateralToken].name,
+          }),
+          assetCtx: mapDataToAssetCtx(ctx),
+        });
+      }
+    },
+    applySpotAssetCtxs(data) {
+      set({ spotAssetCtxs: data });
+    },
+    applyAllDexsAssetCtxs(data) {
+      set({ allDexsAssetCtxs: data });
+    },
+  }),
+);
 
 export const useShallowInstrumentStore = <T>(
   selector: (state: InstrumentStoreState) => T,

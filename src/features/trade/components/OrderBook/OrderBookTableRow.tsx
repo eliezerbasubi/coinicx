@@ -38,7 +38,7 @@ const OrderBookTableRow = ({
         {
           "peer/ask peer-hover/ask:bg-neutral-gray-200/25 hover:border-t":
             side === "asks",
-          "peer/bid group-hover/bids:bg-neutral-gray-200/25 peer-hover/bid:bg-transparent hover:border-b":
+          "peer/bid group-hover/bid:bg-neutral-gray-200/25 peer-hover/bid:bg-transparent hover:border-b":
             side === "bids",
         },
         className,
