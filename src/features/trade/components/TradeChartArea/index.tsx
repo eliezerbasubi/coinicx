@@ -18,15 +18,17 @@ const ChartCategories = dynamic(() => import("./Header/ChartCategories"), {
 const ChartHeader = dynamic(() => import("./Header/ChartHeader"), {
   ssr: false,
 });
-const KlineChart = dynamic(() => import("./Kline/KlineChart"), { ssr: false });
-const DepthChart = dynamic(() => import("./Depth"), { ssr: false });
+const KlineChart = dynamic(() => import("./Chart/Kline/KlineChart"), {
+  ssr: false,
+});
+const DepthChart = dynamic(() => import("./Chart/Depth"), { ssr: false });
 
 type State = {
   currentTab: ChartAreaTabValue;
   fullscreen: boolean;
 };
 
-const SpotChart = () => {
+const TradeChartArea = () => {
   const isMobile = useIsMobile();
 
   const chartType = useShallowChartSettingsStore((s) => s.chartType);
@@ -105,9 +107,12 @@ const SpotChart = () => {
 
       <div
         role="tabpanel"
-        className={cn("w-full flex justify-center items-center", {
-          hidden: state.currentTab !== "info",
-        })}
+        className={cn(
+          "w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-125 flex justify-center items-center",
+          {
+            hidden: state.currentTab !== "info",
+          },
+        )}
       >
         <p>Coming Soon</p>
       </div>
@@ -115,4 +120,4 @@ const SpotChart = () => {
   );
 };
 
-export default SpotChart;
+export default TradeChartArea;
