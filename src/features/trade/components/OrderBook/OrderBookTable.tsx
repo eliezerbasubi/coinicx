@@ -1,15 +1,16 @@
 "use client";
 
-import React from "react";
-import { useMediaQuery } from "usehooks-ts";
-
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useSubscription } from "@/hooks/useSubscription";
 import Visibility from "@/components/common/Visibility";
 import { getNSigFigsAndMantissa } from "@/features/trade/utils";
 import { hlSubClient } from "@/services/transport";
 import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
-import { useOrderBookStore } from "@/store/trade/orderbook";
+import { useShallowInstrumentStore } from "@/store/trade/instrument";
+import {
+  useOrderBookStore,
+  useShallowOrderBookStore,
+} from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 
 import OrderBookCompare from "./OrderBookCompare";
@@ -17,14 +18,13 @@ import OrderBookList from "./OrderBookList";
 import OrderBookTicker from "./OrderBookTicker";
 
 const OrderBookTable = () => {
-  const setSnapshot = useOrderBookStore((state) => state.setSnapshot);
-  const layout = useOrderBookStore((state) => state.layout);
-  const tickSize = useOrderBookStore((state) => state.tickSize);
-  const coin = useInstrumentStore((state) => state.assetMeta?.coin);
+  const { layout, tickSize } = useShallowOrderBookStore((state) => ({
+    layout: state.layout,
+    tickSize: state.tickSize,
+  }));
+  const coin = useShallowInstrumentStore((state) => state.assetMeta?.coin);
 
-  const isMobile = useMediaQuery("(max-width: 768px)", {
-    initializeWithValue: false,
-  });
+  const isMobile = useIsMobile();
 
   useSubscription(() => {
     if (!coin) return;
@@ -32,7 +32,9 @@ const OrderBookTable = () => {
     const { nSigFigs, mantissa } = getNSigFigsAndMantissa(tickSize);
 
     return hlSubClient.l2Book({ coin, nSigFigs, mantissa }, (data) => {
-      setSnapshot({ bids: data.levels[0], asks: data.levels[1] });
+      useOrderBookStore
+        .getState()
+        .setSnapshot({ bids: data.levels[0], asks: data.levels[1] });
     });
   }, [coin, tickSize]);
 
@@ -53,7 +55,10 @@ const OrderBookTable = () => {
         {!isMobile && <OrderBookTicker />}
 
         {layout !== "sellOrder" && (
-          <OrderBookList side="bids" className={cn({ "p-0": isMobile })} />
+          <OrderBookList
+            side="bids"
+            className={cn("group/bid", { "p-0": isMobile })}
+          />
         )}
       </div>
 

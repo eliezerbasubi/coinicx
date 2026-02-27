@@ -12,18 +12,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useOrderBookStore } from "@/store/trade/orderbook";
+import {
+  useOrderBookStore,
+  useShallowOrderBookStore,
+} from "@/store/trade/orderbook";
 
 const OrderBookSettings = () => {
-  const setSettings = useOrderBookStore((state) => state.setSettings);
-  const onDepthVisualizerChange = useOrderBookStore(
-    (state) => state.onDepthVisualizerChange,
-  );
-
-  const settings = useOrderBookStore((state) => state.settings);
+  const settings = useShallowOrderBookStore((state) => state.settings);
 
   const onCheckedChange = (name: string, value: boolean) =>
-    setSettings({ [name]: value });
+    useOrderBookStore.getState().setSettings({ [name]: value });
 
   return (
     <Popover>
@@ -65,9 +63,11 @@ const OrderBookSettings = () => {
             name="depthVisualizer"
             defaultValue="amount"
             onValueChange={(value) =>
-              onDepthVisualizerChange(
-                value as IOrderBookSettings["depthVisualizer"],
-              )
+              useOrderBookStore
+                .getState()
+                .onDepthVisualizerChange(
+                  value as IOrderBookSettings["depthVisualizer"],
+                )
             }
             className="w-full"
           >

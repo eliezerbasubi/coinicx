@@ -1,15 +1,15 @@
 import React, { useCallback, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
-import { useMediaQuery } from "usehooks-ts";
 
 import {
   CumulativePriceLevel,
   OrderBookType,
   PriceLevel,
 } from "@/types/orderbook";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useTradeContext } from "@/store/trade/hooks";
-import { useOrderBookStore } from "@/store/trade/orderbook";
+import { useShallowOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 
 import AveragePriceTooltip from "./AveragePriceTooltip";
@@ -25,20 +25,17 @@ const MAX_VISIBLE_ROWS = 17;
 const ROW_HEIGHT = 20;
 
 const OrderBookList = ({ side, className }: Props) => {
-  const priceLevels = useOrderBookStore((state) => state[side]);
+  const { priceLevels, layout, averageAndSum, depthVisualizer } =
+    useShallowOrderBookStore((s) => ({
+      priceLevels: s[side],
+      layout: s.layout,
+      averageAndSum: s.settings.averageAndSum,
+      depthVisualizer: s.settings.depthVisualizer,
+    }));
 
-  const layout = useOrderBookStore((state) => state.layout);
-  const averageAndSum = useOrderBookStore(
-    (state) => state.settings.averageAndSum,
-  );
-  const depthVisualizer = useOrderBookStore(
-    (state) => state.settings.depthVisualizer,
-  );
   const decimals = useTradeContext((state) => state.decimals);
 
-  const isMobile = useMediaQuery("(max-width: 768px)", {
-    initializeWithValue: false,
-  });
+  const isMobile = useIsMobile();
 
   const [hoverIndex, setHoverIndex] = useState(0);
   const scrollHeight = useRef(0);

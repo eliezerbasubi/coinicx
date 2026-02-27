@@ -1,12 +1,11 @@
-import React from "react";
 import { ArrowUp } from "lucide-react";
 
-import { useInstrumentStore } from "@/store/trade/instrument";
+import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 const OrderBookTicker = () => {
-  const tokenCtx = useInstrumentStore((state) => state.assetCtx);
+  const tokenCtx = useShallowInstrumentStore((state) => state.assetCtx);
 
   const close = Number(tokenCtx?.prevDayPx ?? 0);
   const open = Number(tokenCtx?.markPx ?? 0);
