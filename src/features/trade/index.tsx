@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 
-import SpotChart from "./components/Chart";
 import TickerOverview from "./components/TickerOverview";
+import TradeChartArea from "./components/TradeChartArea";
 import TradeUserInfo from "./components/TradeUserInfo";
 import UserAccountInfo from "./components/UserAccountInfo";
 
@@ -39,7 +39,7 @@ const Trade = () => {
 
           <div className="flex gap-1 md:flex-wrap-reverse xl:flex-nowrap">
             {!isMobile && <OrderBook />}
-            <SpotChart />
+            <TradeChartArea />
           </div>
         </div>
         {isMobile ? <OrderFormMobile /> : <OrderForm />}
