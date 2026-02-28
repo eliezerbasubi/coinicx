@@ -1,6 +1,8 @@
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import Visibility from "@/components/common/Visibility";
+import { TRANSPORT_URL } from "@/services/transport";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
 import { formatAddress } from "@/utils/formatting/formatAddress";
@@ -13,17 +15,40 @@ const AssetInfo = () => {
     tokenMeta: state.assetMeta,
   }));
 
+  const { data } = useQuery({
+    queryKey: ["perpAnnotation", tokenMeta?.coin],
+    enabled: !!tokenMeta?.coin && !!tokenMeta.dex,
+    staleTime: Infinity,
+    queryFn: async () => {
+      // Temporary implementation until the SDK adds the perpAnnotation method
+      const response = await fetch(TRANSPORT_URL, {
+        body: JSON.stringify({
+          type: "perpAnnotation",
+          coin: tokenMeta?.coin ?? "",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
+      return response.json() as Promise<{
+        category: string;
+        description: string;
+      }>;
+    },
+  });
+
   if (!tokenMeta) return null;
 
   const marketOrderValue = getMarketOrderValue(tokenMeta.maxLeverage);
 
   return (
     <div className="w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-125 group-fullscreen/chart:lg:w-full group-fullscreen/chart:xl:w-full">
-      <div className="size-full mx-auto max-w-2xl px-4 flex flex-col justify-center">
+      <div className="size-full mx-auto max-w-2xl px-4 flex flex-col justify-center space-y-4">
         <div
           role="button"
           tabIndex={0}
-          className="flex items-center space-x-2 cursor-pointer mb-4"
+          className="flex items-center space-x-2 cursor-pointer"
         >
           <TokenImage
             key={`${tokenMeta.base}-${tokenMeta.coin}`}
@@ -38,7 +63,19 @@ const AssetInfo = () => {
           </p>
         </div>
 
+        <Visibility visible={!!data?.description}>
+          <p className="text-sm text-white">{data?.description}</p>
+        </Visibility>
+
         <div className="w-full space-y-4">
+          <Visibility visible={!!data?.category}>
+            <AssetInfoTile
+              label="Category"
+              value={data?.category ?? ""}
+              className="capitalize"
+            />
+          </Visibility>
+
           <AssetInfoTile
             label="Min Order Size"
             value={`10 ${tokenMeta.quote}`}
@@ -95,10 +132,6 @@ const getMarketOrderValue = (maxLeverage: number): number => {
   if (maxLeverage > 20 && maxLeverage < 25) return 5_000_000;
   if (maxLeverage > 10 && maxLeverage < 20) return 2_000_000;
   return 500_000;
-};
-
-const getLimitOrderValue = (maxLeverage: number): number => {
-  return 10 * getMarketOrderValue(maxLeverage);
 };
 
 /**

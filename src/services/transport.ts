@@ -1,4 +1,3 @@
-import { wagmiConfig } from "@/config/wagmi";
 import {
   ExchangeClient,
   HttpTransport,
@@ -9,6 +8,8 @@ import {
 import { AbstractWallet } from "@nktkas/hyperliquid/signing";
 import { toHex } from "viem";
 import { getWalletClient } from "wagmi/actions";
+
+import { wagmiConfig } from "@/config/wagmi";
 
 export const isTestnet = process.env.NEXT_PUBLIC_WEB3_NETWORK === "testnet";
 
@@ -31,7 +32,14 @@ export const hlExchangeClient = async (args?: {
   });
 };
 
-
 const ws = new WebSocketTransport({ isTestnet });
+
+// TODO: Remove this implementation once the perpAnnotation method is added to the SDK
+const TRANSPORT_URLS = {
+  testnet: "https://api.hyperliquid-testnet.xyz",
+  mainnet: "https://api.hyperliquid.xyz",
+};
+
+export const TRANSPORT_URL = TRANSPORT_URLS[isTestnet ? "testnet" : "mainnet"];
 
 export const hlSubClient = new SubscriptionClient({ transport: ws });
