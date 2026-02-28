@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant fullscreen (&:fullscreen);
+
 @theme {
   --color-primary: #fcd535;
   --color-background: #181a20;

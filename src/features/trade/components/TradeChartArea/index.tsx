@@ -5,23 +5,17 @@ import dynamic from "next/dynamic";
 
 import { ChartAreaTabValue } from "@/types/trade";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import {
-  useChartSettingsStore,
-  useShallowChartSettingsStore,
-} from "@/store/trade/chart-settings";
 import { cn } from "@/utils/cn";
 
+import AssetInfo from "./AssetInfo";
+
+const ChartArea = dynamic(() => import("./Chart"), { ssr: false });
+
 const OrderBook = dynamic(() => import("../OrderBook"), { ssr: false });
-const ChartCategories = dynamic(() => import("./Header/ChartCategories"), {
-  ssr: false,
-});
+
 const ChartHeader = dynamic(() => import("./Header/ChartHeader"), {
   ssr: false,
 });
-const KlineChart = dynamic(() => import("./Chart/Kline/KlineChart"), {
-  ssr: false,
-});
-const DepthChart = dynamic(() => import("./Chart/Depth"), { ssr: false });
 
 type State = {
   currentTab: ChartAreaTabValue;
@@ -30,8 +24,6 @@ type State = {
 
 const TradeChartArea = () => {
   const isMobile = useIsMobile();
-
-  const chartType = useShallowChartSettingsStore((s) => s.chartType);
 
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
@@ -61,7 +53,10 @@ const TradeChartArea = () => {
   }, [isMobile, state.currentTab]);
 
   return (
-    <div ref={wrapperRef} className="w-full bg-primary-dark md:rounded-md">
+    <div
+      ref={wrapperRef}
+      className="group/chart w-full bg-primary-dark md:rounded-md"
+    >
       <ChartHeader
         currentTab={state.currentTab}
         fullscreen={state.fullscreen}
@@ -69,52 +64,24 @@ const TradeChartArea = () => {
         onFullScreen={handleFullscreen}
       />
 
-      <div
-        role="tabpanel"
-        className={cn("w-full", {
-          hidden: state.currentTab !== "chart",
-        })}
-      >
-        <ChartCategories
-          value={chartType}
-          onValueChange={(chartType) =>
-            useChartSettingsStore.getState().setSettings({ chartType })
-          }
-        />
-        <div
-          id="chartArea"
-          className={cn("w-full h-dvh", {
-            "lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-125":
-              !state.fullscreen,
-          })}
+      <div role="tabpanel" className="w-full">
+        <Activity mode={state.currentTab === "chart" ? "visible" : "hidden"}>
+          <ChartArea />
+        </Activity>
+      </div>
+
+      <div role="tabpanel" className="w-full">
+        <Activity
+          mode={state.currentTab === "orderbook" ? "visible" : "hidden"}
         >
-          <Activity mode={chartType === "standard" ? "visible" : "hidden"}>
-            <KlineChart />
-          </Activity>
-
-          <Activity mode={chartType === "depth" ? "visible" : "hidden"}>
-            <DepthChart />
-          </Activity>
-        </div>
+          <OrderBook />
+        </Activity>
       </div>
 
-      <div
-        role="tabpanel"
-        className={cn("w-full", { hidden: state.currentTab !== "orderbook" })}
-      >
-        {state.currentTab === "orderbook" && <OrderBook />}
-      </div>
-
-      <div
-        role="tabpanel"
-        className={cn(
-          "w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-125 flex justify-center items-center",
-          {
-            hidden: state.currentTab !== "info",
-          },
-        )}
-      >
-        <p>Coming Soon</p>
+      <div role="tabpanel" className="w-full">
+        <Activity mode={state.currentTab === "info" ? "visible" : "hidden"}>
+          <AssetInfo />
+        </Activity>
       </div>
     </div>
   );
