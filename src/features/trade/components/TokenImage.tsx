@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 import { InstrumentType } from "@/types/trade";
@@ -8,22 +8,25 @@ import { cn } from "@/utils/cn";
 
 type Props = {
   name: string;
+  coin?: string;
   className?: string;
   instrumentType: InstrumentType;
 };
 
-const TokenImage = ({ name, className, instrumentType }: Props) => {
+const TokenImage = ({ name, coin, className, instrumentType }: Props) => {
   const [error, setError] = useState(false);
 
-  const imagePath =
-    instrumentType === "spot" ? name + "_spot.svg" : name + ".svg";
+  const isSpot = instrumentType === "spot";
+  const tokenName = isSpot ? name : (coin ?? name);
+
+  const imagePath = isSpot ? tokenName + "_spot.svg" : tokenName + ".svg";
 
   return (
     <div className={cn("size-8 rounded-full overflow-hidden", className)}>
-      {(!error && name && (
+      {(!error && tokenName && (
         <Image
           src={`https://app.hyperliquid.xyz/coins/${imagePath}`}
-          alt={name}
+          alt={tokenName}
           width={100}
           height={100}
           className="size-full rounded-full"
@@ -31,7 +34,7 @@ const TokenImage = ({ name, className, instrumentType }: Props) => {
         />
       )) || (
         <div className="bg-primary text-primary-dark size-full grid place-content-center font-semibold">
-          <span>{name.charAt(0)}</span>
+          <span>{tokenName.charAt(0)}</span>
         </div>
       )}
     </div>

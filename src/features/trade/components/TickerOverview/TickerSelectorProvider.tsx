@@ -110,9 +110,6 @@ const TickerSelectorProvider = ({ children }: Props) => {
         const midPx = Number(ctx.midPx || 0);
         const dayBaseVlm = Number(ctx.dayBaseVlm || 0);
 
-        // skip assets with no data
-        if (!midPx || !markPx || !dayBaseVlm) continue;
-
         assets.push({
           isSpot: false,
           dex,

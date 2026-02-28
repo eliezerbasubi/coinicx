@@ -26,8 +26,9 @@ const AssetInfo = () => {
           className="flex items-center space-x-2 cursor-pointer mb-4"
         >
           <TokenImage
-            key={tokenMeta.base}
+            key={`${tokenMeta.base}-${tokenMeta.coin}`}
             name={tokenMeta.base}
+            coin={tokenMeta.coin}
             instrumentType={tokenMeta.dex === null ? "spot" : "perps"}
             className="size-5 md:size-8"
           />

@@ -363,6 +363,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                         <Visibility visible={isMobile}>
                           <TokenImage
                             name={datum.base}
+                            coin={datum.coin}
                             instrumentType={instrumentType}
                             className="bg-neutral-gray-200 border border-neutral-gray-200 text-trade-dark size-6 md:size-5"
                           />
