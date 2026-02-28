@@ -18,16 +18,16 @@ const AssetsSelector = () => {
 
   const isMobile = useIsMobile();
 
-  const tokenMeta = useShallowInstrumentStore((state) => ({
-    dex: state.assetMeta?.dex,
-    coin: state.assetMeta?.coin,
-    maxLeverage: state.assetMeta?.maxLeverage,
+  const tokenMeta = useShallowInstrumentStore((s) => ({
+    dex: s.assetMeta?.dex,
+    maxLeverage: s.assetMeta?.maxLeverage,
   }));
 
-  const { base, quote, instrumentType } = useTradeContext((state) => ({
-    base: state.base,
-    quote: state.quote,
-    instrumentType: state.instrumentType,
+  const { base, quote, coin, instrumentType } = useTradeContext((s) => ({
+    base: s.base,
+    quote: s.quote,
+    coin: s.coin,
+    instrumentType: s.instrumentType,
   }));
 
   const triggerRef = useRef(null);
@@ -44,9 +44,9 @@ const AssetsSelector = () => {
         onClick={() => setOpen(!open)}
       >
         <TokenImage
-          key={`${base}-${tokenMeta?.coin}`}
+          key={`${base}-${coin}`}
           name={base}
-          coin={tokenMeta?.coin}
+          coin={coin}
           instrumentType={instrumentType}
           className="size-5 md:size-8"
         />

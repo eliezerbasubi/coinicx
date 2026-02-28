@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import Visibility from "@/components/common/Visibility";
 import { TRANSPORT_URL } from "@/services/transport";
+import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
 import { formatAddress } from "@/utils/formatting/formatAddress";
@@ -15,9 +16,15 @@ const AssetInfo = () => {
     tokenMeta: state.assetMeta,
   }));
 
+  const { base, coin, instrumentType } = useTradeContext((s) => ({
+    base: s.base,
+    coin: s.coin,
+    instrumentType: s.instrumentType,
+  }));
+
   const { data } = useQuery({
-    queryKey: ["perpAnnotation", tokenMeta?.coin],
-    enabled: !!tokenMeta?.coin && !!tokenMeta.dex,
+    queryKey: ["perpAnnotation", coin],
+    enabled: !!tokenMeta && !!tokenMeta.dex,
     staleTime: Infinity,
     queryFn: async () => {
       // Temporary implementation until the SDK adds the perpAnnotation method
@@ -51,10 +58,10 @@ const AssetInfo = () => {
           className="flex items-center space-x-2 cursor-pointer"
         >
           <TokenImage
-            key={`${tokenMeta.base}-${tokenMeta.coin}`}
-            name={tokenMeta.base}
-            coin={tokenMeta.coin}
-            instrumentType={tokenMeta.dex === null ? "spot" : "perps"}
+            key={`${base}-${coin}`}
+            name={base}
+            coin={coin}
+            instrumentType={instrumentType}
             className="size-5 md:size-8"
           />
 
