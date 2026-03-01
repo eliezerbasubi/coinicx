@@ -23,6 +23,8 @@ export type AdaptiveTableProps<TData, TValue> = {
   className?: string;
   tableClassName?: string;
   rowClassName?: string;
+  thClassName?: string;
+  rowCellClassName?: string;
   onRowClick?: (data: TData) => void;
 };
 
@@ -41,6 +43,8 @@ const AdaptiveTable = <TData, TValue>({
   className,
   tableClassName,
   rowClassName,
+  thClassName,
+  rowCellClassName,
   loading,
   onRowClick,
 }: AdaptiveTableProps<TData, TValue>) => {
@@ -48,13 +52,10 @@ const AdaptiveTable = <TData, TValue>({
 
   return (
     <div
-      className={cn(
-        "w-full border border-neutral-gray-200 rounded-2xl overflow-hidden text-neutral-gray-100",
-        className,
-      )}
+      className={cn("w-full overflow-hidden text-neutral-gray-100", className)}
     >
       <TableElement className={tableClassName}>
-        <TableHeader className="bg-neutral-gray-600 border-b [&_tr]:border-b-0 border-neutral-gray-200 sticky top-0">
+        <TableHeader className="border-b-0 [&_tr]:border-b-0 border-neutral-gray-200 sticky top-0">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -63,6 +64,7 @@ const AdaptiveTable = <TData, TValue>({
                     key={header.id}
                     className={cn(
                       "whitespace-nowrap text-left text-neutral-gray-400 font-medium py-2 px-4",
+                      thClassName,
                       (
                         header.column.columnDef.meta as ColumnMeta<
                           TData,
@@ -98,6 +100,7 @@ const AdaptiveTable = <TData, TValue>({
                     key={cell.id}
                     className={cn(
                       "text-left py-2 px-4",
+                      rowCellClassName,
                       (cell.column.columnDef.meta as ColumnMeta<TData, TValue>)
                         ?.className,
                     )}

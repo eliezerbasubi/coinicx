@@ -3,7 +3,10 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
 import Visibility from "@/components/common/Visibility";
+import { useTradeContext } from "@/store/trade/hooks";
 import { cn } from "@/utils/cn";
+
+import UserBalances from "./UserBalances";
 
 const TABS = [
   { label: "Balances", value: "balances" },
@@ -16,9 +19,10 @@ const TABS = [
 ];
 
 const TradeUserInfo = () => {
-  const [currentTab, setCurrentTab] = useState("openOrders");
-  const { openConnectModal } = useConnectModal();
-  const { address } = useAccount();
+  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
+  const [currentTab, setCurrentTab] = useState(() =>
+    isPerps ? "positions" : "balances",
+  );
 
   return (
     <div className="w-full bg-primary-dark md:rounded-md">
@@ -40,7 +44,7 @@ const TradeUserInfo = () => {
               tabIndex={selected ? 1 : -1}
               onClick={() => setCurrentTab(tab.value)}
               className={cn(
-                "h-full flex items-center text-neutral-gray-400 text-sm font-medium border-b-2 border-transparent transition-colors cursor-pointer whitespace-nowrap",
+                "h-full flex items-center text-neutral-gray-400 text-xs font-medium border-b-2 border-transparent transition-colors cursor-pointer whitespace-nowrap",
                 {
                   "border-primary text-white": selected,
                 },
@@ -53,24 +57,36 @@ const TradeUserInfo = () => {
         })}
       </div>
 
-      <div role="tabpanel" className="h-64 flex items-center justify-center">
-        <Visibility
-          visible={!address}
-          fallback={<p className="text-sm">You orders will appear here</p>}
-        >
-          <p className="text-sm">
-            Please &nbsp;
-            <span
-              role="button"
-              className="text-primary cursor-pointer"
-              onClick={openConnectModal}
-            >
-              connect
-            </span>
-            &nbsp; your wallet first.
-          </p>
-        </Visibility>
+      <div role="tabpanel" className="h-64">
+        <AuthenticatedContent>
+          <UserBalances />
+        </AuthenticatedContent>
       </div>
+    </div>
+  );
+};
+
+const AuthenticatedContent = ({ children }: { children: React.ReactNode }) => {
+  const { openConnectModal } = useConnectModal();
+  const { address } = useAccount();
+
+  if (address) {
+    return children;
+  }
+
+  return (
+    <div className="h-full flex items-center justify-center">
+      <p className="text-sm">
+        Please &nbsp;
+        <span
+          role="button"
+          className="text-primary cursor-pointer"
+          onClick={openConnectModal}
+        >
+          connect
+        </span>
+        &nbsp; your wallet first.
+      </p>
     </div>
   );
 };

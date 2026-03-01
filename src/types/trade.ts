@@ -2,6 +2,8 @@ import {
   AllPerpMetasResponse,
   CandleSnapshotParameters,
   OrderParameters,
+  SpotMetaResponse,
+  SpotStateWsEvent,
 } from "@nktkas/hyperliquid";
 
 export type ChartType = "standard" | "tradingView" | "depth";
@@ -158,3 +160,11 @@ export type AllPerpMetas = Array<
     perpDexIndex: number;
   }
 >;
+
+export type SpotBalance = SpotStateWsEvent["spotState"]["balances"][number];
+
+export type SpotMetas = {
+  spotMeta: SpotMetaResponse;
+  tokenNamesToUniverseIndex: Map<string, Map<string, number>>;
+  tokensToSpotId: Map<number, Map<number, number>>;
+};

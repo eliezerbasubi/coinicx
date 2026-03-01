@@ -7,9 +7,9 @@ import {
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-import { useInstrumentStore } from "./instrument";
+import { SpotBalance } from "@/types/trade";
 
-type SpotBalances = SpotStateWsEvent["spotState"]["balances"];
+import { useInstrumentStore } from "./instrument";
 
 type AllDexsClearinghouseState =
   AllDexsClearinghouseStateWsEvent["clearinghouseStates"][number][1];
@@ -24,7 +24,7 @@ interface UserTradeState {
   /** Available to trade in quote asset. e.g. BTC for perps and notional for spot */
   availableQuoteToTrade: number;
   leverage: ActiveAssetDataResponse["leverage"] | null;
-  spotBalances: SpotBalances;
+  spotBalances: SpotBalance[];
   webData: WebData3WsEvent | null;
   clearinghouseState: AllDexsClearinghouseState | null;
   allDexsClearinghouseState: AllDexsClearinghouseState | null;

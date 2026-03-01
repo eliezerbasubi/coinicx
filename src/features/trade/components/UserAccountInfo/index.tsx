@@ -59,12 +59,10 @@ const SpotEquity = () => {
   const spotBalances = useShallowUserTradeStore((s) => s.spotBalances);
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
 
-  const { getSpotAssetsData } = useMetaAndAssetCtxs();
-
-  const { tokensToUniverseIndex } = getSpotAssetsData();
+  const { tokensToSpotId } = useMetaAndAssetCtxs();
 
   const spotValue = useMemo(() => {
-    if (!tokensToUniverseIndex.size) return 0;
+    if (!tokensToSpotId?.size) return 0;
 
     return spotBalances.reduce((acc, balance) => {
       const amount = Number(balance.total);
@@ -73,20 +71,20 @@ const SpotEquity = () => {
         return acc + amount;
       }
 
-      const tokenMap = tokensToUniverseIndex.get(balance.token);
+      const tokenMap = tokensToSpotId.get(balance.token);
       if (tokenMap === undefined) return acc;
 
       // Prefer USDC-quoted pairs (token 0) for accurate USD conversion.
-      const quoteTokenIndex = tokenMap.get(0);
+      const spotId = tokenMap.get(0);
 
-      if (quoteTokenIndex === undefined) return acc;
+      if (spotId === undefined) return acc;
 
-      const ctx = spotAssetCtxs[quoteTokenIndex];
+      const ctx = spotAssetCtxs[spotId];
       const markPx = Number(ctx?.markPx || "0");
 
       return acc + amount * markPx;
     }, 0);
-  }, [spotBalances, spotAssetCtxs, tokensToUniverseIndex]);
+  }, [spotBalances, spotAssetCtxs, tokensToSpotId]);
 
   return (
     <div className="flex items-center justify-between text-xs">
@@ -171,10 +169,13 @@ const AccountMargin = () => {
     allDexsClearinghouseState?.crossMaintenanceMarginUsed || "0",
   );
 
-  const crossMarginRatio = crossMaintenanceMarginUsed / accountValue;
-  const crossAccountLeverage =
-    Number(allDexsClearinghouseState?.marginSummary.totalNtlPos || "0") /
-    accountValue;
+  const crossMarginRatio = accountValue
+    ? crossMaintenanceMarginUsed / accountValue
+    : 0;
+  const crossAccountLeverage = accountValue
+    ? Number(allDexsClearinghouseState?.marginSummary.totalNtlPos || "0") /
+      accountValue
+    : 0;
 
   return (
     <div className="w-full mt-3">
