@@ -40,12 +40,12 @@ export const useOrderForm = () => {
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
   const availableToTrade = useAvailableToTrade(isBuyOrder);
 
-  const markPx = useShallowInstrumentStore((s) => s.assetCtx?.markPx || 0);
+  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
   const leverage = useShallowUserTradeStore((s) => s.leverage?.value || 0);
 
   const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 
-  const orderSizeInBase = useOrderFormStore.getState().getSizeInBase(markPx);
+  const orderSizeInBase = useOrderFormStore.getState().getSizeInBase(midPx);
 
   const isLimitOrderType = isLimitOrder(settings.orderType);
 
@@ -58,7 +58,7 @@ export const useOrderForm = () => {
     orderType: settings.orderType,
     orderSize: orderSizeInBase,
     limitPx: parseFloat(limitPrice || "0"),
-    markPx,
+    midPx,
     leverage,
     isSpot,
     reduceOnly: settings.reduceOnly,
@@ -70,7 +70,7 @@ export const useOrderForm = () => {
     balance: availableBalance,
     isBuyOrder,
     isSpot,
-    markPx,
+    midPx,
     orderType: settings.orderType,
   });
 
@@ -95,17 +95,17 @@ const checkInsufficientMargin = (params: {
   balance: number;
   marginRequired: number;
   orderValue: number;
-  markPx: number;
+  midPx: number;
   orderType: OrderType;
   isSpot: boolean;
   isBuyOrder: boolean;
 }) => {
-  let availableBalance = params.balance * params.markPx;
+  let availableBalance = params.balance * params.midPx;
 
   if (params.isSpot) {
     availableBalance = params.isBuyOrder
       ? params.balance
-      : params.balance * params.markPx;
+      : params.balance * params.midPx;
   }
 
   const margin = params.isSpot ? params.orderValue : params.marginRequired;
@@ -120,7 +120,7 @@ const calculateOrderValueAndMargin = (params: {
   orderType: OrderType;
   orderSize: number;
   limitPx: number;
-  markPx: number;
+  midPx: number;
   leverage: number;
   isSpot: boolean;
   reduceOnly: boolean;
@@ -139,7 +139,7 @@ const calculateOrderValueAndMargin = (params: {
       orderType: params.orderType,
       orderSize: params.orderSize,
       limitPx: params.limitPx,
-      markPx: params.markPx,
+      midPx: params.midPx,
     });
 
   if (params.isSpot) {

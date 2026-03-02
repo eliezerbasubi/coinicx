@@ -55,12 +55,13 @@ export const usePlaceOrder = () => {
       throw new Error("Asset metadata is not available");
     }
 
+    const midPx = assetCtx.midPx;
     const markPx = assetCtx.markPx;
 
     const size = parseFloat(params.size);
 
     const isNtl = params.isSzInNtl ?? settings.isSzInNtl;
-    const sizeInBase = isNtl ? size / markPx : size;
+    const sizeInBase = isNtl ? size * midPx : size;
 
     const price = params.entryPrice ? parseFloat(params.entryPrice) : markPx;
 
@@ -137,26 +138,31 @@ export const usePlaceOrder = () => {
     return tspslOrders;
   };
 
-  const buildMarketOrder = () => {
-    const formValues = useOrderFormStore.getState();
+  const buildMarketOrder = (params: {
+    size: string;
+    tpPrice?: string;
+    slPrice?: string;
+    isBuyOrder: boolean;
+  }) => {
+    const size = params.size;
     const markPx = useInstrumentStore.getState().assetCtx?.markPx ?? 0;
 
     const entryPrice = calculateSlippageAdjustedPrice({
       entryPrice: markPx,
-      isBuyOrder,
+      isBuyOrder: params.isBuyOrder,
     });
 
     const order = buildExchangeOrder({
-      size: formValues.size,
+      size,
       entryPrice: entryPrice.toString(),
       type: "market",
       isMarket: true,
     });
 
     const tspslOrders = buildTpSlOrders({
-      size: formValues.size,
-      tpPrice: formValues.tpslState.tpPrice || "",
-      slPrice: formValues.tpslState.slPrice || "",
+      size,
+      tpPrice: params.tpPrice || "",
+      slPrice: params.slPrice || "",
     });
 
     return {
@@ -165,20 +171,24 @@ export const usePlaceOrder = () => {
     };
   };
 
-  const buildLimitOrder = () => {
-    const formValues = useOrderFormStore.getState();
-
+  const buildLimitOrder = (params: {
+    size: string;
+    limitPrice: string;
+    tpPrice?: string;
+    slPrice?: string;
+    isBuyOrder: boolean;
+  }) => {
     const order = buildExchangeOrder({
-      size: formValues.size,
-      entryPrice: formValues.limitPrice,
+      size: params.size,
+      entryPrice: params.limitPrice,
       type: "limit",
       isMarket: false,
     });
 
     const tspslOrders = buildTpSlOrders({
-      size: formValues.size,
-      tpPrice: formValues.tpslState.tpPrice || "",
-      slPrice: formValues.tpslState.slPrice || "",
+      size: params.size,
+      tpPrice: params.tpPrice || "",
+      slPrice: params.slPrice || "",
     });
 
     return {
@@ -187,16 +197,18 @@ export const usePlaceOrder = () => {
     };
   };
 
-  const buildStopOrders = () => {
-    const formValues = useOrderFormStore.getState();
+  const buildStopOrders = (params: { size: string; isBuyOrder: boolean }) => {
+    const size = params.size;
     const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
-
-    const triggerPrice = formValues.triggerPrice;
+    const triggerPrice = useOrderFormStore.getState().triggerPrice;
     const trigger = parseFloat(triggerPrice);
 
-    if ((isBuyOrder && trigger < midPx) || (!isBuyOrder && trigger > midPx)) {
+    if (
+      (params.isBuyOrder && trigger < midPx) ||
+      (!params.isBuyOrder && trigger > midPx)
+    ) {
       throw new Error(
-        `Stop price must be ${isBuyOrder ? "above" : "below"} the current price`,
+        `Stop price must be ${params.isBuyOrder ? "above" : "below"} the current price`,
       );
     }
     const isMarket = settings.orderType === "stopMarket";
@@ -208,7 +220,7 @@ export const usePlaceOrder = () => {
       : trigger;
 
     const order = buildExchangeOrder({
-      size: formValues.size,
+      size,
       entryPrice: entryPrice.toString(),
       type: settings.orderType,
       isMarket,
@@ -327,21 +339,39 @@ export const usePlaceOrder = () => {
   };
 
   const getExchangeOrders = () => {
+    const formValues = useOrderFormStore.getState();
+
     let orderPayload = {
       orders: [] as OrderParameters["orders"],
       grouping: "na",
     };
 
+    const size = formValues.size;
+
     switch (settings.orderType) {
       case "market":
-        orderPayload = buildMarketOrder();
+        orderPayload = buildMarketOrder({
+          size,
+          tpPrice: formValues.tpslState.tpPrice,
+          slPrice: formValues.tpslState.slPrice,
+          isBuyOrder,
+        });
         break;
       case "limit":
-        orderPayload = buildLimitOrder();
+        orderPayload = buildLimitOrder({
+          size,
+          limitPrice: formValues.limitPrice,
+          tpPrice: formValues.tpslState.tpPrice,
+          slPrice: formValues.tpslState.slPrice,
+          isBuyOrder,
+        });
         break;
       case "stopMarket":
       case "stopLimit":
-        orderPayload = buildStopOrders();
+        orderPayload = buildStopOrders({
+          size,
+          isBuyOrder,
+        });
         break;
       case "scale":
         orderPayload = buildScaleOrders();

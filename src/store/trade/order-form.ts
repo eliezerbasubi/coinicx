@@ -110,11 +110,11 @@ export const useOrderFormStore = create<OrderFormStore>()(
       setExecutionOrder(data) {
         set((state) => ({ ...state, ...data }));
       },
-      getSizeInBase(markPx?: number) {
+      getSizeInBase(midPx?: number) {
         const { size, settings } = get();
-        const mark = markPx ?? getInstrumentData().markPx;
+        const mid = midPx ?? getInstrumentData().midPx;
         const parsedSize = parseFloat(size || "0");
-        return settings.isSzInNtl ? parsedSize / mark : parsedSize;
+        return settings.isSzInNtl ? parsedSize / mid : parsedSize;
       },
       setSettings(settings) {
         set((state) => ({
@@ -129,7 +129,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
       },
       calculateOrderSize({ isSpot, isBuyOrder }) {
         const { orderSide, settings } = get();
-        const { markPx } = getInstrumentData();
+        const { midPx } = getInstrumentData();
 
         const isBuy = isBuyOrder ?? orderSide === "buy";
 
@@ -145,7 +145,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
           isSpot,
           isSzInNtl: settings.isSzInNtl,
           availableBalance,
-          markPx,
+          midPx,
         });
 
         return maxOrderSize;
@@ -254,7 +254,6 @@ const getInstrumentData = () => {
   const { assetCtx, assetMeta } = useInstrumentStore.getState();
   return {
     midPx: assetCtx?.midPx || 0,
-    markPx: assetCtx?.markPx || 0,
     szDecimals: assetMeta?.szDecimals || 0,
   };
 };
@@ -263,15 +262,15 @@ const calculateOrderSize = (args: {
   isSpot: boolean;
   isSzInNtl: boolean;
   isBuyOrder: boolean;
-  markPx: number;
+  midPx: number;
   availableBalance: number;
 }) => {
-  const { isBuyOrder, isSpot, isSzInNtl, availableBalance, markPx } = args;
+  const { isBuyOrder, isSpot, isSzInNtl, availableBalance, midPx } = args;
   if (isSpot) {
     if (isBuyOrder)
-      return isSzInNtl ? availableBalance : availableBalance / markPx;
-    return isSzInNtl ? availableBalance * markPx : availableBalance;
+      return isSzInNtl ? availableBalance : availableBalance / midPx;
+    return isSzInNtl ? availableBalance * midPx : availableBalance;
   }
 
-  return isSzInNtl ? availableBalance * markPx : availableBalance;
+  return isSzInNtl ? availableBalance * midPx : availableBalance;
 };
