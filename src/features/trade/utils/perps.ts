@@ -78,16 +78,15 @@ export const estimateSlippagePercent = (params: {
 
 export const calculateOrderValue = (params: {
   orderSize: number;
-  midPx: number;
+  markPx: number;
   limitPx?: number;
   orderType: OrderType;
 }) => {
   if (isLimitOrder(params.orderType)) {
     return params.orderSize * (params.limitPx ?? 0);
   }
-  // TODO: Implement order value calculation for scale orders here
 
-  return params.orderSize * (params.midPx ?? 0);
+  return params.orderSize * (params.markPx ?? 0);
 };
 
 export const calculateMarginRequired = (params: {
