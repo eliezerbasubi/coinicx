@@ -1,5 +1,6 @@
 import React from "react";
 
+import { useTradeContext } from "@/store/trade/hooks";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -10,6 +11,7 @@ import OrderFormSlider from "./OrderFormSlider";
 import SizeCoinSelector from "./SizeCoinSelector";
 
 const OrderFormSize = () => {
+  const isSpot = useTradeContext((s) => s.instrumentType === "spot");
   const { szPercent, size } = useShallowOrderFormStore((s) => ({
     szPercent: s.szPercent,
     size: s.size,
@@ -29,12 +31,14 @@ const OrderFormSize = () => {
           />
         }
         onChange={(e) =>
-          useOrderFormStore.getState().onSizeChange(e.target.value)
+          useOrderFormStore.getState().onSizeChange(e.target.value, isSpot)
         }
       />
       <OrderFormSlider
         value={szPercent}
-        onValueChange={useOrderFormStore.getState().onPercentChange}
+        onValueChange={(value) =>
+          useOrderFormStore.getState().onPercentChange(value, isSpot)
+        }
       />
     </React.Fragment>
   );

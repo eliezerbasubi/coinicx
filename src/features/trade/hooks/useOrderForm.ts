@@ -40,12 +40,16 @@ export const useOrderForm = () => {
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
   const availableToTrade = useAvailableToTrade(isBuyOrder);
 
-  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
+  const referencePx = useShallowInstrumentStore(
+    (s) => s.assetCtx?.referencePx || 0,
+  );
   const leverage = useShallowUserTradeStore((s) => s.leverage?.value || 0);
 
   const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 
-  const orderSizeInBase = useOrderFormStore.getState().getSizeInBase(midPx);
+  const orderSizeInBase = useOrderFormStore
+    .getState()
+    .getSizeInBase(referencePx);
 
   const isLimitOrderType = isLimitOrder(settings.orderType);
 
@@ -58,7 +62,7 @@ export const useOrderForm = () => {
     orderType: settings.orderType,
     orderSize: orderSizeInBase,
     limitPx: parseFloat(limitPrice || "0"),
-    midPx,
+    referencePx,
     leverage,
     isSpot,
     reduceOnly: settings.reduceOnly,
@@ -70,7 +74,7 @@ export const useOrderForm = () => {
     balance: availableBalance,
     isBuyOrder,
     isSpot,
-    midPx,
+    referencePx,
     orderType: settings.orderType,
   });
 
@@ -95,17 +99,17 @@ const checkInsufficientMargin = (params: {
   balance: number;
   marginRequired: number;
   orderValue: number;
-  midPx: number;
+  referencePx: number;
   orderType: OrderType;
   isSpot: boolean;
   isBuyOrder: boolean;
 }) => {
-  let availableBalance = params.balance * params.midPx;
+  let availableBalance = params.balance * params.referencePx;
 
   if (params.isSpot) {
     availableBalance = params.isBuyOrder
       ? params.balance
-      : params.balance * params.midPx;
+      : params.balance * params.referencePx;
   }
 
   const margin = params.isSpot ? params.orderValue : params.marginRequired;
@@ -120,7 +124,7 @@ const calculateOrderValueAndMargin = (params: {
   orderType: OrderType;
   orderSize: number;
   limitPx: number;
-  midPx: number;
+  referencePx: number;
   leverage: number;
   isSpot: boolean;
   reduceOnly: boolean;
@@ -139,7 +143,7 @@ const calculateOrderValueAndMargin = (params: {
       orderType: params.orderType,
       orderSize: params.orderSize,
       limitPx: params.limitPx,
-      midPx: params.midPx,
+      referencePx: params.referencePx,
     });
 
   if (params.isSpot) {
