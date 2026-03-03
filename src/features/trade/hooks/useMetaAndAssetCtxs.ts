@@ -56,6 +56,7 @@ export const useMetaAndAssetCtxs = () => {
             string,
             Map<string, number>
           >();
+          const spotNamesToTokens = new Map() as SpotMetas["spotNamesToTokens"];
           const tokensToSpotId = new Map<number, Map<number, number>>();
 
           for (let index = 0; index < spotMeta.universe.length; index++) {
@@ -72,6 +73,14 @@ export const useMetaAndAssetCtxs = () => {
             spotMeta.tokens[quoteIndex].name = getTokenDisplayName(
               quoteTokenMeta.name,
             );
+
+            /** Map spot names to tokens */
+            if (!spotNamesToTokens.has(universe.name)) {
+              spotNamesToTokens.set(universe.name, {
+                baseToken: baseIndex,
+                quoteToken: quoteIndex,
+              });
+            }
 
             /** Map token names to universe index */
             if (!tokenNamesToUniverseIndex.has(baseTokenMeta.name)) {
@@ -93,7 +102,12 @@ export const useMetaAndAssetCtxs = () => {
             tokensToSpotId.get(baseIndex)?.set(quoteIndex, universe.index);
           }
 
-          return { tokenNamesToUniverseIndex, tokensToSpotId, spotMeta };
+          return {
+            tokenNamesToUniverseIndex,
+            tokensToSpotId,
+            spotNamesToTokens,
+            spotMeta,
+          };
         },
       },
     ],

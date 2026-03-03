@@ -4,9 +4,6 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
-import { ROUTES } from "@/constants/routes";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
-import { parseBuilderDeployedAsset } from "@/features/trade/utils";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/formatting/dates";
@@ -14,11 +11,14 @@ import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
 import CardItem from "./CardItem";
+import CoinLink from "./CoinLink";
+import { useSpotToTokenDetails } from "./hooks/useSpotToTokenDetails";
 
 interface TradeHistoryEntry {
   timestamp: number;
   symbol: string;
   base: string;
+  coin: string;
   dex: string | null;
   direction: string;
   feeToken: string;
@@ -44,14 +44,11 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
     header: "Coin",
     cell({ row: { original } }) {
       return (
-        <Link
+        <CoinLink
+          symbol={original.symbol}
+          dex={original.dex}
           href={original.href}
-          className="font-medium hover:text-primary flex items-center gap-x-1"
-        >
-          <p>{original.symbol}</p>
-
-          {original.dex && <Tag value={original.dex} />}
-        </Link>
+        />
       );
     },
   },
@@ -129,7 +126,6 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
           })}
         >
           {sign}
-          {/* {original.closedPnl} */}
           {formatNumber(original.closedPnl, {
             style: "currency",
             minimumFractionDigits: 2,
@@ -144,49 +140,18 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
 const TradeHistory = () => {
   const userFills = useShallowUserTradeStore((s) => s.fills);
 
-  const { spotMeta } = useMetaAndAssetCtxs();
-
-  const spotNamesToMetas = useMemo(() => {
-    const map = new Map<string, { base: string; quote: string }>();
-
-    if (!spotMeta) return map;
-
-    for (const meta of spotMeta.universe) {
-      const [baseIndex, quoteIndex] = meta.tokens;
-
-      map.set(meta.name, {
-        base: spotMeta.tokens[baseIndex].name,
-        quote: spotMeta.tokens[quoteIndex].name,
-      });
-    }
-    return map;
-  }, [spotMeta]);
+  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
 
   const data = useMemo(() => {
     return userFills.map((fill) => {
-      const spotInfo = spotNamesToMetas.get(fill.coin);
-
-      // Perps state
-      let symbol = fill.coin;
-      let href = `${ROUTES.trade.perps}/${fill.coin}`;
-      let dex = null;
-
-      // Spot state
-      if (spotInfo) {
-        symbol = `${spotInfo.base}/${spotInfo.quote}`;
-        href = `${ROUTES.trade.spot}/${symbol}`;
-      } else {
-        const asset = parseBuilderDeployedAsset(fill.coin);
-        dex = asset.dex;
-        symbol = asset.base;
-      }
+      const tokenDetails = mapSpotNameToTokenDetails(fill.coin);
 
       return {
         timestamp: fill.time,
-        coin: fill.coin,
+        coin: tokenDetails.coin,
         direction: fill.dir,
         feeToken: fill.feeToken,
-        base: spotInfo?.base || fill.coin,
+        base: tokenDetails.base,
         side: fill.side,
         size: Number(fill.sz),
         price: formatNumber(Number(fill.px), {
@@ -194,15 +159,15 @@ const TradeHistory = () => {
           minimumSignificantDigits: 5,
           maximumFractionDigits: 8,
         }),
-        closedPnl: Number(fill.closedPnl) - Number(fill.fee),
+        closedPnl: Number(fill.closedPnl) + Number(fill.fee),
         fee: Number(fill.fee),
         tradeValue: Number(fill.sz) * Number(fill.px),
-        symbol,
-        dex,
-        href,
+        symbol: tokenDetails.symbol,
+        dex: tokenDetails.dex,
+        href: tokenDetails.href,
       };
     });
-  }, [spotNamesToMetas, userFills]);
+  }, [mapSpotNameToTokenDetails, userFills]);
 
   return (
     <AdaptiveDataTable
@@ -230,7 +195,7 @@ const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
-              name={data.base}
+              name={data.coin}
               className="size-4"
               instrumentType={data.dex === null ? "spot" : "perps"}
             />

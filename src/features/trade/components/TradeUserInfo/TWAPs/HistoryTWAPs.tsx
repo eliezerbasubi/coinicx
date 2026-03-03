@@ -1,10 +1,9 @@
+import { useMemo } from "react";
 import Link from "next/link";
-import { UserTwapHistoryWsEvent } from "@nktkas/hyperliquid";
 import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
-import { ROUTES } from "@/constants/routes";
 import TokenImage from "@/features/trade/components/TokenImage";
 import { formatTotalRuntime } from "@/features/trade/utils/twap";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
@@ -16,38 +15,42 @@ import {
 } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
+import { useSpotToTokenDetails } from "../hooks/useSpotToTokenDetails";
 
-type TwapHistory = UserTwapHistoryWsEvent["history"][number];
+type TwapHistory = {
+  timestamp: number;
+  coin: string;
+  base: string;
+  dex: string | null;
+  symbol: string;
+  href: string;
+  sz: number;
+  executedSz: number;
+  averagePx: number;
+  totalRuntime: number;
+  reduceOnly: boolean;
+  randomize: boolean;
+  status: string;
+};
 
 const columns: ColumnDef<TwapHistory>[] = [
   {
     header: "Time",
-    accessorFn: (row) => row.time,
+    accessorFn: (row) => row.timestamp,
     cell({ row: { original } }) {
-      return <span>{formatDateTime(original.time * 1000)}</span>;
+      return <span>{formatDateTime(original.timestamp)}</span>;
     },
   },
   {
     id: "coin",
     header: "Coin",
     cell({ row: { original } }) {
-      const isSpot =
-        original.state.coin.startsWith("@") ||
-        original.state.coin.includes("USDC");
-
-      let path = `${ROUTES.trade.perps}/${original.state.coin}`;
-
-      // TODO complete this implementation for spot to have quote asset
-      if (isSpot) {
-        path = `${ROUTES.trade.spot}/${original.state.coin}/${original.state.coin}`;
-      }
-
       return (
         <Link
-          href={path}
+          href={original.href}
           className="font-medium hover:text-primary transition-colors"
         >
-          {original.state.coin}
+          {original.symbol}
         </Link>
       );
     },
@@ -59,11 +62,11 @@ const columns: ColumnDef<TwapHistory>[] = [
       return (
         <span className="text-buy space-x-1">
           <span>
-            {formatNumber(Number(original.state.sz), {
+            {formatNumber(original.sz, {
               minimumFractionDigits: 2,
             })}
           </span>
-          <span>{original.state.coin}</span>
+          <span>{original.base}</span>
         </span>
       );
     },
@@ -72,12 +75,12 @@ const columns: ColumnDef<TwapHistory>[] = [
     id: "executedSize",
     header: "Executed Size",
     cell({ row: { original } }) {
-      const executedSz = Number(original.state.executedSz);
+      const executedSz = original.executedSz;
 
       return (
         <span className="space-x-1 text-buy">
           <span>{formatNumberWithFallback(executedSz)}</span>
-          {!!executedSz && <span>{original.state.coin}</span>}
+          {!!executedSz && <span>{original.base}</span>}
         </span>
       );
     },
@@ -86,54 +89,76 @@ const columns: ColumnDef<TwapHistory>[] = [
     id: "averagePrice",
     header: "Average Price",
     cell({ row: { original } }) {
-      const avgPx = Number(original.state.executedSz)
-        ? Number(original.state.executedNtl) / Number(original.state.executedSz)
-        : 0;
-
-      return <span>{formatNumberWithFallback(avgPx)}</span>;
+      return <span>{formatNumberWithFallback(original.averagePx)}</span>;
     },
   },
   {
     id: "totalRuntime",
     header: "Total Runtime",
     cell({ row: { original } }) {
-      return <span>{formatTotalRuntime(original.state.minutes)}</span>;
+      return <span>{formatTotalRuntime(original.totalRuntime)}</span>;
     },
   },
   {
     id: "reduceOnly",
     header: "Reduce Only",
     cell({ row: { original } }) {
-      return <span>{original.state.reduceOnly ? "Yes" : "No"}</span>;
+      return <span>{original.reduceOnly ? "Yes" : "No"}</span>;
     },
   },
   {
     id: "randomize",
     header: "Randomize",
     cell({ row: { original } }) {
-      return <span>{original.state.randomize ? "Yes" : "No"}</span>;
+      return <span>{original.randomize ? "Yes" : "No"}</span>;
     },
   },
   {
     id: "status",
     header: "Status",
     cell({ row: { original } }) {
-      return (
-        <span className="font-medium capitalize">{original.status.status}</span>
-      );
+      return <span className="font-medium capitalize">{original.status}</span>;
     },
   },
 ];
 
 const HistoryTWAPs = () => {
-  const history = useShallowUserTradeStore((s) => s.twapStates.history);
+  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
+  const twapHistory = useShallowUserTradeStore((s) => s.twapStates.history);
+
+  const data = useMemo(() => {
+    return twapHistory.map((history) => {
+      const tokenDetails = mapSpotNameToTokenDetails(history.state.coin);
+
+      const avgPx = Number(history.state.executedSz)
+        ? Number(history.state.executedNtl) / Number(history.state.executedSz)
+        : 0;
+
+      return {
+        timestamp: history.time * 1000,
+        href: tokenDetails.href,
+        symbol: tokenDetails.symbol,
+        coin: tokenDetails.coin,
+        base: tokenDetails.base,
+        dex: tokenDetails.dex,
+        sz: Number(history.state.sz),
+        executedSz: Number(history.state.executedSz),
+        averagePx: avgPx,
+        reduceOnly: history.state.reduceOnly,
+        randomize: history.state.randomize,
+        totalRuntime: history.state.minutes,
+        status: history.status.status,
+      };
+    });
+  }, [mapSpotNameToTokenDetails, twapHistory]);
 
   return (
     <AdaptiveDataTable
       columns={columns}
-      data={history.sort((a, b) => b.time - a.time)}
+      data={data.sort((a, b) => b.timestamp - a.timestamp)}
       loading={false}
       className="space-y-1.5 mb-3"
+      wrapperClassName="p-4 md:p-0"
       thClassName="h-8 py-0 font-medium text-xs"
       rowClassName="text-xs font-medium whitespace-nowrap py-0"
       rowCellClassName="py-1"
@@ -146,9 +171,7 @@ const HistoryTWAPs = () => {
 };
 
 const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
-  const executedSz = Number(data.state.executedSz);
-  const avgPx = executedSz ? Number(data.state.executedNtl) / executedSz : 0;
-  const status = data.status.status;
+  const status = data.status;
 
   return (
     <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
@@ -156,19 +179,20 @@ const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
-              name={data.state.coin}
+              name={data.coin}
               className="size-4"
-              instrumentType="perps"
+              instrumentType={data.dex === null ? "spot" : "perps"}
             />
             <Link
-              href={`${ROUTES.trade.perps}/${data.state.coin}`}
+              href={data.href}
               className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
             >
-              {data.state.coin}
+              {data.symbol}
             </Link>
           </div>
-          {data.state.randomize && <Tag value="Randomize" />}
-          {data.state.reduceOnly && <Tag value="Reduce Only" />}
+          {data.dex && <Tag value={data.dex} />}
+          {data.randomize && <Tag value="Randomize" />}
+          {data.reduceOnly && <Tag value="Reduce Only" />}
         </div>
 
         <p
@@ -188,21 +212,21 @@ const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
       <div className="w-full grid grid-cols-4 gap-2 text-sm">
         <CardItem
           label="Total Size"
-          value={`${formatNumber(Number(data.state.sz), {
+          value={`${formatNumber(data.sz, {
             minimumFractionDigits: 2,
-          })} ${data.state.coin}`}
+          })} ${data.base}`}
         />
         <CardItem
           label="Executed Size"
-          value={formatNumberWithFallback(executedSz)}
+          value={formatNumberWithFallback(data.executedSz)}
         />
         <CardItem
           label="Average Price"
-          value={formatNumberWithFallback(avgPx)}
+          value={formatNumberWithFallback(data.averagePx)}
         />
         <CardItem
           label="Total Runtime"
-          value={formatTotalRuntime(data.state.minutes)}
+          value={formatTotalRuntime(data.totalRuntime)}
         />
       </div>
     </div>

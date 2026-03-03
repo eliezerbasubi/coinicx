@@ -113,19 +113,23 @@ const formatElapsedTime = (elapsedSeconds: number): string => {
  * @param params.totalMinutes   - The total planned duration in minutes.
  * @param params.startTimestamp - The epoch timestamp (ms) when the TWAP started.
  * @param params.includeElapsed - Whether to prepend the elapsed time.
+ * @param params.excludeTotal - Whether to remove the total time.
  */
 export const formatTwapRuntime = (params: {
   totalMinutes: number;
   startTimestamp: number;
   includeElapsed: boolean;
+  excludeTotal?: boolean;
 }): string => {
-  const { totalMinutes, startTimestamp, includeElapsed } = params;
+  const { totalMinutes, startTimestamp, includeElapsed, excludeTotal } = params;
   const total = formatTotalRuntime(totalMinutes);
 
   if (!includeElapsed) return total;
 
   const elapsedSeconds = (Date.now() - startTimestamp) / 1000;
   const elapsed = formatElapsedTime(elapsedSeconds);
+
+  if (excludeTotal) return elapsed;
 
   return `${elapsed} / ${total}`;
 };

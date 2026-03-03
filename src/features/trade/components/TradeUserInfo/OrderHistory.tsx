@@ -4,9 +4,6 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
-import { ROUTES } from "@/constants/routes";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
-import { parseBuilderDeployedAsset } from "@/features/trade/utils";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/formatting/dates";
@@ -17,6 +14,8 @@ import {
 
 import TokenImage from "../TokenImage";
 import CardItem from "./CardItem";
+import CoinLink from "./CoinLink";
+import { useSpotToTokenDetails } from "./hooks/useSpotToTokenDetails";
 
 type HistoricalOrder = {
   timestamp: number;
@@ -24,6 +23,7 @@ type HistoricalOrder = {
   href: string;
   dex: string | null;
   base: string;
+  coin: string;
   direction: string;
   side: string;
   sz: number;
@@ -64,21 +64,12 @@ const columns: ColumnDef<HistoricalOrder>[] = [
     header: "Coin",
     meta: { thClassName: "w-16" },
     cell({ row: { original } }) {
-      const asset = parseBuilderDeployedAsset(original.base);
-
       return (
-        <Link
+        <CoinLink
+          symbol={original.symbol}
+          dex={original.dex}
           href={original.href}
-          className="font-medium hover:text-primary flex items-center gap-x-1"
-        >
-          <p>{asset.dex ? asset.base : original.symbol}</p>
-
-          {asset.dex && (
-            <div className="inline-block p-0.5 px-1 rounded bg-primary/10 text-primary text-[11px] font-medium">
-              {asset.dex}
-            </div>
-          )}
-        </Link>
+        />
       );
     },
   },
@@ -159,25 +150,9 @@ const columns: ColumnDef<HistoricalOrder>[] = [
 ];
 
 const OrderHistory = () => {
-  const { spotMeta } = useMetaAndAssetCtxs();
+  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
 
   const historicalOrders = useShallowUserTradeStore((s) => s.historicalOrders);
-
-  const spotNamesToMetas = useMemo(() => {
-    const map = new Map<string, { base: string; quote: string }>();
-
-    if (!spotMeta) return map;
-
-    for (const meta of spotMeta.universe) {
-      const [baseIndex, quoteIndex] = meta.tokens;
-
-      map.set(meta.name, {
-        base: spotMeta.tokens[baseIndex].name,
-        quote: spotMeta.tokens[quoteIndex].name,
-      });
-    }
-    return map;
-  }, [spotMeta]);
 
   const data = useMemo(() => {
     return historicalOrders
@@ -185,14 +160,11 @@ const OrderHistory = () => {
       .map((historicalOrder) => {
         const order = historicalOrder.order;
 
-        const spotInfo = spotNamesToMetas.get(order.coin);
+        const tokenDetails = mapSpotNameToTokenDetails(order.coin);
 
         // Perps state
-        let symbol = order.coin;
         let direction = order.side === "B" ? "Long" : "Short";
-        let href = `${ROUTES.trade.perps}/${order.coin}`;
         let orderType = orderTypeLabels[order.orderType] || order.orderType;
-        let dex = null;
 
         if (order.reduceOnly) {
           // flip direction
@@ -201,14 +173,8 @@ const OrderHistory = () => {
         }
 
         // Spot state
-        if (spotInfo) {
-          symbol = `${spotInfo.base}/${spotInfo.quote}`;
+        if (tokenDetails.isSpot) {
           direction = order.side === "B" ? "Buy" : "Sell";
-          href = `${ROUTES.trade.spot}/${symbol}`;
-        } else {
-          const asset = parseBuilderDeployedAsset(order.coin);
-          dex = asset.dex;
-          symbol = asset.base;
         }
 
         // Liquidation state
@@ -228,11 +194,9 @@ const OrderHistory = () => {
         const price = Number(order.limitPx || order.triggerPx || "0");
 
         return {
-          href,
+          ...tokenDetails,
           timestamp: order.timestamp,
           orderType,
-          dex,
-          base: spotInfo?.base || order.coin,
           direction,
           side: order.side,
           sz: size,
@@ -242,10 +206,9 @@ const OrderHistory = () => {
           reduceOnly: order.reduceOnly,
           triggerCondition: order.triggerCondition,
           status,
-          symbol,
         };
       });
-  }, [spotNamesToMetas, historicalOrders]);
+  }, [mapSpotNameToTokenDetails, historicalOrders]);
 
   return (
     <AdaptiveDataTable
@@ -271,7 +234,7 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
-              name={data.base}
+              name={data.coin}
               className="size-4"
               instrumentType={data.dex === null ? "spot" : "perps"}
             />

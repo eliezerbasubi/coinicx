@@ -155,6 +155,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
     onAssetChange({
       base,
       quote,
+      coin,
       instrumentType: isSpot ? "spot" : "perps",
       price,
       szDecimals,

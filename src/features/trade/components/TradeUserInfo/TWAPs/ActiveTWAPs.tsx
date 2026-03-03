@@ -1,12 +1,10 @@
-import { TwapStatesWsEvent } from "@nktkas/hyperliquid";
+import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
 import Tag from "@/components/ui/tag";
-import { ROUTES } from "@/constants/routes";
 import TokenImage from "@/features/trade/components/TokenImage";
-import { parseBuilderDeployedAsset } from "@/features/trade/utils";
 import { formatTwapRuntime } from "@/features/trade/utils/twap";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
@@ -17,15 +15,37 @@ import {
 } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
+import CoinLink from "../CoinLink";
+import { useSpotToTokenDetails } from "../hooks/useSpotToTokenDetails";
 
-type ActiveTwap = TwapStatesWsEvent["states"][number][1];
+type ActiveTwap = {
+  coin: string;
+  dex: string | null;
+  base: string;
+  symbol: string;
+  href: string;
+  averagePx: number;
+  executedSz: number;
+  minutes: number;
+  randomize: boolean;
+  reduceOnly: boolean;
+  side: "B" | "A";
+  sz: number;
+  timestamp: number;
+};
 
 const columns: ColumnDef<ActiveTwap>[] = [
   {
     header: "Coin",
     accessorFn: (row) => row.coin,
     cell({ row: { original } }) {
-      return <span className="font-medium">{original.coin}</span>;
+      return (
+        <CoinLink
+          symbol={original.symbol}
+          dex={original.dex}
+          href={original.href}
+        />
+      );
     },
   },
   {
@@ -54,12 +74,10 @@ const columns: ColumnDef<ActiveTwap>[] = [
     id: "averagePrice",
     header: "Average Price",
     cell({ row: { original } }) {
-      const executedSz = Number(original.executedSz);
-
-      const avgPx = executedSz ? Number(original.executedNtl) / executedSz : 0;
-
       return (
-        <span className="text-buy">{formatNumberWithFallback(avgPx)}</span>
+        <span className="text-buy">
+          {formatNumberWithFallback(original.averagePx)}
+        </span>
       );
     },
   },
@@ -106,9 +124,33 @@ const columns: ColumnDef<ActiveTwap>[] = [
 ];
 
 const ActiveTWAPs = () => {
+  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
+
   const twaps = useShallowUserTradeStore((s) => s.twapStates.twaps);
 
-  const data = Array.from(new Map(twaps).values());
+  const data = useMemo(() => {
+    return Array.from(new Map(twaps).values()).map((twap) => {
+      const tokenDetails = mapSpotNameToTokenDetails(twap.coin);
+      const executedSz = Number(twap.executedSz);
+      const avgPx = executedSz ? Number(twap.executedNtl) / executedSz : 0;
+
+      return {
+        timestamp: twap.timestamp,
+        dex: tokenDetails.dex,
+        base: tokenDetails.base,
+        symbol: tokenDetails.symbol,
+        coin: tokenDetails.coin,
+        href: tokenDetails.href,
+        averagePx: avgPx,
+        side: twap.side,
+        executedSz,
+        sz: Number(twap.sz),
+        minutes: twap.minutes,
+        reduceOnly: twap.reduceOnly,
+        randomize: twap.randomize,
+      };
+    });
+  }, [mapSpotNameToTokenDetails, twaps]);
 
   return (
     <AdaptiveDataTable
@@ -116,6 +158,7 @@ const ActiveTWAPs = () => {
       data={data.sort((a, b) => b.timestamp - a.timestamp)}
       loading={false}
       className="space-y-1.5 mb-3"
+      wrapperClassName="p-4 md:p-4"
       thClassName="h-8 py-0 font-medium text-xs"
       rowClassName="text-xs font-medium whitespace-nowrap py-0"
       rowCellClassName="py-1"
@@ -127,9 +170,6 @@ const ActiveTWAPs = () => {
 };
 
 const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
-  const asset = parseBuilderDeployedAsset(data.coin);
-  const executedSz = Number(data.executedSz);
-  const avgPx = executedSz ? Number(data.executedNtl) / executedSz : 0;
   const isSell = data.side === "A";
 
   return (
@@ -138,15 +178,15 @@ const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
-              name={asset.base}
+              name={data.base}
               className="size-4"
               instrumentType="perps"
             />
             <span className="text-sm text-neutral-gray-100 font-medium line-clamp-1">
-              {asset.base}
+              {data.base}
             </span>
           </div>
-          {asset.dex && <Tag value={asset.dex} />}
+          {data.dex && <Tag value={data.dex} />}
           <Tag
             value={isSell ? "Sell" : "Buy"}
             className={cn("text-buy bg-buy/10", {
@@ -154,27 +194,36 @@ const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
             })}
           />
         </div>
+
+        <p className="text-xs text-neutral-gray-400">
+          {formatTwapRuntime({
+            totalMinutes: data.minutes,
+            startTimestamp: data.timestamp,
+            includeElapsed: true,
+            excludeTotal: true,
+          })}
+        </p>
       </div>
 
-      <div className="w-full grid grid-cols-2 gap-2 text-sm">
+      <div className="w-full grid grid-cols-4 gap-2 text-sm">
         <CardItem
           label="Size"
           value={`${formatNumber(Number(data.sz))} ${data.coin}`}
         />
         <CardItem
           label="Executed Size"
-          value={`${formatNumber(executedSz)} ${data.coin}`}
+          value={`${formatNumber(data.executedSz)} ${data.coin}`}
         />
         <CardItem
           label="Average Price"
-          value={formatNumberWithFallback(avgPx)}
+          value={formatNumberWithFallback(data.averagePx)}
         />
         <CardItem
-          label="Running Time"
+          label="Total Time"
           value={formatTwapRuntime({
             totalMinutes: data.minutes,
             startTimestamp: data.timestamp,
-            includeElapsed: true,
+            includeElapsed: false,
           })}
         />
       </div>

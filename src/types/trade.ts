@@ -175,6 +175,6 @@ export type AssetPosition = AllDexsClearinghouseState["assetPositions"][number];
 export type SpotMetas = {
   spotMeta: SpotMetaResponse;
   tokenNamesToUniverseIndex: Map<string, Map<string, number>>;
-  // spotNamesToTokens: Map<string, { base: number; quote: number }>;
+  spotNamesToTokens: Map<string, { baseToken: number; quoteToken: number }>;
   tokensToSpotId: Map<number, Map<number, number>>;
 };

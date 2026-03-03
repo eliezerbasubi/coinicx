@@ -44,24 +44,22 @@ const TradeUserInfo = () => {
         }
         className="h-full gap-0"
       >
-        <div className="w-full border-b border-neutral-gray-200 overflow-x-auto no-scrollbars">
-          <TabsList
-            variant="line"
-            className="h-11! px-4 pt-0 justify-start md:justify-center shrink-0 space-x-0 md:space-x-4"
-          >
-            {TABS.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="w-fit text-xs font-medium"
-              >
-                {tab.label}
-                {tab.counter &&
-                  ` (${counters[tab.counter as keyof typeof counters]})`}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
+        <TabsList
+          variant="line"
+          className="w-full h-11! border-b border-neutral-gray-200 px-4 shrink-0 space-x-0 md:space-x-4 justify-start overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        >
+          {TABS.map((tab) => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="w-fit flex-0 text-xs font-medium"
+            >
+              {tab.label}
+              {tab.counter &&
+                ` (${counters[tab.counter as keyof typeof counters]})`}
+            </TabsTrigger>
+          ))}
+        </TabsList>
         <AuthenticatedContent>
           <TabsContent value="balances" className="overflow-auto">
             <Balances />

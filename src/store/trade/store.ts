@@ -20,6 +20,7 @@ export interface TradeStoreState extends TradeStoreProps {
   onAssetChange: (data: {
     base: string;
     quote: string;
+    coin: string;
     instrumentType: InstrumentType;
     price: number;
     szDecimals: number;
@@ -48,6 +49,7 @@ export const createTradeStore = (initialProps: TradeStoreProps) => {
         decimals: pxDecimals,
         base: data.base,
         quote: data.quote,
+        coin: data.coin,
         instrumentType: data.instrumentType,
       });
     },
