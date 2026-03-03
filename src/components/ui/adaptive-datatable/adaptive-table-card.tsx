@@ -8,6 +8,7 @@ export type AdaptiveTableCardProps<TData> = {
   loading?: boolean;
   className?: string;
   skeleton?: React.ReactNode;
+  disablePagination?: boolean;
   render?: (data: TData) => React.ReactNode;
 };
 
@@ -16,12 +17,15 @@ const AdaptiveTableCard = <TData,>({
   loading,
   className,
   skeleton,
+  disablePagination,
   render,
 }: AdaptiveTableCardProps<TData>) => {
-  const { rows } = table.getRowModel();
+  const { rows } = disablePagination
+    ? table.getCoreRowModel()
+    : table.getRowModel();
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("size-full", className)}>
       {rows.map((row) => (
         <React.Fragment key={row.id ?? row.index}>
           {render?.(row.original)}

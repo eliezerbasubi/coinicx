@@ -30,6 +30,7 @@ const UserTradeProvider = ({ children }: Props) => {
     });
   }, [user, coin, instrumentType]);
 
+  // Subscribe to spot state
   useSubscription(() => {
     if (!address) return;
 
@@ -38,6 +39,7 @@ const UserTradeProvider = ({ children }: Props) => {
     });
   }, [address]);
 
+  // Subscribe to web data for perps only
   useSubscription(() => {
     if (!address || instrumentType !== "perps") return;
 
@@ -46,11 +48,73 @@ const UserTradeProvider = ({ children }: Props) => {
     });
   }, [address, instrumentType]);
 
+  // Subscribe to all dexs clearinghouse state
   useSubscription(() => {
     if (!address) return;
 
     return hlSubClient.allDexsClearinghouseState({ user: address }, (data) => {
       useUserTradeStore.getState().applyClearinghouseState(data);
+    });
+  }, [address]);
+
+  // Subscribe to all dexs open orders state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.openOrders(
+      { user: address, dex: "ALL_DEXS" },
+      (data) => {
+        useUserTradeStore.getState().applyOpenOrders(data);
+      },
+    );
+  }, [address]);
+
+  // Subscribe to user fills state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.userFills({ user: address }, (data) => {
+      useUserTradeStore.getState().applyUserFills(data);
+    });
+  }, [address]);
+
+  // Subscribe to user twap state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.twapStates({ user: address }, (data) => {
+      useUserTradeStore.getState().applyTwapStates({ twaps: data.states });
+    });
+  }, [address]);
+
+  // Subscribe to user twap history state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.userTwapHistory({ user: address }, (data) => {
+      useUserTradeStore.getState().applyTwapStates({ history: data.history });
+    });
+  }, [address]);
+
+  // Subscribe to user twap fills history state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.userTwapSliceFills({ user: address }, (data) => {
+      useUserTradeStore
+        .getState()
+        .applyTwapStates({ sliceFills: data.twapSliceFills });
+    });
+  }, [address]);
+
+  // Subscribe to user historical orders state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.userHistoricalOrders({ user: address }, (data) => {
+      useUserTradeStore.getState().applyUserHistoricalOrders(data);
+    });
+  }, [address]);
+
+  // Subscribe to user fundings state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.userFundings({ user: address }, (data) => {
+      useUserTradeStore.getState().applyUserFundings(data);
     });
   }, [address]);
 

@@ -118,7 +118,7 @@ const columns: ColumnDef<UserBalance>[] = [
   },
 ];
 
-const UserBalances = () => {
+const Balances = () => {
   const { tokensToSpotId } = useMetaAndAssetCtxs();
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
   const { spotBalances, allDexsClearinghouseState } = useShallowUserTradeStore(
@@ -192,7 +192,7 @@ const UserBalances = () => {
 
           const ctx = spotAssetCtxs[spotId];
 
-          const markPx = Number(ctx.markPx || "1");
+          const markPx = Number(ctx?.markPx || "1");
           const entryNtl = Number(balance.entryNtl);
           const totalBalance = Number(balance.total);
           const totalBalanceNtl = totalBalance * markPx;
@@ -225,23 +225,22 @@ const UserBalances = () => {
       columns={columns}
       data={data}
       loading={false}
-      className="space-y-1.5"
-      wrapperClassName="mb-6 mt-3 md:mt-0 space-y-3"
-      tableClassName="table-auto overflow-auto md:table-fixed"
+      className="space-y-1.5 mb-3"
       thClassName="h-8 py-0 font-medium text-xs"
       rowClassName="text-xs font-medium whitespace-nowrap py-0"
       rowCellClassName="py-1"
-      render={(entry) => <UserBalanceCard data={entry} />}
-      hidePagination
+      render={(entry) => <BalanceCard data={entry} />}
+      noData="No balances yet"
+      disablePagination
     />
   );
 };
 
-type UserBalanceCardProps = {
+type BalanceCardProps = {
   data: UserBalance;
 };
 
-const UserBalanceCard = ({ data }: UserBalanceCardProps) => {
+const BalanceCard = ({ data }: BalanceCardProps) => {
   return (
     <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
       <div className="flex-1 flex items-center gap-4">
@@ -298,4 +297,4 @@ const UserBalanceCard = ({ data }: UserBalanceCardProps) => {
   );
 };
 
-export default UserBalances;
+export default Balances;

@@ -1,18 +1,24 @@
-import { useState } from "react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
-import Visibility from "@/components/common/Visibility";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTradeContext } from "@/store/trade/hooks";
-import { cn } from "@/utils/cn";
+import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 
-import UserBalances from "./UserBalances";
+import Balances from "./Balances";
+import FundingHistory from "./FundingHistory";
+import OpenOrders from "./OpenOrders";
+import OrderHistory from "./OrderHistory";
+import Positions from "./Positions";
+import { useInfoSectionStore, useShallowInfoSectionStore } from "./store";
+import TradeHistory from "./TradeHistory";
+import Twaps from "./TWAPs";
 
 const TABS = [
   { label: "Balances", value: "balances" },
-  { label: "Positions", value: "positions", counter: true },
-  { label: "Open Orders", value: "openOrders", counter: true },
-  { label: "TWAP", value: "twap", counter: true },
+  { label: "Positions", value: "positions", counter: "positionsCount" },
+  { label: "Open Orders", value: "openOrders", counter: "openOrdersCount" },
+  { label: "TWAP", value: "twap", counter: "twapsCount" },
   { label: "Order History", value: "orderHistory" },
   { label: "Trade History", value: "tradeHistory" },
   { label: "Funding History", value: "fundingHistory" },
@@ -20,48 +26,64 @@ const TABS = [
 
 const TradeUserInfo = () => {
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
-  const [currentTab, setCurrentTab] = useState(() =>
-    isPerps ? "positions" : "balances",
-  );
+  const activeTab = useShallowInfoSectionStore((s) => s.activeTab);
+
+  const counters = useShallowUserTradeStore((s) => ({
+    openOrdersCount: s.openOrders.length,
+    positionsCount: s.clearinghouseState?.assetPositions.length || 0,
+    twapsCount: s.twapStates.twaps.length,
+  }));
 
   return (
-    <div className="w-full bg-primary-dark md:rounded-md">
-      <div
-        role="tablist"
-        aria-orientation="horizontal"
-        className="w-full h-11 border-b border-neutral-gray-200 px-4 flex items-center gap-x-4 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+    <div className="w-full h-85 overflow-hidden bg-primary-dark md:rounded-md">
+      <Tabs
+        defaultValue={isPerps ? "positions" : "balances"}
+        value={activeTab}
+        onValueChange={(value) =>
+          useInfoSectionStore.setState({ activeTab: value })
+        }
+        className="h-full gap-0"
       >
-        {TABS.map((tab, index) => {
-          const selected = currentTab === tab.value;
-
-          return (
-            <div
+        <TabsList
+          variant="line"
+          className="w-full h-11! border-b border-neutral-gray-200 px-4 inline-block shrink-0 space-x-4 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        >
+          {TABS.map((tab) => (
+            <TabsTrigger
               key={tab.value}
-              role="tab"
-              id={`trd-info-tab-item-${index}`}
-              aria-controls={`trd-info-tab-item-${index}`}
-              aria-selected={selected}
-              tabIndex={selected ? 1 : -1}
-              onClick={() => setCurrentTab(tab.value)}
-              className={cn(
-                "h-full flex items-center text-neutral-gray-400 text-xs font-medium border-b-2 border-transparent transition-colors cursor-pointer whitespace-nowrap",
-                {
-                  "border-primary text-white": selected,
-                },
-              )}
+              value={tab.value}
+              className="w-fit text-xs font-medium"
             >
               {tab.label}
-              {tab.counter && ` (0)`}
-            </div>
-          );
-        })}
-      </div>
-
-      <div role="tabpanel" className="h-64">
+              {tab.counter &&
+                ` (${counters[tab.counter as keyof typeof counters]})`}
+            </TabsTrigger>
+          ))}
+        </TabsList>
         <AuthenticatedContent>
-          <UserBalances />
+          <TabsContent value="balances" className="overflow-auto">
+            <Balances />
+          </TabsContent>
+          <TabsContent value="positions" className="overflow-auto">
+            <Positions />
+          </TabsContent>
+          <TabsContent value="openOrders" className="overflow-auto">
+            <OpenOrders />
+          </TabsContent>
+          <TabsContent value="twap" className="overflow-auto">
+            <Twaps />
+          </TabsContent>
+          <TabsContent value="orderHistory" className="overflow-auto">
+            <OrderHistory />
+          </TabsContent>
+          <TabsContent value="tradeHistory" className="overflow-auto">
+            <TradeHistory />
+          </TabsContent>
+          <TabsContent value="fundingHistory" className="overflow-auto">
+            <FundingHistory />
+          </TabsContent>
         </AuthenticatedContent>
-      </div>
+      </Tabs>
     </div>
   );
 };

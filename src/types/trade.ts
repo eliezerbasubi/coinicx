@@ -1,4 +1,5 @@
 import {
+  AllDexsClearinghouseStateWsEvent,
   AllPerpMetasResponse,
   CandleSnapshotParameters,
   OrderParameters,
@@ -99,6 +100,9 @@ export type AssetCxt = {
   midPx: number;
   markPx: number;
   oraclePx: number | null;
+
+  /** Reference price to be used for orders (mid price for spot, mark price for perps) */
+  referencePx: number;
 };
 
 export type AllAssetsMetas = {
@@ -163,8 +167,14 @@ export type AllPerpMetas = Array<
 
 export type SpotBalance = SpotStateWsEvent["spotState"]["balances"][number];
 
+export type AllDexsClearinghouseState =
+  AllDexsClearinghouseStateWsEvent["clearinghouseStates"][number][1];
+
+export type AssetPosition = AllDexsClearinghouseState["assetPositions"][number];
+
 export type SpotMetas = {
   spotMeta: SpotMetaResponse;
   tokenNamesToUniverseIndex: Map<string, Map<string, number>>;
+  // spotNamesToTokens: Map<string, { base: number; quote: number }>;
   tokensToSpotId: Map<number, Map<number, number>>;
 };

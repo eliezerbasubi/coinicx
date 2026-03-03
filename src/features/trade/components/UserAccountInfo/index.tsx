@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
+import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 const UserAccountInfo = () => {
@@ -148,7 +149,12 @@ const PerpsEquity = () => {
               Fees
             </p>
           </AdaptiveTooltip>
-          <p className="text-white font-medium">
+          <p
+            className={cn("text-white font-medium", {
+              "text-buy": unrealizedPnl > 0,
+              "text-sell": unrealizedPnl < 0,
+            })}
+          >
             {formatNumber(unrealizedPnl, { style: "currency" })}
           </p>
         </div>
@@ -196,8 +202,12 @@ const AccountMargin = () => {
               liquidated if Margin Ratio reaches 100%.
             </p>
           </AdaptiveTooltip>
-          <p className="text-white font-medium">
-            {formatNumber(crossMarginRatio * 100, {
+          <p
+            className={cn("font-medium text-buy", {
+              "text-sell": crossMarginRatio < 0,
+            })}
+          >
+            {formatNumber(crossMarginRatio, {
               style: "percent",
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,

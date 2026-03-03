@@ -44,7 +44,7 @@ const Trade = () => {
         </div>
         {isMobile ? <OrderFormMobile /> : <OrderForm />}
       </div>
-      <div className="w-full bg-trade-dark flex gap-1 py-0.5 md:p-1 flex-wrap md:flex-nowrap">
+      <div className="w-full bg-trade-dark flex gap-1 py-0.5 md:px-1 md:pb-2 flex-wrap md:flex-nowrap">
         <TradeUserInfo />
         <UserAccountInfo />
       </div>

@@ -10,6 +10,8 @@ import {
 } from "@/features/trade/utils";
 import { hlInfoClient } from "@/services/transport";
 
+import { getTokenDisplayName } from "../utils/getTokenDisplayName";
+
 export const useMetaAndAssetCtxs = () => {
   const { data, error, loading } = useQueries({
     combine(result) {
@@ -62,6 +64,14 @@ export const useMetaAndAssetCtxs = () => {
 
             const baseTokenMeta = spotMeta.tokens[baseIndex];
             const quoteTokenMeta = spotMeta.tokens[quoteIndex];
+
+            // Update name in tokens of spotMeta to the display name
+            spotMeta.tokens[baseIndex].name = getTokenDisplayName(
+              baseTokenMeta.name,
+            );
+            spotMeta.tokens[quoteIndex].name = getTokenDisplayName(
+              quoteTokenMeta.name,
+            );
 
             /** Map token names to universe index */
             if (!tokenNamesToUniverseIndex.has(baseTokenMeta.name)) {

@@ -1,18 +1,28 @@
 import {
   ActiveAssetDataResponse,
   AllDexsClearinghouseStateWsEvent,
+  OpenOrdersWsEvent,
   SpotStateWsEvent,
+  TwapStatesWsEvent,
+  UserFillsWsEvent,
+  UserFundingsWsEvent,
+  UserHistoricalOrdersWsEvent,
+  UserTwapHistoryWsEvent,
+  UserTwapSliceFillsWsEvent,
   WebData3WsEvent,
 } from "@nktkas/hyperliquid";
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-import { SpotBalance } from "@/types/trade";
+import { AllDexsClearinghouseState, SpotBalance } from "@/types/trade";
 
 import { useInstrumentStore } from "./instrument";
 
-type AllDexsClearinghouseState =
-  AllDexsClearinghouseStateWsEvent["clearinghouseStates"][number][1];
+type TwapStates = {
+  twaps: TwapStatesWsEvent["states"];
+  history: UserTwapHistoryWsEvent["history"];
+  sliceFills: UserTwapSliceFillsWsEvent["twapSliceFills"];
+};
 
 interface UserTradeState {
   /** Max size in base asset. e.g. BTC for perps */
@@ -25,6 +35,11 @@ interface UserTradeState {
   availableQuoteToTrade: number;
   leverage: ActiveAssetDataResponse["leverage"] | null;
   spotBalances: SpotBalance[];
+  openOrders: OpenOrdersWsEvent["orders"];
+  historicalOrders: UserHistoricalOrdersWsEvent["orderHistory"];
+  fills: UserFillsWsEvent["fills"];
+  fundings: UserFundingsWsEvent["fundings"];
+  twapStates: TwapStates;
   webData: WebData3WsEvent | null;
   clearinghouseState: AllDexsClearinghouseState | null;
   allDexsClearinghouseState: AllDexsClearinghouseState | null;
@@ -41,7 +56,12 @@ interface UserTradeStoreActions {
   applyActiveAssetData: (data: ActiveAssetDataResponse) => void;
   applySpotState: (data: SpotStateWsEvent) => void;
   applyWebData: (data: WebData3WsEvent) => void;
+  applyOpenOrders: (data: OpenOrdersWsEvent) => void;
   applyClearinghouseState: (data: AllDexsClearinghouseStateWsEvent) => void;
+  applyUserFills: (data: UserFillsWsEvent) => void;
+  applyTwapStates: (data: Partial<TwapStates>) => void;
+  applyUserHistoricalOrders: (data: UserHistoricalOrdersWsEvent) => void;
+  applyUserFundings: (data: UserFundingsWsEvent) => void;
 }
 
 interface UserTradeStore extends UserTradeState, UserTradeStoreActions {}
@@ -54,6 +74,15 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   leverage: null,
   spotBalances: [],
   webData: null,
+  openOrders: [],
+  fills: [],
+  fundings: [],
+  historicalOrders: [],
+  twapStates: {
+    twaps: [],
+    history: [],
+    sliceFills: [],
+  },
   clearinghouseState: null,
   allDexsClearinghouseState: null,
   updateLeverage(leverage) {
@@ -127,6 +156,33 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   applyWebData(data) {
     set({
       webData: data,
+    });
+  },
+  applyOpenOrders(data) {
+    set({
+      openOrders: data.orders,
+    });
+  },
+  applyUserFills(data) {
+    set({
+      fills: data.fills,
+    });
+  },
+  applyTwapStates(data) {
+    const { twapStates } = get();
+
+    set({
+      twapStates: { ...twapStates, ...data },
+    });
+  },
+  applyUserHistoricalOrders(data) {
+    set({
+      historicalOrders: data.orderHistory,
+    });
+  },
+  applyUserFundings(data) {
+    set({
+      fundings: data.fundings,
     });
   },
   applyClearinghouseState(data) {

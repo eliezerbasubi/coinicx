@@ -8,7 +8,7 @@ const Table = React.forwardRef<
 >(({ className, wrapperClassName, ...props }, ref) => (
   <div
     className={cn(
-      "relative w-full overflow-auto [&::-webkit-scrollbar]:h-1",
+      "relative size-full [&::-webkit-scrollbar]:h-1",
       wrapperClassName,
     )}
   >

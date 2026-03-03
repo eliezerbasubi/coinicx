@@ -19,8 +19,8 @@ import {
 import { useIsDesktop } from "@/hooks/useIsMobile";
 import { cn } from "@/utils/cn";
 
-import { AdaptiveTableProps } from "./adaptive-table";
-import { AdaptiveTableCardProps } from "./adaptive-table-card";
+import type { AdaptiveTableProps } from "./adaptive-table";
+import type { AdaptiveTableCardProps } from "./adaptive-table-card";
 
 const AdaptiveTable = dynamic(() => import("./adaptive-table"), { ssr: false });
 const AdaptiveTableCard = dynamic(() => import("./adaptive-table-card"), {
@@ -43,7 +43,7 @@ type Props<TData, TValue> = {
   className?: string;
   wrapperClassName?: string;
   globalFilterFn?: FilterFnOption<TData>;
-  hidePagination?: boolean;
+  disablePagination?: boolean;
   onPaginationChange?: OnChangeFn<PaginationState>;
 } & Omit<CompProps<TData, TValue>, "table">;
 
@@ -57,7 +57,7 @@ const AdaptiveDataTable = <TData, TValue>({
   globalFilterFn,
   skeleton,
   wrapperClassName,
-  hidePagination,
+  disablePagination,
   render,
   onPaginationChange,
   onRowClick,
@@ -92,7 +92,7 @@ const AdaptiveDataTable = <TData, TValue>({
   });
 
   return (
-    <div className={cn("w-full", wrapperClassName)}>
+    <div className={cn("size-full", wrapperClassName)}>
       {!isDesktop ? (
         <AdaptiveTableCard
           table={table as Table<unknown>}
@@ -104,13 +104,14 @@ const AdaptiveDataTable = <TData, TValue>({
       ) : (
         <AdaptiveTable
           {...props}
+          disablePagination={disablePagination}
           columns={columns as ColumnDef<unknown, unknown>[]}
           table={table as Table<unknown>}
           onRowClick={onRowClick as (data: unknown) => void}
         />
       )}
 
-      {!hidePagination && (
+      {!disablePagination && (
         <AdaptivePagination table={table as Table<unknown>} />
       )}
     </div>
