@@ -2,14 +2,21 @@ import { TwapStatesWsEvent } from "@nktkas/hyperliquid";
 import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
+import { Button } from "@/components/ui/button";
+import Tag from "@/components/ui/tag";
+import { ROUTES } from "@/constants/routes";
 import TokenImage from "@/features/trade/components/TokenImage";
+import { parseBuilderDeployedAsset } from "@/features/trade/utils";
 import { formatTwapRuntime } from "@/features/trade/utils/twap";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
+import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/formatting/dates";
 import {
   formatNumber,
   formatNumberWithFallback,
 } from "@/utils/formatting/numbers";
+
+import CardItem from "../CardItem";
 
 type ActiveTwap = TwapStatesWsEvent["states"][number][1];
 
@@ -120,34 +127,65 @@ const ActiveTWAPs = () => {
 };
 
 const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
+  const asset = parseBuilderDeployedAsset(data.coin);
+  const executedSz = Number(data.executedSz);
+  const avgPx = executedSz ? Number(data.executedNtl) / executedSz : 0;
+  const isSell = data.side === "A";
+
   return (
-    <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
-      <div className="flex-1 flex items-center gap-4">
-        <div className="size-9 relative">
-          <TokenImage
-            key={data.coin}
-            name={data.coin}
-            instrumentType="perps"
-            className="size-9 rounded-full overflow-hidden"
+    <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
+      <div className="flex items-center justify-between gap-x-4 mb-1">
+        <div className="flex items-center gap-x-1">
+          <div className="flex items-center gap-x-1 mr-1">
+            <TokenImage
+              name={asset.base}
+              className="size-4"
+              instrumentType="perps"
+            />
+            <span className="text-sm text-neutral-gray-100 font-medium line-clamp-1">
+              {asset.base}
+            </span>
+          </div>
+          {asset.dex && <Tag value={asset.dex} />}
+          <Tag
+            value={isSell ? "Sell" : "Buy"}
+            className={cn("text-buy bg-buy/10", {
+              "text-sell bg-sell/10": isSell,
+            })}
           />
         </div>
-        <div className="flex-1 text-sm">
-          <p className="text-white font-medium">{data.coin}</p>
-          <p className="text-xs text-neutral-gray-400 font-medium mt-1">
-            <span>
-              Size: {data.coin}
-              <span className="ml-2">Executed: {data.coin}</span>
-            </span>
-          </p>
-        </div>
       </div>
-      <div className="flex-1 text-right">
-        <button
-          type="button"
-          className="text-sell text-xs font-medium bg-sell/10 rounded-md px-3 py-1"
-        >
-          Terminate
-        </button>
+
+      <div className="w-full grid grid-cols-2 gap-2 text-sm">
+        <CardItem
+          label="Size"
+          value={`${formatNumber(Number(data.sz))} ${data.coin}`}
+        />
+        <CardItem
+          label="Executed Size"
+          value={`${formatNumber(executedSz)} ${data.coin}`}
+        />
+        <CardItem
+          label="Average Price"
+          value={formatNumberWithFallback(avgPx)}
+        />
+        <CardItem
+          label="Running Time"
+          value={formatTwapRuntime({
+            totalMinutes: data.minutes,
+            startTimestamp: data.timestamp,
+            includeElapsed: true,
+          })}
+        />
+      </div>
+
+      <div className="mt-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="h-7"
+          label="Terminate"
+        />
       </div>
     </div>
   );

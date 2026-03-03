@@ -2,17 +2,16 @@ import { useMemo } from "react";
 import { OpenOrdersWsEvent } from "@nktkas/hyperliquid";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { AssetPosition } from "@/types/trade";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import Tag from "@/components/ui/tag";
 import { parseBuilderDeployedAsset } from "@/features/trade/utils";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
+import CardItem from "./CardItem";
 
 type OpenOrder = OpenOrdersWsEvent["orders"][number];
 
@@ -67,9 +66,15 @@ const columns: ColumnDef<OpenOrder>[] = [
     id: "price",
     header: "Price",
     cell({ row: { original } }) {
+      const price = Number(original.limitPx || original.triggerPx);
+
       return (
         <span>
-          {formatNumber(Number(original.limitPx), { style: "currency" })}
+          {formatNumber(price, {
+            maximumSignificantDigits: 8,
+            minimumSignificantDigits: 5,
+            maximumFractionDigits: 8,
+          })}
         </span>
       );
     },
@@ -78,23 +83,33 @@ const columns: ColumnDef<OpenOrder>[] = [
     id: "value",
     header: "Value",
     cell({ row: { original } }) {
-      return <span>{0.495}</span>;
+      const size = Number(original.sz);
+
+      const price = Number(original.limitPx || original.triggerPx);
+
+      return (
+        <span>
+          {formatNumber(price * size, {
+            style: "currency",
+          })}
+        </span>
+      );
     },
   },
   {
     id: "trigger",
     header: "Trigger",
     cell({ row: { original } }) {
-      return <span>{original.triggerPx}</span>;
+      return <span>{original.triggerCondition}</span>;
     },
   },
-  {
-    id: "tpsl",
-    header: "TP/SL",
-    cell({ row: { original } }) {
-      return <span>{original.triggerPx}</span>;
-    },
-  },
+  // {
+  //   id: "tpsl",
+  //   header: "TP/SL",
+  //   cell({ row: { original } }) {
+  //     return <span>{original.triggerPx}</span>;
+  //   },
+  // },
   {
     id: "cancelAll",
     header: "Cancel All",
@@ -138,46 +153,53 @@ type OpenOrderCardProps = {
 };
 
 const OpenOrderCard = ({ data }: OpenOrderCardProps) => {
+  const asset = parseBuilderDeployedAsset(data.coin);
+  const isSell = data.side === "A";
+  const value = Number(data.limitPx) * Number(data.sz);
+
   return (
-    <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
-      <div className="flex-1 flex items-center gap-4">
-        <div className="size-9 relative">
-          <TokenImage
-            key={data.coin}
-            name={data.coin}
-            instrumentType="perps"
-            className="size-9 rounded-full overflow-hidden"
-          />
-        </div>
-        <div className="flex-1 text-sm">
-          <p className="text-white font-medium flex items-center">
-            {data.coin}
-          </p>
-          <p className="text-xs text-neutral-gray-400 font-medium mt-1">
-            <span>
-              {formatNumber(Number(data.limitPx), {
-                minimumFractionDigits: 2,
-                roundingMode: "trunc",
-              })}
-              <span className="ml-1">
-                <span className="mr-1">≈</span>
-                {formatNumber(Number(data.sz), {
-                  minimumFractionDigits: 2,
-                  style: "currency",
-                })}
-              </span>
+    <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
+      <div className="flex items-center justify-between gap-x-4 mb-1">
+        <div className="flex items-center gap-x-1">
+          <div className="flex items-center gap-x-1 mr-1">
+            <TokenImage
+              name={asset.base}
+              className="size-4"
+              instrumentType="perps"
+            />
+            <span className="text-sm text-neutral-gray-100 font-medium line-clamp-1">
+              {asset.base}
             </span>
-          </p>
+          </div>
+          {asset.dex && <Tag value={asset.dex} />}
+          <Tag
+            value={isSell ? "Sell" : "Buy"}
+            className={cn("text-buy bg-buy/10", {
+              "text-sell bg-sell/10": isSell,
+            })}
+          />
+          <span className="text-neutral-gray-400 text-[11px]">
+            {data.orderType}
+          </span>
         </div>
       </div>
 
-      <div className="flex-1 text-right">
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-6 w-fit font-medium text-xs md:text-[13px] rounded-md px-3"
-          label="Transfer"
+      <div className="w-full grid grid-cols-subgrid gap-2 text-sm">
+        <CardItem label="Size" value={String(data.sz)} />
+        <CardItem
+          label="Price"
+          value={formatNumber(Number(data.limitPx), { style: "currency" })}
         />
+        <CardItem
+          label="Value"
+          value={formatNumber(value, { style: "currency" })}
+        />
+        <CardItem label="Trigger" value={data.triggerPx || "--"} />
+        {/* <CardItem label="TP/SL" value={data.triggerPx || "--/--"} /> */}
+      </div>
+
+      <div className="mt-2">
+        <Button variant="secondary" size="sm" className="h-7" label="Cancel" />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
+import Tag from "@/components/ui/tag";
 import { ROUTES } from "@/constants/routes";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { parseBuilderDeployedAsset } from "@/features/trade/utils";
@@ -12,14 +13,16 @@ import { formatDateTime } from "@/utils/formatting/dates";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
+import CardItem from "./CardItem";
 
 interface TradeHistoryEntry {
   timestamp: number;
   symbol: string;
   base: string;
+  dex: string | null;
   direction: string;
   feeToken: string;
-  price: number;
+  price: string;
   size: number;
   side: string;
   tradeValue: number;
@@ -40,19 +43,14 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
     id: "symbol",
     header: "Coin",
     cell({ row: { original } }) {
-      const asset = parseBuilderDeployedAsset(original.base);
       return (
         <Link
           href={original.href}
           className="font-medium hover:text-primary flex items-center gap-x-1"
         >
-          <p>{asset.dex ? asset.base : original.symbol}</p>
+          <p>{original.symbol}</p>
 
-          {asset.dex && (
-            <div className="inline-block p-0.5 px-1 rounded bg-primary/10 text-primary text-[11px] font-medium">
-              {asset.dex}
-            </div>
-          )}
+          {original.dex && <Tag value={original.dex} />}
         </Link>
       );
     },
@@ -76,15 +74,7 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
     id: "price",
     header: "Price",
     cell({ row: { original } }) {
-      return (
-        <span>
-          {formatNumber(original.price, {
-            maximumSignificantDigits: 8,
-            minimumSignificantDigits: 5,
-            maximumFractionDigits: 8,
-          })}
-        </span>
-      );
+      return <span>{original.price}</span>;
     },
   },
   {
@@ -179,11 +169,16 @@ const TradeHistory = () => {
       // Perps state
       let symbol = fill.coin;
       let href = `${ROUTES.trade.perps}/${fill.coin}`;
+      let dex = null;
 
       // Spot state
       if (spotInfo) {
         symbol = `${spotInfo.base}/${spotInfo.quote}`;
         href = `${ROUTES.trade.spot}/${symbol}`;
+      } else {
+        const asset = parseBuilderDeployedAsset(fill.coin);
+        dex = asset.dex;
+        symbol = asset.base;
       }
 
       return {
@@ -194,11 +189,16 @@ const TradeHistory = () => {
         base: spotInfo?.base || fill.coin,
         side: fill.side,
         size: Number(fill.sz),
-        price: Number(fill.px),
+        price: formatNumber(Number(fill.px), {
+          maximumSignificantDigits: 8,
+          minimumSignificantDigits: 5,
+          maximumFractionDigits: 8,
+        }),
         closedPnl: Number(fill.closedPnl) - Number(fill.fee),
         fee: Number(fill.fee),
         tradeValue: Number(fill.sz) * Number(fill.px),
         symbol,
+        dex,
         href,
       };
     });
@@ -210,6 +210,7 @@ const TradeHistory = () => {
       data={data.sort((a, b) => b.timestamp - a.timestamp)}
       loading={false}
       className="space-y-1.5 mb-3"
+      wrapperClassName="p-4 md:p-0"
       thClassName="h-8 py-0 font-medium text-xs"
       rowClassName="text-xs font-medium whitespace-nowrap py-0"
       rowCellClassName="py-1"
@@ -221,59 +222,74 @@ const TradeHistory = () => {
 };
 
 const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
-  const sign = data.closedPnl > 0 && "+";
+  const sign = (data.closedPnl > 0 && "+") || "";
 
   return (
-    <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
-      <div className="flex-1 flex items-center gap-4">
-        <div className="size-9 relative">
-          <TokenImage
-            key={data.symbol}
-            name={data.symbol}
-            instrumentType="perps"
-            className="size-9 rounded-full overflow-hidden"
+    <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
+      <div className="flex items-center justify-between gap-x-4 mb-1">
+        <div className="flex items-center gap-x-1">
+          <div className="flex items-center gap-x-1 mr-1">
+            <TokenImage
+              name={data.base}
+              className="size-4"
+              instrumentType={data.dex === null ? "spot" : "perps"}
+            />
+            <Link
+              href={data.href}
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
+            >
+              {data.symbol}
+            </Link>
+          </div>
+          {data.dex && <Tag value={data.dex} />}
+          <Tag
+            value={data.direction}
+            className={cn("text-buy bg-buy/10", {
+              "text-sell bg-sell/10": data.side === "A",
+            })}
+          />
+          <Tag
+            value={`${sign}${formatNumber(data.closedPnl, {
+              style: "currency",
+              maximumFractionDigits: 2,
+              minimumFractionDigits: 2,
+            })}`}
+            className={cn("text-buy bg-buy/10", {
+              "text-sell bg-sell/10": data.closedPnl < 0,
+            })}
           />
         </div>
-        <div className="flex-1 text-sm">
-          <p className="text-white font-medium flex items-center">
-            {data.symbol}
-            <span
-              className={cn("ml-2 text-xs", {
-                "text-buy": data.side === "B",
-                "text-sell": data.side === "A",
-              })}
-            >
-              {data.direction}
-            </span>
-          </p>
-          <p className="text-xs text-neutral-gray-400 font-medium mt-1">
-            {formatNumber(data.price, {
-              minimumFractionDigits: 2,
-              style: "currency",
-            })}
-            <span className="ml-2">Qty: {data.size}</span>
-          </p>
-        </div>
+        <span className="text-[11px] md:text-sm text-neutral-gray-400 font-medium">
+          {new Date(data.timestamp).toLocaleDateString("en-US", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
       </div>
-      <div className="flex-1 text-right">
-        {data.closedPnl !== 0 ? (
-          <p
-            className={cn("text-xs font-medium text-buy", {
-              "text-sell": data.closedPnl < 0,
-            })}
-          >
-            {sign}
-            {formatNumber(data.closedPnl, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </p>
-        ) : (
-          <p className="text-xs font-medium">--</p>
-        )}
-        <p className="text-xs text-neutral-gray-400 mt-1">
-          {formatDateTime(data.timestamp)}
-        </p>
+
+      <div className="w-full grid grid-cols-4 gap-2 text-sm">
+        <CardItem label="Price" value={data.price} />
+        <CardItem
+          label="Size"
+          value={formatNumber(data.size, {
+            maximumFractionDigits: 6,
+          })}
+        />
+        <CardItem
+          label="Trade Value"
+          value={formatNumber(data.tradeValue, {
+            style: "currency",
+          })}
+        />
+        <CardItem
+          label="Fee"
+          value={formatNumber(data.fee, {
+            maximumFractionDigits: 6,
+          })}
+        />
       </div>
     </div>
   );

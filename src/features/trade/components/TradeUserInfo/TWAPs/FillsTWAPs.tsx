@@ -3,12 +3,16 @@ import { UserTwapSliceFillsWsEvent } from "@nktkas/hyperliquid";
 import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
+import Tag from "@/components/ui/tag";
 import { ROUTES } from "@/constants/routes";
 import TokenImage from "@/features/trade/components/TokenImage";
+import { parseBuilderDeployedAsset } from "@/features/trade/utils";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/formatting/dates";
 import { formatNumber } from "@/utils/formatting/numbers";
+
+import CardItem from "../CardItem";
 
 type TwapHistoryFills = UserTwapSliceFillsWsEvent["twapSliceFills"][number];
 
@@ -159,40 +163,84 @@ const FillsTWAPs = () => {
 };
 
 const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
+  const asset = parseBuilderDeployedAsset(data.fill.coin);
+  const closedPnl =
+    Number(data.fill.closedPnl) - Number(data.fill.fee);
+  const sign = (closedPnl > 0 && "+") || "";
+  const tradeValue = Number(data.fill.px) * Number(data.fill.sz);
+
   return (
-    <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
-      <div className="flex-1 flex items-center gap-4">
-        <div className="size-9 relative">
-          <TokenImage
-            key={data.fill.coin}
-            name={data.fill.coin}
-            instrumentType="perps"
-            className="size-9 rounded-full overflow-hidden"
+    <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
+      <div className="flex items-center justify-between gap-x-4 mb-1">
+        <div className="flex items-center gap-x-1">
+          <div className="flex items-center gap-x-1 mr-1">
+            <TokenImage
+              name={asset.base}
+              className="size-4"
+              instrumentType="perps"
+            />
+            <Link
+              href={`${ROUTES.trade.perps}/${data.fill.coin}`}
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
+            >
+              {asset.base}
+            </Link>
+          </div>
+          {asset.dex && <Tag value={asset.dex} />}
+          <Tag
+            value={data.fill.dir}
+            className={cn("text-buy bg-buy/10", {
+              "text-sell bg-sell/10": data.fill.side === "A",
+            })}
+          />
+          <Tag
+            value={`${sign}${formatNumber(closedPnl, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })} ${data.fill.feeToken}`}
+            className={cn("text-buy bg-buy/10", {
+              "text-sell bg-sell/10": closedPnl < 0,
+            })}
           />
         </div>
-        <div className="flex-1 text-sm">
-          <p className="text-white font-medium">{data.fill.coin}</p>
-          <p className="text-xs text-neutral-gray-400 font-medium mt-1">
-            <span>
-              {formatNumber(Number(data.fill.fee), {
-                minimumFractionDigits: 2,
-                style: "currency",
-              })}
-              <span className="ml-2">
-                {data.fill.sz} / {data.fill.crossed}
-              </span>
-            </span>
-          </p>
-        </div>
-      </div>
-      <div className="flex-1 text-right">
-        <span
-          className={cn("text-xs font-medium text-buy", {
-            "text-sell": Number(data.fill.closedPnl) < 0,
+        <span className="text-[11px] md:text-sm text-neutral-gray-400 font-medium">
+          {new Date(data.fill.time).toLocaleDateString("en-US", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
           })}
-        >
-          {formatNumber(Number(data.fill.closedPnl))} {data.fill.feeToken}
         </span>
+      </div>
+
+      <div className="w-full grid grid-cols-4 gap-2 text-sm">
+        <CardItem
+          label="Price"
+          value={formatNumber(Number(data.fill.px), {
+            minimumFractionDigits: 3,
+          })}
+        />
+        <CardItem
+          label="Size"
+          value={`${formatNumber(Number(data.fill.sz), {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 5,
+          })} ${data.fill.coin}`}
+        />
+        <CardItem
+          label="Trade Value"
+          value={`${formatNumber(tradeValue, {
+            minimumFractionDigits: 2,
+          })} ${data.fill.feeToken}`}
+        />
+        <CardItem
+          label="Fee"
+          value={`${formatNumber(Number(data.fill.fee), {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })} ${data.fill.feeToken}`}
+        />
       </div>
     </div>
   );

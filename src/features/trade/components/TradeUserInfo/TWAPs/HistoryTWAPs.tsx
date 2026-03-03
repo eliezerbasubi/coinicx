@@ -3,6 +3,7 @@ import { UserTwapHistoryWsEvent } from "@nktkas/hyperliquid";
 import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
+import Tag from "@/components/ui/tag";
 import { ROUTES } from "@/constants/routes";
 import TokenImage from "@/features/trade/components/TokenImage";
 import { formatTotalRuntime } from "@/features/trade/utils/twap";
@@ -13,6 +14,8 @@ import {
   formatNumber,
   formatNumberWithFallback,
 } from "@/utils/formatting/numbers";
+
+import CardItem from "../CardItem";
 
 type TwapHistory = UserTwapHistoryWsEvent["history"][number];
 
@@ -143,41 +146,64 @@ const HistoryTWAPs = () => {
 };
 
 const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
+  const executedSz = Number(data.state.executedSz);
+  const avgPx = executedSz ? Number(data.state.executedNtl) / executedSz : 0;
+  const status = data.status.status;
+
   return (
-    <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
-      <div className="flex-1 flex items-center gap-4">
-        <div className="size-9 relative">
-          <TokenImage
-            key={data.state.coin}
-            name={data.state.coin}
-            instrumentType="perps"
-            className="size-9 rounded-full overflow-hidden"
-          />
+    <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
+      <div className="flex items-center justify-between gap-x-4 mb-1">
+        <div className="flex items-center gap-x-1">
+          <div className="flex items-center gap-x-1 mr-1">
+            <TokenImage
+              name={data.state.coin}
+              className="size-4"
+              instrumentType="perps"
+            />
+            <Link
+              href={`${ROUTES.trade.perps}/${data.state.coin}`}
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
+            >
+              {data.state.coin}
+            </Link>
+          </div>
+          {data.state.randomize && <Tag value="Randomize" />}
+          {data.state.reduceOnly && <Tag value="Reduce Only" />}
         </div>
-        <div className="flex-1 text-sm">
-          <p className="text-white font-medium">{data.state.coin}</p>
-          <p className="text-xs text-neutral-gray-400 font-medium mt-1">
-            <span>
-              {formatNumber(0, {
-                minimumFractionDigits: 2,
-                style: "currency",
-              })}
-              <span className="ml-2">
-                {data.state.executedSz} / {data.state.sz}
-              </span>
-            </span>
-          </p>
-        </div>
-      </div>
-      <div className="flex-1 text-right">
-        <span
-          className={cn("font-medium text-green-500 capitalize", {
-            "text-red-500": data.status.status === "terminated",
-            "text-yellow-500": data.status.status === "activated",
-          })}
+
+        <p
+          className={cn(
+            "text-neutral-gray-400 capitalize text-xs font-medium",
+            {
+              "text-sell": status === "terminated" || status === "error",
+              "text-yellow-500": status === "activated",
+              "text-green-500": status === "finished",
+            },
+          )}
         >
-          {data.status.status}
-        </span>
+          {status}
+        </p>
+      </div>
+
+      <div className="w-full grid grid-cols-4 gap-2 text-sm">
+        <CardItem
+          label="Total Size"
+          value={`${formatNumber(Number(data.state.sz), {
+            minimumFractionDigits: 2,
+          })} ${data.state.coin}`}
+        />
+        <CardItem
+          label="Executed Size"
+          value={formatNumberWithFallback(executedSz)}
+        />
+        <CardItem
+          label="Average Price"
+          value={formatNumberWithFallback(avgPx)}
+        />
+        <CardItem
+          label="Total Runtime"
+          value={formatTotalRuntime(data.state.minutes)}
+        />
       </div>
     </div>
   );

@@ -40,7 +40,7 @@ const AssetsSelector = () => {
         role="button"
         tabIndex={0}
         ref={triggerRef}
-        className="group/selector flex items-center space-x-2 cursor-pointer"
+        className="group/selector flex items-center space-x-2 cursor-pointer mb-2 sm:mb-0"
         onClick={() => setOpen(!open)}
       >
         <TokenImage
@@ -53,7 +53,7 @@ const AssetsSelector = () => {
 
         <div className="flex-1">
           <div className="flex items-center space-x-1">
-            <p className="text-md md:text-xl font-bold">
+            <p className="text-md md:text-xl font-bold whitespace-nowrap">
               {formatSymbol(base, quote, isSpot)}
             </p>
 

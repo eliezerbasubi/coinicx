@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
+import Tag from "@/components/ui/tag";
 import { ROUTES } from "@/constants/routes";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { parseBuilderDeployedAsset } from "@/features/trade/utils";
@@ -15,18 +16,19 @@ import {
 } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
+import CardItem from "./CardItem";
 
 type HistoricalOrder = {
   timestamp: number;
   orderType: string;
   href: string;
+  dex: string | null;
   base: string;
   direction: string;
   side: string;
   sz: number;
   filledSz: number;
-  limitPx: number;
-  triggerPx: number;
+  orderValue: number;
   price: number;
   reduceOnly: boolean;
   triggerCondition: string;
@@ -128,10 +130,9 @@ const columns: ColumnDef<HistoricalOrder>[] = [
     id: "orderValue",
     header: "Order Value",
     cell({ row: { original } }) {
-      const size = original.filledSz || original.sz;
-      const orderValue = size * original.price;
-
-      return <span>{formatNumber(orderValue, { style: "currency" })}</span>;
+      return (
+        <span>{formatNumber(original.orderValue, { style: "currency" })}</span>
+      );
     },
   },
   {
@@ -191,6 +192,7 @@ const OrderHistory = () => {
         let direction = order.side === "B" ? "Long" : "Short";
         let href = `${ROUTES.trade.perps}/${order.coin}`;
         let orderType = orderTypeLabels[order.orderType] || order.orderType;
+        let dex = null;
 
         if (order.reduceOnly) {
           // flip direction
@@ -203,6 +205,10 @@ const OrderHistory = () => {
           symbol = `${spotInfo.base}/${spotInfo.quote}`;
           direction = order.side === "B" ? "Buy" : "Sell";
           href = `${ROUTES.trade.spot}/${symbol}`;
+        } else {
+          const asset = parseBuilderDeployedAsset(order.coin);
+          dex = asset.dex;
+          symbol = asset.base;
         }
 
         // Liquidation state
@@ -213,22 +219,26 @@ const OrderHistory = () => {
         // Status state
         let status = historicalOrder.status.toLowerCase();
 
-        if (status.includes("rejected") || status.includes("cancelled")) {
-          status = "Cancelled";
+        if (status.includes("rejected") || status.includes("canceled")) {
+          status = "Canceled";
         }
+
+        const size = Number(order.origSz) - Number(order.sz);
+        const filledSize = Number(order.sz);
+        const price = Number(order.limitPx || order.triggerPx || "0");
 
         return {
           href,
           timestamp: order.timestamp,
           orderType,
+          dex,
           base: spotInfo?.base || order.coin,
           direction,
           side: order.side,
-          sz: Number(order.origSz) - Number(order.sz),
-          filledSz: Number(order.sz),
-          limitPx: Number(order.limitPx || "0"),
-          triggerPx: Number(order.triggerPx || "0"),
-          price: Number(order.limitPx || order.triggerPx || "0"),
+          sz: size,
+          filledSz: filledSize,
+          orderValue: Number(filledSize || size) * price,
+          price,
           reduceOnly: order.reduceOnly,
           triggerCondition: order.triggerCondition,
           status,
@@ -243,6 +253,7 @@ const OrderHistory = () => {
       data={data.sort((a, b) => b.timestamp - a.timestamp)}
       loading={false}
       className="space-y-1.5 mb-3"
+      wrapperClassName="p-4 md:p-0"
       thClassName="h-8 py-0 font-medium text-xs"
       rowClassName="text-xs font-medium whitespace-nowrap py-0"
       rowCellClassName="py-1"
@@ -255,46 +266,66 @@ const OrderHistory = () => {
 
 const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
   return (
-    <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
-      <div className="flex-1 flex items-center gap-4">
-        <div className="size-9 relative">
-          <TokenImage
-            key={data.base}
-            name={data.base}
-            instrumentType="perps"
-            className="size-9 rounded-full overflow-hidden"
+    <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
+      <div className="flex items-center justify-between gap-x-4 mb-1">
+        <div className="flex items-center gap-x-1">
+          <div className="flex items-center gap-x-1 mr-1">
+            <TokenImage
+              name={data.base}
+              className="size-4"
+              instrumentType={data.dex === null ? "spot" : "perps"}
+            />
+            <Link
+              href={data.href}
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
+            >
+              {data.symbol}
+            </Link>
+          </div>
+          {data.dex && <Tag value={data.dex} />}
+          <Tag
+            value={data.direction}
+            className={cn("text-buy bg-buy/10", {
+              "text-sell bg-sell/10": data.side === "A",
+            })}
+          />
+          <Tag
+            value={data.status}
+            className="text-neutral-gray-400 bg-neutral-gray-200 capitalize font-medium"
           />
         </div>
-        <div className="flex-1 text-sm">
-          <p className="text-white font-medium flex items-center">
-            {data.base}
-            <span
-              className={cn("ml-2 text-xs", {
-                "text-buy": data.side === "B",
-                "text-sell": data.side === "A",
-              })}
-            >
-              {data.side}
-            </span>
-          </p>
-          <p className="text-xs text-neutral-gray-400 font-medium mt-1">
-            <span>
-              {formatNumber(Number(data.limitPx || data.triggerPx), {
-                minimumFractionDigits: 2,
-                style: "currency",
-              })}
-              <span className="ml-2">
-                {Number(data.filledSz) - Number(data.sz)} / {data.filledSz}
-              </span>
-            </span>
-          </p>
-        </div>
+        <span className="text-[11px] md:text-sm text-neutral-gray-400 font-medium">
+          {new Date(data.timestamp).toLocaleDateString("en-US", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
       </div>
-      <div className="flex-1 text-right">
-        <p className="text-xs font-medium capitalize">{data.status}</p>
-        <p className="text-xs text-neutral-gray-400 mt-1">
-          {formatDateTime(data.timestamp)}
-        </p>
+
+      <div className="w-full grid grid-cols-5 gap-2 text-sm">
+        <CardItem label="Type" value={data.orderType} />
+        <CardItem label="Size" value={formatNumberWithFallback(data.sz)} />
+        <CardItem
+          label="Filled Size"
+          value={formatNumberWithFallback(data.filledSz)}
+        />
+        <CardItem
+          label="Price"
+          value={formatNumberWithFallback(data.price, {
+            maximumSignificantDigits: 8,
+            minimumSignificantDigits: 5,
+            maximumFractionDigits: 8,
+          })}
+        />
+        <CardItem
+          label="Order Value"
+          value={formatNumberWithFallback(data.orderValue, {
+            maximumFractionDigits: 6,
+          })}
+        />
       </div>
     </div>
   );

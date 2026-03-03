@@ -35,7 +35,7 @@ const TradeUserInfo = () => {
   }));
 
   return (
-    <div className="w-full h-85 overflow-hidden bg-primary-dark md:rounded-md">
+    <div className="w-full md:h-85 overflow-hidden bg-primary-dark md:rounded-md">
       <Tabs
         defaultValue={isPerps ? "positions" : "balances"}
         value={activeTab}
@@ -44,22 +44,24 @@ const TradeUserInfo = () => {
         }
         className="h-full gap-0"
       >
-        <TabsList
-          variant="line"
-          className="w-full h-11! border-b border-neutral-gray-200 px-4 inline-block shrink-0 space-x-4 overflow-x-auto [&::-webkit-scrollbar]:hidden"
-        >
-          {TABS.map((tab) => (
-            <TabsTrigger
-              key={tab.value}
-              value={tab.value}
-              className="w-fit text-xs font-medium"
-            >
-              {tab.label}
-              {tab.counter &&
-                ` (${counters[tab.counter as keyof typeof counters]})`}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="w-full border-b border-neutral-gray-200 overflow-x-auto no-scrollbars">
+          <TabsList
+            variant="line"
+            className="h-11! px-4 pt-0 justify-start md:justify-center shrink-0 space-x-0 md:space-x-4"
+          >
+            {TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="w-fit text-xs font-medium"
+              >
+                {tab.label}
+                {tab.counter &&
+                  ` (${counters[tab.counter as keyof typeof counters]})`}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
         <AuthenticatedContent>
           <TabsContent value="balances" className="overflow-auto">
             <Balances />

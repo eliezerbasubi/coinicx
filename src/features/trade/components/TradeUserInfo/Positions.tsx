@@ -6,6 +6,7 @@ import { Pen } from "lucide-react";
 import { AssetPosition } from "@/types/trade";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
+import Tag from "@/components/ui/tag";
 import { ROUTES } from "@/constants/routes";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { parseBuilderDeployedAsset } from "@/features/trade/utils";
@@ -18,6 +19,7 @@ import {
 } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
+import CardItem from "./CardItem";
 
 type Position = AssetPosition["position"] & { markPx: string };
 
@@ -266,45 +268,96 @@ type PositionCardProps = {
 };
 
 const PositionCard = ({ data }: PositionCardProps) => {
+  const asset = parseBuilderDeployedAsset(data.coin);
+  const isLong = Number(data.szi) > 0;
+  const unrealizedPnl = Number(data.unrealizedPnl);
+  const returnOnEquity = Number(data.returnOnEquity);
+  const pnlSign = (unrealizedPnl > 0 && "+") || "";
+
+  const pnlLabel = `${pnlSign}${formatNumber(unrealizedPnl, {
+    style: "currency",
+  })}`;
+
+  const roeLabel = `(${pnlSign}${formatNumber(returnOnEquity, {
+    style: "percent",
+  })})`;
+
   return (
-    <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
-      <div className="flex-1 flex items-center gap-4">
-        <div className="size-9 relative">
-          <TokenImage
-            key={data.coin}
-            name={data.coin}
-            instrumentType="perps"
-            className="size-9 rounded-full overflow-hidden"
+    <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
+      <div className="flex items-center justify-between gap-x-4 mb-1">
+        <div className="flex items-center gap-x-1">
+          <div className="flex items-center gap-x-1 mr-1">
+            <TokenImage
+              name={asset.base}
+              className="size-4"
+              instrumentType="perps"
+            />
+            <Link
+              href={`${ROUTES.trade.perps}/${data.coin}`}
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
+            >
+              {asset.base}
+            </Link>
+          </div>
+          {asset.dex && <Tag value={asset.dex} />}
+          <Tag
+            value={isLong ? "Long" : "Short"}
+            className={cn("text-buy bg-buy/10", {
+              "text-sell bg-sell/10": !isLong,
+            })}
           />
-        </div>
-        <div className="flex-1 text-sm">
-          <p className="text-white font-medium flex items-center">
-            {data.coin}
-          </p>
-          <p className="text-xs text-neutral-gray-400 font-medium mt-1">
-            <span>
-              {formatNumber(Number(data.entryPx), {
-                minimumFractionDigits: 2,
-                roundingMode: "trunc",
-              })}
-              <span className="ml-1">
-                <span className="mr-1">≈</span>
-                {formatNumber(Number(data.markPx), {
-                  minimumFractionDigits: 2,
-                  style: "currency",
-                })}
-              </span>
-            </span>
-          </p>
+          <Tag
+            value={`${data.leverage.value}x ${data.leverage.type}`}
+            className={cn("text-buy bg-buy/10 capitalize", {
+              "text-sell bg-sell/10": !isLong,
+            })}
+          />
         </div>
       </div>
 
-      <div className="flex-1 text-right">
+      <div className="w-full grid grid-cols-4 gap-2 text-sm">
+        <CardItem
+          label="Position Value"
+          value={formatNumber(Number(data.positionValue), {
+            style: "currency",
+          })}
+        />
+        <CardItem
+          label="Entry Price"
+          value={formatNumber(Number(data.entryPx), { style: "currency" })}
+        />
+        <CardItem
+          label="PnL (ROE %)"
+          value={`${pnlLabel} ${roeLabel}`}
+          className={cn("text-buy", {
+            "text-sell": unrealizedPnl < 0,
+          })}
+        />
+        <CardItem
+          label="Margin"
+          value={formatNumberWithFallback(Number(data.marginUsed), {
+            style: "currency",
+          })}
+        />
+        <CardItem
+          label="Funding"
+          value={formatNumberWithFallback(Number(data.cumFunding.allTime), {
+            style: "currency",
+          })}
+        />
+        <CardItem
+          label="Liq. Price"
+          value={formatNumberWithFallback(Number(data.liquidationPx || "0"))}
+          className="last:items-start"
+        />
+      </div>
+
+      <div className="mt-2">
         <Button
           variant="secondary"
           size="sm"
-          className="h-6 w-fit font-medium text-xs md:text-[13px] rounded-md px-3"
-          label="Transfer"
+          className="h-7"
+          label="Close Position"
         />
       </div>
     </div>
