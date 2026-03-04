@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import { InputNumberControl } from "@/components/ui/input-number";
 import { Label } from "@/components/ui/label";
 import { convertTimeToMinutes } from "@/features/trade/utils/twap";
 import {
@@ -8,8 +9,6 @@ import {
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
-
-import { OrderFormInput } from "./OrderFormInput";
 
 type State = {
   hours: string;
@@ -87,7 +86,7 @@ const TwapOrderForm = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-x-1">
-          <OrderFormInput
+          <InputNumberControl
             name="hours"
             id="hours"
             label="Hours"
@@ -96,7 +95,7 @@ const TwapOrderForm = () => {
             value={state.hours}
             onChange={onValueChange}
           />
-          <OrderFormInput
+          <InputNumberControl
             name="minutes"
             id="minutes"
             label="Minutes"

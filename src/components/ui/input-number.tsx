@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 
+import { cn } from "@/utils/cn";
 import {
-  COMMON_DECIMAL_SEPARATORS,
   buildAllowedCharsRegex,
+  COMMON_DECIMAL_SEPARATORS,
   formatWithGrouping,
   getLocaleDecimalSeparator,
   getLocaleGroupSeparator,
@@ -11,7 +12,10 @@ import {
   toParseableNumber,
 } from "@/utils/formatting/normalize-input-number";
 
-export { toParseableNumber, toDisplayNumber } from "@/utils/formatting/normalize-input-number";
+export {
+  toParseableNumber,
+  toDisplayNumber,
+} from "@/utils/formatting/normalize-input-number";
 
 type Props = React.DetailedHTMLProps<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -91,4 +95,54 @@ const InputNumber = ({ locale, useGrouping, ...props }: Props) => {
   );
 };
 
-export default InputNumber;
+type InputNumberFormatterProps = React.DetailedHTMLProps<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  HTMLInputElement
+>;
+
+const InputNumberFormatter = (props: InputNumberFormatterProps) => {
+  return <InputNumber useGrouping {...props} />;
+};
+
+type InputNumberControlProps = {
+  label?: React.ReactNode;
+  trailing?: React.ReactNode;
+  wrapperClassName?: string;
+} & React.DetailedHTMLProps<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  HTMLInputElement
+>;
+
+const InputNumberControl = ({
+  label,
+  trailing,
+  wrapperClassName,
+  ...props
+}: InputNumberControlProps) => {
+  return (
+    <label
+      htmlFor={props.id}
+      className={cn(
+        "w-full h-9 flex items-center gap-x-1 border border-neutral-gray-200 focus-within:border-primary rounded-md px-3",
+        wrapperClassName,
+      )}
+    >
+      {label && (
+        <div className="text-sm text-neutral-gray-400 font-medium whitespace-nowrap">
+          {label}
+        </div>
+      )}
+
+      <InputNumberFormatter
+        {...props}
+        className={cn(
+          "w-full caret-primary text-white font-medium text-right outline-0",
+          props.className,
+        )}
+      />
+      {trailing}
+    </label>
+  );
+};
+
+export { InputNumberFormatter, InputNumber, InputNumberControl };

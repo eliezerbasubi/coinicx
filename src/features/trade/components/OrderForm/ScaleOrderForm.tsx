@@ -5,6 +5,7 @@ import { ScaleDistribution } from "@/types/trade";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
+import { InputNumberControl } from "@/components/ui/input-number";
 import { formatPriceToDecimal, formatSize } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
@@ -15,7 +16,7 @@ import {
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 
-import { OrderFormInput, TrailingQuote } from "./OrderFormInput";
+import TrailingQuote from "./TrailingQuote";
 
 const MAX_ORDERS = 100;
 const MIN_ORDERS = 2;
@@ -128,7 +129,7 @@ const ScaleOrderForm = () => {
 
   return (
     <div className="w-full space-y-2">
-      <OrderFormInput
+      <InputNumberControl
         name="startPrice"
         id="startPrice"
         label="Start Price"
@@ -137,7 +138,7 @@ const ScaleOrderForm = () => {
         value={state.startPrice}
         onChange={onValueChange}
       />
-      <OrderFormInput
+      <InputNumberControl
         name="endPrice"
         id="endPrice"
         label="End Price"
@@ -148,7 +149,7 @@ const ScaleOrderForm = () => {
       />
 
       <div className="grid grid-cols-2 gap-2">
-        <OrderFormInput
+        <InputNumberControl
           name="totalOrders"
           id="totalOrders"
           label="Orders"
@@ -159,7 +160,7 @@ const ScaleOrderForm = () => {
           value={state.totalOrders}
           onChange={onValueChange}
         />
-        <OrderFormInput
+        <InputNumberControl
           name="skew"
           id="skew"
           label="Skew"
@@ -320,7 +321,7 @@ const PreviewOrders = () => {
             Order Value ({quote})
           </p>
         </div>
-        <div className="w-full max-h-[400px] overflow-y-auto">
+        <div className="w-full max-h-100 overflow-y-auto">
           {scaleOrder
             .sort((a, b) =>
               isBuyOrder ? b.price - a.price : a.price - b.price,

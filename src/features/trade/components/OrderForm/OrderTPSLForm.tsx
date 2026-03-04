@@ -12,12 +12,11 @@
 // } from "@/components/ui/tooltip";
 // import { useTradeContext } from "@/store/trade/hooks";
 
+import { InputNumberControl } from "@/components/ui/input-number";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
-
-import { OrderFormInput } from "./OrderFormInput";
 
 const OrderTPSLForm = () => {
   const { tpPrice, slPrice } = useShallowOrderFormStore((s) => ({
@@ -37,7 +36,7 @@ const OrderTPSLForm = () => {
         </p> */}
 
         <div className="flex items-center gap-1">
-          <OrderFormInput
+          <InputNumberControl
             label="TP Price"
             name="tpPrice"
             id="tpPrice"
@@ -64,7 +63,7 @@ const OrderTPSLForm = () => {
         </p> */}
 
         <div className="flex items-center gap-1">
-          <OrderFormInput
+          <InputNumberControl
             label="SL Price"
             name="slPrice"
             id="slPrice"
@@ -123,7 +122,7 @@ const OrderTPSLForm = () => {
 //   const [open, setOpen] = useState(false);
 
 //   return (
-//     <OrderFormInput
+//     <InputNumberControl
 //       name={name}
 //       id={name}
 //       value={value}

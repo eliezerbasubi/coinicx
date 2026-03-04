@@ -46,7 +46,7 @@ const TradeUserInfo = () => {
       >
         <TabsList
           variant="line"
-          className="w-full h-11! border-b border-neutral-gray-200 px-4 shrink-0 space-x-0 md:space-x-4 justify-start overflow-x-auto [&::-webkit-scrollbar]:hidden"
+          className="w-full h-11! px-4 shrink-0 space-x-0 md:space-x-4 justify-start"
         >
           {TABS.map((tab) => (
             <TabsTrigger
@@ -56,6 +56,7 @@ const TradeUserInfo = () => {
             >
               {tab.label}
               {tab.counter &&
+                !!counters[tab.counter as keyof typeof counters] &&
                 ` (${counters[tab.counter as keyof typeof counters]})`}
             </TabsTrigger>
           ))}

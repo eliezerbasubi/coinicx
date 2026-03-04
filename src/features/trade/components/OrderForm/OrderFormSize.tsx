@@ -1,12 +1,12 @@
 import React from "react";
 
+import { InputNumberControl } from "@/components/ui/input-number";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 
-import { OrderFormInput } from "./OrderFormInput";
 import OrderFormSlider from "./OrderFormSlider";
 import SizeCoinSelector from "./SizeCoinSelector";
 
@@ -19,7 +19,7 @@ const OrderFormSize = () => {
 
   return (
     <React.Fragment>
-      <OrderFormInput
+      <InputNumberControl
         name="size"
         id="size"
         value={size}

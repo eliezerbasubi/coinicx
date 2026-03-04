@@ -6,7 +6,7 @@ import ConnectButton from "@/components/common/ConnectButton";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
-import InputNumber from "@/components/ui/input-number";
+import { InputNumber } from "@/components/ui/input-number";
 import { useEnableTrading } from "@/features/trade/hooks/useEnableTrading";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
@@ -241,7 +241,7 @@ const AdjustLeverage = () => {
       open={open}
       onOpenChange={setOpen}
       title="Adjust Leverage"
-      className="gap-0 pb-4 md:pb-0"
+      className="gap-0"
       trigger={
         <Button
           variant="secondary"
