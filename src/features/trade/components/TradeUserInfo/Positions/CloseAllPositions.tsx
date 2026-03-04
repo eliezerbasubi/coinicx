@@ -20,7 +20,10 @@ const CloseAllPositions = ({ positions }: Props) => {
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(open) => {
+        if (!positions.length) return;
+        setOpen(open);
+      }}
       title={"Close all positions"}
       description={
         <p className="text-xs text-neutral-gray-400">
@@ -29,7 +32,11 @@ const CloseAllPositions = ({ positions }: Props) => {
         </p>
       }
       trigger={
-        <p className="text-primary text-xs font-medium cursor-pointer">
+        <p
+          className={cn("text-primary text-xs font-medium cursor-pointer", {
+            "text-neutral-gray-400": !positions.length,
+          })}
+        >
           Close All
         </p>
       }

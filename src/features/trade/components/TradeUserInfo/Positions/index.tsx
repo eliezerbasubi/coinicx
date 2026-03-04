@@ -30,6 +30,7 @@ import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";
 import CloseAllPositions from "./CloseAllPositions";
 import ClosePosition from "./ClosePosition";
+import ReversePosition from "./ReversePosition";
 
 const columns: ColumnDef<Position>[] = [
   {
@@ -217,9 +218,14 @@ const columns: ColumnDef<Position>[] = [
               </p>
             }
           />
-          <button type="button" className="text-primary text-xs font-medium">
-            Reverse
-          </button>
+          <ReversePosition
+            position={original}
+            trigger={
+              <p className="text-primary text-xs font-medium cursor-pointer">
+                Reverse
+              </p>
+            }
+          />
         </div>
       );
     },
@@ -327,7 +333,7 @@ const Positions = () => {
 
   return (
     <div className="w-full">
-      <Visibility visible={isMobile}>
+      <Visibility visible={isMobile && !!data.length}>
         <div className="w-full flex justify-end py-2 px-4">
           <CloseAllPositions positions={data} />
         </div>
@@ -457,11 +463,16 @@ const PositionCard = ({ data }: PositionCardProps) => {
             />
           }
         />
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-7 text-xs text-white"
-          label="Reverse"
+        <ReversePosition
+          position={data}
+          trigger={
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 text-xs text-white"
+              label="Reverse"
+            />
+          }
         />
       </div>
     </div>
