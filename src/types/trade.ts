@@ -172,6 +172,18 @@ export type AllDexsClearinghouseState =
 
 export type AssetPosition = AllDexsClearinghouseState["assetPositions"][number];
 
+export type Position = AssetPosition["position"] & {
+  markPx: string;
+  midPx: string;
+  dex: string;
+  base: string;
+  quote: string;
+  szDecimals: number;
+  pxDecimals: number;
+  assetId: number;
+  isLong: boolean;
+};
+
 export type SpotMetas = {
   spotMeta: SpotMetaResponse;
   tokenNamesToUniverseIndex: Map<string, Map<string, number>>;

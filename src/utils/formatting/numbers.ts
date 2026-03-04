@@ -1,11 +1,23 @@
-export type FormatOptions = { locale?: string } & Intl.NumberFormatOptions;
+export type FormatOptions = {
+  locale?: string;
+  showSign?: boolean;
+} & Intl.NumberFormatOptions;
 
 export const formatNumber = (value: number, options?: FormatOptions) => {
-  const { locale, ...rest } = options ?? {};
-  return value.toLocaleString(locale ?? "en-US", {
+  const { locale, showSign, ...rest } = options ?? {};
+
+  const formatted = value.toLocaleString(locale ?? "en-US", {
     ...rest,
     currency: rest.currency ?? "USD",
   });
+
+  if (showSign) {
+    const sign = value >= 0 ? "+" : "";
+
+    return sign + formatted;
+  }
+
+  return formatted;
 };
 
 export const formatInputValue = (value: string, options?: FormatOptions) => {

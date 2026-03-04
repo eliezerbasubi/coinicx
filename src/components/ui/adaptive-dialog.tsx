@@ -1,8 +1,9 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useMediaQuery } from "usehooks-ts";
 import { useAccount } from "wagmi";
+
+import { useIsDesktop } from "@/hooks/useIsMobile";
 
 type Props = {
   open?: boolean;
@@ -18,7 +19,7 @@ const DrawerSheet = dynamic(() => import("./drawer-sheet"), { ssr: false });
 const DialogSheet = dynamic(() => import("./dialog-sheet"), { ssr: false });
 
 const AdaptiveDialog = (props: Props) => {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useIsDesktop();
 
   const { connectModalOpen } = useConnectModal();
   const { isConnected } = useAccount();

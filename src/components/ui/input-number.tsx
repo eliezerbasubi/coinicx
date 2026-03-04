@@ -108,6 +108,7 @@ type InputNumberControlProps = {
   label?: React.ReactNode;
   trailing?: React.ReactNode;
   wrapperClassName?: string;
+  onValueChange?: (value: string) => void;
 } & React.DetailedHTMLProps<
   React.InputHTMLAttributes<HTMLInputElement>,
   HTMLInputElement
@@ -117,6 +118,7 @@ const InputNumberControl = ({
   label,
   trailing,
   wrapperClassName,
+  onValueChange,
   ...props
 }: InputNumberControlProps) => {
   return (
@@ -139,6 +141,7 @@ const InputNumberControl = ({
           "w-full caret-primary text-white font-medium text-right outline-0",
           props.className,
         )}
+        onChange={(e) => onValueChange?.(e.target.value) || props.onChange?.(e)}
       />
       {trailing}
     </label>

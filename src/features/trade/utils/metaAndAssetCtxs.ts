@@ -45,9 +45,10 @@ export const mapPerpDataToAssetMeta = (data: {
 
   return {
     index,
-    assetId: data.perpDexIndex
-      ? 100000 + data.perpDexIndex * 10000 + index
-      : index,
+    assetId: buildPerpAssetId({
+      perpDexIndex: data.perpDexIndex,
+      universeIndex: index,
+    }),
     base,
     coin: universe.name,
     quote,
@@ -91,4 +92,16 @@ export const mapDataToAssetCtx = (
   }
 
   return ctx;
+};
+
+export const buildPerpAssetId = ({
+  perpDexIndex,
+  universeIndex,
+}: {
+  perpDexIndex: number;
+  universeIndex: number;
+}) => {
+  return perpDexIndex
+    ? 100000 + perpDexIndex * 10000 + universeIndex
+    : universeIndex;
 };

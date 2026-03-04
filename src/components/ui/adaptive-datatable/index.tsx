@@ -12,6 +12,7 @@ import {
   PaginationState,
   SortingState,
   Table,
+  TableMeta,
   TableState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -44,6 +45,7 @@ type Props<TData, TValue> = {
   wrapperClassName?: string;
   globalFilterFn?: FilterFnOption<TData>;
   disablePagination?: boolean;
+  meta?: TableMeta<TData>;
   onPaginationChange?: OnChangeFn<PaginationState>;
 } & Omit<CompProps<TData, TValue>, "table">;
 
@@ -58,6 +60,7 @@ const AdaptiveDataTable = <TData, TValue>({
   skeleton,
   wrapperClassName,
   disablePagination,
+  meta,
   render,
   onPaginationChange,
   onRowClick,
@@ -80,6 +83,7 @@ const AdaptiveDataTable = <TData, TValue>({
       columnFilters,
     },
     globalFilterFn,
+    meta,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,

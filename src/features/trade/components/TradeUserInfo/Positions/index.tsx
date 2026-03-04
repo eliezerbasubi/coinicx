@@ -1,15 +1,23 @@
-import { useMemo } from "react";
+import { CSSProperties, useMemo } from "react";
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 import { Pen } from "lucide-react";
 
-import { AssetPosition } from "@/types/trade";
+import { Position } from "@/types/trade";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
 import Tag from "@/components/ui/tag";
 import { ROUTES } from "@/constants/routes";
+import TokenImage from "@/features/trade/components/TokenImage";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
-import { parseBuilderDeployedAsset } from "@/features/trade/utils";
+import {
+  buildPerpAssetId,
+  formatPriceToDecimal,
+  getPriceDecimals,
+  parseBuilderDeployedAsset,
+} from "@/features/trade/utils";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
@@ -18,23 +26,50 @@ import {
   formatNumberWithFallback,
 } from "@/utils/formatting/numbers";
 
-import TokenImage from "../TokenImage";
-import CardItem from "./CardItem";
-
-type Position = AssetPosition["position"] & { markPx: string };
+import CardItem from "../CardItem";
+import CoinLink from "../CoinLink";
+import CloseAllPositions from "./CloseAllPositions";
+import ClosePosition from "./ClosePosition";
 
 const columns: ColumnDef<Position>[] = [
   {
     header: "Coin",
+    meta: {
+      className: "p-0",
+    },
     accessorFn: (row) => row.coin,
     cell({ row: { original } }) {
+      const sideColor = original.isLong
+        ? "var(--color-buy)"
+        : "var(--color-sell";
+      const sideBgColor = original.isLong
+        ? "rgb(11, 50, 38)"
+        : "rgb(59, 17, 23)";
+
       return (
-        <Link
-          href={`${ROUTES.trade.perps}/${original.coin}`}
-          className="font-medium space-x-1 hover:text-primary"
+        <div
+          style={
+            {
+              "--side-color": sideColor,
+              "--side-bg-color": sideBgColor,
+            } as CSSProperties
+          }
+          className="w-full flex items-center gap-x-2 px-4 py-1 bg-[linear-gradient(90deg,var(--side-color)_0px,var(--side-color)_4px,var(--side-bg-color)_4px,transparent_100%)]"
         >
-          {original.coin}
-        </Link>
+          <CoinLink
+            dex={original.dex}
+            href={`${ROUTES.trade.perps}/${original.coin}`}
+            symbol={original.base}
+          />
+
+          <p
+            className={cn("text-xs font-medium text-buy", {
+              "text-sell": !original.isLong,
+            })}
+          >
+            {original.leverage.value}x
+          </p>
+        </div>
       );
     },
   },
@@ -71,7 +106,7 @@ const columns: ColumnDef<Position>[] = [
     cell({ row: { original } }) {
       return (
         <span>
-          {formatNumber(Number(original.entryPx), { style: "currency" })}
+          {formatPriceToDecimal(Number(original.entryPx), original.pxDecimals)}
         </span>
       );
     },
@@ -82,7 +117,7 @@ const columns: ColumnDef<Position>[] = [
     cell({ row: { original } }) {
       return (
         <span>
-          {formatNumber(Number(original.markPx), { style: "currency" })}
+          {formatPriceToDecimal(Number(original.markPx), original.pxDecimals)}
         </span>
       );
     },
@@ -164,18 +199,28 @@ const columns: ColumnDef<Position>[] = [
   },
   {
     id: "closeAll",
-    header() {
-      return (
-        <button type="button" className="text-primary text-xs font-medium">
-          Close All
-        </button>
-      );
+    header({ table }) {
+      const positions = (
+        table.options.meta as unknown as { positions: Position[] }
+      )?.positions;
+
+      return <CloseAllPositions positions={positions} />;
     },
-    cell() {
+    cell({ row: { original } }) {
       return (
-        <button type="button" className="text-primary text-xs font-medium">
-          Close
-        </button>
+        <div className="flex items-center gap-x-2">
+          <ClosePosition
+            position={original}
+            trigger={
+              <p className="text-primary text-xs font-medium cursor-pointer">
+                Close
+              </p>
+            }
+          />
+          <button type="button" className="text-primary text-xs font-medium">
+            Reverse
+          </button>
+        </div>
       );
     },
   },
@@ -194,29 +239,50 @@ const columns: ColumnDef<Position>[] = [
 ];
 
 const Positions = () => {
-  const { perpMetas } = useMetaAndAssetCtxs();
+  const isMobile = useIsMobile();
+
+  const { perpMetas, spotMeta } = useMetaAndAssetCtxs();
   const { positions } = useShallowUserTradeStore((s) => ({
     positions: s.allDexsClearinghouseState?.assetPositions,
   }));
 
   const allDexsAssetCtxs = useShallowInstrumentStore((s) => s.allDexsAssetCtxs);
 
-  const perpsTokensToUniverseIndex = useMemo(() => {
-    const map = new Map<string, number>();
+  const perpsTokensToInfo = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        universeIndex: number;
+        quote: string;
+        szDecimals: number;
+        assetId: number;
+      }
+    >();
 
-    if (!perpMetas) return map;
+    if (!perpMetas || !spotMeta) return map;
 
-    for (const perpMeta of perpMetas) {
+    for (
+      let perpDexIndex = 0;
+      perpDexIndex < perpMetas.length;
+      perpDexIndex++
+    ) {
+      const perpMeta = perpMetas[perpDexIndex];
       const meta = perpMeta.universe;
 
       for (let index = 0; index < meta.length; index++) {
         const universe = meta[index];
-        map.set(universe.name, index);
+
+        map.set(universe.name, {
+          universeIndex: index,
+          quote: spotMeta.tokens[perpMeta.collateralToken].name ?? "USDC",
+          szDecimals: universe.szDecimals,
+          assetId: buildPerpAssetId({ perpDexIndex, universeIndex: index }),
+        });
       }
     }
 
     return map;
-  }, [perpMetas]);
+  }, [perpMetas, spotMeta]);
 
   const data = useMemo(() => {
     if (!positions) return [];
@@ -232,34 +298,59 @@ const Positions = () => {
 
       if (!dexCtxState) continue;
 
-      const universeIndex = perpsTokensToUniverseIndex.get(position.coin);
+      const info = perpsTokensToInfo.get(position.coin);
 
-      if (!universeIndex) continue;
+      if (!info) continue;
 
-      const ctx = dexCtxState[universeIndex];
+      const ctx = dexCtxState[info.universeIndex];
 
       assetPositions.push({
         ...position,
+        dex: asset.dex,
+        base: asset.base,
+        quote: info.quote,
         markPx: ctx.markPx,
+        midPx: ctx.midPx || "0",
+        szDecimals: info.szDecimals,
+        pxDecimals: getPriceDecimals(
+          Number(ctx.markPx),
+          info.szDecimals,
+          false,
+        ),
+        assetId: info.assetId,
+        isLong: Number(position.szi) > 0,
       });
     }
 
     return assetPositions;
-  }, [positions, allDexsAssetCtxs, perpsTokensToUniverseIndex]);
+  }, [positions, allDexsAssetCtxs, perpsTokensToInfo]);
 
   return (
-    <AdaptiveDataTable
-      columns={columns}
-      data={data}
-      loading={false}
-      className="space-y-1.5 mb-3"
-      thClassName="h-8 py-0 font-medium text-xs"
-      rowClassName="text-xs font-medium whitespace-nowrap py-0"
-      rowCellClassName="py-1"
-      render={(entry) => <PositionCard data={entry} />}
-      noData="No open positions yet"
-      disablePagination
-    />
+    <div className="w-full">
+      <Visibility visible={isMobile}>
+        <div className="w-full flex justify-end py-2 px-4">
+          <CloseAllPositions positions={data} />
+        </div>
+      </Visibility>
+      <AdaptiveDataTable
+        columns={columns}
+        data={data}
+        meta={{
+          // We're passing positions here so that we can grab them inside the header
+          // Good for performance. Better than calling table.getRowModel().rows inside header
+          positions: data,
+        }}
+        loading={false}
+        className="space-y-1.5 mb-3"
+        wrapperClassName="px-4 md:p-0"
+        thClassName="h-8 py-0 font-medium text-xs"
+        rowClassName="text-xs font-medium whitespace-nowrap py-0"
+        rowCellClassName="py-1"
+        render={(entry) => <PositionCard data={entry} />}
+        noData="No open positions yet"
+        disablePagination
+      />
+    </div>
   );
 };
 
@@ -268,8 +359,6 @@ type PositionCardProps = {
 };
 
 const PositionCard = ({ data }: PositionCardProps) => {
-  const asset = parseBuilderDeployedAsset(data.coin);
-  const isLong = Number(data.szi) > 0;
   const unrealizedPnl = Number(data.unrealizedPnl);
   const returnOnEquity = Number(data.returnOnEquity);
   const pnlSign = (unrealizedPnl > 0 && "+") || "";
@@ -288,7 +377,7 @@ const PositionCard = ({ data }: PositionCardProps) => {
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
-              name={asset.base}
+              name={data.base}
               className="size-4"
               instrumentType="perps"
             />
@@ -296,20 +385,20 @@ const PositionCard = ({ data }: PositionCardProps) => {
               href={`${ROUTES.trade.perps}/${data.coin}`}
               className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
             >
-              {asset.base}
+              {data.base}
             </Link>
           </div>
-          {asset.dex && <Tag value={asset.dex} />}
+          {data.dex && <Tag value={data.dex} />}
           <Tag
-            value={isLong ? "Long" : "Short"}
+            value={data.isLong ? "Long" : "Short"}
             className={cn("text-buy bg-buy/10", {
-              "text-sell bg-sell/10": !isLong,
+              "text-sell bg-sell/10": !data.isLong,
             })}
           />
           <Tag
             value={`${data.leverage.value}x ${data.leverage.type}`}
             className={cn("text-buy bg-buy/10 capitalize", {
-              "text-sell bg-sell/10": !isLong,
+              "text-sell bg-sell/10": !data.isLong,
             })}
           />
         </div>
@@ -324,7 +413,11 @@ const PositionCard = ({ data }: PositionCardProps) => {
         />
         <CardItem
           label="Entry Price"
-          value={formatNumber(Number(data.entryPx), { style: "currency" })}
+          value={formatPriceToDecimal(Number(data.entryPx), data.pxDecimals)}
+        />
+        <CardItem
+          label="Mark Price"
+          value={formatPriceToDecimal(Number(data.markPx), data.pxDecimals)}
         />
         <CardItem
           label="PnL (ROE %)"
@@ -352,12 +445,23 @@ const PositionCard = ({ data }: PositionCardProps) => {
         />
       </div>
 
-      <div className="mt-2">
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <ClosePosition
+          position={data}
+          trigger={
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 text-xs text-white"
+              label="Close Position"
+            />
+          }
+        />
         <Button
           variant="secondary"
           size="sm"
-          className="h-7"
-          label="Close Position"
+          className="h-7 text-xs text-white"
+          label="Reverse"
         />
       </div>
     </div>

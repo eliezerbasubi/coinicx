@@ -19,14 +19,12 @@ import {
 } from "@/store/trade/order-form";
 
 import { calculateSubOrderSize, MAX_MINUTES, MIN_MINUTES } from "../utils/twap";
-import { useApproveBuilderFee } from "./useApproveBuilderFee";
-import { useEnableTrading } from "./useEnableTrading";
+import { useEnsureTradingEnabled } from "./useEnsureTradingEnabled";
 
 const toastId = "place-order";
 
 export const usePlaceOrder = () => {
-  const { shouldEnableTrading, enableTrading } = useEnableTrading({ toastId });
-  const { builder, approveBuilderFee } = useApproveBuilderFee();
+  const { builder, enableTrading } = useEnsureTradingEnabled({ toastId });
 
   const { settings, orderSide } = useShallowOrderFormStore((s) => ({
     settings: s.settings,
@@ -298,9 +296,6 @@ export const usePlaceOrder = () => {
         id: toastId,
       });
 
-      // Ensure the user has approved the builder fee before placing the order
-      await approveBuilderFee();
-
       const exchClient = await enableTrading();
 
       await exchClient.twapOrder({
@@ -369,9 +364,6 @@ export const usePlaceOrder = () => {
         id: toastId,
       });
 
-      // Ensure the user has approved the builder fee before placing the order
-      await approveBuilderFee();
-
       const exchClient = await enableTrading();
 
       const { response } = await exchClient.order({
@@ -417,24 +409,8 @@ export const usePlaceOrder = () => {
     }
   };
 
-  const approveFeeAndEnableTrading = async () => {
-    setProcessing(true);
-    try {
-      await Promise.all([approveBuilderFee(), enableTrading()]);
-    } catch (error) {
-      throw error;
-    } finally {
-      setProcessing(false);
-    }
-  };
-
   const onPlaceOrder = async () => {
     try {
-      // If trading is not enabled, we approve the builder fee and enable trading before placing the order
-      if (shouldEnableTrading) {
-        return await approveFeeAndEnableTrading();
-      }
-
       if (settings.orderType === "twap") {
         return await placeTwapOrder();
       }
@@ -449,5 +425,5 @@ export const usePlaceOrder = () => {
     }
   };
 
-  return { shouldEnableTrading, processing, onPlaceOrder };
+  return { processing, onPlaceOrder };
 };
