@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 import ConnectButton from "@/components/common/ConnectButton";
+import FormInputSlider from "@/components/common/FormInputSlider";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,6 @@ import {
   useUserTradeStore,
 } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
-
-import OrderFormSlider from "./OrderFormSlider";
 
 const toastId = "adjust-leverage";
 
@@ -285,7 +284,7 @@ const AdjustLeverage = () => {
             }
           />
         </div>
-        <OrderFormSlider
+        <FormInputSlider
           value={Math.floor((Number(assetLeverage) / maxLeverage) * 100)}
           min={1}
           onValueChange={(value) => {

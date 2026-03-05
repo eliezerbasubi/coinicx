@@ -1,7 +1,7 @@
 import React, { useMemo, useReducer, useState } from "react";
 
 import { Position } from "@/types/trade";
-import FormInputControl from "@/components/common/FormInputControl";
+import FormInputSlider from "@/components/common/FormInputSlider";
 import TradingButton from "@/components/common/TradingButton";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
@@ -10,7 +10,11 @@ import { InputNumberControl } from "@/components/ui/input-number";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClosePosition } from "@/features/trade/hooks/useClosePosition";
 import { useFeeRate } from "@/features/trade/hooks/useUserFees";
-import { formatPriceToDecimal, roundToDecimals } from "@/features/trade/utils";
+import {
+  formatPriceToDecimal,
+  formatSize,
+  roundToDecimals,
+} from "@/features/trade/utils";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -21,6 +25,7 @@ type Props = {
 
 type State = {
   size: string;
+  szPercent: number;
   limitPrice: string;
   currentTab: "market" | "limit";
 };
@@ -68,6 +73,7 @@ const ClosePositionContent = ({
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     {
       size: position.szi,
+      szPercent: 100,
       limitPrice: getMidPrice(position.midPx, position.pxDecimals),
       currentTab: "market",
     },
@@ -150,8 +156,10 @@ const ClosePositionContent = ({
       <div className="w-full mt-2">
         <div className="space-y-1">
           <div className="w-full flex items-center justify-between">
-            <p className="text-sm text-neutral-gray-400">Entry Price</p>
-            <p className="text-sm text-white font-medium">
+            <p className="text-xs text-neutral-gray-400 font-medium">
+              Entry Price
+            </p>
+            <p className="text-xs text-white font-medium">
               {formatPriceToDecimal(
                 Number(position.entryPx),
                 position.pxDecimals,
@@ -159,8 +167,10 @@ const ClosePositionContent = ({
             </p>
           </div>
           <div className="w-full flex items-center justify-between">
-            <p className="text-sm text-neutral-gray-400">Mark Price</p>
-            <p className="text-sm text-white font-medium">
+            <p className="text-xs text-neutral-gray-400 font-medium">
+              Mark Price
+            </p>
+            <p className="text-xs text-white font-medium">
               {formatPriceToDecimal(
                 Number(position.markPx),
                 position.pxDecimals,
@@ -194,16 +204,28 @@ const ClosePositionContent = ({
             />
           </Visibility>
 
-          <FormInputControl
+          <InputNumberControl
             label="Size"
             trailing={<p className="font-medium">{position.coin}</p>}
             value={state.size}
             onValueChange={(value) => dispatch({ size: value })}
             max={position.szi}
           />
+          <FormInputSlider
+            showLimiters
+            value={state.szPercent}
+            onValueChange={(percent) => {
+              const size = Math.abs(Number(position.szi)) * (percent / 100);
+              const sz = formatSize(size, position.szDecimals);
+              dispatch({
+                szPercent: percent,
+                size: percent ? sz : "",
+              });
+            }}
+          />
         </div>
 
-        <div className="w-full space-y-1 bg-neutral-gray-200 p-2 rounded-lg mb-1">
+        <div className="w-full space-y-1 bg-neutral-gray-200 p-2 rounded-lg mb-2">
           <div className="w-full flex items-center justify-between">
             <p className="text-xs text-neutral-gray-400 font-medium">
               Expected {estimatedNetPnl >= 0 ? "profit" : "loss"}

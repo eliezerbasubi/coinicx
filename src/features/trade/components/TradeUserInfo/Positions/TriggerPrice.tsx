@@ -1,6 +1,7 @@
 import React, { useMemo, useReducer, useState } from "react";
 
 import { Position } from "@/types/trade";
+import FormInputSlider from "@/components/common/FormInputSlider";
 import TradingButton from "@/components/common/TradingButton";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Tag from "@/components/ui/tag";
-import OrderFormSlider from "@/features/trade/components/OrderForm/OrderFormSlider";
 import { useTriggerPrice } from "@/features/trade/hooks/useTriggerPrice";
 import { formatPriceToDecimal, roundToDecimals } from "@/features/trade/utils";
 import { cn } from "@/utils/cn";
@@ -285,7 +285,7 @@ const TriggerPriceContent = ({
               trailing={<p className="text-sm font-medium">{position.coin}</p>}
               onValueChange={onSizeChange}
             />
-            <OrderFormSlider
+            <FormInputSlider
               value={state.sizePercentage}
               onValueChange={onSizePercentageChange}
             />

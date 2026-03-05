@@ -1,5 +1,6 @@
 import React from "react";
 
+import FormInputSlider from "@/components/common/FormInputSlider";
 import { InputNumberControl } from "@/components/ui/input-number";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
@@ -7,7 +8,6 @@ import {
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 
-import OrderFormSlider from "./OrderFormSlider";
 import SizeCoinSelector from "./SizeCoinSelector";
 
 const OrderFormSize = () => {
@@ -34,7 +34,7 @@ const OrderFormSize = () => {
           useOrderFormStore.getState().onSizeChange(e.target.value, isSpot)
         }
       />
-      <OrderFormSlider
+      <FormInputSlider
         value={szPercent}
         onValueChange={(value) =>
           useOrderFormStore.getState().onPercentChange(value, isSpot)
