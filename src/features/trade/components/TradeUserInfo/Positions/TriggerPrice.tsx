@@ -260,7 +260,7 @@ const TriggerPriceContent = ({
     >
       <TabsList
         variant="line"
-        className="w-full h-11! shrink-0 space-x-0 md:space-x-2 justify-start"
+        className="w-full shrink-0 space-x-0 md:space-x-2 justify-start"
       >
         {TABS.map((tab) => (
           <TabsTrigger

@@ -46,7 +46,7 @@ const TradeUserInfo = () => {
       >
         <TabsList
           variant="line"
-          className="w-full h-11! px-4 shrink-0 space-x-0 md:space-x-4 justify-start"
+          className="w-full px-4 shrink-0 space-x-0 md:space-x-4 justify-start"
         >
           {TABS.map((tab) => (
             <TabsTrigger

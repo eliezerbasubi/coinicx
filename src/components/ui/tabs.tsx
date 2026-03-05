@@ -25,12 +25,12 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "rounded-lg p-[3px] group-data-[orientation=horizontal]/tabs:h-9 data-[variant=line]:rounded-none group/tabs-list text-neutral-gray-400 inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col",
+  "rounded-lg p-[3px] group-data-[orientation=horizontal]/tabs:h-11 data-[variant=line]:rounded-none group/tabs-list text-neutral-gray-400 inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col",
   {
     variants: {
       variant: {
         default: "bg-neutral-gray-200",
-        line: "gap-1 bg-transparent border-b border-neutral-gray-200 overflow-x-auto no-scrollbars",
+        line: "gap-1 bg-transparent border-b border-neutral-gray-200 overflow-x-auto overflow-y-hidden no-scrollbars",
       },
     },
     defaultVariants: {
