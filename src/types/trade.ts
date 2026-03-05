@@ -205,6 +205,24 @@ export type OpenOrder = {
   cloid: `0x${string}` | null;
 };
 
+export type ActiveTwap = {
+  twapId: number;
+  coin: string;
+  dex: string | null;
+  base: string;
+  symbol: string;
+  href: string;
+  averagePx: number;
+  executedSz: number;
+  minutes: number;
+  randomize: boolean;
+  reduceOnly: boolean;
+  side: "B" | "A";
+  sz: number;
+  timestamp: number;
+  isSpot: boolean;
+};
+
 export type SpotMetas = {
   spotMeta: SpotMetaResponse;
   tokenNamesToUniverseIndex: Map<string, Map<string, number>>;

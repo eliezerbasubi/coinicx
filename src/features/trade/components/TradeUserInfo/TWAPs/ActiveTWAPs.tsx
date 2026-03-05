@@ -1,10 +1,14 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 
+import { ActiveTwap } from "@/types/trade";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
 import Tag from "@/components/ui/tag";
 import TokenImage from "@/features/trade/components/TokenImage";
+import { useTerminateTwap } from "@/features/trade/hooks/useTerminateTwap";
 import { formatTwapRuntime } from "@/features/trade/utils/twap";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
@@ -17,22 +21,6 @@ import {
 import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";
 import { useSpotToTokenDetails } from "../hooks/useSpotToTokenDetails";
-
-type ActiveTwap = {
-  coin: string;
-  dex: string | null;
-  base: string;
-  symbol: string;
-  href: string;
-  averagePx: number;
-  executedSz: number;
-  minutes: number;
-  randomize: boolean;
-  reduceOnly: boolean;
-  side: "B" | "A";
-  sz: number;
-  timestamp: number;
-};
 
 const columns: ColumnDef<ActiveTwap>[] = [
   {
@@ -111,36 +99,57 @@ const columns: ColumnDef<ActiveTwap>[] = [
     },
   },
   {
-    id: "terminate",
-    header: "Terminate",
-    cell() {
+    id: "terminateAll",
+    header({ table }) {
+      const activeTwaps = (
+        table.options.meta as unknown as { activeTwaps: ActiveTwap[] }
+      )?.activeTwaps;
+
       return (
-        <button type="button" className="text-sell text-xs font-medium">
-          Terminate
-        </button>
+        <TerminateTwapButton
+          variant="ghost"
+          activeTwaps={activeTwaps}
+          label="Terminate All"
+          className={cn("text-sell text-xs font-medium h-fit p-0", {
+            "text-neutral-gray-400": !activeTwaps.length,
+          })}
+        />
+      );
+    },
+    cell({ row: { original } }) {
+      return (
+        <TerminateTwapButton
+          variant="ghost"
+          activeTwaps={[original]}
+          label="Terminate"
+          className="text-sell text-xs font-medium h-fit p-0"
+        />
       );
     },
   },
 ];
 
 const ActiveTWAPs = () => {
+  const isMobile = useIsMobile();
   const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
 
   const twaps = useShallowUserTradeStore((s) => s.twapStates.twaps);
 
   const data = useMemo(() => {
-    return Array.from(new Map(twaps).values()).map((twap) => {
+    return Array.from(new Map(twaps)).map(([twapId, twap]) => {
       const tokenDetails = mapSpotNameToTokenDetails(twap.coin);
       const executedSz = Number(twap.executedSz);
       const avgPx = executedSz ? Number(twap.executedNtl) / executedSz : 0;
 
       return {
+        twapId,
         timestamp: twap.timestamp,
         dex: tokenDetails.dex,
         base: tokenDetails.base,
         symbol: tokenDetails.symbol,
         coin: tokenDetails.coin,
         href: tokenDetails.href,
+        isSpot: tokenDetails.isSpot,
         averagePx: avgPx,
         side: twap.side,
         executedSz,
@@ -152,20 +161,42 @@ const ActiveTWAPs = () => {
     });
   }, [mapSpotNameToTokenDetails, twaps]);
 
+  const sortedData = useMemo(
+    () => data.sort((a, b) => b.timestamp - a.timestamp),
+    [data],
+  );
+
   return (
-    <AdaptiveDataTable
-      columns={columns}
-      data={data.sort((a, b) => b.timestamp - a.timestamp)}
-      loading={false}
-      className="space-y-1.5 mb-3"
-      wrapperClassName="p-4 md:p-4"
-      thClassName="h-8 py-0 font-medium text-xs"
-      rowClassName="text-xs font-medium whitespace-nowrap py-0"
-      rowCellClassName="py-1"
-      render={(entry: ActiveTwap) => <ActiveTwapCard data={entry} />}
-      noData="No active TWAPs yet"
-      disablePagination
-    />
+    <div className="w-full">
+      <Visibility visible={isMobile && !!data.length}>
+        <div className="w-full flex justify-end py-2 px-4">
+          <TerminateTwapButton
+            variant="ghost"
+            activeTwaps={data}
+            label="Terminate All"
+            className={cn("w-fit text-sell text-xs font-medium h-fit p-0", {
+              "text-neutral-gray-400": !data.length,
+            })}
+          />
+        </div>
+      </Visibility>
+      <AdaptiveDataTable
+        columns={columns}
+        data={sortedData}
+        loading={false}
+        meta={{
+          activeTwaps: data,
+        }}
+        className="space-y-1.5 mb-3"
+        wrapperClassName="px-4 md:p-0"
+        thClassName="h-8 py-0 font-medium text-xs"
+        rowClassName="text-xs font-medium whitespace-nowrap py-0"
+        rowCellClassName="py-1"
+        render={(entry: ActiveTwap) => <ActiveTwapCard data={entry} />}
+        noData="No active TWAPs yet"
+        disablePagination
+      />
+    </div>
   );
 };
 
@@ -216,7 +247,7 @@ const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
         />
         <CardItem
           label="Average Price"
-          value={formatNumberWithFallback(data.averagePx)}
+          value={formatNumber(data.averagePx, { useFallback: true })}
         />
         <CardItem
           label="Total Time"
@@ -228,15 +259,37 @@ const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
         />
       </div>
 
-      <div className="mt-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-7"
-          label="Terminate"
-        />
-      </div>
+      <TerminateTwapButton
+        showLoading
+        activeTwaps={[data]}
+        variant="secondary"
+        size="sm"
+        className="h-7 mt-2 text-xs text-white"
+        label="Terminate"
+      />
     </div>
+  );
+};
+
+type TerminateTwapButtonProps = React.ComponentProps<typeof Button> & {
+  activeTwaps: ActiveTwap[];
+  showLoading?: boolean;
+};
+
+const TerminateTwapButton = ({
+  activeTwaps,
+  showLoading,
+  ...props
+}: TerminateTwapButtonProps) => {
+  const { processing, terminateTwap } = useTerminateTwap();
+
+  return (
+    <Button
+      {...props}
+      loading={showLoading && processing}
+      disabled={processing}
+      onClick={() => terminateTwap(activeTwaps)}
+    />
   );
 };
 
