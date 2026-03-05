@@ -505,7 +505,7 @@ const PositionSummaryTile = ({
               useFallback: true,
             })}
           </p>
-          {price && (
+          {!!price && (
             <span
               className={cn("text-xs font-medium text-buy", {
                 "text-sell": roi < 0,

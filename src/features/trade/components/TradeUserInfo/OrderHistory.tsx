@@ -92,14 +92,28 @@ const columns: ColumnDef<HistoricalOrder>[] = [
     id: "size",
     header: "Size",
     cell({ row: { original } }) {
-      return <span>{formatNumberWithFallback(original.sz)}</span>;
+      return (
+        <span>
+          {formatNumber(original.sz, {
+            useFallback: true,
+            maximumFractionDigits: 5,
+          })}
+        </span>
+      );
     },
   },
   {
     id: "filledSize",
     header: "Filled Size",
     cell({ row: { original } }) {
-      return <span>{formatNumberWithFallback(original.filledSz)}</span>;
+      return (
+        <span>
+          {formatNumber(original.filledSz, {
+            useFallback: true,
+            maximumFractionDigits: 5,
+          })}
+        </span>
+      );
     },
   },
   {
