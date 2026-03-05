@@ -31,6 +31,7 @@ import CoinLink from "../CoinLink";
 import CloseAllPositions from "./CloseAllPositions";
 import ClosePosition from "./ClosePosition";
 import ReversePosition from "./ReversePosition";
+import TriggerPrice from "./TriggerPrice";
 
 const columns: ColumnDef<Position>[] = [
   {
@@ -233,12 +234,17 @@ const columns: ColumnDef<Position>[] = [
   {
     id: "tpsl",
     header: "TP/SL",
-    cell() {
+    cell({ row: { original } }) {
       return (
-        <div className="flex items-center gap-x-1">
-          <p>--/--</p>
-          <Pen className="size-4 text-primary" />
-        </div>
+        <TriggerPrice
+          position={original}
+          trigger={
+            <div className="flex items-center gap-x-1 cursor-pointer">
+              <p>--/--</p>
+              <Pen className="size-4 text-primary" />
+            </div>
+          }
+        />
       );
     },
   },
@@ -451,7 +457,7 @@ const PositionCard = ({ data }: PositionCardProps) => {
         />
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
+      <div className="mt-2 grid grid-cols-3 gap-2">
         <ClosePosition
           position={data}
           trigger={
@@ -471,6 +477,17 @@ const PositionCard = ({ data }: PositionCardProps) => {
               size="sm"
               className="h-7 text-xs text-white"
               label="Reverse"
+            />
+          }
+        />
+        <TriggerPrice
+          position={data}
+          trigger={
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 text-xs text-white"
+              label="TP/SL"
             />
           }
         />

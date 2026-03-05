@@ -26,10 +26,10 @@ const CloseAllPositions = ({ positions }: Props) => {
       }}
       title={"Close all positions"}
       description={
-        <p className="text-xs text-neutral-gray-400">
+        <span className="text-xs text-neutral-gray-400">
           This will close all your positions and cancel their associated TP/SL
           orders
-        </p>
+        </span>
       }
       trigger={
         <p
@@ -139,7 +139,7 @@ const CloseAllPositionContent = ({
           >
             {formatNumber(totalPnl, {
               style: "currency",
-              showSign: true,
+              useSign: true,
             })}
           </p>
         </div>

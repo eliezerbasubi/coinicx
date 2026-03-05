@@ -215,7 +215,7 @@ const ClosePositionContent = ({
             >
               {formatNumber(estimatedNetPnl, {
                 style: "currency",
-                showSign: true,
+                useSign: true,
               })}
             </p>
           </div>
