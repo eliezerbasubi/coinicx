@@ -66,6 +66,8 @@ export const useMetaAndAssetCtxs = () => {
             const baseTokenMeta = spotMeta.tokens[baseIndex];
             const quoteTokenMeta = spotMeta.tokens[quoteIndex];
 
+            if (!baseTokenMeta || !quoteTokenMeta) continue;
+
             // Update name in tokens of spotMeta to the display name
             spotMeta.tokens[baseIndex].name = getTokenDisplayName(
               baseTokenMeta.name,

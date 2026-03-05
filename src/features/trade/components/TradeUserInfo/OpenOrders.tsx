@@ -1,28 +1,32 @@
-import { useMemo } from "react";
-import { OpenOrdersWsEvent } from "@nktkas/hyperliquid";
+import React, { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 
+import { OpenOrder } from "@/types/trade";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
 import Tag from "@/components/ui/tag";
-import { parseBuilderDeployedAsset } from "@/features/trade/utils";
+import TokenImage from "@/features/trade/components/TokenImage";
+import { useCancelOrder } from "@/features/trade/hooks/useCancelOrder";
+import { orderTypeLabels } from "@/features/trade/utils/orderTypes";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
+import { formatDateTime } from "@/utils/formatting/dates";
 import { formatNumber } from "@/utils/formatting/numbers";
 
-import TokenImage from "../TokenImage";
 import CardItem from "./CardItem";
-
-type OpenOrder = OpenOrdersWsEvent["orders"][number];
+import CoinLink from "./CoinLink";
+import { useSpotToTokenDetails } from "./hooks/useSpotToTokenDetails";
 
 const columns: ColumnDef<OpenOrder>[] = [
   {
     header: "Time",
     accessorFn: (row) => row.timestamp,
-    cell({ row }) {
+    cell({ row: { original } }) {
       return (
-        <span className="font-medium space-x-1">
-          <span>{new Date(row.original.timestamp).toLocaleDateString()}</span>
+        <span className="font-medium">
+          {formatDateTime(original.timestamp)}
         </span>
       );
     },
@@ -44,33 +48,42 @@ const columns: ColumnDef<OpenOrder>[] = [
     header: "Coin",
     accessorFn: (row) => row.coin,
     cell({ row: { original } }) {
-      return <span>{original.coin}</span>;
+      return (
+        <CoinLink
+          dex={original.dex}
+          symbol={original.symbol}
+          href={original.href}
+        />
+      );
     },
   },
   {
-    id: "side",
-    header: "Side",
+    id: "direction",
+    header: "Direction",
     cell({ row: { original } }) {
       return (
         <span
-          className={cn("space-x-1 text-buy", {
-            "text-sell": original.side === "A",
-          })}
+          className={cn("text-buy", { "text-sell": original.side === "A" })}
         >
-          {original.side === "A" ? "Sell" : "Buy"}
+          {original.direction}
         </span>
       );
+    },
+  },
+  {
+    id: "size",
+    header: "Size",
+    cell({ row: { original } }) {
+      return <span>{original.sz}</span>;
     },
   },
   {
     id: "price",
     header: "Price",
     cell({ row: { original } }) {
-      const price = Number(original.limitPx || original.triggerPx);
-
       return (
         <span>
-          {formatNumber(price, {
+          {formatNumber(original.price, {
             maximumSignificantDigits: 8,
             minimumSignificantDigits: 5,
             maximumFractionDigits: 8,
@@ -83,13 +96,9 @@ const columns: ColumnDef<OpenOrder>[] = [
     id: "value",
     header: "Value",
     cell({ row: { original } }) {
-      const size = Number(original.sz);
-
-      const price = Number(original.limitPx || original.triggerPx);
-
       return (
         <span>
-          {formatNumber(price * size, {
+          {formatNumber(original.price * original.sz, {
             style: "currency",
           })}
         </span>
@@ -103,48 +112,119 @@ const columns: ColumnDef<OpenOrder>[] = [
       return <span>{original.triggerCondition}</span>;
     },
   },
-  // {
-  //   id: "tpsl",
-  //   header: "TP/SL",
-  //   cell({ row: { original } }) {
-  //     return <span>{original.triggerPx}</span>;
-  //   },
-  // },
   {
     id: "cancelAll",
-    header: "Cancel All",
-    cell() {
+    header({ table }) {
+      const openOrders = (
+        table.options.meta as unknown as { openOrders: OpenOrder[] }
+      )?.openOrders;
+
       return (
-        <button type="button" className="text-primary text-xs font-medium">
-          Cancel All
-        </button>
+        <CancelOrderButton
+          variant="ghost"
+          openOrders={openOrders}
+          label="Cancel All"
+          className={cn("text-primary text-xs font-medium h-fit p-0", {
+            "text-neutral-gray-400": !openOrders.length,
+          })}
+        />
+      );
+    },
+    cell({ row: { original } }) {
+      return (
+        <CancelOrderButton
+          variant="ghost"
+          openOrders={[original]}
+          label="Cancel"
+          className="text-primary text-xs font-medium h-fit p-0"
+        />
       );
     },
   },
 ];
 
 const OpenOrders = () => {
+  const isMobile = useIsMobile();
+
+  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
   const openOrders = useShallowUserTradeStore((s) => s.openOrders);
 
-  const data = useMemo(() => {
+  const data = useMemo<OpenOrder[]>(() => {
     if (!openOrders) return [];
 
-    return openOrders;
+    return openOrders.map((order) => {
+      const tokenDetails = mapSpotNameToTokenDetails(order.coin);
+
+      let direction = order.side === "B" ? "Long" : "Short";
+
+      if (order.reduceOnly) {
+        // flip direction
+        const side = order.side === "B" ? "Short" : "Long";
+        direction = "Close " + side;
+      }
+
+      // Spot state
+      if (tokenDetails.isSpot) {
+        direction = order.side === "B" ? "Buy" : "Sell";
+      }
+
+      const sz = Number(order.sz);
+      const price = Number(order.limitPx || order.triggerPx);
+
+      return {
+        direction,
+        timestamp: order.timestamp,
+        triggerPx: order.triggerPx,
+        href: tokenDetails.href,
+        base: tokenDetails.base,
+        dex: tokenDetails.dex,
+        symbol: tokenDetails.symbol,
+        coin: tokenDetails.coin,
+        isSpot: tokenDetails.isSpot,
+        side: order.side,
+        sz,
+        price,
+        orderType: orderTypeLabels[order.orderType] || order.orderType,
+        triggerCondition: order.triggerCondition,
+        oid: order.oid,
+        cloid: order.cloid,
+      };
+    });
   }, [openOrders]);
 
   return (
-    <AdaptiveDataTable
-      columns={columns}
-      data={data}
-      loading={false}
-      className="space-y-1.5 mb-3"
-      thClassName="h-8 py-0 font-medium text-xs"
-      rowClassName="text-xs font-medium whitespace-nowrap py-0"
-      rowCellClassName="py-1"
-      render={(entry) => <OpenOrderCard data={entry} />}
-      noData="No open orders yet"
-      disablePagination
-    />
+    <div className="w-full">
+      <Visibility visible={isMobile && !!data.length}>
+        <div className="w-full flex justify-end py-2 px-4">
+          <CancelOrderButton
+            variant="ghost"
+            openOrders={data}
+            label="Cancel All"
+            className={cn("w-fit text-primary text-xs font-medium h-fit p-0", {
+              "text-neutral-gray-400": !openOrders.length,
+            })}
+          />
+        </div>
+      </Visibility>
+      <AdaptiveDataTable
+        columns={columns}
+        data={data}
+        loading={false}
+        meta={{
+          // We're passing positions here so that we can grab them inside the header
+          // Good for performance. Better than calling table.getRowModel().rows inside header
+          openOrders: data,
+        }}
+        className="space-y-1.5 mb-3"
+        wrapperClassName="px-4 md:p-0"
+        thClassName="h-8 py-0 font-medium text-xs"
+        rowClassName="text-xs font-medium whitespace-nowrap py-0"
+        rowCellClassName="py-1"
+        render={(entry) => <OpenOrderCard data={entry} />}
+        noData="No open orders yet"
+        disablePagination
+      />
+    </div>
   );
 };
 
@@ -153,9 +233,7 @@ type OpenOrderCardProps = {
 };
 
 const OpenOrderCard = ({ data }: OpenOrderCardProps) => {
-  const asset = parseBuilderDeployedAsset(data.coin);
   const isSell = data.side === "A";
-  const value = Number(data.limitPx) * Number(data.sz);
 
   return (
     <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
@@ -163,45 +241,74 @@ const OpenOrderCard = ({ data }: OpenOrderCardProps) => {
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
-              name={asset.base}
+              name={data.base}
               className="size-4"
               instrumentType="perps"
             />
             <span className="text-sm text-neutral-gray-100 font-medium line-clamp-1">
-              {asset.base}
+              {data.base}
             </span>
           </div>
-          {asset.dex && <Tag value={asset.dex} />}
+          {data.dex && <Tag value={data.dex} />}
           <Tag
-            value={isSell ? "Sell" : "Buy"}
+            value={data.direction}
             className={cn("text-buy bg-buy/10", {
               "text-sell bg-sell/10": isSell,
             })}
           />
-          <span className="text-neutral-gray-400 text-[11px]">
+          <span className="text-neutral-gray-400 text-[11px] font-medium">
             {data.orderType}
           </span>
         </div>
       </div>
 
-      <div className="w-full grid grid-cols-subgrid gap-2 text-sm">
+      <div className="w-full grid grid-cols-4 gap-2 text-sm">
         <CardItem label="Size" value={String(data.sz)} />
         <CardItem
           label="Price"
-          value={formatNumber(Number(data.limitPx), { style: "currency" })}
+          value={formatNumber(data.price, { style: "currency" })}
         />
         <CardItem
           label="Value"
-          value={formatNumber(value, { style: "currency" })}
+          value={formatNumber(data.price * data.sz, { style: "currency" })}
         />
-        <CardItem label="Trigger" value={data.triggerPx || "--"} />
-        {/* <CardItem label="TP/SL" value={data.triggerPx || "--/--"} /> */}
+        <CardItem
+          label="Trigger"
+          value={formatNumber(Number(data.triggerPx), { useFallback: true })}
+        />
       </div>
 
-      <div className="mt-2">
-        <Button variant="secondary" size="sm" className="h-7" label="Cancel" />
-      </div>
+      <CancelOrderButton
+        showLoading
+        openOrders={[data]}
+        variant="secondary"
+        size="sm"
+        className="h-7 mt-2 text-xs text-white"
+        label="Cancel"
+      />
     </div>
+  );
+};
+
+type CancelOrderButtonProps = React.ComponentProps<typeof Button> & {
+  openOrders: OpenOrder[];
+  showLoading?: boolean;
+};
+
+const CancelOrderButton = ({
+  openOrders,
+  showLoading,
+  ...props
+}: CancelOrderButtonProps) => {
+  const { processing, cancelOrder } = useCancelOrder();
+
+  return (
+    <Button
+      {...props}
+      loading={showLoading && processing}
+      disabled={processing}
+      onClick={() => cancelOrder(openOrders)}
+    />
   );
 };
 

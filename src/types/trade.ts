@@ -182,6 +182,27 @@ export type Position = AssetPosition["position"] & {
   pxDecimals: number;
   assetId: number;
   isLong: boolean;
+  tpPrice: string | null;
+  slPrice: string | null;
+};
+
+export type OpenOrder = {
+  timestamp: number;
+  orderType: string;
+  href: string;
+  dex: string | null;
+  base: string;
+  coin: string;
+  symbol: string;
+  direction: string;
+  side: string;
+  sz: number;
+  price: number;
+  isSpot: boolean;
+  triggerCondition: string;
+  triggerPx: string;
+  oid: number;
+  cloid: `0x${string}` | null;
 };
 
 export type SpotMetas = {

@@ -48,16 +48,15 @@ const TickerSelectorProvider = ({ children }: Props) => {
 
     for (let index = 0; index < spotMeta.universe.length; index++) {
       const universe = spotMeta.universe[index];
-      const tokenIndex = universe.index;
+      const spotId = universe.index;
       const [baseIndex, quoteIndex] = universe.tokens;
 
-      const token = spotMeta.tokens[tokenIndex];
       const baseTokenMeta = spotMeta.tokens[baseIndex];
       const quoteTokenMeta = spotMeta.tokens[quoteIndex];
 
-      const context = spotAssetCtxs[tokenIndex];
+      const context = spotAssetCtxs[spotId];
 
-      if (!context) continue;
+      if (!context || !baseTokenMeta || !quoteTokenMeta) continue;
 
       assets.push({
         isSpot: true,
@@ -66,7 +65,7 @@ const TickerSelectorProvider = ({ children }: Props) => {
         coin: universe.name,
         base: baseTokenMeta.name,
         quote: quoteTokenMeta.name,
-        szDecimals: token.szDecimals,
+        szDecimals: baseTokenMeta.szDecimals,
         symbol: formatSymbol(baseTokenMeta.name, quoteTokenMeta.name, true),
         markPx: Number(context.markPx),
         midPx: Number(context.midPx),
@@ -101,10 +100,12 @@ const TickerSelectorProvider = ({ children }: Props) => {
         const collateralToken = perpDexState.collateralToken;
         const ctx = ctxs[index];
 
-        if (!ctx || universe.isDelisted) continue;
+        const spotAsset = spotMeta?.tokens[collateralToken];
+
+        if (!ctx || universe.isDelisted || !spotAsset) continue;
 
         const { dex, base } = parseBuilderDeployedAsset(universe.name);
-        const quote = parseQuoteAsset(spotMeta?.tokens[collateralToken].name);
+        const quote = parseQuoteAsset(spotAsset.name);
 
         const markPx = Number(ctx.markPx || 0);
         const midPx = Number(ctx.midPx || 0);

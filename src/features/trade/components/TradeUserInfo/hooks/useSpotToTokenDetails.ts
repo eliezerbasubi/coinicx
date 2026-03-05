@@ -11,8 +11,8 @@ export const useSpotToTokenDetails = () => {
   const { spotMeta, spotNamesToTokens } = useMetaAndAssetCtxs();
 
   const mapSpotNameToTokenDetails = useCallback(
-    (spotName: string) => {
-      const spotInfo = spotNamesToTokens?.get(spotName);
+    (coin: string) => {
+      const spotInfo = spotNamesToTokens?.get(coin);
 
       if (spotInfo && spotMeta) {
         const quote = spotMeta.tokens[spotInfo.quoteToken].name;
@@ -22,20 +22,20 @@ export const useSpotToTokenDetails = () => {
           href: `${ROUTES.trade.perps}/${base}/${quote}`,
           quote,
           base,
-          coin: base,
+          coin,
           dex: null,
           symbol: formatSymbol(base, quote, true),
           isSpot: true,
         };
       }
 
-      const asset = parseBuilderDeployedAsset(spotName);
+      const asset = parseBuilderDeployedAsset(coin);
 
       return {
-        href: `${ROUTES.trade.perps}/${spotName}`,
+        href: `${ROUTES.trade.perps}/${coin}`,
         ...asset,
         quote: null,
-        coin: spotName,
+        coin,
         symbol: asset.base,
         isSpot: false,
       };

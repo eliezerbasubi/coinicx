@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
+import { orderTypeLabels } from "@/features/trade/utils/orderTypes";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/formatting/dates";
@@ -34,13 +35,6 @@ type HistoricalOrder = {
   triggerCondition: string;
   status: string;
   symbol: string;
-};
-
-const orderTypeLabels: Record<string, string> = {
-  "Take Profit Limit": "Limit (TP)",
-  "Take Profit Market": "Market (TP)",
-  "Stop Limit": "Limit (SL)",
-  "Stop Market": "Market (SL)",
 };
 
 const columns: ColumnDef<HistoricalOrder>[] = [

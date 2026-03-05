@@ -30,7 +30,7 @@ const TradeUserInfo = () => {
 
   const counters = useShallowUserTradeStore((s) => ({
     openOrdersCount: s.openOrders.length,
-    positionsCount: s.clearinghouseState?.assetPositions.length || 0,
+    positionsCount: s.allDexsClearinghouseState?.assetPositions.length || 0,
     twapsCount: s.twapStates.twaps.length,
   }));
 

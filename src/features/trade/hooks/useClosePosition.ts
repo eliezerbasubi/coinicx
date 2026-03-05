@@ -28,7 +28,7 @@ type UseClosePositionArgs = {
 export const useClosePosition = (args?: UseClosePositionArgs) => {
   const { builder, enableTrading } = useEnsureTradingEnabled({ toastId });
 
-  const getClosingOrders = (params: ClosePositionParams) => {
+  const buildClosingOrders = (params: ClosePositionParams) => {
     const {
       positions,
       limitPrice: userLimitPx,
@@ -76,7 +76,7 @@ export const useClosePosition = (args?: UseClosePositionArgs) => {
 
   const closePosition = async (params: ClosePositionParams) => {
     try {
-      const orders = getClosingOrders(params);
+      const orders = buildClosingOrders(params);
 
       const isClosingAllPositions = orders.length > 1;
 

@@ -105,3 +105,7 @@ export const buildPerpAssetId = ({
     ? 100000 + perpDexIndex * 10000 + universeIndex
     : universeIndex;
 };
+
+export const buildSpotAssetId = (spotId: number) => {
+  return 10000 + spotId;
+};

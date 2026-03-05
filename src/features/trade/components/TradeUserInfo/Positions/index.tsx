@@ -18,16 +18,15 @@ import {
   getPriceDecimals,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
+import { isStopLoss, isTakeProfit } from "@/features/trade/utils/orderTypes";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
-import {
-  formatNumber,
-  formatNumberWithFallback,
-} from "@/utils/formatting/numbers";
+import { formatNumber } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";
+import { useInfoSectionStore } from "../store";
 import CloseAllPositions from "./CloseAllPositions";
 import ClosePosition from "./ClosePosition";
 import ReversePosition from "./ReversePosition";
@@ -165,7 +164,9 @@ const columns: ColumnDef<Position>[] = [
     cell({ row: { original } }) {
       return (
         <span>
-          {formatNumberWithFallback(Number(original.liquidationPx || "0"))}
+          {formatNumber(Number(original.liquidationPx || "0"), {
+            useFallback: true,
+          })}
         </span>
       );
     },
@@ -177,8 +178,9 @@ const columns: ColumnDef<Position>[] = [
       return (
         <span className="space-x-1">
           <span>
-            {formatNumberWithFallback(Number(original.marginUsed), {
+            {formatNumber(Number(original.marginUsed), {
               style: "currency",
+              useFallback: true,
             })}
           </span>
           <span className="capitalize">({original.leverage.type})</span>
@@ -192,8 +194,9 @@ const columns: ColumnDef<Position>[] = [
     cell({ row: { original } }) {
       return (
         <span>
-          {formatNumberWithFallback(Number(original.cumFunding.allTime), {
+          {formatNumber(Number(original.cumFunding.allTime), {
             style: "currency",
+            useFallback: true,
           })}
         </span>
       );
@@ -235,12 +238,35 @@ const columns: ColumnDef<Position>[] = [
     id: "tpsl",
     header: "TP/SL",
     cell({ row: { original } }) {
+      const formattedTpPrice = formatPriceToDecimal(
+        Number(original.tpPrice || "0"),
+        original.pxDecimals,
+        { useFallback: true },
+      );
+      const formattedSlPrice = formatPriceToDecimal(
+        Number(original.slPrice || "0"),
+        original.pxDecimals,
+        { useFallback: true },
+      );
+
       return (
         <TriggerPrice
           position={original}
           trigger={
             <div className="flex items-center gap-x-1 cursor-pointer">
-              <p>--/--</p>
+              <p
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  useInfoSectionStore.getState().setActiveTab("openOrders");
+                }}
+                className={cn({
+                  "border-b border-transparent hover:border-primary hover:text-primary":
+                    !!original.tpPrice || !!original.slPrice,
+                })}
+              >
+                {formattedTpPrice}/{formattedSlPrice}
+              </p>
               <Pen className="size-4 text-primary" />
             </div>
           }
@@ -254,11 +280,50 @@ const Positions = () => {
   const isMobile = useIsMobile();
 
   const { perpMetas, spotMeta } = useMetaAndAssetCtxs();
-  const { positions } = useShallowUserTradeStore((s) => ({
+  const { positions, openOrders } = useShallowUserTradeStore((s) => ({
     positions: s.allDexsClearinghouseState?.assetPositions,
+    openOrders: s.openOrders,
   }));
 
   const allDexsAssetCtxs = useShallowInstrumentStore((s) => s.allDexsAssetCtxs);
+
+  const hasAssetPositions = !!positions?.length;
+
+  const perpsToTpslOrders = useMemo(() => {
+    // Skip computation if there are no positions
+    if (!hasAssetPositions) return;
+
+    const map = new Map<string, { tpPrice: string; slPrice: string }>();
+    if (!openOrders.length) return map;
+
+    for (const order of openOrders) {
+      // Exclude spot
+      if (
+        order.coin.startsWith("@") ||
+        order.coin === "PURR/USDC" ||
+        !order.reduceOnly
+      ) {
+        continue;
+      } else {
+        const payload = {
+          tpPrice: isTakeProfit(order.orderType) ? order.triggerPx : "",
+          slPrice: isStopLoss(order.orderType) ? order.triggerPx : "",
+        };
+
+        if (map.has(order.coin)) {
+          const data = map.get(order.coin)!;
+          map.set(order.coin, {
+            tpPrice: data.tpPrice || payload.tpPrice,
+            slPrice: data.slPrice || payload.slPrice,
+          });
+        } else {
+          map.set(order.coin, payload);
+        }
+      }
+    }
+
+    return map;
+  }, [openOrders, hasAssetPositions]);
 
   const perpsTokensToInfo = useMemo(() => {
     const map = new Map<
@@ -271,7 +336,7 @@ const Positions = () => {
       }
     >();
 
-    if (!perpMetas || !spotMeta) return map;
+    if (!perpMetas) return map;
 
     for (
       let perpDexIndex = 0;
@@ -284,9 +349,14 @@ const Positions = () => {
       for (let index = 0; index < meta.length; index++) {
         const universe = meta[index];
 
+        const spotAsset = spotMeta?.tokens?.[perpMeta.collateralToken];
+
+        // Skip if the collateral asset is not supported
+        if (!spotAsset) continue;
+
         map.set(universe.name, {
           universeIndex: index,
-          quote: spotMeta.tokens[perpMeta.collateralToken].name ?? "USDC",
+          quote: spotAsset.name ?? "USDC",
           szDecimals: universe.szDecimals,
           assetId: buildPerpAssetId({ perpDexIndex, universeIndex: index }),
         });
@@ -296,23 +366,22 @@ const Positions = () => {
     return map;
   }, [perpMetas, spotMeta]);
 
-  const data = useMemo(() => {
+  const data = useMemo<Position[]>(() => {
     if (!positions) return [];
 
     const dexCtxStates = new Map(allDexsAssetCtxs);
 
-    const assetPositions = [];
+    const assetPositions: Position[] = [];
 
     for (const datum of positions) {
       const position = datum.position;
       const asset = parseBuilderDeployedAsset(position.coin);
       const dexCtxState = dexCtxStates.get(asset.dex);
 
-      if (!dexCtxState) continue;
-
       const info = perpsTokensToInfo.get(position.coin);
+      const tpslInfo = perpsToTpslOrders?.get(position.coin);
 
-      if (!info) continue;
+      if (!dexCtxState || !info) continue;
 
       const ctx = dexCtxState[info.universeIndex];
 
@@ -329,13 +398,15 @@ const Positions = () => {
           info.szDecimals,
           false,
         ),
+        tpPrice: tpslInfo?.tpPrice ?? null,
+        slPrice: tpslInfo?.slPrice ?? null,
         assetId: info.assetId,
         isLong: Number(position.szi) > 0,
       });
     }
 
     return assetPositions;
-  }, [positions, allDexsAssetCtxs, perpsTokensToInfo]);
+  }, [positions, allDexsAssetCtxs, perpsTokensToInfo, perpsToTpslOrders]);
 
   return (
     <div className="w-full">
@@ -440,19 +511,23 @@ const PositionCard = ({ data }: PositionCardProps) => {
         />
         <CardItem
           label="Margin"
-          value={formatNumberWithFallback(Number(data.marginUsed), {
+          value={formatNumber(Number(data.marginUsed), {
             style: "currency",
+            useFallback: true,
           })}
         />
         <CardItem
           label="Funding"
-          value={formatNumberWithFallback(Number(data.cumFunding.allTime), {
+          value={formatNumber(Number(data.cumFunding.allTime), {
             style: "currency",
+            useFallback: true,
           })}
         />
         <CardItem
           label="Liq. Price"
-          value={formatNumberWithFallback(Number(data.liquidationPx || "0"))}
+          value={formatNumber(Number(data.liquidationPx || "0"), {
+            useFallback: true,
+          })}
           className="last:items-start"
         />
       </div>
