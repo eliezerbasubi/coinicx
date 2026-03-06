@@ -6,7 +6,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROUTES } from "@/constants/routes";
-import { formatPriceToDecimal } from "@/features/trade/utils";
+import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
@@ -46,7 +46,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
 
   const assets = useTickerSelector();
 
-  const { instrumentType, decimals, onAssetChange } = useTradeContext((s) => ({
+  const { instrumentType, onAssetChange } = useTradeContext((s) => ({
     instrumentType: s.instrumentType,
     decimals: s.decimals,
     onAssetChange: s.onAssetChange,
@@ -334,6 +334,11 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                   : 0;
 
                 const isFavourite = state.favourites.includes(datum.coin);
+                const pxDecimals = getPriceDecimals(
+                  datum.markPx,
+                  datum.szDecimals,
+                  datum.isSpot,
+                );
 
                 return (
                   <tr
@@ -397,7 +402,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                       </div>
                     </td>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
-                      {formatPriceToDecimal(datum.midPx, decimals)}
+                      {formatPriceToDecimal(datum.midPx, pxDecimals)}
                     </td>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
                       <p
@@ -407,7 +412,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                         })}
                       >
                         <span>
-                          {formatPriceToDecimal(change, decimals, {
+                          {formatPriceToDecimal(change, pxDecimals, {
                             useSign: true,
                           })}
                         </span>
@@ -463,7 +468,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     <Visibility visible={isMobile}>
                       <td className="py-0.5 text-right">
                         <p className="text-white font-semibold">
-                          {formatPriceToDecimal(datum.midPx, decimals)}
+                          {formatPriceToDecimal(datum.midPx, pxDecimals)}
                         </p>
                         <p
                           className={cn("text-buy space-x-1 text-[11px]", {
@@ -472,7 +477,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                           })}
                         >
                           <span>
-                            {formatPriceToDecimal(change, decimals, {
+                            {formatPriceToDecimal(change, pxDecimals, {
                               useSign: true,
                             })}
                           </span>
