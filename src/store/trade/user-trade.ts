@@ -106,9 +106,9 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
     } = get();
 
     if (args.isSpot) {
-      return args.isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
+      return args.isBuyOrder ? availableBaseToTrade : availableQuoteToTrade;
     }
-    return args.isBuyOrder ? maxQuoteTradeSz : maxBaseTradeSz;
+    return args.isBuyOrder ? maxBaseTradeSz : maxQuoteTradeSz;
   },
   applyActiveAssetData(data) {
     const { leverage } = get();
@@ -214,18 +214,32 @@ export const useShallowUserTradeStore = <T>(
 };
 
 export const useMaxTradeSz = (isBuyOrder: boolean) => {
-  const maxBaseTradeSz = useShallowUserTradeStore((s) =>
+  const maxTradeSize = useShallowUserTradeStore((s) =>
     isBuyOrder ? s.maxQuoteTradeSz : s.maxBaseTradeSz,
   );
 
-  return maxBaseTradeSz;
+  return maxTradeSize;
 };
 
-export const useAvailableToTrade = (isBuyOrder: boolean) => {
-  const availableBaseToTrade = useShallowUserTradeStore((s) =>
-    isBuyOrder ? s.availableQuoteToTrade : s.availableBaseToTrade,
-  );
-  return availableBaseToTrade;
+/**
+ * A hook to get the available balance to trade on an asset.
+ *
+ * @param isBuyOrder
+ * @param isSpot
+ * @returns quote balance if isSpot and buying and base balance for perps if buying
+ */
+export const useAvailableToTrade = (isBuyOrder: boolean, isSpot: boolean) => {
+  const { availableBaseToTrade, availableQuoteToTrade } =
+    useShallowUserTradeStore((s) => ({
+      availableBaseToTrade: s.availableBaseToTrade,
+      availableQuoteToTrade: s.availableQuoteToTrade,
+    }));
+
+  if (isSpot) {
+    return isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
+  }
+
+  return isBuyOrder ? availableBaseToTrade : availableQuoteToTrade;
 };
 
 /**

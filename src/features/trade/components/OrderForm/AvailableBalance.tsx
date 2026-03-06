@@ -13,7 +13,7 @@ const AvailableBalance = () => {
   }));
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
   const isBuyOrder = useShallowOrderFormStore((s) => s.orderSide === "buy");
-  const availableBalance = useAvailableToTrade(isBuyOrder);
+  const availableBalance = useAvailableToTrade(isBuyOrder, !isPerps);
 
   return (
     <div className="flex items-center justify-between">

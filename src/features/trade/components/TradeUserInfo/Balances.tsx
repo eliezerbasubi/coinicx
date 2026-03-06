@@ -4,6 +4,12 @@ import { InfinityIcon } from "lucide-react";
 
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
+import Tag from "@/components/ui/tag";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { getTokenDisplayName } from "@/features/trade/utils/getTokenDisplayName";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
@@ -21,6 +27,7 @@ interface UserBalance {
   usdValue: number;
   unrealizedPnl: number;
   returnOnEquity: number;
+  withdrawable: number;
 }
 
 const columns: ColumnDef<UserBalance>[] = [
@@ -44,10 +51,15 @@ const columns: ColumnDef<UserBalance>[] = [
     accessorFn: (row) => row.totalBalance,
     cell({ row: { original } }) {
       return (
-        <div className="flex items-center gap-1">
-          <p>{original.totalBalance}</p>
-          <p>{original.coin}</p>
-        </div>
+        <span className="space-x-1">
+          <span>
+            {formatNumber(original.totalBalance, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: original.isSpot ? 5 : 2,
+            })}
+          </span>
+          <span>{original.coin}</span>
+        </span>
       );
     },
   },
@@ -55,7 +67,48 @@ const columns: ColumnDef<UserBalance>[] = [
     id: "availableBalance",
     header: "Available Balance",
     cell({ row: { original } }) {
-      return <span>{original.availableBalance}</span>;
+      if (original.isSpot) {
+        return (
+          <span className="space-x-1">
+            <span>
+              {formatNumber(original.availableBalance, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: original.isSpot ? 5 : 2,
+              })}
+            </span>
+            <span>{original.coin}</span>
+          </span>
+        );
+      }
+      return (
+        <Tooltip>
+          <TooltipTrigger
+            asChild
+            className="underline decoration-dashed cursor-help"
+          >
+            <span className="space-x-1">
+              <span>
+                {formatNumber(original.availableBalance, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: original.isSpot ? 5 : 2,
+                })}
+              </span>
+              <span>{original.coin}</span>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="text-neutral-gray-500 max-w-sm">
+            <p>
+              Available balance to open positions ignoring open orders.{" "}
+              {formatNumber(original.withdrawable, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              {original.coin} is available to withdraw, transfer, or open HIP-3
+              positions.
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      );
     },
   },
   {
@@ -142,13 +195,20 @@ const Balances = () => {
       { unrealizedPnl: 0, returnOnEquity: 0 },
     );
 
+    const withdrawable = Number(allDexsClearinghouseState?.withdrawable || "0");
+    const totalMarginUsed = Number(
+      allDexsClearinghouseState?.marginSummary.totalMarginUsed || "0",
+    );
+    const totalBalance = Number(
+      allDexsClearinghouseState?.marginSummary.accountValue || "0",
+    );
+
     return {
       coin: "USDC",
       isSpot: false,
-      totalBalance: Number(
-        allDexsClearinghouseState?.marginSummary.accountValue || "0",
-      ),
-      availableBalance: Number(allDexsClearinghouseState?.withdrawable || "0"),
+      totalBalance: totalBalance,
+      availableBalance: totalBalance + withdrawable - totalMarginUsed,
+      withdrawable,
       usdValue: Number(
         allDexsClearinghouseState?.marginSummary.accountValue || "0",
       ),
@@ -173,6 +233,7 @@ const Balances = () => {
               isSpot: true,
               unrealizedPnl: 0,
               returnOnEquity: 0,
+              withdrawable: 0,
             };
           }
 
@@ -188,6 +249,7 @@ const Balances = () => {
               isSpot: true,
               unrealizedPnl: 0,
               returnOnEquity: 0,
+              withdrawable: 0,
             };
 
           const ctx = spotAssetCtxs[spotId];
@@ -211,6 +273,7 @@ const Balances = () => {
             usdValue,
             unrealizedPnl,
             returnOnEquity,
+            withdrawable: availableBalance,
           };
         }),
     [spotBalances, tokensToSpotId, spotAssetCtxs],
@@ -262,13 +325,13 @@ const BalanceCard = ({ data }: BalanceCardProps) => {
           <p className="text-white font-medium flex items-center">
             {data.coin}
             {!data.isSpot && (
-              <span className="inline-block px-2 text-[8px]/[18px] h-[18px] rounded-2xl ml-1 text-neutral-gray-400 bg-neutral-gray-600 font-medium uppercase">
+              <span className="inline-block px-2 text-[8px]/[18px] h-4.5 rounded-2xl ml-1 text-neutral-gray-400 bg-neutral-gray-600 font-medium uppercase">
                 Perps
               </span>
             )}
           </p>
-          <p className="text-xs text-neutral-gray-400 font-medium mt-1">
-            <span>
+          <div className="flex gap-x-1 text-xs text-neutral-gray-400 font-medium mt-1">
+            <p>
               {formatNumber(Number(data.totalBalance), {
                 minimumFractionDigits: 2,
                 roundingMode: "trunc",
@@ -280,8 +343,18 @@ const BalanceCard = ({ data }: BalanceCardProps) => {
                   style: "currency",
                 })}
               </span>
-            </span>
-          </p>
+            </p>
+            <Tag
+              value={formatNumber(data.returnOnEquity, {
+                style: "percent",
+                useSign: true,
+                minimumFractionDigits: 2,
+              })}
+              className={cn("text-buy bg-buy/10", {
+                "text-sell bg-sell/10": data.returnOnEquity < 0,
+              })}
+            />
+          </div>
         </div>
       </div>
 

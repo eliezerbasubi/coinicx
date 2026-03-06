@@ -38,7 +38,7 @@ export const useOrderForm = () => {
   const isBuyOrder = orderSide === "buy";
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
-  const availableToTrade = useAvailableToTrade(isBuyOrder);
+  const availableToTrade = useAvailableToTrade(isBuyOrder, isSpot);
 
   const referencePx = useShallowInstrumentStore(
     (s) => s.assetCtx?.referencePx || 0,
