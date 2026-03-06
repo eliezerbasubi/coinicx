@@ -201,12 +201,15 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
           onValueChange={(value) => dispatch({ currentTab: value })}
           className="w-full mb-4"
         >
-          <TabsList className="w-full flex md:block bg-primary-dark px-3 pb-0 md:p-0 border-b border-neutral-gray-200 rounded-none overflow-x-auto no-scrollbars">
+          <TabsList
+            variant="line"
+            className="w-full flex md:block bg-primary-dark px-3"
+          >
             {TABS.map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="w-fit border-0 rounded-none text-xs font-medium cursor-pointer capitalize py-0.5 first:pl-0 text-neutral-gray-400 data-[state=active]:text-white data-[state=active]:border-b border-primary"
+                className="w-fit text-xs font-medium cursor-pointer capitalize py-0.5 first:pl-0 text-neutral-gray-400"
               >
                 {tab.label}
               </TabsTrigger>
