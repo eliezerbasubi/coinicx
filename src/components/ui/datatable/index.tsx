@@ -36,7 +36,7 @@ interface DataTableProps<TData, TValue> extends Omit<
   initialState?: Partial<TableState>;
   tableClassName?: string;
   globalFilterFn?: FilterFnOption<TData>;
-  hidePagination?: boolean;
+  showPagination?: boolean;
   meta?: TableMeta<TData>;
   onPaginationChange?: OnChangeFn<PaginationState>;
   onRowClick?: (data: TData) => void;
@@ -51,7 +51,7 @@ export function DataTable<TData, TValue>({
   className,
   manualPagination,
   globalFilterFn,
-  hidePagination,
+  showPagination,
   tableClassName,
   meta,
   onPaginationChange,
@@ -102,7 +102,7 @@ export function DataTable<TData, TValue>({
         className={tableClassName}
       />
 
-      {!hidePagination && <DataTablePagination table={table} />}
+      {showPagination && <DataTablePagination table={table} />}
     </div>
   );
 }

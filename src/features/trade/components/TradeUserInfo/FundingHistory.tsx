@@ -117,6 +117,12 @@ const FundingHistory = () => {
       columns={columns}
       data={fundings.sort((a, b) => b.time - a.time)}
       loading={false}
+      initialState={{
+        pagination: {
+          pageIndex: 0,
+          pageSize: 30,
+        },
+      }}
       className="space-y-1.5 mb-3"
       wrapperClassName="p-4 md:p-0"
       thClassName="h-8 py-0 font-medium text-xs"

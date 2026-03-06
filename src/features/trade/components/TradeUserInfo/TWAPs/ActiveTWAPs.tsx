@@ -181,6 +181,12 @@ const ActiveTWAPs = () => {
         columns={columns}
         data={sortedData}
         loading={false}
+        initialState={{
+          pagination: {
+            pageIndex: 0,
+            pageSize: 30,
+          },
+        }}
         meta={{
           activeTwaps: data,
         }}

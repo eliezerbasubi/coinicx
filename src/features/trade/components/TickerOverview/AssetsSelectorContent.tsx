@@ -451,7 +451,6 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
             initialState={{
               sorting: [{ id: "volume", desc: true }],
             }}
-            hidePagination
             tableClassName="w-full text-xs font-medium"
             thClassName="p-0 pb-1 pr-4 h-auto text-neutral-gray-400 text-xs font-medium whitespace-nowrap"
             rowClassName="text-white cursor-pointer"

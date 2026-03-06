@@ -60,7 +60,7 @@ type Props<TData, TValue> = {
   wrapperClassName?: string;
   globalFilterFn?: FilterFnOption<TData>;
   meta?: TableMeta<TData>;
-  hidePagination?: boolean;
+  showPagination?: boolean;
   onPaginationChange?: OnChangeFn<PaginationState>;
 } & Omit<CompProps<TData, TValue>, "table">;
 
@@ -75,7 +75,7 @@ const AdaptiveDataTable = <TData, TValue>({
   skeleton,
   wrapperClassName,
   meta,
-  hidePagination,
+  showPagination,
   render,
   onPaginationChange,
   onRowClick,
@@ -130,7 +130,7 @@ const AdaptiveDataTable = <TData, TValue>({
         />
       )}
 
-      {!hidePagination && (
+      {showPagination && (
         <DataTablePagination
           table={table as Table<unknown>}
           hideRowsPerPage={!isDesktop}
