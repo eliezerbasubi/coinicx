@@ -12,8 +12,10 @@ import {
   OnChangeFn,
   PaginationState,
   SortingState,
+  TableMeta,
   TableState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { cn } from "@/utils/cn";
@@ -21,8 +23,9 @@ import { cn } from "@/utils/cn";
 import { DataTablePagination } from "./DataTablePagination";
 import { DataTableRenderer } from "./DataTableRenderer";
 
-interface DataTableProps<TData, TValue> extends React.ComponentProps<
-  typeof DataTableRenderer<TData, TValue>
+interface DataTableProps<TData, TValue> extends Omit<
+  React.ComponentProps<typeof DataTableRenderer<TData, TValue>>,
+  "table"
 > {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -30,9 +33,11 @@ interface DataTableProps<TData, TValue> extends React.ComponentProps<
   manualPagination?: boolean;
   rowCount?: number;
   state?: Partial<TableState>;
+  initialState?: Partial<TableState>;
   tableClassName?: string;
   globalFilterFn?: FilterFnOption<TData>;
-  disablePagination?: boolean;
+  hidePagination?: boolean;
+  meta?: TableMeta<TData>;
   onPaginationChange?: OnChangeFn<PaginationState>;
   onRowClick?: (data: TData) => void;
 }
@@ -41,17 +46,26 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   state,
+  initialState,
   rowCount,
   className,
   manualPagination,
   globalFilterFn,
-  disablePagination,
+  hidePagination,
   tableClassName,
+  meta,
   onPaginationChange,
   ...props
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>(
+    initialState?.sorting ?? [],
+  );
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+    initialState?.columnFilters ?? [],
+  );
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    initialState?.columnVisibility ?? {},
+  );
 
   const table = useReactTable({
     data,
@@ -59,17 +73,21 @@ export function DataTable<TData, TValue>({
     rowCount,
     manualPagination,
     state: {
-      ...state,
       sorting,
       columnFilters,
+      columnVisibility,
+      ...state,
     },
     globalFilterFn,
+    meta,
+    enableSortingRemoval: false,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
 
     // Tanstack table looks for the onPaginationChange key if it exists in the options to disable auto pagination
     ...(manualPagination ? { onPaginationChange } : {}),
@@ -84,7 +102,7 @@ export function DataTable<TData, TValue>({
         className={tableClassName}
       />
 
-      {!disablePagination && <DataTablePagination table={table} />}
+      {!hidePagination && <DataTablePagination table={table} />}
     </div>
   );
 }

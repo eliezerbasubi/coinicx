@@ -26,7 +26,6 @@ export type DataTableRendererProps<TData, TValue> = {
   rowCellClassName?: string;
   headerClassName?: string;
   noData?: React.ReactNode;
-  disablePagination?: boolean;
   onRowClick?: (data: TData) => void;
 };
 
@@ -49,12 +48,9 @@ export const DataTableRenderer = <TData, TValue>({
   headerClassName,
   loading,
   noData,
-  disablePagination,
   onRowClick,
 }: DataTableRendererProps<TData, TValue>) => {
-  const { rows } = disablePagination
-    ? table.getCoreRowModel()
-    : table.getRowModel();
+  const { rows } = table.getRowModel();
 
   return (
     <TableElement className={cn("table-auto", className)}>

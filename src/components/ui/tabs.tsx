@@ -30,7 +30,7 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: "bg-neutral-gray-200",
-        line: "gap-1 bg-transparent border-b border-neutral-gray-200 overflow-x-auto overflow-y-hidden no-scrollbars",
+        line: "gap-1 justify-start bg-transparent border-b border-neutral-gray-200 overflow-x-auto overflow-y-hidden no-scrollbars",
       },
     },
     defaultVariants: {
