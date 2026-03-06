@@ -129,7 +129,6 @@ const columns: ColumnDef<Position>[] = [
     cell({ row: { original } }) {
       const unrealizedPnl = Number(original.unrealizedPnl);
       const returnOnEquity = Number(original.returnOnEquity);
-      const sign = unrealizedPnl > 0 && "+";
 
       return (
         <span
@@ -138,17 +137,18 @@ const columns: ColumnDef<Position>[] = [
           })}
         >
           <span>
-            {sign}
             {formatNumber(unrealizedPnl, {
               style: "currency",
+              useSign: true,
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
           </span>
           <span>
-            ({sign}
+            (
             {formatNumber(returnOnEquity, {
               style: "percent",
+              useSign: true,
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}

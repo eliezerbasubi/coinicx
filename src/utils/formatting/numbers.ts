@@ -25,28 +25,3 @@ export const formatNumber = (value: number, options?: FormatOptions) => {
 
   return formatted;
 };
-
-export const formatInputValue = (value: string, options?: FormatOptions) => {
-  if (!value) return "";
-
-  const formatted = formatNumber(Number(value), options);
-
-  // if (value.endsWith(".")) {
-  //   formatted += ".";
-  // }
-
-  return formatted;
-};
-
-/**
- * @deprecated Use formatNumber with useFallback set to true
- */
-export const formatNumberWithFallback = (
-  value: number,
-  options?: FormatOptions,
-  fallback?: string,
-) => {
-  if (!value || !Number.isFinite(value)) return fallback ?? "--";
-
-  return formatNumber(value, options);
-};

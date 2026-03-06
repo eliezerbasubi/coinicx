@@ -13,10 +13,7 @@ import { formatTwapRuntime } from "@/features/trade/utils/twap";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/formatting/dates";
-import {
-  formatNumber,
-  formatNumberWithFallback,
-} from "@/utils/formatting/numbers";
+import { formatNumber } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";
@@ -64,7 +61,7 @@ const columns: ColumnDef<ActiveTwap>[] = [
     cell({ row: { original } }) {
       return (
         <span className="text-buy">
-          {formatNumberWithFallback(original.averagePx)}
+          {formatNumber(original.averagePx, { useFallback: true })}
         </span>
       );
     },

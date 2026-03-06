@@ -21,7 +21,7 @@ import {
 } from "@/store/trade/instrument";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
-import { formatNumberWithFallback } from "@/utils/formatting/numbers";
+import { formatNumber } from "@/utils/formatting/numbers";
 
 import AssetsSelector from "./AssetsSelector";
 import FundingCountdown from "./FundingCountdown";
@@ -97,7 +97,8 @@ const TickerOverview = () => {
     value?: string | number,
     options?: Intl.NumberFormatOptions,
   ) => {
-    return formatNumberWithFallback(Number(value), {
+    return formatNumber(Number(value), {
+      useFallback: true,
       notation: isMobile && Number(value) >= 1e6 ? "compact" : undefined,
       minimumFractionDigits: decimals ?? 0,
       maximumFractionDigits: decimals ?? 10,
@@ -122,7 +123,8 @@ const TickerOverview = () => {
                 "text-sell": markPx > prevDayPx,
               })}
             >
-              {formatNumberWithFallback(price, {
+              {formatNumber(price, {
+                useFallback: true,
                 minimumFractionDigits: decimals ?? 0,
                 maximumFractionDigits: decimals ?? 5,
               })}
@@ -131,8 +133,9 @@ const TickerOverview = () => {
             {/* Price dollar value conversion */}
             <p className="text-xs font-semibold">
               <span>
-                {formatNumberWithFallback(price, {
+                {formatNumber(price, {
                   style: "currency",
+                  useFallback: true,
                 })}
               </span>
 
@@ -142,9 +145,10 @@ const TickerOverview = () => {
                     "text-sell": change < 0,
                   })}
                 >
-                  {tokenCtx && change >= 0 && "+"}
-                  {formatNumberWithFallback(changeInPercentage / 100, {
+                  {formatNumber(changeInPercentage / 100, {
                     style: "percent",
+                    useFallback: true,
+                    useSign: true,
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
@@ -158,7 +162,8 @@ const TickerOverview = () => {
               <p className="text-[10px] text-neutral-gray-400">Mark Price</p>
 
               <p className="text-[10px]">
-                {formatNumberWithFallback(tokenCtx?.markPx ?? 0, {
+                {formatNumber(tokenCtx?.markPx ?? 0, {
+                  useFallback: true,
                   minimumFractionDigits: decimals ?? 0,
                   maximumFractionDigits: decimals ?? 5,
                 })}
@@ -181,9 +186,10 @@ const TickerOverview = () => {
             value={formatBigValue(change)}
             suffix={
               <p>
-                {tokenCtx && change >= 0 && "+"}
-                {formatNumberWithFallback(changeInPercentage / 100, {
+                {formatNumber(changeInPercentage / 100, {
                   style: "percent",
+                  useFallback: true,
+                  useSign: true,
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -243,8 +249,9 @@ const TickerOverview = () => {
                     "text-sell": Number(tokenCtx?.funding ?? 0) < 0,
                   })}
                 >
-                  {formatNumberWithFallback(tokenCtx?.funding ?? 0, {
+                  {formatNumber(tokenCtx?.funding ?? 0, {
                     style: "percent",
+                    useFallback: true,
                     minimumFractionDigits: 4,
                     maximumFractionDigits: 4,
                   })}

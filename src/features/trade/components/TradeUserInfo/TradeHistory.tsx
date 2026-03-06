@@ -113,8 +113,6 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
     id: "closedPnl",
     header: "Closed PNL",
     cell({ row: { original } }) {
-      const sign = original.closedPnl > 0 && "+";
-
       if (original.closedPnl === 0) {
         return <span>--</span>;
       }
@@ -125,9 +123,9 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
             "text-sell": original.closedPnl < 0,
           })}
         >
-          {sign}
           {formatNumber(original.closedPnl, {
             style: "currency",
+            useSign: true,
             minimumFractionDigits: 2,
             maximumFractionDigits: 4,
           })}
@@ -187,8 +185,6 @@ const TradeHistory = () => {
 };
 
 const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
-  const sign = (data.closedPnl > 0 && "+") || "";
-
   return (
     <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
       <div className="flex items-center justify-between gap-x-4 mb-1">
@@ -214,11 +210,12 @@ const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
             })}
           />
           <Tag
-            value={`${sign}${formatNumber(data.closedPnl, {
+            value={formatNumber(data.closedPnl, {
               style: "currency",
+              useSign: true,
               maximumFractionDigits: 2,
               minimumFractionDigits: 2,
-            })}`}
+            })}
             className={cn("text-buy bg-buy/10", {
               "text-sell bg-sell/10": data.closedPnl < 0,
             })}

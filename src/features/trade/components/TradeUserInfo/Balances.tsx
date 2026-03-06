@@ -126,8 +126,6 @@ const columns: ColumnDef<UserBalance>[] = [
     id: "unrealizedPnl",
     header: "PNL (ROE %)",
     cell({ row: { original } }) {
-      const sign = original.unrealizedPnl > 0 && "+";
-
       if (original.unrealizedPnl === 0) {
         return null;
       }
@@ -139,16 +137,17 @@ const columns: ColumnDef<UserBalance>[] = [
           })}
         >
           <span>
-            {sign}
             {formatNumber(original.unrealizedPnl, {
+              useSign: true,
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
           </span>
           <span>
-            ({sign}
+            (
             {formatNumber(original.returnOnEquity, {
               style: "percent",
+              useSign: true,
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}

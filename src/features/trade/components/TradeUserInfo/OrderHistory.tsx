@@ -8,10 +8,7 @@ import { orderTypeLabels } from "@/features/trade/utils/orderTypes";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/formatting/dates";
-import {
-  formatNumber,
-  formatNumberWithFallback,
-} from "@/utils/formatting/numbers";
+import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
 import CardItem from "./CardItem";
@@ -278,14 +275,18 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
 
       <div className="w-full grid grid-cols-5 gap-2 text-sm">
         <CardItem label="Type" value={data.orderType} />
-        <CardItem label="Size" value={formatNumberWithFallback(data.sz)} />
+        <CardItem
+          label="Size"
+          value={formatNumber(data.sz, { useFallback: true })}
+        />
         <CardItem
           label="Filled Size"
-          value={formatNumberWithFallback(data.filledSz)}
+          value={formatNumber(data.filledSz, { useFallback: true })}
         />
         <CardItem
           label="Price"
-          value={formatNumberWithFallback(data.price, {
+          value={formatNumber(data.price, {
+            useFallback: true,
             maximumSignificantDigits: 8,
             minimumSignificantDigits: 5,
             maximumFractionDigits: 8,
@@ -293,7 +294,8 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
         />
         <CardItem
           label="Order Value"
-          value={formatNumberWithFallback(data.orderValue, {
+          value={formatNumber(data.orderValue, {
+            useFallback: true,
             maximumFractionDigits: 6,
           })}
         />

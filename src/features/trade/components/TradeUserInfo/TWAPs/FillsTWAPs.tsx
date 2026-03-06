@@ -206,8 +206,6 @@ const FillsTWAPs = () => {
 const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
   const closedPnl = data.closedPnl;
 
-  const sign = (closedPnl > 0 && "+") || "";
-
   return (
     <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
       <div className="flex items-center justify-between gap-x-4 mb-1">
@@ -233,7 +231,8 @@ const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
             })}
           />
           <Tag
-            value={`${sign}${formatNumber(closedPnl, {
+            value={`${formatNumber(closedPnl, {
+              useSign: true,
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })} ${data.feeToken}`}

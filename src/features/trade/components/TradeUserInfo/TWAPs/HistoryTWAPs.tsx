@@ -9,10 +9,7 @@ import { formatTotalRuntime } from "@/features/trade/utils/twap";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/formatting/dates";
-import {
-  formatNumber,
-  formatNumberWithFallback,
-} from "@/utils/formatting/numbers";
+import { formatNumber } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
 import { useSpotToTokenDetails } from "../hooks/useSpotToTokenDetails";
@@ -79,7 +76,7 @@ const columns: ColumnDef<TwapHistory>[] = [
 
       return (
         <span className="space-x-1 text-buy">
-          <span>{formatNumberWithFallback(executedSz)}</span>
+          <span>{formatNumber(executedSz, { useFallback: true })}</span>
           {!!executedSz && <span>{original.base}</span>}
         </span>
       );
@@ -89,7 +86,9 @@ const columns: ColumnDef<TwapHistory>[] = [
     id: "averagePrice",
     header: "Average Price",
     cell({ row: { original } }) {
-      return <span>{formatNumberWithFallback(original.averagePx)}</span>;
+      return (
+        <span>{formatNumber(original.averagePx, { useFallback: true })}</span>
+      );
     },
   },
   {
@@ -218,11 +217,11 @@ const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
         />
         <CardItem
           label="Executed Size"
-          value={formatNumberWithFallback(data.executedSz)}
+          value={formatNumber(data.executedSz, { useFallback: true })}
         />
         <CardItem
           label="Average Price"
-          value={formatNumberWithFallback(data.averagePx)}
+          value={formatNumber(data.averagePx, { useFallback: true })}
         />
         <CardItem
           label="Total Runtime"

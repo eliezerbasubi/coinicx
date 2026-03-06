@@ -6,10 +6,11 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROUTES } from "@/constants/routes";
+import { formatPriceToDecimal } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
-import { formatNumberWithFallback } from "@/utils/formatting/numbers";
+import { formatNumber } from "@/utils/formatting/numbers";
 
 import Badge from "../Badge";
 import TokenImage from "../TokenImage";
@@ -124,13 +125,6 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
       }
     });
   }, [state.search, state.sortBy, assetsByTab]);
-
-  const formatValueToDecimals = (value: number) => {
-    return formatNumberWithFallback(value, {
-      minimumFractionDigits: decimals || 0,
-      maximumSignificantDigits: decimals || 10,
-    });
-  };
 
   const onAssetSelected = (asset: Asset) => {
     const {
@@ -388,8 +382,9 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                             <p className="space-x-1 text-[11px] text-neutral-gray-400 font-medium">
                               <span>Vol.</span>
                               <span>
-                                {formatNumberWithFallback(datum.dayNtlVlm, {
+                                {formatNumber(datum.dayNtlVlm, {
                                   style: "currency",
+                                  useFallback: true,
                                   // notation: "compact",
                                 })}
                               </span>
@@ -399,7 +394,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                       </div>
                     </td>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
-                      {formatValueToDecimals(datum.midPx)}
+                      {formatPriceToDecimal(datum.midPx, decimals)}
                     </td>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
                       <p
@@ -409,13 +404,15 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                         })}
                       >
                         <span>
-                          {change >= 0 && "+"}
-                          {formatValueToDecimals(change)}
+                          {formatPriceToDecimal(change, decimals, {
+                            useSign: true,
+                          })}
                         </span>
                         <span>/</span>
                         <span>
-                          {formatNumberWithFallback(changeInPercentage / 100, {
+                          {formatNumber(changeInPercentage / 100, {
                             style: "percent",
+                            useFallback: true,
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })}
@@ -424,27 +421,27 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     </td>
                     <Visibility visible={isPerps}>
                       <td className="pr-3 py-0.5 hidden md:table-cell">
-                        {formatNumberWithFallback(
-                          Number(datum.funding ?? 0) / 100,
-                          {
-                            style: "percent",
-                            minimumFractionDigits: 4,
-                            maximumFractionDigits: 4,
-                          },
-                        )}
+                        {formatNumber(Number(datum.funding ?? 0) / 100, {
+                          style: "percent",
+                          useFallback: true,
+                          minimumFractionDigits: 4,
+                          maximumFractionDigits: 4,
+                        })}
                       </td>
                     </Visibility>
                     <td className="pr-3 py-0.5 hidden md:table-cell">
-                      {formatNumberWithFallback(datum.dayNtlVlm, {
+                      {formatNumber(datum.dayNtlVlm, {
                         style: "currency",
+                        useFallback: true,
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </td>
                     <Visibility visible={isPerps}>
                       <td className="pr-3 py-0.5 hidden md:table-cell">
-                        {formatNumberWithFallback(datum.openInterest ?? 0, {
+                        {formatNumber(datum.openInterest ?? 0, {
                           style: "currency",
+                          useFallback: true,
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -452,8 +449,9 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     </Visibility>
                     <Visibility visible={!isPerps}>
                       <td className="py-0.5 hidden md:table-cell">
-                        {formatNumberWithFallback(datum.marketCap ?? 0, {
+                        {formatNumber(datum.marketCap ?? 0, {
                           style: "currency",
+                          useFallback: true,
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -462,7 +460,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                     <Visibility visible={isMobile}>
                       <td className="py-0.5 text-right">
                         <p className="text-white font-semibold">
-                          {formatValueToDecimals(datum.midPx)}
+                          {formatPriceToDecimal(datum.midPx, decimals)}
                         </p>
                         <p
                           className={cn("text-buy space-x-1 text-[11px]", {
@@ -471,19 +469,18 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
                           })}
                         >
                           <span>
-                            {change >= 0 && "+"}
-                            {formatValueToDecimals(change)}
+                            {formatPriceToDecimal(change, decimals, {
+                              useSign: true,
+                            })}
                           </span>
                           <span>/</span>
                           <span>
-                            {formatNumberWithFallback(
-                              changeInPercentage / 100,
-                              {
-                                style: "percent",
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              },
-                            )}
+                            {formatNumber(changeInPercentage / 100, {
+                              style: "percent",
+                              useFallback: true,
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </span>
                         </p>
                       </td>
