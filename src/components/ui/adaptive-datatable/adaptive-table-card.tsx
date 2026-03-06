@@ -12,7 +12,7 @@ export type AdaptiveTableCardProps<TData> = {
   render?: (data: TData) => React.ReactNode;
 };
 
-const AdaptiveTableCard = <TData,>({
+export const AdaptiveTableCard = <TData,>({
   table,
   loading,
   className,
@@ -43,5 +43,3 @@ const AdaptiveTableCard = <TData,>({
     </div>
   );
 };
-
-export default AdaptiveTableCard;

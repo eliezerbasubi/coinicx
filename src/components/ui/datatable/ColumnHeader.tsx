@@ -5,7 +5,7 @@ import { cn } from "@/utils/cn";
 
 import { Button } from "../button";
 
-interface TableColumnHeaderProps<
+interface DataTableColumnHeaderProps<
   TData,
   TValue,
 > extends React.HTMLAttributes<HTMLDivElement> {
@@ -13,11 +13,11 @@ interface TableColumnHeaderProps<
   title: string;
 }
 
-const TableColumnHeader = <TData, TValue>({
+export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
-}: TableColumnHeaderProps<TData, TValue>) => {
+}: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
   }
@@ -25,7 +25,7 @@ const TableColumnHeader = <TData, TValue>({
   return (
     <div className={cn("flex items-center space-x-2", className)}>
       <Button
-        variant="default"
+        variant="ghost"
         size="sm"
         className="flex items-center h-auto w-auto p-0 text-sm font-medium text-neutral-gray-800 hover:text-neutral-gray-800 bg-transparent hover:bg-transparent data-[state=open]:bg-accent"
         onClick={() => {
@@ -43,6 +43,4 @@ const TableColumnHeader = <TData, TValue>({
       </Button>
     </div>
   );
-};
-
-export default TableColumnHeader;
+}

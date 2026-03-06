@@ -20,18 +20,33 @@ import {
 import { useIsDesktop } from "@/hooks/useIsMobile";
 import { cn } from "@/utils/cn";
 
-import type { AdaptiveTableProps } from "./adaptive-table";
+import type { DataTableRendererProps } from "../datatable/DataTableRenderer";
 import type { AdaptiveTableCardProps } from "./adaptive-table-card";
 
-const AdaptiveTable = dynamic(() => import("./adaptive-table"), { ssr: false });
-const AdaptiveTableCard = dynamic(() => import("./adaptive-table-card"), {
-  ssr: false,
-});
-const AdaptivePagination = dynamic(() => import("./adaptive-pagination"), {
-  ssr: false,
-});
+const DataTableRenderer = dynamic(
+  () =>
+    import("../datatable/DataTableRenderer").then(
+      (mod) => mod.DataTableRenderer,
+    ),
+  { ssr: false },
+);
+const AdaptiveTableCard = dynamic(
+  () => import("./adaptive-table-card").then((mod) => mod.AdaptiveTableCard),
+  {
+    ssr: false,
+  },
+);
+const DataTablePagination = dynamic(
+  () =>
+    import("../datatable/DataTablePagination").then(
+      (mod) => mod.DataTablePagination,
+    ),
+  {
+    ssr: false,
+  },
+);
 
-type CompProps<TData, TValue> = AdaptiveTableProps<TData, TValue> &
+type CompProps<TData, TValue> = DataTableRendererProps<TData, TValue> &
   AdaptiveTableCardProps<TData>;
 
 type Props<TData, TValue> = {
@@ -44,7 +59,6 @@ type Props<TData, TValue> = {
   className?: string;
   wrapperClassName?: string;
   globalFilterFn?: FilterFnOption<TData>;
-  disablePagination?: boolean;
   meta?: TableMeta<TData>;
   onPaginationChange?: OnChangeFn<PaginationState>;
 } & Omit<CompProps<TData, TValue>, "table">;
@@ -97,7 +111,15 @@ const AdaptiveDataTable = <TData, TValue>({
 
   return (
     <div className={cn("size-full", wrapperClassName)}>
-      {!isDesktop ? (
+      {isDesktop ? (
+        <DataTableRenderer
+          {...props}
+          disablePagination={disablePagination}
+          columns={columns as ColumnDef<unknown, unknown>[]}
+          table={table as Table<unknown>}
+          onRowClick={onRowClick as (data: unknown) => void}
+        />
+      ) : (
         <AdaptiveTableCard
           table={table as Table<unknown>}
           className={props.className}
@@ -105,18 +127,13 @@ const AdaptiveDataTable = <TData, TValue>({
           skeleton={skeleton}
           render={render as (data: unknown) => React.ReactNode}
         />
-      ) : (
-        <AdaptiveTable
-          {...props}
-          disablePagination={disablePagination}
-          columns={columns as ColumnDef<unknown, unknown>[]}
-          table={table as Table<unknown>}
-          onRowClick={onRowClick as (data: unknown) => void}
-        />
       )}
 
       {!disablePagination && (
-        <AdaptivePagination table={table as Table<unknown>} />
+        <DataTablePagination
+          table={table as Table<unknown>}
+          hideRowsPerPage={!isDesktop}
+        />
       )}
     </div>
   );

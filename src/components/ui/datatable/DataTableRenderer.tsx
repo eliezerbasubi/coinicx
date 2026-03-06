@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/utils/cn";
 
-export type AdaptiveTableProps<TData, TValue> = {
+export type DataTableRendererProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   table: Table<TData>;
   loading?: boolean;
@@ -26,8 +26,8 @@ export type AdaptiveTableProps<TData, TValue> = {
   rowCellClassName?: string;
   headerClassName?: string;
   noData?: React.ReactNode;
-  onRowClick?: (data: TData) => void;
   disablePagination?: boolean;
+  onRowClick?: (data: TData) => void;
 };
 
 interface ColumnMeta<TData extends RowData, TValue> extends BaseColumnMeta<
@@ -39,7 +39,7 @@ interface ColumnMeta<TData extends RowData, TValue> extends BaseColumnMeta<
   loaderClassName?: string;
 }
 
-const AdaptiveTable = <TData, TValue>({
+export const DataTableRenderer = <TData, TValue>({
   table,
   columns,
   className,
@@ -51,7 +51,7 @@ const AdaptiveTable = <TData, TValue>({
   noData,
   disablePagination,
   onRowClick,
-}: AdaptiveTableProps<TData, TValue>) => {
+}: DataTableRendererProps<TData, TValue>) => {
   const { rows } = disablePagination
     ? table.getCoreRowModel()
     : table.getRowModel();
@@ -148,5 +148,3 @@ const AdaptiveTable = <TData, TValue>({
     </TableElement>
   );
 };
-
-export default AdaptiveTable;
