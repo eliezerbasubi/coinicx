@@ -4,7 +4,6 @@ import { toast } from "sonner";
 
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputSlider from "@/components/common/FormInputSlider";
-import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 import { InputNumber } from "@/components/ui/input-number";
@@ -236,7 +235,7 @@ const AdjustLeverage = () => {
   };
 
   return (
-    <AdaptiveDialog
+    <AdaptivePopover
       open={open}
       onOpenChange={setOpen}
       title="Adjust Leverage"
@@ -251,7 +250,10 @@ const AdjustLeverage = () => {
         </Button>
       }
     >
-      <div className="w-full pt-4">
+      <div className="w-full pt-4 md:pt-0">
+        <p className="text-white text-sm hidden sm:block font-medium mb-2">
+          Adjust Leverage
+        </p>
         <div className="flex items-center justify-between mb-4">
           <ChevronLeft
             role="button"
@@ -302,7 +304,7 @@ const AdjustLeverage = () => {
           onClick={onAdjustLeverage}
         />
       </div>
-    </AdaptiveDialog>
+    </AdaptivePopover>
   );
 };
 
