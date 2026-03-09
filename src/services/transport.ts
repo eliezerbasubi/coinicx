@@ -42,4 +42,8 @@ const TRANSPORT_URLS = {
 
 export const TRANSPORT_URL = TRANSPORT_URLS[isTestnet ? "testnet" : "mainnet"];
 
+export const UNIT_API_BASE_URL = isTestnet
+  ? "https://api.hyperunit-testnet.xyz"
+  : "https://api.hyperunit.xyz";
+
 export const hlSubClient = new SubscriptionClient({ transport: ws });

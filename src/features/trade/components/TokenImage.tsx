@@ -5,6 +5,7 @@ import Image from "next/image";
 
 import { InstrumentType } from "@/types/trade";
 import { cn } from "@/utils/cn";
+import { getHLTokenImgUrl } from "@/utils/getHLTokenImgUrl";
 
 type Props = {
   name: string;
@@ -19,13 +20,13 @@ const TokenImage = ({ name, coin, className, instrumentType }: Props) => {
   const isSpot = instrumentType === "spot";
   const tokenName = isSpot ? name : (coin ?? name);
 
-  const imagePath = isSpot ? tokenName + "_spot.svg" : tokenName + ".svg";
+  const url = getHLTokenImgUrl(tokenName, isSpot);
 
   return (
     <div className={cn("size-8 rounded-full overflow-hidden", className)}>
-      {(!error && tokenName && (
+      {(!error && url && (
         <Image
-          src={`https://app.hyperliquid.xyz/coins/${imagePath}`}
+          src={url}
           alt={tokenName}
           width={100}
           height={100}

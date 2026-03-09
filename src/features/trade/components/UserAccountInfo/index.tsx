@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAccountTransactStore } from "@/store/trade/account-transact";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
@@ -21,6 +22,9 @@ const UserAccountInfo = () => {
             variant="secondary"
             size="sm"
             className="flex-1 text-white text-xs font-medium h-7"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("deposit")
+            }
           >
             Deposit
           </Button>
@@ -28,6 +32,9 @@ const UserAccountInfo = () => {
             variant="secondary"
             size="sm"
             className="flex-1 text-white text-xs font-medium h-7"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("withdraw")
+            }
           >
             Withdraw
           </Button>
@@ -35,6 +42,9 @@ const UserAccountInfo = () => {
             variant="secondary"
             size="sm"
             className="flex-1 text-white text-xs font-medium h-7"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("transfer")
+            }
           >
             Transfer
           </Button>

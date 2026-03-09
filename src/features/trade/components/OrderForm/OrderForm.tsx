@@ -8,6 +8,7 @@ import Visibility from "@/components/common/Visibility";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
 import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
+import { useAccountTransactStore } from "@/store/trade/account-transact";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
   useOrderFormStore,
@@ -166,6 +167,12 @@ const OrderFormFooter = () => {
     return ORDER_FORM_SIDES[orderSide][labelKey];
   }, [hasInsufficientMargin, orderSide, labelKey]);
 
+  const placeOrder = () => {
+    if (hasInsufficientMargin)
+      return useAccountTransactStore.getState().openAccountTransact("deposit");
+    return onPlaceOrder();
+  };
+
   return (
     <>
       <TradingButton
@@ -182,7 +189,7 @@ const OrderFormFooter = () => {
               hasInsufficientMargin,
           },
         )}
-        onClick={onPlaceOrder}
+        onClick={placeOrder}
       />
 
       <div className="w-full space-y-2">

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { getTokenDisplayName } from "@/features/trade/utils/getTokenDisplayName";
+import { useAccountTransactStore } from "@/store/trade/account-transact";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
@@ -160,9 +161,16 @@ const columns: ColumnDef<UserBalance>[] = [
   {
     id: "action",
     header: "Action",
-    cell() {
+    cell({ row: { original } }) {
+      if (original.coin !== "USDC") return null;
       return (
-        <button type="button" className="text-primary text-xs font-medium">
+        <button
+          type="button"
+          className="text-primary text-xs font-medium"
+          onClick={() =>
+            useAccountTransactStore.getState().openAccountTransact("transfer")
+          }
+        >
           Transfer
         </button>
       );
@@ -206,7 +214,7 @@ const Balances = () => {
       coin: "USDC",
       isSpot: false,
       totalBalance: totalBalance,
-      availableBalance: totalBalance + withdrawable - totalMarginUsed,
+      availableBalance: totalBalance - totalMarginUsed,
       withdrawable,
       usdValue: Number(
         allDexsClearinghouseState?.marginSummary.accountValue || "0",
@@ -363,6 +371,9 @@ const BalanceCard = ({ data }: BalanceCardProps) => {
           size="sm"
           className="h-6 w-fit font-medium text-xs md:text-[13px] rounded-md px-3"
           label="Transfer"
+          onClick={() =>
+            useAccountTransactStore.getState().openAccountTransact("transfer")
+          }
         />
       </div>
     </div>

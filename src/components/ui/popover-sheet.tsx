@@ -9,6 +9,7 @@ import {
 
 type Props = {
   open?: boolean;
+  modal?: boolean;
   children: React.ReactNode;
   trigger?: React.ReactNode;
   triggerRef?: React.Ref<HTMLElement>;
@@ -17,6 +18,7 @@ type Props = {
 
 const PopoverSheet = ({
   open,
+  modal,
   children,
   trigger,
   triggerRef,
@@ -24,7 +26,7 @@ const PopoverSheet = ({
   ...props
 }: Props) => {
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover modal={modal} open={open} onOpenChange={onOpenChange}>
       {trigger && <PopoverTrigger asChild>{trigger}</PopoverTrigger>}
 
       {triggerRef && (

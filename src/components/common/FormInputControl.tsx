@@ -33,7 +33,8 @@ const FormInputControl = ({ value, max, onValueChange, ...props }: Props) => {
             size="sm"
             variant="secondary"
             className={cn("h-6 w-fit text-xs font-semibold", {
-              "bg-primary/10 text-primary": currentPercentage === percentage,
+              "bg-primary/10 text-primary":
+                value && currentPercentage === percentage,
             })}
             label={percentage === 100 ? "Max" : `${percentage}%`}
             disabled={!maxValue}
