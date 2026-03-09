@@ -16,6 +16,7 @@ type PointerDownOutsideEvent = CustomEvent<{
 
 type Props = {
   open?: boolean;
+  disabled?: boolean;
   children: React.ReactNode;
   trigger?: React.ReactNode;
   title?: React.ReactNode;

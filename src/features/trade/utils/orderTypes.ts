@@ -27,3 +27,16 @@ export function isScaleOrTwapOrder(type: OrderType) {
 export function getOrderTif(type: OrderType) {
   return type === "market" ? "FrontendMarket" : "Gtc";
 }
+export function isTakeProfit(type: string) {
+  return type === "Take Profit Limit" || type === "Take Profit Market";
+}
+export function isStopLoss(type: string) {
+  return type === "Stop Limit" || type === "Stop Market";
+}
+
+export const orderTypeLabels: Record<string, string> = {
+  "Take Profit Limit": "Limit (TP)",
+  "Take Profit Market": "Market (TP)",
+  "Stop Limit": "Limit (SL)",
+  "Stop Market": "Market (SL)",
+};

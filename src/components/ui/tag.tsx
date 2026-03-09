@@ -7,9 +7,7 @@ type Props = {
   className?: string;
 };
 
-const Badge = ({ value, className }: Props) => {
-  if (!value) return null;
-
+const Tag = ({ value, className }: Props) => {
   return (
     <div
       className={cn(
@@ -22,4 +20,4 @@ const Badge = ({ value, className }: Props) => {
   );
 };
 
-export default Badge;
+export default Tag;

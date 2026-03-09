@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 import { cn } from "@/utils/cn";
 
@@ -6,10 +6,17 @@ type Props = {
   value: number;
   min?: number;
   max?: number;
+  showLimiters?: boolean;
   onValueChange?: (value: number) => void;
 };
 
-const OrderFormSlider = ({ value, min, max, onValueChange }: Props) => {
+const FormInputSlider = ({
+  value,
+  min,
+  max,
+  showLimiters,
+  onValueChange,
+}: Props) => {
   const tooltipXPosition = useMemo(() => {
     if (value <= 10) return -11;
     if (value < 20) return -15;
@@ -79,12 +86,14 @@ const OrderFormSlider = ({ value, min, max, onValueChange }: Props) => {
           })}
         </div>
       </div>
-      <div className="w-full hidden justify-between items-center text-xs text-neutral-gray-400 font-semibold">
-        <p>0</p>
-        <p>100%</p>
-      </div>
+      {showLimiters && (
+        <div className="w-full flex justify-between items-center text-xs text-neutral-gray-400 font-semibold">
+          <p>0%</p>
+          <p>100%</p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default OrderFormSlider;
+export default FormInputSlider;

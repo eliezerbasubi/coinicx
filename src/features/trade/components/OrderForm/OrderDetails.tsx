@@ -18,7 +18,7 @@ import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowOrderFormStore } from "@/store/trade/order-form";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { useMaxTradeSz, useUserTradeStore } from "@/store/trade/user-trade";
-import { formatNumberWithFallback } from "@/utils/formatting/numbers";
+import { formatNumber } from "@/utils/formatting/numbers";
 
 export const LiquidationPrice = ({ size }: { size: number }) => {
   const { isPerps, coin, decimals } = useTradeContext((s) => ({
@@ -99,8 +99,9 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
       </AdaptiveTooltip>
 
       <p className="text-xs font-medium">
-        {formatNumberWithFallback(liquidationPrice || 0, {
+        {formatNumber(liquidationPrice || 0, {
           style: "currency",
+          useFallback: true,
           minimumFractionDigits: decimals,
           maximumFractionDigits: decimals,
         })}
@@ -127,7 +128,8 @@ export const OrderValueAndMarginRequired = ({
 
         <p className="text-xs font-medium space-x-1">
           <span>
-            {formatNumberWithFallback(data.orderValue, {
+            {formatNumber(data.orderValue, {
+              useFallback: true,
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
@@ -141,7 +143,8 @@ export const OrderValueAndMarginRequired = ({
 
           <p className="text-xs font-medium space-x-1">
             <span>
-              {formatNumberWithFallback(data.marginRequired, {
+              {formatNumber(data.marginRequired, {
+                useFallback: true,
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
@@ -168,7 +171,7 @@ export const MaxOrderSize = () => {
       <p className="text-xs text-neutral-gray-400">Max</p>
 
       <p className="text-xs font-medium space-x-1">
-        <span>{formatNumberWithFallback(maxTradeSz)}</span>
+        <span>{formatNumber(maxTradeSz, { useFallback: true })}</span>
         <span>{base}</span>
       </p>
     </div>
@@ -209,8 +212,9 @@ export const Fees = () => {
 };
 
 const formatFee = (fee?: string) => {
-  return formatNumberWithFallback((Number(fee ?? "0") * 100) / 100, {
+  return formatNumber((Number(fee ?? "0") * 100) / 100, {
     style: "percent",
+    useFallback: true,
     minimumFractionDigits: 4,
     maximumFractionDigits: 4,
   });
@@ -287,7 +291,8 @@ export const TwapDetails = ({ size }: { size: number }) => {
         <p className="text-xs text-neutral-gray-400">Size per Suborder</p>
 
         <p className="text-xs font-medium">
-          {formatNumberWithFallback(sizePerSuborder, {
+          {formatNumber(sizePerSuborder, {
+            useFallback: true,
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}{" "}

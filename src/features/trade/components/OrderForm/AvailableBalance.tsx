@@ -1,5 +1,6 @@
 import { PlusCircle } from "lucide-react";
 
+import { useAccountTransactStore } from "@/store/trade/account-transact";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowOrderFormStore } from "@/store/trade/order-form";
@@ -13,7 +14,7 @@ const AvailableBalance = () => {
   }));
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
   const isBuyOrder = useShallowOrderFormStore((s) => s.orderSide === "buy");
-  const availableBalance = useAvailableToTrade(isBuyOrder);
+  const availableBalance = useAvailableToTrade(isBuyOrder, !isPerps);
 
   return (
     <div className="flex items-center justify-between">
@@ -26,7 +27,12 @@ const AvailableBalance = () => {
           </span>
           <span>{!isPerps ? (isBuyOrder ? quote : base) : quote}</span>
         </p>
-        <PlusCircle className="size-3.5 text-primary" />
+        <PlusCircle
+          className="size-3.5 text-primary"
+          onClick={() =>
+            useAccountTransactStore.getState().openAccountTransact("deposit")
+          }
+        />
       </button>
     </div>
   );

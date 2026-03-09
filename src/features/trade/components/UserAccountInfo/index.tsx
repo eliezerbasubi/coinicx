@@ -3,8 +3,10 @@ import { useMemo } from "react";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAccountTransactStore } from "@/store/trade/account-transact";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
+import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 const UserAccountInfo = () => {
@@ -20,6 +22,9 @@ const UserAccountInfo = () => {
             variant="secondary"
             size="sm"
             className="flex-1 text-white text-xs font-medium h-7"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("deposit")
+            }
           >
             Deposit
           </Button>
@@ -27,6 +32,9 @@ const UserAccountInfo = () => {
             variant="secondary"
             size="sm"
             className="flex-1 text-white text-xs font-medium h-7"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("withdraw")
+            }
           >
             Withdraw
           </Button>
@@ -34,6 +42,9 @@ const UserAccountInfo = () => {
             variant="secondary"
             size="sm"
             className="flex-1 text-white text-xs font-medium h-7"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("transfer")
+            }
           >
             Transfer
           </Button>
@@ -59,12 +70,10 @@ const SpotEquity = () => {
   const spotBalances = useShallowUserTradeStore((s) => s.spotBalances);
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
 
-  const { getSpotAssetsData } = useMetaAndAssetCtxs();
-
-  const { tokensToUniverseIndex } = getSpotAssetsData();
+  const { tokensToSpotId } = useMetaAndAssetCtxs();
 
   const spotValue = useMemo(() => {
-    if (!tokensToUniverseIndex.size) return 0;
+    if (!tokensToSpotId?.size) return 0;
 
     return spotBalances.reduce((acc, balance) => {
       const amount = Number(balance.total);
@@ -73,20 +82,20 @@ const SpotEquity = () => {
         return acc + amount;
       }
 
-      const tokenMap = tokensToUniverseIndex.get(balance.token);
+      const tokenMap = tokensToSpotId.get(balance.token);
       if (tokenMap === undefined) return acc;
 
       // Prefer USDC-quoted pairs (token 0) for accurate USD conversion.
-      const quoteTokenIndex = tokenMap.get(0);
+      const spotId = tokenMap.get(0);
 
-      if (quoteTokenIndex === undefined) return acc;
+      if (spotId === undefined) return acc;
 
-      const ctx = spotAssetCtxs[quoteTokenIndex];
+      const ctx = spotAssetCtxs[spotId];
       const markPx = Number(ctx?.markPx || "0");
 
       return acc + amount * markPx;
     }, 0);
-  }, [spotBalances, spotAssetCtxs, tokensToUniverseIndex]);
+  }, [spotBalances, spotAssetCtxs, tokensToSpotId]);
 
   return (
     <div className="flex items-center justify-between text-xs">
@@ -150,7 +159,12 @@ const PerpsEquity = () => {
               Fees
             </p>
           </AdaptiveTooltip>
-          <p className="text-white font-medium">
+          <p
+            className={cn("text-white font-medium", {
+              "text-buy": unrealizedPnl > 0,
+              "text-sell": unrealizedPnl < 0,
+            })}
+          >
             {formatNumber(unrealizedPnl, { style: "currency" })}
           </p>
         </div>
@@ -171,10 +185,13 @@ const AccountMargin = () => {
     allDexsClearinghouseState?.crossMaintenanceMarginUsed || "0",
   );
 
-  const crossMarginRatio = crossMaintenanceMarginUsed / accountValue;
-  const crossAccountLeverage =
-    Number(allDexsClearinghouseState?.marginSummary.totalNtlPos || "0") /
-    accountValue;
+  const crossMarginRatio = accountValue
+    ? crossMaintenanceMarginUsed / accountValue
+    : 0;
+  const crossAccountLeverage = accountValue
+    ? Number(allDexsClearinghouseState?.marginSummary.totalNtlPos || "0") /
+      accountValue
+    : 0;
 
   return (
     <div className="w-full mt-3">
@@ -195,8 +212,12 @@ const AccountMargin = () => {
               liquidated if Margin Ratio reaches 100%.
             </p>
           </AdaptiveTooltip>
-          <p className="text-white font-medium">
-            {formatNumber(crossMarginRatio * 100, {
+          <p
+            className={cn("font-medium text-buy", {
+              "text-sell": crossMarginRatio < 0,
+            })}
+          >
+            {formatNumber(crossMarginRatio, {
               style: "percent",
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,

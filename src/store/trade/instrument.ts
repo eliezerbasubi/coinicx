@@ -3,12 +3,11 @@ import {
   ActiveSpotAssetCtxWsEvent,
   AllDexsAssetCtxsWsEvent,
   SpotAssetCtxsWsEvent,
-  SpotMetaResponse,
 } from "@nktkas/hyperliquid";
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-import { AllPerpMetas, AssetCxt, AssetMeta } from "@/types/trade";
+import { AllPerpMetas, AssetCxt, AssetMeta, SpotMetas } from "@/types/trade";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import {
   mapDataToAssetCtx,
@@ -54,11 +53,13 @@ export const useInstrumentStore = create<InstrumentStoreState>()(
       const allPerpMetas = queryClient.getQueryData<AllPerpMetas>([
         QUERY_KEYS.allPerpMetas,
       ]);
-      const spotMeta = queryClient.getQueryData<SpotMetaResponse>([
+      const spotMetas = queryClient.getQueryData<SpotMetas>([
         QUERY_KEYS.spotMeta,
       ]);
 
-      if (!allPerpMetas || !spotMeta) return;
+      if (!allPerpMetas || !spotMetas) return;
+
+      const spotMeta = spotMetas.spotMeta;
 
       if (params.isSpot) {
         const universe = spotMeta.universe[params.assetIndex];

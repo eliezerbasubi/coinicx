@@ -3,11 +3,12 @@
 import { useMemo } from "react";
 
 import { OrderSide } from "@/types/trade";
-import ConnectButton from "@/components/common/ConnectButton";
+import TradingButton from "@/components/common/TradingButton";
 import Visibility from "@/components/common/Visibility";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
 import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
+import { useAccountTransactStore } from "@/store/trade/account-transact";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
   useOrderFormStore,
@@ -152,29 +153,32 @@ const OrderFormFooter = () => {
     hasInsufficientMargin,
   } = useOrderForm();
 
-  const { shouldEnableTrading, processing, onPlaceOrder } = usePlaceOrder();
+  const { processing, onPlaceOrder } = usePlaceOrder();
 
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const labelKey = isPerps ? "perp" : "spot";
 
   const label = useMemo(() => {
-    if (shouldEnableTrading) {
-      return "Enable Trading";
-    }
     if (hasInsufficientMargin) {
       return "Deposit";
     }
 
     return ORDER_FORM_SIDES[orderSide][labelKey];
-  }, [hasInsufficientMargin, shouldEnableTrading, orderSide, labelKey]);
+  }, [hasInsufficientMargin, orderSide, labelKey]);
+
+  const placeOrder = () => {
+    if (hasInsufficientMargin)
+      return useAccountTransactStore.getState().openAccountTransact("deposit");
+    return onPlaceOrder();
+  };
 
   return (
     <>
-      <ConnectButton
+      <TradingButton
         type="button"
         size="default"
-        disabled={!shouldEnableTrading && (disabled || processing)}
+        disabled={disabled || processing}
         loading={processing}
         label={label}
         className={cn(
@@ -185,7 +189,7 @@ const OrderFormFooter = () => {
               hasInsufficientMargin,
           },
         )}
-        onClick={onPlaceOrder}
+        onClick={placeOrder}
       />
 
       <div className="w-full space-y-2">

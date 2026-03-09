@@ -16,7 +16,7 @@ export const mapSpotDataToAssetMeta = (
   quote: string,
 ): AssetMeta => {
   return {
-    assetId: 10000 + token.index,
+    assetId: 10000 + universe.index,
     tokenId: token.tokenId,
     index: token.index,
     base: token.name,
@@ -45,9 +45,10 @@ export const mapPerpDataToAssetMeta = (data: {
 
   return {
     index,
-    assetId: data.perpDexIndex
-      ? 100000 + data.perpDexIndex * 10000 + index
-      : index,
+    assetId: buildPerpAssetId({
+      perpDexIndex: data.perpDexIndex,
+      universeIndex: index,
+    }),
     base,
     coin: universe.name,
     quote,
@@ -74,6 +75,7 @@ export const mapDataToAssetCtx = (
     prevDayPx: Number(data.prevDayPx),
     dayBaseVlm: Number(data.dayBaseVlm),
     dayNtlVlm: Number(data.dayNtlVlm),
+    referencePx: markPx,
     openInterest: null,
     funding: null,
     oraclePx: null,
@@ -86,7 +88,24 @@ export const mapDataToAssetCtx = (
     ctx.oraclePx = Number(data.oraclePx);
   } else {
     ctx.marketCap = Number(data.circulatingSupply) * markPx;
+    ctx.referencePx = Number(data.midPx);
   }
 
   return ctx;
+};
+
+export const buildPerpAssetId = ({
+  perpDexIndex,
+  universeIndex,
+}: {
+  perpDexIndex: number;
+  universeIndex: number;
+}) => {
+  return perpDexIndex
+    ? 100000 + perpDexIndex * 10000 + universeIndex
+    : universeIndex;
+};
+
+export const buildSpotAssetId = (spotId: number) => {
+  return 10000 + spotId;
 };

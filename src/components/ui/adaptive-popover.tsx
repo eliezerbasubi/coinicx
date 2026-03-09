@@ -10,6 +10,7 @@ const PopoverSheet = dynamic(() => import("./popover-sheet"), { ssr: false });
 
 type Props = {
   open?: boolean;
+  modal?: boolean;
   children: React.ReactNode;
   trigger?: React.ReactNode;
   title?: React.ReactNode;

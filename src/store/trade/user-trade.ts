@@ -1,18 +1,28 @@
 import {
   ActiveAssetDataResponse,
   AllDexsClearinghouseStateWsEvent,
+  OpenOrdersWsEvent,
   SpotStateWsEvent,
+  TwapStatesWsEvent,
+  UserFillsWsEvent,
+  UserFundingsWsEvent,
+  UserHistoricalOrdersWsEvent,
+  UserTwapHistoryWsEvent,
+  UserTwapSliceFillsWsEvent,
   WebData3WsEvent,
 } from "@nktkas/hyperliquid";
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
+import { AllDexsClearinghouseState, SpotBalance } from "@/types/trade";
+
 import { useInstrumentStore } from "./instrument";
 
-type SpotBalances = SpotStateWsEvent["spotState"]["balances"];
-
-type AllDexsClearinghouseState =
-  AllDexsClearinghouseStateWsEvent["clearinghouseStates"][number][1];
+type TwapStates = {
+  twaps: TwapStatesWsEvent["states"];
+  history: UserTwapHistoryWsEvent["history"];
+  sliceFills: UserTwapSliceFillsWsEvent["twapSliceFills"];
+};
 
 interface UserTradeState {
   /** Max size in base asset. e.g. BTC for perps */
@@ -24,7 +34,12 @@ interface UserTradeState {
   /** Available to trade in quote asset. e.g. BTC for perps and notional for spot */
   availableQuoteToTrade: number;
   leverage: ActiveAssetDataResponse["leverage"] | null;
-  spotBalances: SpotBalances;
+  spotBalances: SpotBalance[];
+  openOrders: OpenOrdersWsEvent["orders"];
+  historicalOrders: UserHistoricalOrdersWsEvent["orderHistory"];
+  fills: UserFillsWsEvent["fills"];
+  fundings: UserFundingsWsEvent["fundings"];
+  twapStates: TwapStates;
   webData: WebData3WsEvent | null;
   clearinghouseState: AllDexsClearinghouseState | null;
   allDexsClearinghouseState: AllDexsClearinghouseState | null;
@@ -41,7 +56,12 @@ interface UserTradeStoreActions {
   applyActiveAssetData: (data: ActiveAssetDataResponse) => void;
   applySpotState: (data: SpotStateWsEvent) => void;
   applyWebData: (data: WebData3WsEvent) => void;
+  applyOpenOrders: (data: OpenOrdersWsEvent) => void;
   applyClearinghouseState: (data: AllDexsClearinghouseStateWsEvent) => void;
+  applyUserFills: (data: UserFillsWsEvent) => void;
+  applyTwapStates: (data: Partial<TwapStates>) => void;
+  applyUserHistoricalOrders: (data: UserHistoricalOrdersWsEvent) => void;
+  applyUserFundings: (data: UserFundingsWsEvent) => void;
 }
 
 interface UserTradeStore extends UserTradeState, UserTradeStoreActions {}
@@ -54,6 +74,15 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   leverage: null,
   spotBalances: [],
   webData: null,
+  openOrders: [],
+  fills: [],
+  fundings: [],
+  historicalOrders: [],
+  twapStates: {
+    twaps: [],
+    history: [],
+    sliceFills: [],
+  },
   clearinghouseState: null,
   allDexsClearinghouseState: null,
   updateLeverage(leverage) {
@@ -77,9 +106,9 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
     } = get();
 
     if (args.isSpot) {
-      return args.isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
+      return args.isBuyOrder ? availableBaseToTrade : availableQuoteToTrade;
     }
-    return args.isBuyOrder ? maxQuoteTradeSz : maxBaseTradeSz;
+    return args.isBuyOrder ? maxBaseTradeSz : maxQuoteTradeSz;
   },
   applyActiveAssetData(data) {
     const { leverage } = get();
@@ -129,6 +158,33 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       webData: data,
     });
   },
+  applyOpenOrders(data) {
+    set({
+      openOrders: data.orders,
+    });
+  },
+  applyUserFills(data) {
+    set({
+      fills: data.fills,
+    });
+  },
+  applyTwapStates(data) {
+    const { twapStates } = get();
+
+    set({
+      twapStates: { ...twapStates, ...data },
+    });
+  },
+  applyUserHistoricalOrders(data) {
+    set({
+      historicalOrders: data.orderHistory,
+    });
+  },
+  applyUserFundings(data) {
+    set({
+      fundings: data.fundings,
+    });
+  },
   applyClearinghouseState(data) {
     const assetMeta = useInstrumentStore.getState().assetMeta;
 
@@ -158,18 +214,32 @@ export const useShallowUserTradeStore = <T>(
 };
 
 export const useMaxTradeSz = (isBuyOrder: boolean) => {
-  const maxBaseTradeSz = useShallowUserTradeStore((s) =>
+  const maxTradeSize = useShallowUserTradeStore((s) =>
     isBuyOrder ? s.maxQuoteTradeSz : s.maxBaseTradeSz,
   );
 
-  return maxBaseTradeSz;
+  return maxTradeSize;
 };
 
-export const useAvailableToTrade = (isBuyOrder: boolean) => {
-  const availableBaseToTrade = useShallowUserTradeStore((s) =>
-    isBuyOrder ? s.availableQuoteToTrade : s.availableBaseToTrade,
-  );
-  return availableBaseToTrade;
+/**
+ * A hook to get the available balance to trade on an asset.
+ *
+ * @param isBuyOrder
+ * @param isSpot
+ * @returns quote balance if isSpot and buying and base balance for perps if buying
+ */
+export const useAvailableToTrade = (isBuyOrder: boolean, isSpot: boolean) => {
+  const { availableBaseToTrade, availableQuoteToTrade } =
+    useShallowUserTradeStore((s) => ({
+      availableBaseToTrade: s.availableBaseToTrade,
+      availableQuoteToTrade: s.availableQuoteToTrade,
+    }));
+
+  if (isSpot) {
+    return isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
+  }
+
+  return isBuyOrder ? availableBaseToTrade : availableQuoteToTrade;
 };
 
 /**

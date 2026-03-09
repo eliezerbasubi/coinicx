@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useQueries } from "@tanstack/react-query";
 
-import { AssetMeta, InstrumentType } from "@/types/trade";
+import { AssetMeta, InstrumentType, SpotMetas } from "@/types/trade";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import {
   mapPerpDataToAssetMeta,
@@ -10,13 +10,15 @@ import {
 } from "@/features/trade/utils";
 import { hlInfoClient } from "@/services/transport";
 
+import { getTokenDisplayName } from "../utils/getTokenDisplayName";
+
 export const useMetaAndAssetCtxs = () => {
   const { data, error, loading } = useQueries({
     combine(result) {
       return {
         data: {
           perpMetas: result[0]?.data,
-          spotMeta: result[1]?.data,
+          ...result[1]?.data,
         },
         error: result[0]?.error || result[1]?.error,
         loading: result[0]?.isLoading || result[1]?.isLoading,
@@ -47,66 +49,71 @@ export const useMetaAndAssetCtxs = () => {
       {
         queryKey: [QUERY_KEYS.spotMeta],
         staleTime: Infinity,
-        queryFn: () => hlInfoClient.spotMeta(),
+        queryFn: async (): Promise<SpotMetas> => {
+          const spotMeta = await hlInfoClient.spotMeta();
+
+          const tokenNamesToUniverseIndex = new Map<
+            string,
+            Map<string, number>
+          >();
+          const spotNamesToTokens = new Map() as SpotMetas["spotNamesToTokens"];
+          const tokensToSpotId = new Map<number, Map<number, number>>();
+
+          for (let index = 0; index < spotMeta.universe.length; index++) {
+            const universe = spotMeta.universe[index];
+            const [baseIndex, quoteIndex] = universe.tokens;
+
+            const baseTokenMeta = spotMeta.tokens[baseIndex];
+            const quoteTokenMeta = spotMeta.tokens[quoteIndex];
+
+            if (!baseTokenMeta || !quoteTokenMeta) continue;
+
+            // Update name in tokens of spotMeta to the display name
+            spotMeta.tokens[baseIndex].name = getTokenDisplayName(
+              baseTokenMeta.name,
+            );
+            spotMeta.tokens[quoteIndex].name = getTokenDisplayName(
+              quoteTokenMeta.name,
+            );
+
+            /** Map spot names to tokens */
+            if (!spotNamesToTokens.has(universe.name)) {
+              spotNamesToTokens.set(universe.name, {
+                baseToken: baseIndex,
+                quoteToken: quoteIndex,
+              });
+            }
+
+            /** Map token names to universe index */
+            if (!tokenNamesToUniverseIndex.has(baseTokenMeta.name)) {
+              tokenNamesToUniverseIndex.set(
+                baseTokenMeta.name,
+                new Map<string, number>(),
+              );
+            }
+
+            tokenNamesToUniverseIndex
+              .get(baseTokenMeta.name)
+              ?.set(quoteTokenMeta.name, index);
+
+            /** Map token indexes to spot index */
+            if (!tokensToSpotId.has(baseIndex)) {
+              tokensToSpotId.set(baseIndex, new Map<number, number>());
+            }
+
+            tokensToSpotId.get(baseIndex)?.set(quoteIndex, universe.index);
+          }
+
+          return {
+            tokenNamesToUniverseIndex,
+            tokensToSpotId,
+            spotNamesToTokens,
+            spotMeta,
+          };
+        },
       },
     ],
   });
-
-  const getSpotInstrumentQuotes = useCallback(() => {
-    const quotes = new Map<
-      number,
-      { name: string; fullName: string | null; index: number }
-    >();
-
-    if (data.spotMeta) {
-      data.spotMeta.universe.forEach((universe) => {
-        const quoteToken = universe.tokens[1];
-
-        const token = data.spotMeta?.tokens[quoteToken];
-
-        if (token) {
-          quotes.set(quoteToken, {
-            name: token.name,
-            fullName: token.fullName,
-            index: token.index,
-          });
-        }
-      });
-    }
-
-    return quotes;
-  }, [data.spotMeta]);
-
-  const getSpotAssetsData = useCallback(() => {
-    const tokensToAssetsMetas = new Map<string, AssetMeta>();
-    const tokensToUniverseIndex = new Map<number, Map<number, number>>();
-
-    if (!data.spotMeta)
-      return {
-        tokensToAssetsMetas,
-        tokensToUniverseIndex,
-      };
-
-    for (const universe of data.spotMeta.universe) {
-      const [baseIndex, quoteIndex] = universe.tokens;
-
-      const baseTokenMeta = data.spotMeta.tokens[baseIndex];
-      const quoteTokenMeta = data.spotMeta.tokens[quoteIndex];
-
-      tokensToAssetsMetas.set(
-        universe.name,
-        mapSpotDataToAssetMeta(universe, baseTokenMeta, quoteTokenMeta.name),
-      );
-
-      if (!tokensToUniverseIndex.has(baseIndex)) {
-        tokensToUniverseIndex.set(baseIndex, new Map<number, number>());
-      }
-
-      tokensToUniverseIndex.get(baseIndex)?.set(quoteIndex, universe.index);
-    }
-
-    return { tokensToAssetsMetas, tokensToUniverseIndex };
-  }, [data.spotMeta]);
 
   const getTokenMeta = useCallback(
     (
@@ -115,27 +122,33 @@ export const useMetaAndAssetCtxs = () => {
       quoteAsset: string,
     ): AssetMeta | undefined => {
       if (instrumentType === "spot") {
-        if (!baseAsset || !quoteAsset || !data.spotMeta) return;
+        if (
+          !baseAsset ||
+          !quoteAsset ||
+          !data.tokenNamesToUniverseIndex?.size ||
+          !data.spotMeta
+        )
+          return;
 
-        const universe = data.spotMeta.universe.find((universe) => {
-          const [baseIndex, quoteIndex] = universe.tokens;
+        const universeIndex = data.tokenNamesToUniverseIndex
+          ?.get(baseAsset)
+          ?.get(quoteAsset);
 
-          return (
-            data.spotMeta?.tokens[baseIndex].name.toLowerCase() ===
-              baseAsset.toLowerCase() &&
-            data.spotMeta?.tokens[quoteIndex].name.toLowerCase() ===
-              quoteAsset.toLowerCase()
-          );
-        });
+        if (!universeIndex) return;
+
+        const universe = data.spotMeta.universe[universeIndex];
 
         if (!universe) return;
 
-        const [baseIndex, quoteIndex] = universe.tokens;
+        const baseTokenMeta = data.spotMeta.tokens[universe.tokens[0]];
+        const quoteTokenMeta = data.spotMeta.tokens[universe.tokens[1]];
+
+        if (!baseTokenMeta || !quoteTokenMeta) return;
 
         return mapSpotDataToAssetMeta(
           universe,
-          data.spotMeta.tokens[baseIndex],
-          data.spotMeta.tokens[quoteIndex].name,
+          baseTokenMeta,
+          quoteTokenMeta.name,
         );
       }
 
@@ -168,16 +181,13 @@ export const useMetaAndAssetCtxs = () => {
         }
       }
     },
-    [data],
+    [data.perpMetas, data.spotMeta],
   );
 
   return {
-    spotMeta: data.spotMeta,
-    perpMetas: data.perpMetas,
+    ...data,
     error,
     isLoading: loading,
     getTokenMeta,
-    getSpotAssetsData,
-    getSpotInstrumentQuotes,
   };
 };

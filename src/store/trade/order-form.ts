@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 
 import { OrderSide, OrderType, ScaleDistribution } from "@/types/trade";
+import { roundToDecimals } from "@/features/trade/utils";
 
 import { useInstrumentStore } from "./instrument";
 import { useUserTradeStore } from "./user-trade";
@@ -56,8 +57,8 @@ type OrderFormActions = {
   setScaleOrder: (value: ScaleOrder[]) => void;
   setTwapOrder: (value: Partial<TwapOrder>) => void;
   onSizeCoinChange: (isNtl: boolean) => void;
-  onPercentChange: (percent: number) => void;
-  onSizeChange: (size: string) => void;
+  onPercentChange: (percent: number, isSpot: boolean) => void;
+  onSizeChange: (size: string, isSpot: boolean) => void;
   onOrderSideChange: (orderSide: OrderSide, isSpot: boolean) => void;
   onMidClick: () => void;
   getSizeInBase: (midPx?: number) => number;
@@ -162,7 +163,11 @@ export const useOrderFormStore = create<OrderFormStore>()(
 
           const fractionDigits = isNtl ? 2 : szDecimals;
 
-          currentSize = newSize.toFixed(fractionDigits);
+          currentSize = roundToDecimals(
+            newSize,
+            fractionDigits,
+            "floor",
+          ).toString();
         }
 
         set({
@@ -170,13 +175,13 @@ export const useOrderFormStore = create<OrderFormStore>()(
           settings: { ...settings, isSzInNtl: isNtl },
         });
       },
-      onPercentChange(percent: number) {
-        const { settings, calculateOrderSize } = get();
+      onPercentChange(percent, isSpot) {
+        const { orderSide, settings, calculateOrderSize } = get();
         const { szDecimals } = getInstrumentData();
 
         const maxOrderSize = calculateOrderSize({
-          isSpot: false,
-          isBuyOrder: false,
+          isSpot,
+          isBuyOrder: orderSide === "buy",
         });
 
         const size = (maxOrderSize * percent) / 100;
@@ -184,16 +189,16 @@ export const useOrderFormStore = create<OrderFormStore>()(
 
         set({
           szPercent: percent,
-          size: size.toFixed(fractionDigits),
+          size: roundToDecimals(size, fractionDigits, "floor").toString(),
         });
       },
 
-      onSizeChange(size: string) {
-        const { calculateOrderSize } = get();
+      onSizeChange(size, isSpot) {
+        const { orderSide, calculateOrderSize } = get();
 
         const maxOrderSize = calculateOrderSize({
-          isSpot: false,
-          isBuyOrder: false,
+          isSpot,
+          isBuyOrder: orderSide === "buy",
         });
 
         const maxOrderSizeValue = maxOrderSize || 1;

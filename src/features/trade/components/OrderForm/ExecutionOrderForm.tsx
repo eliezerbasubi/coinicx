@@ -2,6 +2,7 @@ import React from "react";
 
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
+import { InputNumberControl } from "@/components/ui/input-number";
 import { isLimitOrder, isStopOrder } from "@/features/trade/utils/orderTypes";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import {
@@ -9,7 +10,7 @@ import {
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 
-import { OrderFormInput, TrailingQuote } from "./OrderFormInput";
+import TrailingQuote from "./TrailingQuote";
 
 const ExecutionOrderForm = () => {
   const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);
@@ -30,7 +31,7 @@ const ExecutionOrderForm = () => {
   return (
     <React.Fragment>
       <Visibility visible={isStopOrder(orderType)}>
-        <OrderFormInput
+        <InputNumberControl
           name="triggerPrice"
           id="triggerPrice"
           value={triggerPrice}
@@ -41,7 +42,7 @@ const ExecutionOrderForm = () => {
         />
       </Visibility>
       <Visibility visible={isLimitOrder(orderType)}>
-        <OrderFormInput
+        <InputNumberControl
           name="limitPrice"
           id="limitPrice"
           value={limitPrice}

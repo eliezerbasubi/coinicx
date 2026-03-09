@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import InputNumberFormatter from "@/components/common/InputNumberFormatter";
+import { InputNumberFormatter } from "@/components/ui/input-number";
 
 type Props = {
   label: string;

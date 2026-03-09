@@ -1,31 +1,27 @@
-export type FormatOptions = { locale?: string } & Intl.NumberFormatOptions;
+export type FormatOptions = {
+  locale?: string;
+  useSign?: boolean;
+  useFallback?: boolean;
+  fallback?: string;
+} & Intl.NumberFormatOptions;
 
 export const formatNumber = (value: number, options?: FormatOptions) => {
-  const { locale, ...rest } = options ?? {};
-  return value.toLocaleString(locale ?? "en-US", {
+  const { locale, useSign, useFallback, fallback, ...rest } = options ?? {};
+
+  const formatted = value.toLocaleString(locale ?? "en-US", {
     ...rest,
     currency: rest.currency ?? "USD",
   });
-};
 
-export const formatInputValue = (value: string, options?: FormatOptions) => {
-  if (!value) return "";
+  if (useFallback && (!value || !Number.isFinite(value))) {
+    return fallback ?? "--";
+  }
 
-  const formatted = formatNumber(Number(value), options);
+  if (useSign) {
+    const sign = value >= 0 ? "+" : "";
 
-  // if (value.endsWith(".")) {
-  //   formatted += ".";
-  // }
+    return sign + formatted;
+  }
 
   return formatted;
-};
-
-export const formatNumberWithFallback = (
-  value: number,
-  options?: FormatOptions,
-  fallback?: string,
-) => {
-  if (!value || !Number.isFinite(value)) return fallback ?? "--";
-
-  return formatNumber(value, options);
 };

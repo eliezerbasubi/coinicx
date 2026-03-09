@@ -1,6 +1,22 @@
-import { arbitrum, arbitrumSepolia, hyperEvm, hyperliquidEvmTestnet } from "viem/chains";
+import { ChainContract } from "viem";
+import {
+  arbitrum,
+  arbitrumSepolia,
+  Chain,
+  hyperEvm,
+  hyperliquidEvmTestnet,
+} from "viem/chains";
 
-export const CHAINS_CONFIG = {
+interface IChain extends Chain {
+  contracts: Record<string, ChainContract>;
+}
+
+type Network = "testnet" | "mainnet";
+
+export const CHAINS_CONFIG: Record<
+  Network,
+  Record<"arbitrum" | "hyperEVM", IChain>
+> = {
   testnet: {
     arbitrum: {
       ...arbitrumSepolia,
@@ -9,7 +25,7 @@ export const CHAINS_CONFIG = {
         bridge2: { address: "0x08cfc1B6b2dCF36A1480b99353A354AA8AC56f89" },
       },
     },
-    hyperEVM: hyperliquidEvmTestnet,
+    hyperEVM: hyperliquidEvmTestnet as IChain,
   },
   mainnet: {
     arbitrum: {
@@ -19,7 +35,7 @@ export const CHAINS_CONFIG = {
         bridge2: { address: "0x2df1c51e09aecf9cacb7bc98cb1742757f163df7" },
       },
     },
-    hyperEVM: hyperEvm,
+    hyperEVM: hyperEvm as IChain,
   },
 };
 

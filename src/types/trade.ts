@@ -1,7 +1,10 @@
 import {
+  AllDexsClearinghouseStateWsEvent,
   AllPerpMetasResponse,
   CandleSnapshotParameters,
   OrderParameters,
+  SpotMetaResponse,
+  SpotStateWsEvent,
 } from "@nktkas/hyperliquid";
 
 export type ChartType = "standard" | "tradingView" | "depth";
@@ -97,6 +100,9 @@ export type AssetCxt = {
   midPx: number;
   markPx: number;
   oraclePx: number | null;
+
+  /** Reference price to be used for orders (mid price for spot, mark price for perps) */
+  referencePx: number;
 };
 
 export type AllAssetsMetas = {
@@ -158,3 +164,68 @@ export type AllPerpMetas = Array<
     perpDexIndex: number;
   }
 >;
+
+export type SpotBalance = SpotStateWsEvent["spotState"]["balances"][number];
+
+export type AllDexsClearinghouseState =
+  AllDexsClearinghouseStateWsEvent["clearinghouseStates"][number][1];
+
+export type AssetPosition = AllDexsClearinghouseState["assetPositions"][number];
+
+export type Position = AssetPosition["position"] & {
+  markPx: string;
+  midPx: string;
+  dex: string;
+  base: string;
+  quote: string;
+  szDecimals: number;
+  pxDecimals: number;
+  assetId: number;
+  isLong: boolean;
+  tpPrice: string | null;
+  slPrice: string | null;
+};
+
+export type OpenOrder = {
+  timestamp: number;
+  orderType: string;
+  href: string;
+  dex: string | null;
+  base: string;
+  coin: string;
+  symbol: string;
+  direction: string;
+  side: string;
+  sz: number;
+  price: number;
+  isSpot: boolean;
+  triggerCondition: string;
+  triggerPx: string;
+  oid: number;
+  cloid: `0x${string}` | null;
+};
+
+export type ActiveTwap = {
+  twapId: number;
+  coin: string;
+  dex: string | null;
+  base: string;
+  symbol: string;
+  href: string;
+  averagePx: number;
+  executedSz: number;
+  minutes: number;
+  randomize: boolean;
+  reduceOnly: boolean;
+  side: "B" | "A";
+  sz: number;
+  timestamp: number;
+  isSpot: boolean;
+};
+
+export type SpotMetas = {
+  spotMeta: SpotMetaResponse;
+  tokenNamesToUniverseIndex: Map<string, Map<string, number>>;
+  spotNamesToTokens: Map<string, { baseToken: number; quoteToken: number }>;
+  tokensToSpotId: Map<number, Map<number, number>>;
+};

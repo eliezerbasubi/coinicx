@@ -43,11 +43,23 @@ export const getPriceSigFigs = (
   );
 };
 
-export const parseOrderPrice = (entryPrice: number, decimals: number) => {
-  const multiplier = Math.pow(10, decimals);
-  const epsilon = 0;
+export const roundToDecimals = (
+  entryPrice: number,
+  decimals: number,
+  roundingMode: "round" | "floor" | "ceil" = "round",
+) => {
+  const factor = Math.pow(10, decimals);
 
-  return Math.round(entryPrice * multiplier + epsilon) / multiplier;
+  const value = entryPrice * factor;
+
+  switch (roundingMode) {
+    case "round":
+      return Math.round(value) / factor;
+    case "floor":
+      return Math.floor(value + 1e-9) / factor;
+    case "ceil":
+      return Math.ceil(value - 1e-9) / factor;
+  }
 };
 
 export const calculateSlippageAdjustedPrice = (params: {
@@ -73,5 +85,5 @@ export const parseOrderPriceWithSlippage = (params: {
     slippage: params.slippage,
   });
 
-  return parseOrderPrice(priceWithSlippage, params.decimals);
+  return roundToDecimals(priceWithSlippage, params.decimals, "floor");
 };

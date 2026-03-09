@@ -3,10 +3,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 import ConnectButton from "@/components/common/ConnectButton";
-import AdaptiveDialog from "@/components/ui/adaptive-dialog";
+import FormInputSlider from "@/components/common/FormInputSlider";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
-import InputNumber from "@/components/ui/input-number";
+import { InputNumber } from "@/components/ui/input-number";
 import { useEnableTrading } from "@/features/trade/hooks/useEnableTrading";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
@@ -18,8 +18,6 @@ import {
   useUserTradeStore,
 } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
-
-import OrderFormSlider from "./OrderFormSlider";
 
 const toastId = "adjust-leverage";
 
@@ -237,11 +235,11 @@ const AdjustLeverage = () => {
   };
 
   return (
-    <AdaptiveDialog
+    <AdaptivePopover
       open={open}
       onOpenChange={setOpen}
       title="Adjust Leverage"
-      className="gap-0 pb-4 md:pb-0"
+      className="gap-0"
       trigger={
         <Button
           variant="secondary"
@@ -252,7 +250,10 @@ const AdjustLeverage = () => {
         </Button>
       }
     >
-      <div className="w-full pt-4">
+      <div className="w-full pt-4 md:pt-0">
+        <p className="text-white text-sm hidden sm:block font-medium mb-2">
+          Adjust Leverage
+        </p>
         <div className="flex items-center justify-between mb-4">
           <ChevronLeft
             role="button"
@@ -285,7 +286,7 @@ const AdjustLeverage = () => {
             }
           />
         </div>
-        <OrderFormSlider
+        <FormInputSlider
           value={Math.floor((Number(assetLeverage) / maxLeverage) * 100)}
           min={1}
           onValueChange={(value) => {
@@ -303,7 +304,7 @@ const AdjustLeverage = () => {
           onClick={onAdjustLeverage}
         />
       </div>
-    </AdaptiveDialog>
+    </AdaptivePopover>
   );
 };
 

@@ -4,11 +4,11 @@ import { ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
+import Tag from "@/components/ui/tag";
 import { formatSymbol } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
 
-import Badge from "../Badge";
 import TokenImage from "../TokenImage";
 import AssetsSelectorContent from "./AssetsSelectorContent";
 import TickerSelectorProvider from "./TickerSelectorProvider";
@@ -40,7 +40,7 @@ const AssetsSelector = () => {
         role="button"
         tabIndex={0}
         ref={triggerRef}
-        className="group/selector flex items-center space-x-2 cursor-pointer"
+        className="group/selector flex items-center space-x-2 cursor-pointer mb-2 sm:mb-0"
         onClick={() => setOpen(!open)}
       >
         <TokenImage
@@ -53,7 +53,7 @@ const AssetsSelector = () => {
 
         <div className="flex-1">
           <div className="flex items-center space-x-1">
-            <p className="text-md md:text-xl font-bold">
+            <p className="text-md md:text-xl font-bold whitespace-nowrap">
               {formatSymbol(base, quote, isSpot)}
             </p>
 
@@ -64,11 +64,11 @@ const AssetsSelector = () => {
           </div>
           <Visibility visible={!isMobile}>
             <div className="flex items-center space-x-1">
-              <Badge value={instrumentType} className="capitalize" />
+              <Tag value={instrumentType} className="capitalize" />
               {!!tokenMeta?.maxLeverage && (
-                <Badge value={`${tokenMeta?.maxLeverage}x`} />
+                <Tag value={`${tokenMeta?.maxLeverage}x`} />
               )}
-              <Badge value={tokenMeta?.dex} />
+              {tokenMeta.dex && <Tag value={tokenMeta?.dex} />}
             </div>
           </Visibility>
         </div>

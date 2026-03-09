@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 
+import Transact from "./components/AccountTransact";
 import TickerOverview from "./components/TickerOverview";
 import TradeChartArea from "./components/TradeChartArea";
 import TradeUserInfo from "./components/TradeUserInfo";
@@ -44,10 +45,11 @@ const Trade = () => {
         </div>
         {isMobile ? <OrderFormMobile /> : <OrderForm />}
       </div>
-      <div className="w-full bg-trade-dark flex gap-1 py-0.5 md:p-1 flex-wrap md:flex-nowrap">
+      <div className="w-full bg-trade-dark flex gap-1 py-0.5 md:px-1 md:pb-2 flex-wrap md:flex-nowrap">
         <TradeUserInfo />
         <UserAccountInfo />
       </div>
+      <Transact />
     </div>
   );
 };
