@@ -14,6 +14,7 @@ import { useInstrumentStore } from "@/store/trade/instrument";
 import TradeStoreProvider from "@/store/trade/provider";
 
 import { parseBuilderDeployedAsset } from "../utils";
+import TradingPairSubsProvider from "./trading-pair-subs-provider";
 
 const TradingPairProvider = ({
   children,
@@ -58,7 +59,7 @@ const TradingPairProvider = ({
       coin={props.base}
       base={parseBuilderDeployedAsset(props.base).base}
     >
-      {children}
+      <TradingPairSubsProvider>{children}</TradingPairSubsProvider>
     </TradeStoreProvider>
   );
 };
