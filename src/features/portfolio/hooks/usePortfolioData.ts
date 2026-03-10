@@ -16,7 +16,7 @@ export const usePortfolioData = () => {
       const stakingValue =
         Number(delegatorResult.data?.delegated ?? "0") +
         Number(delegatorResult.data?.undelegated ?? "0") +
-        Number(delegatorResult.data?.totalPendingWithdrawal);
+        Number(delegatorResult.data?.totalPendingWithdrawal ?? "0");
 
       const dailyUserVlm = feesResult.data?.dailyUserVlm ?? [];
       const volume14d = dailyUserVlm

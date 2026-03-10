@@ -64,13 +64,13 @@ const PortfolioChart = () => {
   const isPositive = change >= 0;
 
   useEffect(() => {
-    const el = chartRef.current;
+    const chartContainer = chartRef.current;
     const tooltipEl = tooltipRef.current;
-    if (!el || !seriesData.length) return;
+    if (!chartContainer || !seriesData.length) return;
 
-    const chart = createChart(el, {
+    const chart = createChart(chartContainer, {
       ...BASE_CHART_OPTIONS,
-      width: el.clientWidth,
+      width: chartContainer.clientWidth,
     });
 
     const color = isPositive ? "#fcd535" : "#f6465d";
@@ -104,7 +104,7 @@ const PortfolioChart = () => {
       }
       if (
         param.point.x < 0 ||
-        param.point.x > el.clientWidth ||
+        param.point.x > chartContainer.clientWidth ||
         param.point.y < 0 ||
         param.point.y > CHART_HEIGHT
       ) {
@@ -140,7 +140,9 @@ const PortfolioChart = () => {
 
       const x = param.point.x;
       const leftPos =
-        x + tooltipWidth + 12 > el.clientWidth ? x - tooltipWidth - 8 : x + 12;
+        x + tooltipWidth + 12 > chartContainer.clientWidth
+          ? x - tooltipWidth - 8
+          : x + 12;
       const topPos = Math.max(
         0,
         Math.min(yCoord - tooltipHeight / 2, CHART_HEIGHT - tooltipHeight),
@@ -151,13 +153,7 @@ const PortfolioChart = () => {
       tooltipEl.style.opacity = "1";
     });
 
-    const observer = new ResizeObserver(() => {
-      chart.resize(el.clientWidth, CHART_HEIGHT);
-    });
-    observer.observe(el);
-
     return () => {
-      observer.disconnect();
       chart.remove();
       if (tooltipEl) tooltipEl.style.opacity = "0";
     };
@@ -247,6 +243,7 @@ const CHART_HEIGHT = 200;
 
 const BASE_CHART_OPTIONS: DeepPartial<ChartOptions> = {
   height: CHART_HEIGHT,
+  autoSize: true,
   crosshair: {
     mode: CrosshairMode.Normal,
     // Show a subtle vertical line from the marker down to the bottom
