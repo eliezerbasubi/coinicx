@@ -26,7 +26,7 @@ type UseClosePositionArgs = {
 };
 
 export const useClosePosition = (args?: UseClosePositionArgs) => {
-  const { builder, enableTrading } = useEnsureTradingEnabled({ toastId });
+  const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
 
   const buildClosingOrders = (params: ClosePositionParams) => {
     const {
@@ -94,7 +94,7 @@ export const useClosePosition = (args?: UseClosePositionArgs) => {
       const { response } = await exchClient.order({
         orders,
         grouping: "na",
-        builder,
+        builder: getBuilder(Number(orders[0].a)),
       });
 
       let message = `${isClosingAllPositions ? "Positions" : "Position"} closed successfully`;

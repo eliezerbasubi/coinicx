@@ -14,6 +14,15 @@ type Props = {
 const UserTradeProvider = ({ children }: Props) => {
   const { address } = useAccount();
 
+  // Subscribe to web data3 state
+  useSubscription(() => {
+    if (!address) return;
+
+    return hlSubClient.webData3({ user: address }, (data) => {
+      useUserTradeStore.getState().applyWebData(data);
+    });
+  }, [address]);
+
   // Subscribe to spot state
   useSubscription(() => {
     if (!address) return;

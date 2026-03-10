@@ -33,15 +33,6 @@ const TradingPairSubsProvider = ({ children }: Props) => {
     });
   }, [user, coin, instrumentType]);
 
-  // Subscribe to web data for perps only
-  useSubscription(() => {
-    if (!address || instrumentType !== "perps") return;
-
-    return hlSubClient.webData3({ user: address }, (data) => {
-      useUserTradeStore.getState().applyWebData(data);
-    });
-  }, [address, instrumentType]);
-
   return children;
 };
 

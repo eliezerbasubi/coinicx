@@ -12,7 +12,7 @@ export const useEnsureTradingEnabled = (args?: UseEnsureTradingEnabledArgs) => {
   const { shouldEnableTrading, enableTrading } = useEnableTrading({
     toastId: args?.toastId,
   });
-  const { builder, approveBuilderFee } = useApproveBuilderFee();
+  const { approveBuilderFee, getBuilder } = useApproveBuilderFee();
 
   const [processing, setProcessing] = useState(false);
 
@@ -33,7 +33,7 @@ export const useEnsureTradingEnabled = (args?: UseEnsureTradingEnabledArgs) => {
   return {
     processing,
     shouldEnableTrading,
-    builder,
+    getBuilder,
     enableTrading,
     approveBuilderFee,
     approveFeeAndEnableTrading,

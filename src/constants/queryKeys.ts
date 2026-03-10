@@ -7,4 +7,7 @@ export const QUERY_KEYS = {
   tradeTicker: "tradeTicker",
   extraAgents: "userExtraAgents",
   maxBuilderFee: "maxBuilderFee",
+  portfolio: "portfolio",
+  delegatorSummary: "delegatorSummary",
+  userFees: "user-fees",
 } as const;

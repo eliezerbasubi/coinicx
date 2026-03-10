@@ -36,10 +36,10 @@ const Header = () => {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <header className="w-full h-16 flex justify-between items-center px-4 md:px-6">
+    <header className="w-full h-16 flex justify-between items-center px-4 md:px-6 md:gap-x-6">
       <p className="text-xl text-primary font-extrabold">CoinicX</p>
 
-      <div className="hidden md:flex gap-x-6">
+      <div className="hidden md:flex flex-1 gap-x-6">
         {LINKS.map((link) => (
           <Link
             key={link.id}
