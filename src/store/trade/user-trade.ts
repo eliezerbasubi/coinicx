@@ -7,6 +7,7 @@ import {
   UserFillsWsEvent,
   UserFundingsWsEvent,
   UserHistoricalOrdersWsEvent,
+  UserNonFundingLedgerUpdatesWsEvent,
   UserTwapHistoryWsEvent,
   UserTwapSliceFillsWsEvent,
   WebData3WsEvent,
@@ -39,6 +40,7 @@ interface UserTradeState {
   historicalOrders: UserHistoricalOrdersWsEvent["orderHistory"];
   fills: UserFillsWsEvent["fills"];
   fundings: UserFundingsWsEvent["fundings"];
+  nonFundingLedger: UserNonFundingLedgerUpdatesWsEvent["nonFundingLedgerUpdates"];
   twapStates: TwapStates;
   webData: WebData3WsEvent | null;
   clearinghouseState: AllDexsClearinghouseState | null;
@@ -62,6 +64,9 @@ interface UserTradeStoreActions {
   applyTwapStates: (data: Partial<TwapStates>) => void;
   applyUserHistoricalOrders: (data: UserHistoricalOrdersWsEvent) => void;
   applyUserFundings: (data: UserFundingsWsEvent) => void;
+  applyUserNonFundingLedgerUpdates: (
+    data: UserNonFundingLedgerUpdatesWsEvent,
+  ) => void;
 }
 
 interface UserTradeStore extends UserTradeState, UserTradeStoreActions {}
@@ -77,6 +82,7 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   openOrders: [],
   fills: [],
   fundings: [],
+  nonFundingLedger: [],
   historicalOrders: [],
   twapStates: {
     twaps: [],
@@ -204,6 +210,9 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       clearinghouseState,
       allDexsClearinghouseState,
     });
+  },
+  applyUserNonFundingLedgerUpdates(data) {
+    set({ nonFundingLedger: data.nonFundingLedgerUpdates });
   },
 }));
 

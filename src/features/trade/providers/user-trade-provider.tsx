@@ -102,6 +102,17 @@ const UserTradeProvider = ({ children }: Props) => {
     });
   }, [address]);
 
+  // Subscribe to user fundings state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.userNonFundingLedgerUpdates(
+      { user: address },
+      (data) => {
+        useUserTradeStore.getState().applyUserNonFundingLedgerUpdates(data);
+      },
+    );
+  }, [address]);
+
   return children;
 };
 

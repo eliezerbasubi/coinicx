@@ -13,6 +13,7 @@ import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
 import CardItem from "./CardItem";
+import CoinLink from "./CoinLink";
 
 type FundingHistoryEntry = UserFundingsWsEvent["fundings"][number];
 
@@ -29,19 +30,13 @@ const columns: ColumnDef<FundingHistoryEntry>[] = [
     header: "Coin",
     cell({ row: { original } }) {
       const asset = parseBuilderDeployedAsset(original.coin);
-      return (
-        <Link
-          href={`${ROUTES.trade.perps}/${original.coin}`}
-          className="font-medium hover:text-primary flex items-center gap-x-1"
-        >
-          <p>{asset.base}</p>
 
-          {asset.dex && (
-            <div className="inline-block p-0.5 px-1 rounded bg-primary/10 text-primary text-[11px] font-medium">
-              {asset.dex}
-            </div>
-          )}
-        </Link>
+      return (
+        <CoinLink
+          dex={asset.dex}
+          href={`${ROUTES.trade.perps}/${original.coin}`}
+          symbol={asset.base}
+        />
       );
     },
   },

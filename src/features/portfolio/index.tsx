@@ -50,7 +50,7 @@ const Portfolio = () => {
         </div>
       </div>
 
-      <div className="w-full flex flex-col md:flex-row items-stretch md:gap-6">
+      <div className="w-full flex flex-col md:flex-row items-stretch gap-4 md:gap-6">
         <PortfolioOverview />
         <PortfolioChart />
       </div>

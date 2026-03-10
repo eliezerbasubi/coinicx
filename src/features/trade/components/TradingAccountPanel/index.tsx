@@ -7,6 +7,7 @@ import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 
 import Balances from "./Balances";
+import DepositsAndWithdrawals from "./DepositsAndWithdrawals";
 import FundingHistory from "./FundingHistory";
 import OpenOrders from "./OpenOrders";
 import OrderHistory from "./OrderHistory";
@@ -147,7 +148,7 @@ const TradingAccountPanel = ({
             value="depositAndWithdrawals"
             className="overflow-auto [&::-webkit-scrollbar]:h-1"
           >
-            <FundingHistory />
+            <DepositsAndWithdrawals />
           </TabsContent>
         </AuthenticatedContent>
       </Tabs>
