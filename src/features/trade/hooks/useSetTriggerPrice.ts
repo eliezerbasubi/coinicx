@@ -20,12 +20,12 @@ type TriggerPriceParams = {
   size: string;
 };
 
-type UseTriggerPriceArgs = {
+type UseSetTriggerPriceArgs = {
   onSuccess?: () => void;
 };
 
-export const useTriggerPrice = (args?: UseTriggerPriceArgs) => {
-  const { builder, enableTrading } = useEnsureTradingEnabled({ toastId });
+export const useSetTriggerPrice = (args?: UseSetTriggerPriceArgs) => {
+  const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
   const [processing, setProcessing] = useState(false);
 
   const setTriggerPrice = async (params: TriggerPriceParams) => {
@@ -106,7 +106,7 @@ export const useTriggerPrice = (args?: UseTriggerPriceArgs) => {
       const { response } = await exchClient.order({
         orders,
         grouping: "positionTpsl",
-        builder,
+        builder: getBuilder(Number(orders[0].a)),
       });
 
       let message = "Trigger price set successfully";

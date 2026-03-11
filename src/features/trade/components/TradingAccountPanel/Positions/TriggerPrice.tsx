@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Tag from "@/components/ui/tag";
-import { useTriggerPrice } from "@/features/trade/hooks/useTriggerPrice";
+import { useSetTriggerPrice } from "@/features/trade/hooks/useSetTriggerPrice";
 import { formatPriceToDecimal, roundToDecimals } from "@/features/trade/utils";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
@@ -105,7 +105,7 @@ const TriggerPriceContent = ({
     },
   );
 
-  const { processing, setTriggerPrice } = useTriggerPrice({ onSuccess });
+  const { processing, setTriggerPrice } = useSetTriggerPrice({ onSuccess });
 
   const entryPrice = Number(position.entryPx);
   const effectiveSize =
