@@ -22,7 +22,7 @@ type UseReversePositionArgs = {
 };
 
 export const useReversePosition = (args?: UseReversePositionArgs) => {
-  const { builder, enableTrading } = useEnsureTradingEnabled({ toastId });
+  const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
   const [processing, setProcessing] = useState(false);
 
   const reversePosition = async (params: ReversePositionParams) => {
@@ -66,7 +66,7 @@ export const useReversePosition = (args?: UseReversePositionArgs) => {
       const { response } = await exchClient.order({
         orders: [order],
         grouping: "na",
-        builder,
+        builder: getBuilder(position.assetId),
       });
 
       let message = "Position reversed successfully";

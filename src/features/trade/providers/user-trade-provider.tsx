@@ -1,12 +1,10 @@
 "use client";
 
 import React from "react";
-import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
 import { useSubscription } from "@/hooks/useSubscription";
 import { hlSubClient } from "@/services/transport";
-import { useTradeContext } from "@/store/trade/hooks";
 import { useUserTradeStore } from "@/store/trade/user-trade";
 
 type Props = {
@@ -15,20 +13,15 @@ type Props = {
 
 const UserTradeProvider = ({ children }: Props) => {
   const { address } = useAccount();
-  const { coin, instrumentType } = useTradeContext((s) => ({
-    coin: s.coin,
-    instrumentType: s.instrumentType,
-  }));
 
-  const user = address || zeroAddress;
-
-  // Subscribe to user's active asset data for perps only
+  // Subscribe to web data3 state
   useSubscription(() => {
-    if (instrumentType !== "perps" || !coin) return;
-    return hlSubClient.activeAssetData({ user, coin }, (data) => {
-      useUserTradeStore.getState().applyActiveAssetData(data);
+    if (!address) return;
+
+    return hlSubClient.webData3({ user: address }, (data) => {
+      useUserTradeStore.getState().applyWebData(data);
     });
-  }, [user, coin, instrumentType]);
+  }, [address]);
 
   // Subscribe to spot state
   useSubscription(() => {
@@ -38,15 +31,6 @@ const UserTradeProvider = ({ children }: Props) => {
       useUserTradeStore.getState().applySpotState(data);
     });
   }, [address]);
-
-  // Subscribe to web data for perps only
-  useSubscription(() => {
-    if (!address || instrumentType !== "perps") return;
-
-    return hlSubClient.webData3({ user: address }, (data) => {
-      useUserTradeStore.getState().applyWebData(data);
-    });
-  }, [address, instrumentType]);
 
   // Subscribe to all dexs clearinghouse state
   useSubscription(() => {
@@ -116,6 +100,17 @@ const UserTradeProvider = ({ children }: Props) => {
     return hlSubClient.userFundings({ user: address }, (data) => {
       useUserTradeStore.getState().applyUserFundings(data);
     });
+  }, [address]);
+
+  // Subscribe to user fundings state
+  useSubscription(() => {
+    if (!address) return;
+    return hlSubClient.userNonFundingLedgerUpdates(
+      { user: address },
+      (data) => {
+        useUserTradeStore.getState().applyUserNonFundingLedgerUpdates(data);
+      },
+    );
   }, [address]);
 
   return children;

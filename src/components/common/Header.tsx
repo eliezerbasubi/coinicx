@@ -1,16 +1,9 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectButton as RainbowConnectButton } from "@rainbow-me/rainbowkit";
-import {
-  Bitcoin,
-  ChartCandlestick,
-  Coins,
-  Replace,
-  Wallet,
-} from "lucide-react";
+import { ChartCandlestick, Coins, Replace } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import { useAccount } from "wagmi";
 
@@ -22,14 +15,7 @@ import SideBarMenu from "./Sidebar";
 
 const LINKS = [
   {
-    href: `${ROUTES.crypto.buy}/USD/BTC`,
-    label: "Buy Crypto",
-    id: "buyCrypto",
-    icon: <Bitcoin />,
-    subPaths: [ROUTES.crypto.index, ROUTES.crypto.sell],
-  },
-  {
-    href: `${ROUTES.trade.perps}/BTC/USDC`,
+    href: `${ROUTES.trade.perps}/BTC`,
     subPaths: [ROUTES.trade.perps, ROUTES.trade.spot],
     label: "Trade",
     id: "trade",
@@ -42,12 +28,6 @@ const LINKS = [
     id: "portfolio",
     icon: <ChartCandlestick />,
   },
-  {
-    href: ROUTES.wallet.index,
-    label: "Wallet",
-    id: "wallet",
-    icon: <Wallet />,
-  },
 ];
 
 const Header = () => {
@@ -56,10 +36,10 @@ const Header = () => {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <header className="w-full h-16 flex justify-between items-center px-4 md:px-6">
+    <header className="w-full h-16 flex justify-between items-center px-4 md:px-6 md:gap-x-6">
       <p className="text-xl text-primary font-extrabold">CoinicX</p>
 
-      <div className="hidden md:flex gap-x-6">
+      <div className="hidden md:flex flex-1 gap-x-6">
         {LINKS.map((link) => (
           <Link
             key={link.id}

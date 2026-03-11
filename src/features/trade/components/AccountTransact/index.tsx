@@ -11,7 +11,7 @@ import Deposit from "./Deposit";
 import Transfer from "./Transfer";
 import Withdraw from "./Withdraw";
 
-const Transact = () => {
+const AccountTransact = () => {
   const open = useAccountTransactStore((s) => s.open);
   const variant = useAccountTransactStore((s) => s.variant);
 
@@ -60,4 +60,4 @@ const Transact = () => {
   );
 };
 
-export default Transact;
+export default AccountTransact;

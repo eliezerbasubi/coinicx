@@ -15,7 +15,4 @@ export const ROUTES = {
   portfolio: {
     index: "/portfolio",
   },
-  wallet: {
-    index: "/wallet",
-  },
 };

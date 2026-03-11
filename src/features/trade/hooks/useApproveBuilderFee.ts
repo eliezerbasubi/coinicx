@@ -5,7 +5,6 @@ import { useAccount } from "wagmi";
 import { ERROR_NAME } from "@/constants/errors";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import { hlExchangeClient, hlInfoClient } from "@/services/transport";
-import { useTradeContext } from "@/store/trade/hooks";
 
 import { COINICX_BUILDER_SETTINGS } from "../constants";
 
@@ -15,11 +14,6 @@ export const useApproveBuilderFee = () => {
   const { address } = useAccount();
 
   const builderAddress = getAddress(COINICX_BUILDER_SETTINGS.b);
-  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
-
-  const fee = isPerps
-    ? COINICX_BUILDER_SETTINGS.perps
-    : COINICX_BUILDER_SETTINGS.spot;
 
   const queryClient = useQueryClient();
 
@@ -34,6 +28,19 @@ export const useApproveBuilderFee = () => {
         builder: builderAddress,
       }),
   });
+
+  const getBuilder = (assetId: number) => {
+    // Spot Ids start at 10_000
+    const isSpot = assetId > 10_000;
+
+    const fee = isSpot
+      ? COINICX_BUILDER_SETTINGS.spot
+      : COINICX_BUILDER_SETTINGS.perps;
+    return {
+      b: COINICX_BUILDER_SETTINGS.b,
+      f: fee,
+    };
+  };
 
   const approveBuilderFee = async () => {
     if (maxBuilderFee && maxBuilderFee >= MAX_FEE_RATE) return true;
@@ -66,11 +73,8 @@ export const useApproveBuilderFee = () => {
   };
 
   return {
-    builder: {
-      b: builderAddress,
-      f: fee,
-    },
     maxBuilderFeeStatus,
+    getBuilder,
     approveBuilderFee,
   };
 };

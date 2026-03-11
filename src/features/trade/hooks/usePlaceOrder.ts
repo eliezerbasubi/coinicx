@@ -24,7 +24,7 @@ import { useEnsureTradingEnabled } from "./useEnsureTradingEnabled";
 const toastId = "place-order";
 
 export const usePlaceOrder = () => {
-  const { builder, enableTrading } = useEnsureTradingEnabled({ toastId });
+  const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
 
   const { settings, orderSide } = useShallowOrderFormStore((s) => ({
     settings: s.settings,
@@ -369,7 +369,7 @@ export const usePlaceOrder = () => {
       const { response } = await exchClient.order({
         orders: orderPayload.orders,
         grouping: orderPayload.grouping as OrderParameters["grouping"],
-        builder,
+        builder: getBuilder(Number(orderPayload.orders[0].a)),
       });
 
       const base = useInstrumentStore.getState().assetMeta?.base;

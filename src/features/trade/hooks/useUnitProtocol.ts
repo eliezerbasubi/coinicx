@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 
+import { GenerateAddressResponse, Operation, UnitAddress } from "@/types/unit";
 import {
   PERPS_NATIVE_CHAINS_ASSETS,
   UNIT_SPOT_ASSETS,
@@ -18,14 +19,11 @@ export const useUnitFees = (args?: UseUnitFeesArgs) => {
     staleTime: 5 * 60 * 1000,
     enabled: args?.enabled,
     queryFn: async () => {
-      const response = await fetch(
-        UNIT_API_BASE_URL + UNIT_API_BASE_URL + "/v2/estimate-fees",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(UNIT_API_BASE_URL + "/v2/estimate-fees", {
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       const data = await response.json();
 
@@ -67,16 +65,6 @@ export const useUnitFees = (args?: UseUnitFeesArgs) => {
   );
 
   return { unitFees, getUnitFee };
-};
-
-type GenerateAddressResponse = {
-  address: string;
-  signatures: {
-    "field-node": string;
-    "hl-node": string;
-    "node-1": string;
-  };
-  status: string;
 };
 
 type SupportedNetwork =
@@ -142,12 +130,8 @@ export const useGenerateUnitAddress = () => {
 };
 
 type UnitOperationsResponse = {
-  addresses: [
-    {
-      sourceCoinType: string;
-      destinationChain: string;
-    } & GenerateAddressResponse,
-  ];
+  addresses: UnitAddress[];
+  operations: Operation[];
 };
 
 export const useUnitOperations = () => {
@@ -158,7 +142,7 @@ export const useUnitOperations = () => {
     enabled: !!address,
     queryFn: async () => {
       const response = await fetch(
-        UNIT_API_BASE_URL + UNIT_API_BASE_URL + `/operations/${address}`,
+        UNIT_API_BASE_URL + `/operations/${address}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -175,47 +159,9 @@ export const useUnitOperations = () => {
   return {
     status,
     unitAddresses: data?.addresses || [],
+    operations: data?.operations || [],
   };
 };
-
-// export const getAllNetworksAndAssets = () => {
-//   const SPOT_ASSETS = UNIT_SPOT_ASSETS[isTestnet ? "Testnet" : "Mainnet"];
-
-//   const ALL_NETWORKS_AND_ASSETS = {
-//     ...PERPS_NATIVE_CHAINS_ASSETS,
-//     ...SPOT_ASSETS,
-//   };
-
-//   const assets = Object.entries(ALL_NETWORKS_AND_ASSETS).reduce(
-//     (acc, [network, info]) => {
-//       Object.values(info.tokens).forEach((asset) => {
-//         acc[asset.symbol] = {
-//           network: network as SupportedNetwork,
-//           isPerps: info.isPerps,
-//           assetUrl: getHLTokenImgUrl(asset.symbol.toUpperCase(), !info.isPerps),
-//           networkAssetUrl:
-//             info.symbol !== asset.symbol
-//               ? (info.assetUrl ??
-//                 getHLTokenImgUrl(info.symbol.toUpperCase(), true))
-//               : "",
-//           ...asset,
-//         };
-//       });
-//       return acc;
-//     },
-//     {} as Record<
-//       string,
-//       UnitSpotAssetToken & {
-//         network: SupportedNetwork;
-//         isPerps?: boolean;
-//         assetUrl: string;
-//         networkAssetUrl: string;
-//       }
-//     >,
-//   );
-
-//   return { networksAndAssets: ALL_NETWORKS_AND_ASSETS, assets };
-// };
 
 const SPOT_ASSETS = UNIT_SPOT_ASSETS[isTestnet ? "Testnet" : "Mainnet"];
 

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 
-import Transact from "./components/AccountTransact";
+import AccountTransact from "./components/AccountTransact";
 import TickerOverview from "./components/TickerOverview";
 import TradeChartArea from "./components/TradeChartArea";
 import TradeUserInfo from "./components/TradeUserInfo";
@@ -49,7 +49,7 @@ const Trade = () => {
         <TradeUserInfo />
         <UserAccountInfo />
       </div>
-      <Transact />
+      <AccountTransact />
     </div>
   );
 };
