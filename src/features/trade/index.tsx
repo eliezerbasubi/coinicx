@@ -2,56 +2,34 @@
 
 import dynamic from "next/dynamic";
 
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { useIsMobile, useIsTablet } from "@/hooks/useIsMobile";
 
-import AccountTransact from "./components/AccountTransact";
-import TickerOverview from "./components/TickerOverview";
-import TradeChartArea from "./components/TradeChartArea";
-import TradeUserInfo from "./components/TradeUserInfo";
-import UserAccountInfo from "./components/UserAccountInfo";
+import TradingLoading from "./loading";
 
-const OrderBook = dynamic(() => import("./components/OrderBook"), {
+const TradingMobileLayout = dynamic(() => import("./layouts/mobile"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-125 flex flex-col md:max-w-full xl:max-w-80 bg-primary-dark rounded-md" />
-  ),
+  loading: () => <TradingLoading />,
 });
-const OrderForm = dynamic(() => import("./components/OrderForm/OrderForm"), {
+
+const TradingTabletLayout = dynamic(() => import("./layouts/tablet"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-145.5 md:max-w-80 bg-primary-dark md:rounded-md pb-12 md:pb-0" />
-  ),
+  loading: () => <TradingLoading />,
 });
-const OrderFormMobile = dynamic(
-  () => import("./components/OrderForm/OrderFormMobile"),
-  {
-    ssr: false,
-  },
-);
+
+const TradingDesktopLayout = dynamic(() => import("./layouts/desktop"), {
+  ssr: false,
+  loading: () => <TradingLoading />,
+});
 
 const Trade = () => {
   const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
-  return (
-    <div className="w-full">
-      <div className="bg-trade-dark w-full flex gap-1 py-0.5 md:p-1 flex-wrap md:flex-nowrap">
-        <div className="w-full space-y-1">
-          <TickerOverview />
+  if (isMobile) return <TradingMobileLayout />;
 
-          <div className="flex gap-1 md:flex-wrap-reverse xl:flex-nowrap">
-            {!isMobile && <OrderBook />}
-            <TradeChartArea />
-          </div>
-        </div>
-        {isMobile ? <OrderFormMobile /> : <OrderForm />}
-      </div>
-      <div className="w-full bg-trade-dark flex gap-1 py-0.5 md:px-1 md:pb-2 flex-wrap md:flex-nowrap">
-        <TradeUserInfo />
-        <UserAccountInfo />
-      </div>
-      <AccountTransact />
-    </div>
-  );
+  if (isTablet) return <TradingTabletLayout />;
+
+  return <TradingDesktopLayout />;
 };
 
 export default Trade;

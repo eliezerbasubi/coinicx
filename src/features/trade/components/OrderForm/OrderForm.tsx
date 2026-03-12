@@ -57,7 +57,7 @@ const OrderForm = ({ className }: Props) => {
   return (
     <div
       className={cn(
-        "w-full md:max-w-80 bg-primary-dark md:rounded-md pb-6 md:pb-0",
+        "w-full md:max-w-80 lg:max-w-65 xl:max-w-80 bg-primary-dark md:rounded-md pb-6 md:pb-0",
         className,
       )}
     >

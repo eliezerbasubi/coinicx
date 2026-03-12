@@ -13,9 +13,9 @@ const OrderBookTicker = () => {
   const isBuyOrder = close > open;
 
   return (
-    <div className="w-full flex items-center py-3 px-4">
+    <div className="w-full flex items-center py-3 md:py-2 lg:py-3 px-4">
       <p
-        className={cn("text-xl text-buy font-bold", {
+        className={cn("text-base lg:text-xl text-buy font-bold", {
           "text-sell": !isBuyOrder,
         })}
       >

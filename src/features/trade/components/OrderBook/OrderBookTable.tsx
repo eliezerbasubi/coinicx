@@ -1,5 +1,8 @@
 "use client";
 
+import { useMediaQuery } from "usehooks-ts";
+
+import { OrderBookDisplayOrientation } from "@/types/orderbook";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useSubscription } from "@/hooks/useSubscription";
 import Visibility from "@/components/common/Visibility";
@@ -17,7 +20,11 @@ import OrderBookCompare from "./OrderBookCompare";
 import OrderBookList from "./OrderBookList";
 import OrderBookTicker from "./OrderBookTicker";
 
-const OrderBookTable = () => {
+type Props = {
+  orientation?: OrderBookDisplayOrientation;
+};
+
+const OrderBookTable = ({ orientation }: Props) => {
   const { layout, tickSize } = useShallowOrderBookStore((state) => ({
     layout: state.layout,
     tickSize: state.tickSize,
@@ -25,6 +32,7 @@ const OrderBookTable = () => {
   const coin = useShallowInstrumentStore((state) => state.assetMeta?.coin);
 
   const isMobile = useIsMobile();
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)"); // Exclude laptop breakpoint(1024px)
 
   useSubscription(() => {
     if (!coin) return;
@@ -47,22 +55,22 @@ const OrderBookTable = () => {
         </div>
       </Visibility>
 
-      <div className="w-full grid grid-cols-2 gap-2 md:block px-4 md:px-0">
-        {layout !== "buyOrder" && (
-          <OrderBookList side="asks" className={cn({ "p-0": isMobile })} />
-        )}
+      <div className="w-full grid grid-cols-2 gap-2 md:block px-4 md:px-0 md:h-40 lg:h-auto">
+        <Visibility visible={layout !== "buyOrder"}>
+          <OrderBookList side="asks" orientation={orientation} />
+        </Visibility>
 
-        {!isMobile && <OrderBookTicker />}
+        <Visibility visible={!isMobile}>
+          <OrderBookTicker />
+        </Visibility>
 
-        {layout !== "sellOrder" && (
-          <OrderBookList
-            side="bids"
-            className={cn("group/bid", { "p-0": isMobile })}
-          />
-        )}
+        <Visibility visible={layout !== "sellOrder"}>
+          <OrderBookList side="bids" className="group/bid" />
+        </Visibility>
       </div>
-
-      {layout === "orderBook" && <OrderBookCompare />}
+      <Visibility visible={layout === "orderBook" && !isTablet}>
+        <OrderBookCompare />
+      </Visibility>
     </div>
   );
 };

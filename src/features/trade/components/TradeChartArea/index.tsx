@@ -8,6 +8,7 @@ import { ChartAreaTabValue } from "@/types/trade";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/utils/cn";
 
 import AssetInfo from "./AssetInfo";
 
@@ -30,7 +31,11 @@ type State = {
   fullscreen: boolean;
 };
 
-const TradeChartArea = () => {
+type Props = {
+  className?: string;
+};
+
+const TradeChartArea = ({ className }: Props) => {
   const isMobile = useIsMobile();
 
   const [state, dispatch] = useReducer(
@@ -63,7 +68,10 @@ const TradeChartArea = () => {
   return (
     <div
       ref={wrapperRef}
-      className="group/chart w-full bg-primary-dark md:rounded-md"
+      className={cn(
+        "group/chart w-full bg-primary-dark md:rounded-md",
+        className,
+      )}
     >
       <Tabs
         value={state.currentTab}
@@ -111,7 +119,7 @@ const TradeChartArea = () => {
           <Activity
             mode={state.currentTab === "orderbook" ? "visible" : "hidden"}
           >
-            <OrderBook />
+            <OrderBook orientation="horizontal" />
           </Activity>
         </div>
 

@@ -14,7 +14,7 @@ const OrderBookCompare = () => {
     (state) => state.settings.showBuyAndSellRatio,
   );
 
-  if (!showBuyAndSellRatio) return null;
+  if (!showBuyAndSellRatio) return <div className="lg:h-9" />;
 
   return <Compare />;
 };

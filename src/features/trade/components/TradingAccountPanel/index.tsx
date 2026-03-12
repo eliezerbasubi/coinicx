@@ -68,7 +68,7 @@ const TradingAccountPanel = ({
   return (
     <div
       className={cn(
-        "w-full md:h-85 overflow-hidden bg-primary-dark",
+        "w-full min-h-85 md:max-h-85 overflow-hidden bg-primary-dark",
         className,
       )}
     >

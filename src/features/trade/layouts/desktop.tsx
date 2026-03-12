@@ -1,0 +1,30 @@
+import OrderBook from "../components/OrderBook";
+import OrderForm from "../components/OrderForm/OrderForm";
+import TickerOverview from "../components/TickerOverview";
+import TradeChartArea from "../components/TradeChartArea";
+import TradeUserInfo from "../components/TradeUserInfo";
+import UserAccountInfo from "../components/UserAccountInfo";
+
+const TradingDesktopLayout = () => {
+  return (
+    <div className="w-full">
+      <div className="bg-trade-dark w-full flex gap-1 py-0.5 md:p-1 flex-wrap md:flex-nowrap">
+        <div className="w-full space-y-1">
+          <TickerOverview />
+
+          <div className="flex gap-1 md:flex-wrap-reverse xl:flex-nowrap">
+            <OrderBook />
+            <TradeChartArea />
+          </div>
+        </div>
+        <OrderForm />
+      </div>
+      <div className="w-full bg-trade-dark flex gap-1 py-0.5 md:px-1 md:pb-2 md:pt-0 flex-wrap md:flex-nowrap">
+        <TradeUserInfo />
+        <UserAccountInfo />
+      </div>
+    </div>
+  );
+};
+
+export default TradingDesktopLayout;

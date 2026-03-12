@@ -50,7 +50,7 @@ const AssetInfo = () => {
   const marketOrderValue = getMarketOrderValue(tokenMeta.maxLeverage);
 
   return (
-    <div className="w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-125 group-fullscreen/chart:lg:w-full group-fullscreen/chart:xl:w-full">
+    <div className="w-full xl:w-[calc(100vw-650px)] h-125 md:h-85 lg:h-125 group-fullscreen/chart:lg:w-full group-fullscreen/chart:xl:w-full">
       <div className="size-full mx-auto max-w-2xl px-4 flex flex-col justify-center space-y-4">
         <div
           role="button"

@@ -18,3 +18,9 @@ export type Tick = {
   value: number;
   label: string;
 };
+
+/**
+ * Direction in which the order book is display (top-bottom or left-right)
+ * `vertical` means asks are read from lowest to highest and `horizontal` means asks are read from highest to lowest
+ * */
+export type OrderBookDisplayOrientation = "vertical" | "horizontal";
