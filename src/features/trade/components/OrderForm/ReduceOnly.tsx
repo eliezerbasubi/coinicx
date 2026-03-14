@@ -21,7 +21,7 @@ const ReduceOnly = () => {
           })
         }
       />
-      <Label htmlFor="reduceOnly" className="text-white text-xs">
+      <Label htmlFor="reduceOnly" className="text-white text-3xs md:text-xs">
         <p>Reduce Only</p>
       </Label>
     </div>

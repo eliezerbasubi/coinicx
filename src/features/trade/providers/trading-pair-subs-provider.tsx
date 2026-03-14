@@ -1,11 +1,26 @@
 import React from "react";
+import {
+  ActiveAssetCtxWsEvent,
+  ActiveSpotAssetCtxWsEvent,
+} from "@nktkas/hyperliquid";
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
 import { useSubscription } from "@/hooks/useSubscription";
 import { hlSubClient } from "@/services/transport";
 import { useTradeContext } from "@/store/trade/hooks";
+import { useInstrumentStore } from "@/store/trade/instrument";
+import {
+  useOrderBookStore,
+  useShallowOrderBookStore,
+} from "@/store/trade/orderbook";
 import { useUserTradeStore } from "@/store/trade/user-trade";
+
+import {
+  getMaxSizeDecimals,
+  getNSigFigsAndMantissa,
+  getPriceDecimals,
+} from "../utils";
 
 type Props = {
   children: React.ReactNode;
@@ -18,10 +33,16 @@ type Props = {
 const TradingPairSubsProvider = ({ children }: Props) => {
   const { address } = useAccount();
 
-  const { coin, instrumentType } = useTradeContext((s) => ({
-    coin: s.coin,
-    instrumentType: s.instrumentType,
-  }));
+  const { coin, instrumentType, decimals, setDecimals } = useTradeContext(
+    (s) => ({
+      coin: s.coin,
+      instrumentType: s.instrumentType,
+      decimals: s.decimals,
+      setDecimals: s.setDecimals,
+    }),
+  );
+
+  const tickSize = useShallowOrderBookStore((s) => s.tickSize);
 
   const user = address || zeroAddress;
 
@@ -32,6 +53,58 @@ const TradingPairSubsProvider = ({ children }: Props) => {
       useUserTradeStore.getState().applyActiveAssetData(data);
     });
   }, [user, coin, instrumentType]);
+
+  // Subscribe to order book l2Book state
+  useSubscription(() => {
+    if (!coin) return;
+
+    const { nSigFigs, mantissa } = getNSigFigsAndMantissa(tickSize);
+
+    return hlSubClient.l2Book({ coin, nSigFigs, mantissa }, (data) => {
+      useOrderBookStore
+        .getState()
+        .setSnapshot({ bids: data.levels[0], asks: data.levels[1] });
+    });
+  }, [coin, tickSize]);
+
+  const applyTokenCtxAndTicks = (
+    data: ActiveSpotAssetCtxWsEvent["ctx"] | ActiveAssetCtxWsEvent["ctx"],
+  ) => {
+    const isSpot = instrumentType === "spot";
+    const { assetMeta, setAssetCtx } = useInstrumentStore.getState();
+
+    const price = Number(data.midPx ?? data.markPx);
+    const maxSzDecimals = getMaxSizeDecimals(isSpot);
+    const szDecimals = Number(assetMeta?.szDecimals ?? maxSzDecimals);
+
+    // Update asset context
+    setAssetCtx(data);
+
+    const { ticks, setTicks } = useOrderBookStore.getState();
+    if (ticks.length === 0) {
+      setTicks(price, szDecimals, isSpot);
+    }
+
+    if (decimals === null) {
+      const priceDecimals = getPriceDecimals(price, szDecimals, isSpot);
+      setDecimals(priceDecimals);
+    }
+  };
+
+  // Subscribe to active asset context state
+  useSubscription(() => {
+    if (!coin) return;
+
+    if (instrumentType === "spot") {
+      return hlSubClient.activeSpotAssetCtx({ coin }, (data) => {
+        applyTokenCtxAndTicks(data.ctx);
+      });
+    }
+
+    return hlSubClient.activeAssetCtx({ coin }, (data) => {
+      applyTokenCtxAndTicks(data.ctx);
+    });
+  }, [coin, instrumentType]);
 
   return children;
 };

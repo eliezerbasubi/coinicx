@@ -5,7 +5,6 @@ import { ScaleDistribution } from "@/types/trade";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
-import { InputNumberControl } from "@/components/ui/input-number";
 import { formatPriceToDecimal, formatSize } from "@/features/trade/utils";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
@@ -16,6 +15,7 @@ import {
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 
+import OrderFormInput from "./OrderFormInput";
 import TrailingQuote from "./TrailingQuote";
 
 const MAX_ORDERS = 100;
@@ -128,43 +128,40 @@ const ScaleOrderForm = () => {
   }, [scaleOrder]);
 
   return (
-    <div className="w-full space-y-2">
-      <InputNumberControl
+    <div className="w-full space-y-1 md:space-y-2">
+      <OrderFormInput
         name="startPrice"
         id="startPrice"
         label="Start Price"
-        className="text-sm"
         trailing={<TrailingQuote />}
         value={state.startPrice}
         onChange={onValueChange}
       />
-      <InputNumberControl
+      <OrderFormInput
         name="endPrice"
         id="endPrice"
         label="End Price"
-        className="text-sm"
         trailing={<TrailingQuote />}
         value={state.endPrice}
         onChange={onValueChange}
       />
 
       <div className="grid grid-cols-2 gap-2">
-        <InputNumberControl
+        <OrderFormInput
           name="totalOrders"
           id="totalOrders"
           label="Orders"
           placeholder={`(${MIN_ORDERS}-${MAX_ORDERS})`}
-          className="text-sm placeholder:text-xs"
+          className="placeholder:text-xs"
           min={MIN_ORDERS}
           max={MAX_ORDERS}
           value={state.totalOrders}
           onChange={onValueChange}
         />
-        <InputNumberControl
+        <OrderFormInput
           name="skew"
           id="skew"
           label="Skew"
-          className="text-sm"
           min={1}
           max={100}
           value={state.skew}
@@ -208,9 +205,9 @@ const SizeDistribution = () => {
   };
 
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full space-y-1 md:space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-neutral-gray-400 font-medium">
+        <p className="text-3xs md:text-xs text-neutral-gray-400 font-medium">
           Size Distribution
         </p>
         <PreviewOrders />
@@ -222,13 +219,13 @@ const SizeDistribution = () => {
           align="start"
           className="p-0"
           trigger={
-            <div className="w-full h-9 bg-neutral-gray-200 flex items-center text-white space-x-1 px-2 rounded-lg">
-              <p className="flex-1 text-xs font-medium cursor-pointer capitalize">
+            <div className="w-full h-6 md:h-9 bg-neutral-gray-200 flex items-center text-white space-x-1 px-2 rounded-md md:rounded-lg">
+              <p className="flex-1 text-3xs md:text-xs font-medium cursor-pointer capitalize">
                 {scaleDistribution}
               </p>
               <ChevronDown
                 strokeWidth={2.5}
-                className="transition-transform group-data-[state=open]:rotate-180 size-4"
+                className="transition-transform group-data-[state=open]:rotate-180 size-3 md:size-4"
               />
             </div>
           }
@@ -304,7 +301,7 @@ const PreviewOrders = () => {
       title="Preview Scaled Orders"
       className="px-4 md:px-0 sm:max-w-md"
       trigger={
-        <p className="text-primary text-xs font-semibold cursor-pointer">
+        <p className="text-primary text-3xs md:text-xs font-semibold cursor-pointer">
           Preview
         </p>
       }

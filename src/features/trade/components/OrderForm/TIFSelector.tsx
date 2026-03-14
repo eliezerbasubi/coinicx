@@ -54,7 +54,7 @@ const TIFSelector = () => {
       title="Time in Force"
       trigger={
         <div className="flex items-center text-white space-x-1">
-          <p className="text-xs font-medium cursor-pointer uppercase space-x-1">
+          <p className="text-3xs md:text-xs font-medium cursor-pointer uppercase space-x-1">
             <span className="text-neutral-gray-400">TIF</span>
             <span>{timeInForce}</span>
           </p>

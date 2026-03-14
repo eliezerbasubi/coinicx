@@ -2,21 +2,21 @@
 
 import { useMemo } from "react";
 
+import { PortfolioType } from "@/types/portfolio";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
+import {
+  usePreferencesStore,
+  useShallowPreferencesStore,
+} from "@/store/trade/user-preferences";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 import { usePortfolioMetrics } from "../hooks/usePortfolioMetrics";
-import {
-  PortfolioType,
-  usePortfolioStore,
-  useShallowPortfolioStore,
-} from "../store";
 
 const PERIOD_LABELS: Record<string, string> = {
   day: "24H",
@@ -236,12 +236,14 @@ const EquityTile = ({
 };
 
 const PortfolioTypeButton = ({ type }: { type: PortfolioType }) => {
-  const isActive = useShallowPortfolioStore((s) => s.portfolioType === type);
+  const isActive = useShallowPreferencesStore((s) => s.portfolioType === type);
 
   return (
     <Button
       variant="ghost"
-      onClick={() => usePortfolioStore.getState().setPortfolioType(type)}
+      onClick={() =>
+        usePreferencesStore.getState().dispatch({ portfolioType: type })
+      }
       className={cn(
         "size-fit text-xs capitalize px-2 py-0.5 rounded font-medium text-neutral-gray-400 transition-colors",
         { "bg-neutral-gray-200 text-neutral-gray-100": isActive },

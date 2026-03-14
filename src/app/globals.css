@@ -20,6 +20,8 @@
 
 @theme inline {
   --font-sans: var(--font-ibm-plex-sans);
+  --text-2xs: 0.625rem;
+  --text-3xs: 0.6875rem;
 }
 
 html {

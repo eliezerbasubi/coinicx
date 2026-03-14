@@ -12,19 +12,18 @@ import {
   Time,
 } from "lightweight-charts";
 
+import { PortfolioChartTab, PortfolioPeriod } from "@/types/portfolio";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  usePreferencesStore,
+  useShallowPreferencesStore,
+} from "@/store/trade/user-preferences";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 import { usePortfolioMetrics } from "../hooks/usePortfolioMetrics";
-import {
-  ChartTab,
-  PortfolioPeriod,
-  usePortfolioStore,
-  useShallowPortfolioStore,
-} from "../store";
 
-const CHART_TABS: { value: ChartTab; label: string }[] = [
+const CHART_TABS: { value: PortfolioChartTab; label: string }[] = [
   { value: "accountValue", label: "Account Value" },
   { value: "pnl", label: "PNL" },
 ];
@@ -39,7 +38,7 @@ const PERIODS: { value: PortfolioPeriod; label: string }[] = [
 const PortfolioChart = () => {
   const { isLoading, metrics, period } = usePortfolioMetrics();
 
-  const activeChartTab = useShallowPortfolioStore((s) => s.activeChartTab);
+  const activeChartTab = useShallowPreferencesStore((s) => s.portfolioChartTab);
 
   const chartRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -164,8 +163,10 @@ const PortfolioChart = () => {
       <div className="w-full flex items-center justify-between gap-2 flex-wrap sm:border-b border-neutral-gray-200 sm:px-4">
         <Tabs
           value={activeChartTab}
-          onValueChange={(v) =>
-            usePortfolioStore.getState().setActiveChart(v as ChartTab)
+          onValueChange={(value) =>
+            usePreferencesStore.getState().dispatch({
+              portfolioChartTab: value as PortfolioChartTab,
+            })
           }
           className="w-full sm:w-fit"
         >
@@ -190,7 +191,11 @@ const PortfolioChart = () => {
             <button
               key={p.value}
               type="button"
-              onClick={() => usePortfolioStore.getState().setPeriod(p.value)}
+              onClick={() =>
+                usePreferencesStore
+                  .getState()
+                  .dispatch({ portfolioPeriod: p.value })
+              }
               className={cn(
                 "text-xs px-2 py-0.5 rounded font-medium transition-colors",
                 period === p.value

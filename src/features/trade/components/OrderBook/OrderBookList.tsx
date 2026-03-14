@@ -1,15 +1,13 @@
 import React, { useCallback, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
-import { useMediaQuery } from "usehooks-ts";
 
 import {
   CumulativePriceLevel,
-  OrderBookDisplayOrientation,
+  OrderBookOrientation,
   OrderBookType,
   PriceLevel,
 } from "@/types/orderbook";
-import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import { useTradeContext } from "@/store/trade/hooks";
 import { useShallowOrderBookStore } from "@/store/trade/orderbook";
@@ -21,70 +19,58 @@ import OrderBookTableRow from "./OrderBookTableRow";
 type Props = {
   side: OrderBookType;
   className?: string;
-  orientation?: OrderBookDisplayOrientation;
+  hideAvgPriceTooltip?: boolean;
+  orientation?: OrderBookOrientation;
+
+  /** Number of visible rows for orderbook layout type */
+  orderbookVisibleRows?: number;
+
+  /** Number of visible rows for buy or sell order layout type */
+  sideVisibleRows?: number;
+
+  /** If true, side layout will display only the visible items. Affect single side layouts only */
+  disableScrolling?: boolean;
+  hideCumulativeTotal?: boolean;
 };
 
 const VISIBLE_ROWS = 10;
-const MAX_VISIBLE_ROWS = 17;
 const ROW_HEIGHT = 20;
-
-/** Number of visible rows to display on a tablet viewport for orderbook layout type */
-const TABLET_OB_VISIBLE_ROWS = 3;
-
-/** Number of visible rows to display on a tablet viewport for sell and buy layout type */
-const TABLET_LAYOUT_VISIBLE_ROWS = 6;
 
 const OrderBookList = ({
   side,
   className,
+  disableScrolling,
+  hideAvgPriceTooltip,
+  orderbookVisibleRows,
+  sideVisibleRows,
+  hideCumulativeTotal,
   orientation = "vertical",
 }: Props) => {
-  const { priceLevels, layout, averageAndSum, depthVisualizer } =
+  const { priceLevels, layout, averageAndSum, depthVisualizer, rounding } =
     useShallowOrderBookStore((s) => ({
       priceLevels: s[side],
       layout: s.layout,
       averageAndSum: s.settings.averageAndSum,
       depthVisualizer: s.settings.depthVisualizer,
+      rounding: s.settings.rounding,
     }));
 
   const decimals = useTradeContext((state) => state.decimals);
-
-  const isMobile = useIsMobile();
-  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)"); // Exclude laptop breakpoint(1024px)
 
   const [hoverIndex, setHoverIndex] = useState(0);
   const scrollHeight = useRef(0);
 
   const isOrderbookLayout = layout === "orderBook";
-  let containerHeight = !isOrderbookLayout ? 425 : 200;
   const priceLevelsSize = priceLevels.length;
 
-  let itemCount = priceLevelsSize;
+  const visibleRows = isOrderbookLayout
+    ? (orderbookVisibleRows ?? VISIBLE_ROWS)
+    : (sideVisibleRows ?? priceLevelsSize);
 
-  if (isOrderbookLayout || priceLevelsSize <= VISIBLE_ROWS) {
-    itemCount = VISIBLE_ROWS;
-  } else if (
-    priceLevelsSize > VISIBLE_ROWS &&
-    priceLevelsSize <= MAX_VISIBLE_ROWS
-  ) {
-    itemCount = MAX_VISIBLE_ROWS;
-  }
+  const containerHeight = visibleRows * ROW_HEIGHT;
 
-  if (isMobile) {
-    itemCount = 20;
-    containerHeight = 20 * ROW_HEIGHT;
-  }
-
-  // Show only TABLET_OB_VISIBLE_ROWS items for order book layout on tablet and the rest for other layouts
-  if (isTablet) {
-    if (isOrderbookLayout) {
-      itemCount = TABLET_OB_VISIBLE_ROWS;
-      containerHeight = ROW_HEIGHT * TABLET_OB_VISIBLE_ROWS;
-    } else {
-      // We preserve the default item count
-      containerHeight = ROW_HEIGHT * TABLET_LAYOUT_VISIBLE_ROWS;
-    }
-  }
+  const itemCount =
+    !disableScrolling && !isOrderbookLayout ? priceLevelsSize : visibleRows;
 
   const List = useCallback(
     (props: { width: number; height: number }) => {
@@ -112,7 +98,7 @@ const OrderBookList = ({
           </FixedSizeList>
 
           {/* Hide average tooltip on tablet */}
-          <Visibility visible={!isTablet}>
+          <Visibility visible={!hideAvgPriceTooltip}>
             {!!priceLevels.length && averageAndSum && (
               <AveragePriceTooltip
                 hoveredIndex={hoverIndex}
@@ -134,7 +120,7 @@ const OrderBookList = ({
       hoverIndex,
       averageAndSum,
       side,
-      isTablet,
+      hideAvgPriceTooltip,
       orientation,
     ],
   );
@@ -182,7 +168,12 @@ const OrderBookList = ({
             price={Number(price)}
             amount={Number(amount)}
             decimals={decimals}
+            rounding={rounding}
             progress={progress >= 1 ? 1 : progress}
+            hideCumulativeTotal={
+              hideCumulativeTotal ||
+              (orientation === "horizontal" && layout === "orderBook")
+            }
             style={style}
             onMouseEnter={() => setHoverIndex(index)}
           />
@@ -193,7 +184,16 @@ const OrderBookList = ({
       // React-window will consider these fragments as items but they won't be rendered as elements on the DOM
       return <React.Fragment key={index} />;
     },
-    [itemCount, depthVisualizer, decimals, side, orientation],
+    [
+      itemCount,
+      depthVisualizer,
+      decimals,
+      rounding,
+      layout,
+      side,
+      orientation,
+      hideCumulativeTotal,
+    ],
   );
 
   return (

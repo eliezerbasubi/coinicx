@@ -31,7 +31,7 @@ const TokenSelect = ({ token, tokens, showBalance, onTokenChange }: Props) => {
       onOpenChange={setOpen}
       className="w-full md:w-87.5 px-4 pb-5 md:p-0 overflow-hidden"
       trigger={
-        <div className="w-full h-11 flex items-center justify-between gap-x-2 px-3 py-2 mb-2 border border-neutral-gray-200 text-neutral-gray-100 rounded-md cursor-pointer">
+        <div className="w-full h-9 flex items-center justify-between gap-x-2 px-3 py-2 mb-2 border border-neutral-gray-200 text-neutral-gray-100 rounded-md cursor-pointer">
           <TokenImage
             key={token.name}
             instrumentType="spot"

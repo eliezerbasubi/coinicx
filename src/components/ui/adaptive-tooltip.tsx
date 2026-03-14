@@ -9,6 +9,7 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -18,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 type Props = {
   open?: boolean;
   title?: React.ReactNode;
+  description?: React.ReactNode;
   trigger: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
@@ -43,6 +45,7 @@ const adaptiveTooltipVariants = cva("bg-neutral-gray-200", {
 const AdaptiveTooltip = ({
   hideArrow,
   title,
+  description,
   side,
   variant = "default",
   ...props
@@ -84,8 +87,11 @@ const AdaptiveTooltip = ({
       <DrawerContent
         className={cn({ "text-sm": variant === "underline" }, props.className)}
       >
-        <DrawerHeader className={cn({ "sr-only": !title })}>
+        <DrawerHeader className={cn({ "sr-only": !title && !description })}>
           <DrawerTitle>{title}</DrawerTitle>
+          <DrawerDescription className={cn({ hidden: !description })}>
+            {description}
+          </DrawerDescription>
         </DrawerHeader>
 
         {props.children}

@@ -24,7 +24,7 @@ const ChartCategories = ({ value, onValueChange }: Props) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <div className="w-full border-b border-neutral-gray-200 px-4 h-10 flex items-center">
+    <div className="w-full border-b border-neutral-gray-200 px-2 md:px-4 h-10 flex items-center">
       <div className="w-full grid grid-cols-[auto_min-content]">
         <div className="w-full flex items-center divide-x divide-neutral-gray-200">
           <Visibility visible={value === "standard"}>

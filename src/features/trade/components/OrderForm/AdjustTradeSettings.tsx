@@ -27,14 +27,14 @@ const AdjustTradeSettings = () => {
   if (!isPerps) return null;
 
   return (
-    <div className="w-full flex items-center gap-2 px-4 h-10">
+    <div className="w-full flex items-center gap-2 md:px-4 md:h-10 mb-1 md:mb-0">
       <AdjustMarginMode />
       <AdjustLeverage />
       {/* User Account unification mode */}
       <Button
         variant="secondary"
         size="sm"
-        className="h-7 flex-1 text-white text-xs"
+        className="h-6 md:h-7 flex-1 text-white text-3xs md:text-xs"
       >
         Classic
       </Button>
@@ -128,7 +128,7 @@ const AdjustMarginMode = () => {
         <Button
           variant="secondary"
           size="sm"
-          className="h-7 flex-1 text-white text-xs capitalize"
+          className="h-6 md:h-7 flex-1 text-white text-3xs md:text-xs capitalize"
         >
           {marginMode}
         </Button>
@@ -244,7 +244,7 @@ const AdjustLeverage = () => {
         <Button
           variant="secondary"
           size="sm"
-          className="h-7 flex-1 text-white text-xs capitalize"
+          className="h-6 md:h-7 flex-1 text-white text-3xs md:text-xs capitalize"
         >
           {leverage}x
         </Button>

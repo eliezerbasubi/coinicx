@@ -266,7 +266,7 @@ const columns: ColumnDef<Asset>[] = [
             {formatPriceToDecimal(original.midPx, pxDecimals)}
           </p>
           <p
-            className={cn("text-buy space-x-1 text-[11px]", {
+            className={cn("text-buy space-x-1 text-3xs", {
               "text-sell": changeInPercentage < 0,
               "text-neutral-gray-300": !hasPricing,
             })}

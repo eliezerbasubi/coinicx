@@ -1,96 +1,86 @@
 "use client";
 
-import { Activity, useEffect, useReducer, useRef } from "react";
+import { Activity, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Maximize2, Minimize2 } from "lucide-react";
 
-import { ChartAreaTabValue } from "@/types/trade";
+import { MarketAreaTabValue } from "@/types/trade";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  usePreferencesStore,
+  useShallowPreferencesStore,
+} from "@/store/trade/user-preferences";
 import { cn } from "@/utils/cn";
 
-import AssetInfo from "./AssetInfo";
-
-const ChartArea = dynamic(() => import("./Chart"), { ssr: false });
-
+const AssetInfo = dynamic(() => import("../AsssetInfo"), { ssr: false });
+const ChartArea = dynamic(() => import("../ChartArea"), { ssr: false });
 const OrderBook = dynamic(() => import("../OrderBook"), { ssr: false });
 
-const TABS: Array<{
-  label: string;
-  value: ChartAreaTabValue;
-  mobileOnly?: boolean;
-}> = [
+const TABS = [
   { label: "Chart", value: "chart" },
-  { label: "Order Book", value: "orderbook", mobileOnly: true },
+  { label: "Order Book", value: "orderbook" },
   { label: "Info", value: "info" },
-];
-
-type State = {
-  currentTab: ChartAreaTabValue;
-  fullscreen: boolean;
-};
+] as const;
 
 type Props = {
   className?: string;
+  excludeTabs?: MarketAreaTabValue[];
 };
 
-const TradeChartArea = ({ className }: Props) => {
+const MarketArea = ({ className, excludeTabs }: Props) => {
   const isMobile = useIsMobile();
 
-  const [state, dispatch] = useReducer(
-    (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
-    {
-      currentTab: "chart",
-      fullscreen: false,
-    },
-  );
+  const marketActiveTab = useShallowPreferencesStore((s) => s.marketActiveTab);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const handleFullscreen = async () => {
-    if (!state.fullscreen) {
+    if (!document.fullscreenElement) {
       await wrapperRef.current?.requestFullscreen();
     } else {
       document.exitFullscreen();
     }
-
-    dispatch({ fullscreen: !state.fullscreen });
   };
 
-  // Set current tab to chart if user was visiting orderbook tab and moves to tablet viewport
+  // Set default value if the excluded tabs include the current tab
   useEffect(() => {
-    if (!isMobile && state.currentTab === "orderbook") {
-      dispatch({ currentTab: "chart" });
+    if (excludeTabs && excludeTabs.includes(marketActiveTab)) {
+      usePreferencesStore
+        .getState()
+        .dispatch({ marketActiveTab: TABS[0].value });
     }
-  }, [isMobile, state.currentTab]);
+  }, [marketActiveTab, excludeTabs]);
 
   return (
     <div
       ref={wrapperRef}
       className={cn(
-        "group/chart w-full bg-primary-dark md:rounded-md",
+        "group/market w-full bg-primary-dark md:rounded-md",
         className,
       )}
     >
       <Tabs
-        value={state.currentTab}
+        value={marketActiveTab}
         onValueChange={(value) =>
-          dispatch({ currentTab: value as ChartAreaTabValue })
+          usePreferencesStore
+            .getState()
+            .dispatch({ marketActiveTab: value as MarketAreaTabValue })
         }
         className="h-full gap-0"
       >
         <TabsList
           variant="line"
-          className="w-full px-4 shrink-0 gap-x-4 justify-start"
+          className="w-full px-4 shrink-0 gap-x-2 md:gap-x-4 justify-start"
         >
           {TABS.map((tab) => {
-            if (!isMobile && tab.mobileOnly) return null;
+            if (excludeTabs && excludeTabs.includes(tab.value)) return null;
             return (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="w-fit flex-0 text-sm font-medium"
+                className="w-fit flex-0 text-xs md:text-sm font-medium"
               >
                 {tab.label}
               </TabsTrigger>
@@ -99,10 +89,11 @@ const TradeChartArea = ({ className }: Props) => {
           <Visibility visible={!isMobile}>
             <div className="flex-1 flex justify-end">
               <button
-                className="text-neutral-gray-400 hover:text-gray-300 [&>svg]:size-4"
+                className="text-neutral-gray-400 hover:text-gray-300 size-4 [&>svg]:size-4 overflow-hidden"
                 onClick={handleFullscreen}
               >
-                {state.fullscreen ? <Minimize2 /> : <Maximize2 />}
+                <Minimize2 className="hidden group-fullscreen/market:block" />
+                <Maximize2 className="block group-fullscreen/market:hidden" />
               </button>
             </div>
           </Visibility>
@@ -110,21 +101,21 @@ const TradeChartArea = ({ className }: Props) => {
 
         {/* We use activity to avoid unmounting the entire chart tree */}
         <div role="tabpanel" className="w-full">
-          <Activity mode={state.currentTab === "chart" ? "visible" : "hidden"}>
+          <Activity mode={marketActiveTab === "chart" ? "visible" : "hidden"}>
             <ChartArea />
           </Activity>
         </div>
 
         <div role="tabpanel" className="w-full">
           <Activity
-            mode={state.currentTab === "orderbook" ? "visible" : "hidden"}
+            mode={marketActiveTab === "orderbook" ? "visible" : "hidden"}
           >
-            <OrderBook orientation="horizontal" />
+            <OrderBook orientation="horizontal" orderbookVisibleRows={18} />
           </Activity>
         </div>
 
         <div role="tabpanel" className="w-full">
-          <Activity mode={state.currentTab === "info" ? "visible" : "hidden"}>
+          <Activity mode={marketActiveTab === "info" ? "visible" : "hidden"}>
             <AssetInfo />
           </Activity>
         </div>
@@ -133,4 +124,4 @@ const TradeChartArea = ({ className }: Props) => {
   );
 };
 
-export default TradeChartArea;
+export default MarketArea;

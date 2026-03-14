@@ -20,7 +20,7 @@ type Props = {
   onOpenChange?: (open: boolean) => void;
 } & Pick<
   React.ComponentProps<typeof PopoverSheet>,
-  "collisionBoundary" | "collisionPadding" | "align"
+  "collisionBoundary" | "collisionPadding" | "align" | "side" | "sideOffset"
 >;
 
 const AdaptivePopover = ({

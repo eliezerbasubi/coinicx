@@ -28,7 +28,7 @@ const SizeCoinSelector = ({ onValueChange }: Props) => {
   return (
     <Popover>
       <PopoverTrigger className="flex items-center gap-x-1">
-        <p className="text-white text-sm font-medium">
+        <p className="text-white text-3xs md:text-sm font-medium">
           {isSzInNtl ? quote : base}
         </p>
         <ChevronDown strokeWidth={2.5} className="size-4" />

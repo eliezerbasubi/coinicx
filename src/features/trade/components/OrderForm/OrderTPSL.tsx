@@ -39,7 +39,7 @@ const OrderTPSL = () => {
             <TooltipTrigger
               asChild
               type="button"
-              className="cursor-help text-xs text-white"
+              className="cursor-help text-3xs md:text-xs text-white"
             >
               <p>TP/SL</p>
             </TooltipTrigger>

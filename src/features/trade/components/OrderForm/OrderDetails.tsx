@@ -18,6 +18,7 @@ import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { useShallowOrderFormStore } from "@/store/trade/order-form";
 import { useOrderBookStore } from "@/store/trade/orderbook";
 import { useMaxTradeSz, useUserTradeStore } from "@/store/trade/user-trade";
+import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 export const LiquidationPrice = ({ size }: { size: number }) => {
@@ -88,9 +89,7 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
       <AdaptiveTooltip
         variant="underline"
         title="Liquidation Price"
-        trigger={
-          <p className="text-xs text-neutral-gray-400">Liquidation Price</p>
-        }
+        trigger={<DetailsLabel>Liquidation Price</DetailsLabel>}
       >
         <p>
           The liquidation price is the price at which your position will be
@@ -98,14 +97,14 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
         </p>
       </AdaptiveTooltip>
 
-      <p className="text-xs font-medium">
+      <DetailsValue>
         {formatNumber(liquidationPrice || 0, {
           style: "currency",
           useFallback: true,
           minimumFractionDigits: decimals,
           maximumFractionDigits: decimals,
         })}
-      </p>
+      </DetailsValue>
     </div>
   );
 };
@@ -123,35 +122,23 @@ export const OrderValueAndMarginRequired = ({
 
   return (
     <>
-      <div className="w-full flex items-center justify-between">
-        <p className="text-xs text-neutral-gray-400">Order Value</p>
-
-        <p className="text-xs font-medium space-x-1">
-          <span>
-            {formatNumber(data.orderValue, {
-              useFallback: true,
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </span>
-          <span>{quote}</span>
-        </p>
-      </div>
+      <DetailsTile
+        label="Order Value"
+        value={`${formatNumber(data.orderValue, {
+          useFallback: true,
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })} ${quote}`}
+      />
       <Visibility visible={isPerp}>
-        <div className="w-full flex items-center justify-between">
-          <p className="text-xs text-neutral-gray-400">Margin</p>
-
-          <p className="text-xs font-medium space-x-1">
-            <span>
-              {formatNumber(data.marginRequired, {
-                useFallback: true,
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
-            <span>{quote}</span>
-          </p>
-        </div>
+        <DetailsTile
+          label="Margin"
+          value={`${formatNumber(data.marginRequired, {
+            useFallback: true,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })} ${quote}`}
+        />
       </Visibility>
     </>
   );
@@ -167,14 +154,10 @@ export const MaxOrderSize = () => {
   if (!isPerps) return null;
 
   return (
-    <div className="w-full flex items-center justify-between">
-      <p className="text-xs text-neutral-gray-400">Max</p>
-
-      <p className="text-xs font-medium space-x-1">
-        <span>{formatNumber(maxTradeSz, { useFallback: true })}</span>
-        <span>{base}</span>
-      </p>
-    </div>
+    <DetailsTile
+      label="Max"
+      value={`${formatNumber(maxTradeSz, { useFallback: true })} ${base}`}
+    />
   );
 };
 
@@ -195,18 +178,18 @@ export const Fees = () => {
         variant="underline"
         className="max-w-fit"
         title="Fees"
-        trigger={<p className="text-xs text-neutral-gray-400">Fees</p>}
+        trigger={<DetailsLabel>Fees</DetailsLabel>}
       >
         <p>
           Taker orders pay a {taker} fee. Maker orders pay a {maker} fee.
         </p>
       </AdaptiveTooltip>
 
-      <p className="text-xs font-medium space-x-1">
+      <DetailsValue className="space-x-1">
         <span>{formatFee(fees.taker)}</span>
         <span>/</span>
         <span>{formatFee(fees.maker)}</span>
-      </p>
+      </DetailsValue>
     </div>
   );
 };
@@ -251,7 +234,7 @@ export const OrderSlippage = ({ size }: { size: number }) => {
         variant="underline"
         title="Slippage"
         className="max-w-fit"
-        trigger={<p className="text-xs text-neutral-gray-400">Slippage</p>}
+        trigger={<DetailsLabel>Slippage</DetailsLabel>}
       >
         <p>
           Average execution price compared to mid price based on current order
@@ -259,11 +242,11 @@ export const OrderSlippage = ({ size }: { size: number }) => {
         </p>
       </AdaptiveTooltip>
 
-      <p className="text-xs text-primary font-medium space-x-1">
-        <span>Est. {(slippage ?? 0).toFixed(4)}%</span>
+      <DetailsValue className="text-primary gap-x-1">
+        <span>Est. {(slippage ?? 0).toFixed(2)}%</span>
         <span>/</span>
         <span>Max: {(maxSlippage * 100).toFixed(2)}%</span>
-      </p>
+      </DetailsValue>
     </div>
   );
 };
@@ -282,28 +265,49 @@ export const TwapDetails = ({ size }: { size: number }) => {
 
   return (
     <div className="w-full space-y-2">
-      <div className="w-full flex items-center justify-between">
-        <p className="text-xs text-neutral-gray-400">Frequency</p>
+      <DetailsTile label="Frequency" value="30 seconds" />
+      <DetailsTile
+        label="Size per Suborder"
+        value={`${formatNumber(sizePerSuborder, {
+          useFallback: true,
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })} ${base}`}
+      />
+      <DetailsTile label="Number of Orders" value={numOfOrders || 1} />
+    </div>
+  );
+};
 
-        <p className="text-xs font-medium">30 seconds</p>
-      </div>
-      <div className="w-full flex items-center justify-between">
-        <p className="text-xs text-neutral-gray-400">Size per Suborder</p>
+type DetailsProps = { children: React.ReactNode; className?: string };
 
-        <p className="text-xs font-medium">
-          {formatNumber(sizePerSuborder, {
-            useFallback: true,
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}{" "}
-          {base}
-        </p>
-      </div>
-      <div className="w-full flex items-center justify-between">
-        <p className="text-xs text-neutral-gray-400">Number of Orders</p>
+const DetailsLabel = ({ children, className }: DetailsProps) => {
+  return (
+    <p className={cn("text-3xs md:text-xs text-neutral-gray-400", className)}>
+      {children}
+    </p>
+  );
+};
 
-        <p className="text-xs font-medium">{numOfOrders || 1}</p>
-      </div>
+const DetailsValue = ({ children, className }: DetailsProps) => {
+  return (
+    <p className={cn("text-3xs md:text-xs font-medium", className)}>
+      {children}
+    </p>
+  );
+};
+
+type DetailsTileProps = {
+  className?: string;
+  label: React.ReactNode;
+  value: React.ReactNode;
+};
+const DetailsTile = ({ className, label, value }: DetailsTileProps) => {
+  return (
+    <div className={cn("w-full flex items-center justify-between", className)}>
+      <DetailsLabel>{label}</DetailsLabel>
+
+      <DetailsValue>{value}</DetailsValue>
     </div>
   );
 };

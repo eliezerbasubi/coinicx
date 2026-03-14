@@ -42,7 +42,7 @@ const ChartTimeInterval = () => {
             role="button"
             tabIndex={0}
             className={cn(
-              "text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
+              "text-3xs md:text-xs text-neutral-gray-400 font-medium md:font-semibold cursor-pointer transition-colors",
               {
                 "text-white": interval === currentInterval,
               },
@@ -118,7 +118,7 @@ const MoreIntervals = () => {
         role="button"
         tabIndex={0}
         className={cn(
-          "flex items-center text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
+          "flex items-center text-3xs md:text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
           {
             "text-white": isNotBookmarked,
           },
@@ -128,16 +128,18 @@ const MoreIntervals = () => {
         {isNotBookmarked ? capitalize(currentInterval) : "More"}
         <ChevronDown
           strokeWidth={2.5}
-          className={cn("transition-transform size-4", { "rotate-180": open })}
+          className={cn("transition-transform size-3 md:size-4", {
+            "rotate-180": open,
+          })}
         />
       </div>
       <AdaptivePopover
         triggerRef={triggerRef}
         open={open}
         onOpenChange={(open) => dispatch({ open, pinning: false })}
-        className="md:mt-3 p-2"
+        className="md:mt-3 md:p-2"
       >
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5 gap-2 mt-3 md:mt-0">
           {CHART_INTERVALS.map((interval) => {
             const isBookmarked = bookmarkIntervals.includes(interval);
             if (isBookmarked && !pinning) return null;
