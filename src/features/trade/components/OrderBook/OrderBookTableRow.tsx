@@ -5,6 +5,7 @@ import { memo } from "react";
 import { OrderBookType } from "@/types/orderbook";
 import Visibility from "@/components/common/Visibility";
 import { formatPriceToDecimal } from "@/features/trade/utils";
+import { useOrderFormStore } from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -49,6 +50,11 @@ const OrderBookTableRow = ({
       )}
       style={style}
       onMouseEnter={onMouseEnter}
+      onClick={() => {
+        useOrderFormStore
+          .getState()
+          .setExecutionOrder({ limitPrice: price.toFixed(decimals || 0) });
+      }}
     >
       <p className={cn("flex-1 text-buy", { "text-sell": side === "asks" })}>
         {formatPriceToDecimal(price, decimals)}
