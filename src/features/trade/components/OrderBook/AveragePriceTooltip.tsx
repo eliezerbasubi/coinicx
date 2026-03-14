@@ -31,10 +31,6 @@ const AveragePriceTooltip = ({
   const offsetY = rowHeight * incrementedIndex - scrollHeight;
   const y = Math.round(containerHeight - offsetY);
 
-  // const y = isBids
-  //   ? containerHeight - rowHeight * incrementedIndex
-  //   : (itemCount - hoveredIndex) * rowHeight;
-
   // Calculate cumulative totals by looping through the data in decremental order starting from:
   // For bids: Hovered index to zero
   // For asks: Item count minus hovered index to get the proper index of the element as the asks were mapped in reverse

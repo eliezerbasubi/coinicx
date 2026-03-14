@@ -1,106 +1,78 @@
 "use client";
 
-import { useIsMobile } from "@/hooks/useIsMobile";
-import { useSubscription } from "@/hooks/useSubscription";
+import React from "react";
+
+import { OrderBookOrientation } from "@/types/orderbook";
 import Visibility from "@/components/common/Visibility";
-import { getNSigFigsAndMantissa } from "@/features/trade/utils";
-import { hlSubClient } from "@/services/transport";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import {
-  useOrderBookStore,
-  useShallowOrderBookStore,
-} from "@/store/trade/orderbook";
+import { useShallowOrderBookStore } from "@/store/trade/orderbook";
 import { cn } from "@/utils/cn";
 
-import OrderBookCompare from "./OrderBookCompare";
 import OrderBookList from "./OrderBookList";
+import { OrderBookTableHeader } from "./OrderBookTableHeader";
 import OrderBookTicker from "./OrderBookTicker";
 
-const OrderBookTable = () => {
-  const { layout, tickSize } = useShallowOrderBookStore((state) => ({
-    layout: state.layout,
-    tickSize: state.tickSize,
-  }));
-  const coin = useShallowInstrumentStore((state) => state.assetMeta?.coin);
+type Props = Omit<
+  React.ComponentProps<typeof OrderBookList>,
+  "side" | "className"
+> & {
+  orientation: OrderBookOrientation;
+  className?: string;
+  tickerClassName?: string;
+  headerClassName?: string;
+  listWrapperClassName?: string;
+};
 
-  const isMobile = useIsMobile();
-
-  useSubscription(() => {
-    if (!coin) return;
-
-    const { nSigFigs, mantissa } = getNSigFigsAndMantissa(tickSize);
-
-    return hlSubClient.l2Book({ coin, nSigFigs, mantissa }, (data) => {
-      useOrderBookStore
-        .getState()
-        .setSnapshot({ bids: data.levels[0], asks: data.levels[1] });
-    });
-  }, [coin, tickSize]);
+const OrderBookTable = ({
+  orientation,
+  className,
+  tickerClassName,
+  headerClassName,
+  listWrapperClassName,
+  ...props
+}: Props) => {
+  const layout = useShallowOrderBookStore((s) => s.layout);
 
   return (
-    <div className="w-full">
-      <Visibility visible={isMobile} fallback={<OrderBookTableHeader />}>
-        <div className="grid grid-cols-2 gap-2 px-4">
-          <OrderBookTableHeaderMobile />
-          <OrderBookTableHeaderMobile />
-        </div>
-      </Visibility>
+    <div className={cn("w-full", className)}>
+      <OrderBookTableHeader
+        showTotal={!props.hideCumulativeTotal}
+        orientation={orientation}
+        className={headerClassName}
+      />
 
-      <div className="w-full grid grid-cols-2 gap-2 md:block px-4 md:px-0">
-        {layout !== "buyOrder" && (
-          <OrderBookList side="asks" className={cn({ "p-0": isMobile })} />
+      <div
+        className={cn(
+          "w-full px-4 md:px-0 md:h-40 lg:h-auto",
+          {
+            "grid grid-cols-2 gap-2":
+              orientation === "horizontal" && layout === "orderBook",
+          },
+          listWrapperClassName,
         )}
+      >
+        <Visibility visible={layout !== "buyOrder"}>
+          <OrderBookList
+            side="asks"
+            {...props}
+            orientation={orientation}
+            className={cn({ "order-1": orientation === "horizontal" })} // Position bids at the second position in horizontal order
+          />
+        </Visibility>
 
-        {!isMobile && <OrderBookTicker />}
+        <Visibility visible={orientation === "vertical"}>
+          <OrderBookTicker className={tickerClassName} />
+        </Visibility>
 
-        {layout !== "sellOrder" && (
+        <Visibility visible={layout !== "sellOrder"}>
           <OrderBookList
             side="bids"
-            className={cn("group/bid", { "p-0": isMobile })}
+            className={cn("group/bid", {
+              "order-0": orientation === "horizontal", // Position bids at the first position in horizontal order
+            })}
+            {...props}
+            orientation={orientation}
           />
-        )}
-      </div>
-
-      {layout === "orderBook" && <OrderBookCompare />}
-    </div>
-  );
-};
-
-const OrderBookTableHeader = () => {
-  const { base, quote } = useTradeContext((state) => ({
-    base: state.base,
-    quote: state.quote,
-  }));
-
-  return (
-    <div className="flex items-center justify-between text-xs font-medium text-neutral-gray-400 px-4 py-1">
-      <div className="flex-1">
-        <p>Price ({quote})</p>
-      </div>
-      <div className="flex-1 text-right">
-        <p>Amount ({base})</p>
-      </div>
-      <div className="flex-1 text-right hidden md:block">
-        <p>Total ({quote})</p>
-      </div>
-    </div>
-  );
-};
-
-const OrderBookTableHeaderMobile = ({ className }: { className?: string }) => {
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-between text-xs font-medium text-neutral-gray-400 py-1",
-        className,
-      )}
-    >
-      <div className="flex-1">
-        <p>Price </p>
-      </div>
-      <div className="flex-1 text-right">
-        <p>Amount </p>
+        </Visibility>
       </div>
     </div>
   );

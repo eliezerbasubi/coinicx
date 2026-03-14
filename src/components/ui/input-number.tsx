@@ -108,6 +108,7 @@ type InputNumberControlProps = {
   label?: React.ReactNode;
   trailing?: React.ReactNode;
   wrapperClassName?: string;
+  labelClassName?: string;
   onValueChange?: (value: string) => void;
 } & React.DetailedHTMLProps<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -118,6 +119,7 @@ const InputNumberControl = ({
   label,
   trailing,
   wrapperClassName,
+  labelClassName,
   onValueChange,
   ...props
 }: InputNumberControlProps) => {
@@ -130,7 +132,12 @@ const InputNumberControl = ({
       )}
     >
       {label && (
-        <div className="text-sm text-neutral-gray-400 font-medium whitespace-nowrap">
+        <div
+          className={cn(
+            "text-sm text-neutral-gray-400 font-medium whitespace-nowrap",
+            labelClassName,
+          )}
+        >
           {label}
         </div>
       )}

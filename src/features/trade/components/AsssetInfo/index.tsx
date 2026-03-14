@@ -50,12 +50,12 @@ const AssetInfo = () => {
   const marketOrderValue = getMarketOrderValue(tokenMeta.maxLeverage);
 
   return (
-    <div className="w-full lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] h-125 group-fullscreen/chart:lg:w-full group-fullscreen/chart:xl:w-full">
-      <div className="size-full mx-auto max-w-2xl px-4 flex flex-col justify-center space-y-4">
+    <div className="w-full xl:w-[calc(100vw-650px)] h-96 md:h-85 lg:h-125 group-fullscreen/market:lg:w-full group-fullscreen/market:xl:w-full">
+      <div className="size-full mx-auto max-w-2xl px-4 pt-4 md:pt-0 flex flex-col md:justify-center space-y-4">
         <div
           role="button"
           tabIndex={0}
-          className="flex items-center space-x-2 cursor-pointer"
+          className="hidden md:flex items-center space-x-2 cursor-pointer"
         >
           <TokenImage
             key={`${base}-${coin}`}
@@ -127,7 +127,12 @@ const AssetInfoTile = ({
   className?: string;
 }) => {
   return (
-    <div className={cn("flex items-center justify-between text-sm", className)}>
+    <div
+      className={cn(
+        "flex items-center justify-between text-xs md:text-sm",
+        className,
+      )}
+    >
       <div className="text-neutral-gray-400">{label}</div>
       <div className="text-white font-medium">{value}</div>
     </div>

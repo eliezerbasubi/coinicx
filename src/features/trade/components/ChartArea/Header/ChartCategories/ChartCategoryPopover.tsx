@@ -25,11 +25,11 @@ const ChartCategoryPopover = ({ value, onValueChange }: Props) => {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="w-fit flex items-center justify-between shrink-0 rounded text-neutral-gray-400">
-        <span className="text-xs font-semibold whitespace-nowrap mx-1">
+      <PopoverTrigger className="w-fit flex items-center justify-between gap-x-1 shrink-0 rounded text-neutral-gray-400">
+        <span className="text-3xs md:text-xs font-semibold whitespace-nowrap">
           {selectedCategory?.label}
         </span>
-        <ChevronDown className="size-4 stroke-3" />
+        <ChevronDown className="size-3 md:size-4 stroke-3" />
       </PopoverTrigger>
       <PopoverContent
         side="bottom"

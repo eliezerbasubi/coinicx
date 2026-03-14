@@ -11,13 +11,13 @@ import { formatNumber } from "@/utils/formatting/numbers";
 
 const UserAccountInfo = () => {
   return (
-    <div className="w-full md:max-w-80 bg-primary-dark md:rounded-md pb-6 md:pb-0">
+    <div className="w-full md:max-w-80 lg:max-w-65 xl:max-w-80 bg-primary-dark md:rounded-md pb-6 md:pb-0">
       <div className="w-full border-b border-neutral-gray-200 px-4 h-11 flex items-center justify-between">
         <p className="text-sm font-semibold">Account</p>
       </div>
 
-      <div className="w-full px-4">
-        <div className="flex items-center justify-between gap-1 py-2">
+      <div className="w-full px-4 flex flex-col-reverse gap-y-6 md:flex-col md:gap-y-0">
+        <div className="flex items-center justify-between flex-wrap gap-1 py-2">
           <Button
             variant="secondary"
             size="sm"
@@ -51,16 +51,18 @@ const UserAccountInfo = () => {
         </div>
 
         <div className="w-full">
-          <p className="text-xs text-white font-semibold my-2">
-            Account Equity
-          </p>
+          <div className="w-full">
+            <p className="text-xs text-white font-semibold my-2">
+              Account Equity
+            </p>
 
-          <SpotEquity />
+            <SpotEquity />
 
-          <PerpsEquity />
+            <PerpsEquity />
+          </div>
+
+          <AccountMargin />
         </div>
-
-        <AccountMargin />
       </div>
     </div>
   );

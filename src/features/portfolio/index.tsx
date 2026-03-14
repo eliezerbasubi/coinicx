@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import AccountTransact from "@/features/trade/components/AccountTransact";
 import { useAccountTransactStore } from "@/store/trade/account-transact";
 
 import PortfolioChart from "./components/PortfolioChart";
@@ -58,8 +57,6 @@ const Portfolio = () => {
       <PortfolioFees />
 
       <PortfolioUserInfo />
-
-      <AccountTransact />
     </div>
   );
 };

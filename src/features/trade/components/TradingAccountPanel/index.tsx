@@ -3,6 +3,10 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  usePreferencesStore,
+  useShallowPreferencesStore,
+} from "@/store/trade/user-preferences";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 
@@ -12,7 +16,6 @@ import FundingHistory from "./FundingHistory";
 import OpenOrders from "./OpenOrders";
 import OrderHistory from "./OrderHistory";
 import Positions from "./Positions";
-import { useInfoSectionStore, useShallowInfoSectionStore } from "./store";
 import TradeHistory from "./TradeHistory";
 import Twaps from "./TWAPs";
 
@@ -42,15 +45,11 @@ const TABS: Tab[] = [
 type Props = {
   defaultTab?: string;
   className?: string;
-  excludedTabs?: TabValue[];
+  excludeTabs?: TabValue[];
 };
 
-const TradingAccountPanel = ({
-  defaultTab,
-  className,
-  excludedTabs,
-}: Props) => {
-  const activeTab = useShallowInfoSectionStore((s) => s.activeTab);
+const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
+  const activeTab = useShallowPreferencesStore((s) => s.activeTab);
 
   const counters = useShallowUserTradeStore((s) => ({
     openOrdersCount: s.openOrders.length,
@@ -60,15 +59,17 @@ const TradingAccountPanel = ({
 
   // Set default value if the excluded tabs include the current tab
   useEffect(() => {
-    if (excludedTabs && excludedTabs.includes(activeTab as TabValue)) {
-      useInfoSectionStore.setState({ activeTab: defaultTab || TABS[0].value });
+    if (excludeTabs && excludeTabs.includes(activeTab as TabValue)) {
+      usePreferencesStore
+        .getState()
+        .dispatch({ activeTab: defaultTab || TABS[0].value });
     }
-  }, [activeTab, defaultTab, excludedTabs]);
+  }, [activeTab, defaultTab, excludeTabs]);
 
   return (
     <div
       className={cn(
-        "w-full md:h-85 overflow-hidden bg-primary-dark",
+        "w-full min-h-85 md:max-h-85 overflow-hidden bg-primary-dark",
         className,
       )}
     >
@@ -76,7 +77,7 @@ const TradingAccountPanel = ({
         defaultValue={defaultTab}
         value={activeTab}
         onValueChange={(value) =>
-          useInfoSectionStore.setState({ activeTab: value })
+          usePreferencesStore.getState().dispatch({ activeTab: value })
         }
         className="h-full gap-0"
       >
@@ -85,7 +86,7 @@ const TradingAccountPanel = ({
           className="w-full px-4 shrink-0 space-x-0 md:space-x-4 justify-start"
         >
           {TABS.map((tab) => {
-            if (excludedTabs && excludedTabs.includes(tab.value)) return null;
+            if (excludeTabs && excludeTabs.includes(tab.value)) return null;
 
             return (
               <TabsTrigger
@@ -165,7 +166,7 @@ const AuthenticatedContent = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="h-full flex items-center justify-center">
+    <div className="h-full min-h-20 flex items-center justify-center">
       <p className="text-sm">
         Please &nbsp;
         <span

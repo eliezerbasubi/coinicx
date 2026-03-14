@@ -20,13 +20,13 @@ import {
 } from "@/features/trade/utils";
 import { isStopLoss, isTakeProfit } from "@/features/trade/utils/orderTypes";
 import { useShallowInstrumentStore } from "@/store/trade/instrument";
+import { usePreferencesStore } from "@/store/trade/user-preferences";
 import { useShallowUserTradeStore } from "@/store/trade/user-trade";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";
-import { useInfoSectionStore } from "../store";
 import CloseAllPositions from "./CloseAllPositions";
 import ClosePosition from "./ClosePosition";
 import ReversePosition from "./ReversePosition";
@@ -258,7 +258,9 @@ const columns: ColumnDef<Position>[] = [
                 onClick={(e) => {
                   e.preventDefault();
 
-                  useInfoSectionStore.getState().setActiveTab("openOrders");
+                  usePreferencesStore
+                    .getState()
+                    .dispatch({ activeTab: "openOrders" });
                 }}
                 className={cn({
                   "border-b border-transparent hover:border-primary hover:text-primary":

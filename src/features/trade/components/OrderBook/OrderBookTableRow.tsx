@@ -3,8 +3,9 @@
 import { memo } from "react";
 
 import { OrderBookType } from "@/types/orderbook";
+import Visibility from "@/components/common/Visibility";
 import { formatPriceToDecimal } from "@/features/trade/utils";
-import { useOrderBookStore } from "@/store/trade/orderbook";
+import { useOrderFormStore } from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
@@ -16,6 +17,8 @@ type OrderBookTableRowProps = {
   decimals: number | null;
   style?: React.CSSProperties;
   className?: string;
+  rounding?: boolean;
+  hideCumulativeTotal?: boolean;
   onMouseEnter?: () => void;
 };
 
@@ -27,6 +30,8 @@ const OrderBookTableRow = ({
   progress,
   style,
   className,
+  rounding,
+  hideCumulativeTotal,
   onMouseEnter,
 }: OrderBookTableRowProps) => {
   const total = price * amount;
@@ -34,7 +39,7 @@ const OrderBookTableRow = ({
   return (
     <div
       className={cn(
-        "w-full relative isolate overflow-hidden flex items-center justify-between text-xs py-0.5 md:px-4 border-dashed border-neutral-gray-200 hover:bg-neutral-gray-200/25 cursor-pointer",
+        "w-full relative isolate overflow-hidden flex items-center justify-between text-3xs md:text-xs py-0.5 md:px-4 border-dashed border-neutral-gray-200 hover:bg-neutral-gray-200/25 cursor-pointer",
         {
           "peer/ask peer-hover/ask:bg-neutral-gray-200/25 hover:border-t":
             side === "asks",
@@ -45,6 +50,11 @@ const OrderBookTableRow = ({
       )}
       style={style}
       onMouseEnter={onMouseEnter}
+      onClick={() => {
+        useOrderFormStore
+          .getState()
+          .setExecutionOrder({ limitPrice: price.toFixed(decimals || 0) });
+      }}
     >
       <p className={cn("flex-1 text-buy", { "text-sell": side === "asks" })}>
         {formatPriceToDecimal(price, decimals)}
@@ -52,7 +62,15 @@ const OrderBookTableRow = ({
       <p className="text-right flex-1">
         {formatNumber(amount, { maximumFractionDigits: 5 })}
       </p>
-      <PriceLevelTotal total={total} />
+      <Visibility visible={!hideCumulativeTotal}>
+        <p className="text-right flex-1">
+          {formatNumber(total, {
+            // We limit fraction digits to 2 from thousands and above
+            maximumFractionDigits: rounding && total >= 1e3 ? 2 : 5,
+            notation: rounding ? "compact" : undefined,
+          })}
+        </p>
+      </Visibility>
 
       {/* Progress */}
       <div
@@ -65,20 +83,6 @@ const OrderBookTableRow = ({
         )}
       />
     </div>
-  );
-};
-
-const PriceLevelTotal = ({ total }: { total: number }) => {
-  const rounding = useOrderBookStore((state) => state.settings.rounding);
-
-  return (
-    <p className="text-right flex-1 hidden md:block">
-      {formatNumber(total, {
-        // We limit fraction digits to 2 from thousands and above
-        maximumFractionDigits: rounding && total >= 1e3 ? 2 : 5,
-        notation: rounding ? "compact" : undefined,
-      })}
-    </p>
   );
 };
 

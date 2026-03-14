@@ -57,11 +57,11 @@ const OrderForm = ({ className }: Props) => {
   return (
     <div
       className={cn(
-        "w-full md:max-w-80 bg-primary-dark md:rounded-md pb-6 md:pb-0",
+        "w-full md:max-w-80 lg:max-w-65 xl:max-w-80 bg-primary-dark md:rounded-md",
         className,
       )}
     >
-      <div className="w-full border-b border-neutral-gray-200 px-4 h-11 flex items-center justify-between">
+      <div className="w-full border-b border-neutral-gray-200 px-4 h-11 hidden md:flex items-center justify-between">
         <p className="text-sm font-semibold">Trade</p>
       </div>
 
@@ -73,7 +73,7 @@ const OrderForm = ({ className }: Props) => {
 
       <OrderFormSides />
 
-      <form className="w-full px-4 space-y-2 overflow-x-hidden">
+      <form className="w-full md:px-4 space-y-1 md:space-y-2 overflow-x-hidden">
         <AvailableBalance />
 
         <Visibility visible={isExecutionOrder(orderType)}>
@@ -116,8 +116,8 @@ const OrderFormSides = () => {
   const labelKey = isPerps ? "perp" : "spot";
 
   return (
-    <div className="w-full px-4 my-2">
-      <div className="bg-neutral-gray-200 rounded h-7 flex justify-between items-center gap-x-1">
+    <div className="w-full md:px-4 my-2">
+      <div className="bg-neutral-gray-200 rounded h-6 md:h-7 flex justify-between items-center gap-x-1">
         {Object.entries(ORDER_FORM_SIDES).map(([side, label]) => (
           <button
             key={side}
@@ -134,7 +134,7 @@ const OrderFormSides = () => {
                 .onOrderSideChange(side as OrderSide, !isPerps)
             }
           >
-            <p className="text-sm font-medium">{label[labelKey]}</p>
+            <p className="text-xs md:text-sm font-medium">{label[labelKey]}</p>
           </button>
         ))}
       </div>
@@ -182,7 +182,7 @@ const OrderFormFooter = () => {
         loading={processing}
         label={label}
         className={cn(
-          "font-bold bg-buy hover:bg-buy/90 text-white capitalize mt-1 transition-colors",
+          "h-8.25 md:h-10 text-xs md:text-base font-medium md:font-bold bg-buy hover:bg-buy/90 text-white capitalize mt-1 transition-colors",
           {
             "bg-sell hover:bg-sell/90": !isBuyOrder,
             "bg-primary text-background hover:bg-primary/90":
@@ -192,7 +192,7 @@ const OrderFormFooter = () => {
         onClick={placeOrder}
       />
 
-      <div className="w-full space-y-2">
+      <div className="w-full space-y-1 md:space-y-2">
         <LiquidationPrice size={orderSizeInBase} />
 
         <OrderValueAndMarginRequired data={orderValueAndMargin} />

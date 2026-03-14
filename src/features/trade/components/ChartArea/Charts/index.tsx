@@ -27,7 +27,7 @@ const ChartArea = () => {
       />
       <div
         id="chartArea"
-        className="w-full h-125 lg:w-[calc(100vw-300px)] xl:w-[calc(100vw-650px)] group-fullscreen/chart:lg:w-full group-fullscreen/chart:xl:w-full group-fullscreen/chart:h-dvh"
+        className="w-full h-96 md:h-75 lg:h-125 xl:w-[calc(100vw-650px)] group-fullscreen/market:lg:w-full group-fullscreen/market:xl:w-full group-fullscreen/market:h-dvh"
       >
         <Activity mode={chartType === "standard" ? "visible" : "hidden"}>
           <KlineChart />

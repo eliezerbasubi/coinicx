@@ -5,7 +5,9 @@ const TrailingQuote = () => {
 
   return (
     <div className="flex items-center gap-x-2">
-      <span className="text-neutral-300 text-sm font-medium">{quote}</span>
+      <span className="text-neutral-300 text-3xs md:text-sm font-medium">
+        {quote}
+      </span>
     </div>
   );
 };

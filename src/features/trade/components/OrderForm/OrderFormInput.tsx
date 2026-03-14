@@ -1,0 +1,19 @@
+import React from "react";
+
+import { InputNumberControl } from "@/components/ui/input-number";
+import { cn } from "@/utils/cn";
+
+type Props = React.ComponentProps<typeof InputNumberControl>;
+
+const OrderFormInput = (props: Props) => {
+  return (
+    <InputNumberControl
+      {...props}
+      labelClassName="text-xs md:text-sm"
+      wrapperClassName="h-8 md:h-9"
+      className={cn("text-xs md:text-sm", props.className)}
+    />
+  );
+};
+
+export default OrderFormInput;

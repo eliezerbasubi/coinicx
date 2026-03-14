@@ -4,7 +4,11 @@ import { useShallowInstrumentStore } from "@/store/trade/instrument";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/utils/formatting/numbers";
 
-const OrderBookTicker = () => {
+type Props = {
+  className?: string;
+};
+
+const OrderBookTicker = ({ className }: Props) => {
   const tokenCtx = useShallowInstrumentStore((state) => state.assetCtx);
 
   const close = Number(tokenCtx?.prevDayPx ?? 0);
@@ -13,24 +17,31 @@ const OrderBookTicker = () => {
   const isBuyOrder = close > open;
 
   return (
-    <div className="w-full flex items-center py-3 px-4">
-      <p
-        className={cn("text-xl text-buy font-bold", {
-          "text-sell": !isBuyOrder,
-        })}
-      >
-        {formatNumber(close, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-      </p>
-      <ArrowUp
-        key="arrow"
-        className={cn("text-buy size-5 rotate-180", {
-          "text-sell": !isBuyOrder,
-        })}
-      />
-      <p className="text-sm text-neutral-gray-400 ml-2">
+    <div
+      className={cn(
+        "w-full flex items-center justify-center md:justify-start flex-wrap py-2 lg:py-3 px-4 gap-x-2",
+        className,
+      )}
+    >
+      <div className="flex items-center">
+        <p
+          className={cn("text-sm md:text-base lg:text-xl text-buy font-bold", {
+            "text-sell": !isBuyOrder,
+          })}
+        >
+          {formatNumber(close, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </p>
+        <ArrowUp
+          key="arrow"
+          className={cn("text-buy size-4 sm:size-5 rotate-180", {
+            "text-sell": !isBuyOrder,
+          })}
+        />
+      </div>
+      <p className="text-3xs md:text-sm text-neutral-gray-400">
         {formatNumber(close, {
           style: "currency",
           minimumFractionDigits: 2,

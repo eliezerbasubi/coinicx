@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { MoreVertical } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 import { IOrderBookSettings } from "@/types/orderbook";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,7 +26,7 @@ const OrderBookSettings = () => {
   return (
     <Popover>
       <PopoverTrigger key="orderbook-settings-trigger">
-        <MoreVertical className="text-neutral-gray-300 size-4 stroke-3" />
+        <MoreHorizontal className="text-neutral-gray-300 size-4 stroke-3" />
       </PopoverTrigger>
       <PopoverContent align="end" className="p-3 w-52">
         <div className="w-full space-y-3">

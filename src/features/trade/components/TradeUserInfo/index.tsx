@@ -2,13 +2,17 @@ import { useTradeContext } from "@/store/trade/hooks";
 
 import TradingAccountPanel from "../TradingAccountPanel";
 
-const TradeUserInfo = () => {
+type Props = {
+  excludeTabs?: React.ComponentProps<typeof TradingAccountPanel>["excludeTabs"];
+};
+
+const TradeUserInfo = ({ excludeTabs }: Props) => {
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   return (
     <TradingAccountPanel
       defaultTab={isPerps ? "positions" : "balances"}
-      excludedTabs={["depositAndWithdrawals"]}
+      excludeTabs={excludeTabs ?? ["depositAndWithdrawals"]}
       className="md:rounded-md"
     />
   );

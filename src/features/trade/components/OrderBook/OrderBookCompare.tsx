@@ -1,29 +1,39 @@
 import React from "react";
 
+import Visibility from "@/components/common/Visibility";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useShallowOrderBookStore } from "@/store/trade/orderbook";
+import { cn } from "@/utils/cn";
 
 const MAX_LEVELS = 10;
 
-const OrderBookCompare = () => {
-  const showBuyAndSellRatio = useShallowOrderBookStore(
-    (state) => state.settings.showBuyAndSellRatio,
-  );
-
-  if (!showBuyAndSellRatio) return null;
-
-  return <Compare />;
+type Props = {
+  hideLabels?: boolean;
+  showOnSideLayout?: boolean;
+  className?: string;
 };
 
-const Compare = () => {
-  const { bids, asks } = useShallowOrderBookStore((state) => ({
-    bids: state.bids,
-    asks: state.asks,
-  }));
+const OrderBookCompare = ({
+  hideLabels,
+  showOnSideLayout,
+  className,
+}: Props) => {
+  const { bids, asks, showBuyAndSellRatio, layout } = useShallowOrderBookStore(
+    (s) => ({
+      bids: s.bids,
+      asks: s.asks,
+      showBuyAndSellRatio: s.settings.showBuyAndSellRatio,
+      layout: s.layout,
+    }),
+  );
+
+  if (!showBuyAndSellRatio) return <div className="lg:h-9" />;
+
+  if (!showOnSideLayout && layout !== "orderBook") return null;
 
   const bidVolume = bids
     .slice(0, MAX_LEVELS)
@@ -39,27 +49,38 @@ const Compare = () => {
 
   return (
     <Tooltip>
-      <TooltipTrigger className="w-full py-2">
-        <div className="w-full flex items-center gap-x-1 px-4 text-xs">
+      <TooltipTrigger
+        className={cn(
+          "w-full flex items-center gap-x-1 px-4 py-2 text-3xs md:text-xs",
+          className,
+        )}
+      >
+        <Visibility visible={!hideLabels}>
           <div className="shrink-0 size-5 rounded text-buy border border-buy bg-buy/20 grid place-content-center">
             B
           </div>
-          <p className="lining-nums">{bidPercentage.toFixed(2)}%</p>
-          <div className="flex-1 flex gap-x-0.5">
-            <div
-              style={{ width: `${bidPercentage}%` }}
-              className="h-2 w-full bg-buy rounded-l-full"
-            />
-            <div
-              style={{ width: `${askPercentage}%` }}
-              className="h-2 w-full bg-sell rounded-r-full"
-            />
-          </div>
-          <p className="lining-nums">{askPercentage.toFixed(2)}%</p>
+        </Visibility>
+        <p className={cn("lining-nums", { "text-buy": hideLabels })}>
+          {bidPercentage.toFixed(2)}%
+        </p>
+        <div className="flex-1 flex gap-x-0.5">
+          <div
+            style={{ width: `${bidPercentage}%` }}
+            className="h-1 md:h-2 w-full bg-buy rounded-l-full"
+          />
+          <div
+            style={{ width: `${askPercentage}%` }}
+            className="h-1 md:h-2 w-full bg-sell rounded-r-full"
+          />
+        </div>
+        <p className={cn("lining-nums", { "text-sell": hideLabels })}>
+          {askPercentage.toFixed(2)}%
+        </p>
+        <Visibility visible={!hideLabels}>
           <div className="shrink-0 size-5 rounded text-sell border border-sell bg-sell/20 grid place-content-center">
             S
           </div>
-        </div>
+        </Visibility>
       </TooltipTrigger>
       <TooltipContent className="max-w-80 text-xs font-medium text-wrap text-gray-300">
         <p>

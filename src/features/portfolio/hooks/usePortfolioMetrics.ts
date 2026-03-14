@@ -1,4 +1,5 @@
-import { useShallowPortfolioStore } from "../store";
+import { useShallowPreferencesStore } from "@/store/trade/user-preferences";
+
 import { usePortfolioData } from "./usePortfolioData";
 
 const PERIOD_TO_PERPS_PERIOD = {
@@ -11,8 +12,8 @@ const PERIOD_TO_PERPS_PERIOD = {
 export const usePortfolioMetrics = () => {
   const { data, isLoading } = usePortfolioData();
 
-  const { period, portfolioType } = useShallowPortfolioStore((s) => ({
-    period: s.period,
+  const { period, portfolioType } = useShallowPreferencesStore((s) => ({
+    period: s.portfolioPeriod,
     portfolioType: s.portfolioType,
   }));
 

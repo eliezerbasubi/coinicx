@@ -1,19 +1,22 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  usePreferencesStore,
+  useShallowPreferencesStore,
+} from "@/store/trade/user-preferences";
 
-import { useInfoSectionStore, useShallowInfoSectionStore } from "../store";
 import ActiveTWAPs from "./ActiveTWAPs";
 import FillsTWAPs from "./FillsTWAPs";
 import HistoryTWAPs from "./HistoryTWAPs";
 
 const Twaps = () => {
-  const twapActiveTab = useShallowInfoSectionStore((s) => s.twapActiveTab);
+  const twapActiveTab = useShallowPreferencesStore((s) => s.twapActiveTab);
   return (
     <div className="size-full">
       <Tabs
         defaultValue="active"
         value={twapActiveTab}
         onValueChange={(value) =>
-          useInfoSectionStore.setState({ twapActiveTab: value })
+          usePreferencesStore.getState().dispatch({ twapActiveTab: value })
         }
         className="h-full gap-0"
       >

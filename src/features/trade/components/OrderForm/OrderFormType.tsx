@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 import { OrderType } from "@/types/trade";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import Visibility from "@/components/common/Visibility";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
@@ -10,42 +12,57 @@ import {
 } from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
 
-const ORDER_TYPES: Record<
+const SUPPORTED_ORDER_TYPES: Record<
   OrderType,
-  { label: string; value: OrderType; perpsOnly?: boolean }
+  { label: string; value: OrderType; perpsOnly?: boolean; featured?: boolean }
 > = {
-  market: { label: "Market", value: "market" },
-  limit: { label: "Limit", value: "limit" },
+  market: { label: "Market", value: "market", featured: true },
+  limit: { label: "Limit", value: "limit", featured: true },
   stopLimit: { label: "Stop Limit", value: "stopLimit", perpsOnly: true },
   stopMarket: { label: "Stop Market", value: "stopMarket", perpsOnly: true },
   scale: { label: "Scale", value: "scale" },
   twap: { label: "TWAP", value: "twap" },
 };
 
-const FEATURED_ORDER_TYPES = [ORDER_TYPES.market, ORDER_TYPES.limit];
+const FEATURED_ORDER_TYPES = [
+  SUPPORTED_ORDER_TYPES.market,
+  SUPPORTED_ORDER_TYPES.limit,
+];
 
-const OTHER_ORDER_TYPES = Object.values(ORDER_TYPES).filter(
-  (type) =>
-    !FEATURED_ORDER_TYPES.some((featured) => featured.value === type.value),
-);
+const ALL_SUPPORTED_TYPES = Object.values(SUPPORTED_ORDER_TYPES);
+
+// Order types that will be displayed in the tooltip
+const OTHER_ORDER_TYPES = ALL_SUPPORTED_TYPES.filter((type) => !type.featured);
 
 const OrderFormType = () => {
+  const isMobile = useIsMobile();
   const orderType = useShallowOrderFormStore((s) => s.settings.orderType);
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const [open, setOpen] = useState(false);
 
-  const isNonPrimaryType = orderType !== "limit" && orderType !== "market";
+  const isUnfeatured = orderType !== "limit" && orderType !== "market";
 
-  const currentOrderType = ORDER_TYPES[orderType];
+  const currentOrderType = SUPPORTED_ORDER_TYPES[orderType];
 
-  const orderTypes = isPerps
-    ? OTHER_ORDER_TYPES
-    : OTHER_ORDER_TYPES.filter((type) => !type.perpsOnly);
+  // Inside popover we display all the supported order types on mobile, and only the
+  const listedOrderTypes = isMobile ? ALL_SUPPORTED_TYPES : OTHER_ORDER_TYPES;
 
-  const [currentOtherType, setCurrentOtherType] = useState<OrderType>(
-    orderTypes[0].value,
+  // Filter out order types supported by the current instrument
+  const instrumentOrderTypes = isPerps
+    ? listedOrderTypes
+    : listedOrderTypes.filter((type) => !type.perpsOnly);
+
+  // Default to current order type if featured. This is for handling device viewport changes
+  const [unfeaturedType, setUnfeaturedType] = useState<OrderType>(
+    !currentOrderType.featured
+      ? currentOrderType.value
+      : instrumentOrderTypes[0].value,
   );
+
+  const selectedOrderTypeLabel = isMobile
+    ? currentOrderType.label
+    : SUPPORTED_ORDER_TYPES[unfeaturedType].label;
 
   const onTypeChange = (type: OrderType) => {
     useOrderFormStore.getState().setSettings({ orderType: type });
@@ -53,24 +70,32 @@ const OrderFormType = () => {
 
   useEffect(() => {
     if (currentOrderType.perpsOnly && !isPerps) {
-      onTypeChange(ORDER_TYPES.scale.value);
+      onTypeChange(SUPPORTED_ORDER_TYPES.scale.value);
     }
   }, [isPerps, currentOrderType]);
 
+  console.log("🚨 - OrderFormType.tsx - 77", {
+    currentOrderType,
+    unfeaturedType,
+    orderType,
+  });
+
   return (
-    <div className="flex items-center gap-4 px-4 h-11 border-b border-neutral-gray-200">
-      {FEATURED_ORDER_TYPES.map((type) => (
-        <span
-          key={type.value}
-          className={cn(
-            "text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
-            { "text-white": orderType === type.value },
-          )}
-          onClick={() => onTypeChange(type.value)}
-        >
-          {type.label}
-        </span>
-      ))}
+    <div className="flex items-center gap-4 md:px-4 md:h-11 md:border-b border-neutral-gray-200">
+      <Visibility visible={!isMobile}>
+        {FEATURED_ORDER_TYPES.map((type) => (
+          <span
+            key={type.value}
+            className={cn(
+              "text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors",
+              { "text-white": orderType === type.value },
+            )}
+            onClick={() => onTypeChange(type.value)}
+          >
+            {type.label}
+          </span>
+        ))}
+      </Visibility>
 
       <AdaptiveTooltip
         open={open}
@@ -81,12 +106,13 @@ const OrderFormType = () => {
         trigger={
           <div
             className={cn(
-              "w-fit py-2 flex items-center gap-x-1 text-xs font-semibold text-neutral-gray-400 cursor-pointer",
-              { "text-white": isNonPrimaryType },
+              "w-full md:w-fit py-1 sm:py-2 px-4 md:px-0 flex items-center gap-x-1 justify-between md:justify-start text-3xs md:text-xs font-semibold bg-neutral-gray-200 md:bg-transparent text-neutral-gray-400 rounded-md md:rounded-none cursor-pointer",
+              { "text-white": isUnfeatured || isMobile },
             )}
-            onClick={() => onTypeChange(currentOtherType)}
+            // Preselect the unfeatured the order type when the tooltip opens
+            onClick={() => (!isMobile ? onTypeChange(unfeaturedType) : null)}
           >
-            <p>{ORDER_TYPES[currentOtherType].label}</p>
+            <p>{selectedOrderTypeLabel}</p>
             <ChevronDown
               className="size-3 text-neutral-gray-400"
               strokeWidth={4}
@@ -95,23 +121,26 @@ const OrderFormType = () => {
         }
       >
         <ul className="w-full text-sm md:text-xs text-neutral-gray-400 font-medium">
-          {orderTypes.map((type) => (
+          {instrumentOrderTypes.map((type) => (
             <li
               key={type.value}
               onClick={() => {
                 onTypeChange(type.value);
-                setCurrentOtherType(type.value);
+                setUnfeaturedType(type.value);
                 setOpen(false);
               }}
               className={cn(
-                "py-2 px-4 md:px-2 cursor-pointer hover:bg-neutral-gray-200 hover:text-white",
+                "flex items-center justify-between py-2 px-0 md:px-2 cursor-pointer hover:bg-neutral-gray-200 hover:text-white",
                 {
-                  "flex items-center justify-between font-semibold text-white bg-neutral-gray-200":
+                  "font-semibold text-white md:bg-neutral-gray-200":
                     type.value === orderType,
                 },
               )}
             >
               <span>{type.label}</span>
+              {type.value === orderType && (
+                <Check className="size-3 stroke-4 text-neutral-300 shrink-0" />
+              )}
             </li>
           ))}
         </ul>

@@ -9,12 +9,9 @@ import {
 
 export type ChartType = "standard" | "tradingView" | "depth";
 
-export type ChartAreaTabValue =
-  | "chart"
-  | "orderbook"
-  | "info"
-  | "tradingData"
-  | "tradingAnalysis";
+export type MobileViewTab = "markets" | "trade" | "account";
+
+export type MarketAreaTabValue = "chart" | "orderbook" | "info";
 
 export type ChartIntervalType =
   | "second"
@@ -31,21 +28,6 @@ export interface ChartInterval {
   listed?: boolean;
   value: CandleSnapshotParameters["interval"];
 }
-
-export type Kline = [
-  number,
-  `${number}`,
-  `${number}`,
-  `${number}`,
-  `${number}`,
-  `${number}`,
-  number,
-  `${number}`,
-  number,
-  `${number}`,
-  `${number}`,
-  `${number}`,
-];
 
 export type OrderType =
   | "limit"

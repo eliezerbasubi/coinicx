@@ -1,7 +1,6 @@
 import { useEffect, useReducer } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { InputNumberControl } from "@/components/ui/input-number";
 import { Label } from "@/components/ui/label";
 import { convertTimeToMinutes } from "@/features/trade/utils/twap";
 import {
@@ -9,6 +8,8 @@ import {
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 import { cn } from "@/utils/cn";
+
+import OrderFormInput from "./OrderFormInput";
 
 type State = {
   hours: string;
@@ -67,16 +68,16 @@ const TwapOrderForm = () => {
   };
 
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full space-y-1 md:space-y-2">
       <div className="w-full space-y-1">
-        <div className="w-full flex items-center justify-between mb-2">
-          <p className="text-xs text-neutral-gray-400 font-medium">
+        <div className="w-full flex items-center justify-between md:mb-2">
+          <p className="text-3xs md:text-xs text-neutral-gray-400 font-medium">
             Running Time (5m - 24h)
           </p>
 
           <button
             type="button"
-            className="text-xs text-primary font-medium"
+            className="text-3xs md:text-xs text-primary font-medium"
             onClick={() => {
               dispatch({ hours: "23", minutes: "59" });
             }}
@@ -86,20 +87,18 @@ const TwapOrderForm = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-x-1">
-          <InputNumberControl
+          <OrderFormInput
             name="hours"
             id="hours"
             label="Hours"
-            className="text-sm"
             placeholder="0"
             value={state.hours}
             onChange={onValueChange}
           />
-          <InputNumberControl
+          <OrderFormInput
             name="minutes"
             id="minutes"
             label="Minutes"
-            className="text-sm"
             placeholder="0"
             value={state.minutes}
             onChange={onValueChange}
@@ -155,7 +154,7 @@ const Badge = ({
         { "border-primary/50 text-white": isSelected },
       )}
     >
-      <span className="text-xs font-medium">
+      <span className="text-2xs md:text-xs font-medium">
         {value}
         {unit}
       </span>
@@ -178,7 +177,7 @@ const TwapRandomize = () => {
           })
         }
       />
-      <Label htmlFor="randomize" className="text-white text-xs">
+      <Label htmlFor="randomize" className="text-white text-3xs md:text-xs">
         <p>Randomize</p>
       </Label>
     </div>

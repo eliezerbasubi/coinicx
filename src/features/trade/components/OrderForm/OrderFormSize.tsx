@@ -1,13 +1,13 @@
 import React from "react";
 
 import FormInputSlider from "@/components/common/FormInputSlider";
-import { InputNumberControl } from "@/components/ui/input-number";
 import { useTradeContext } from "@/store/trade/hooks";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/store/trade/order-form";
 
+import OrderFormInput from "./OrderFormInput";
 import SizeCoinSelector from "./SizeCoinSelector";
 
 const OrderFormSize = () => {
@@ -19,12 +19,11 @@ const OrderFormSize = () => {
 
   return (
     <React.Fragment>
-      <InputNumberControl
+      <OrderFormInput
         name="size"
         id="size"
         value={size}
         label="Size"
-        className="text-sm"
         trailing={
           <SizeCoinSelector
             onValueChange={useOrderFormStore.getState().onSizeCoinChange}
