@@ -1,3 +1,5 @@
+import { useMediaQuery } from "usehooks-ts";
+
 import MarketArea from "../components/MarketArea";
 import OrderBook from "../components/OrderBook";
 import OrderForm from "../components/OrderForm/OrderForm";
@@ -6,6 +8,8 @@ import TradeUserInfo from "../components/TradeUserInfo";
 import UserAccountInfo from "../components/UserAccountInfo";
 
 const TradingTabletLayout = () => {
+  const isLargeTablet = useMediaQuery("(min-width: 1024px)");
+
   return (
     <div className="w-full">
       <div className="bg-trade-dark w-full py-0.5 md:p-1">
@@ -20,8 +24,8 @@ const TradingTabletLayout = () => {
               hideAvgPriceTooltip
               hideCompare
               orientation="vertical"
-              orderbookVisibleRows={3}
-              sideVisibleRows={6}
+              orderbookVisibleRows={isLargeTablet ? undefined : 3}
+              sideVisibleRows={isLargeTablet ? undefined : 6}
             />
           </div>
           <OrderForm />
