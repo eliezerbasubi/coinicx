@@ -1,30 +1,30 @@
 ### Coinicx
-A high-performance, crypto-native trading platform designed for next-generation traders. Built for speed, transparency, and scalability, CoinicX empowers users to trade digital assets with confidence — beyond the limits of traditional exchanges.
 
-> **⚠️ Development Notice**  
-> This project is currently under active development. Some features may not work as expected, and the codebase is subject to frequent changes. More updates and improvements are coming soon!
-
-> **🎯 Project Purpose**  
-> This is a demonstration project showcasing the architecture and design patterns of a High-Frequency Trading (HFT) platform. It's designed to illustrate best practices in building scalable, real-time trading systems.
+A high-performance trading platform for digital assets, built with a focus on low-latency data rendering, real-time order book visualization, and modular frontend architecture.
 
 ---
 
-A modern, open-source crypto trading interface built with Next.js App Router. It provides:
+It provides:
 
-- Real‑time market data (order book and kline candles) via Binance WebSocket streams
-- Spot trading UI with charts, order book, ticker overview, and order forms
-- Wallet connection powered by wagmi and RainbowKit
-- Clean, extensible component architecture and state management with Zustand and TanStack Query
+- Real-time order book and candlestick chart rendering via WebSocket streams
+- Perpetual futures trading interface powered by the [Hyperliquid](https://hyperliquid.xyz/) L1
+- Wallet connectivity through wagmi and RainbowKit
+- Progressive Web App (PWA) support with offline-capable service workers via Serwist
+- Feature-driven architecture with isolated state, hooks, and providers per domain
 
 ## Tech Stack
 
-- Next.js 15 (App Router) and React 19
-- TypeScript
-- Tailwind CSS 4
-- TanStack Query for data fetching and caching
-- Zustand for local state
-- wagmi + RainbowKit for wallet connectivity
-- klinecharts / lightweight-charts for charting
+| Layer            | Technology                                                |
+| ---------------- | --------------------------------------------------------- |
+| Framework        | Next.js 15 (App Router), React 19, TypeScript             |
+| Styling          | Tailwind CSS 4, Radix UI, class-variance-authority        |
+| State Management | Zustand 5 (global stores), React Context (feature-scoped) |
+| Data Fetching    | TanStack Query, TanStack React Table                      |
+| Charting         | klinecharts, lightweight-charts, Konva (depth chart)      |
+| Web3             | wagmi, RainbowKit, viem                                   |
+| Trading API      | @nktkas/hyperliquid                                       |
+| PWA              | Serwist (service worker + offline support)                |
+| Dev Tooling      | Turbopack, ESLint 9, Prettier                             |
 
 ## Getting Started
 
@@ -33,87 +33,113 @@ A modern, open-source crypto trading interface built with Next.js App Router. It
 - Node.js 18.18+ (LTS) or 20+
 - npm, pnpm, or yarn
 
-### Environment variables
+### Environment Variables
 
-Create a `.env.local` at the project root and set:
+Create a `.env.local` at the project root:
 
 ```bash
-# WalletConnect Cloud Project ID for RainbowKit/wagmi
+# WalletConnect Cloud Project ID (required for RainbowKit/wagmi)
 NEXT_PUBLIC_PROJECT_ID=your_walletconnect_project_id
 
-# Select the network configuration ("mainnet" | "testnet"). Defaults to "testnet" if omitted.
+# Network configuration: "mainnet" | "testnet" (defaults to "testnet")
 NEXT_PUBLIC_WEB3_NETWORK=testnet
 ```
 
-Notes:
+No secret server-side keys are required for local development.
 
-- Market data streams are read from Binance public WebSocket endpoints directly in the client for order book and kline data.
-- No secret server-side keys are required for local development.
-
-### Install and run
+### Install and Run
 
 ```bash
-# install
-npm install
-# or
-pnpm install
-# or
-yarn
+# install dependencies
+npm install       # or pnpm install / yarn
 
-# develop (http://localhost:3000)
+# start dev server (http://localhost:3000)
 npm run dev
 
-# type-check, lint, and build
+# type-check and lint
 npm run lint
-npm run build
+npm run gen-types
 
-# production start (after build)
+# production build and start
+npm run build
 npm start
 ```
 
 ## Project Scripts
 
-- `dev`: Start the Next.js dev server (with Turbopack)
-- `build`: Production build
-- `start`: Start the production server
-- `lint`: Run ESLint
+| Script      | Description                              |
+| ----------- | ---------------------------------------- |
+| `dev`       | Start the dev server with Turbopack      |
+| `build`     | Production build                         |
+| `start`     | Start the production server              |
+| `lint`      | Run ESLint                               |
+| `gen-types` | Generate Next.js types and run tsc check |
 
-## Folder Structure
+## Architecture
 
-High-level overview of `src/`:
+The codebase follows a **feature-driven** architecture. Each domain (trade, portfolio) owns its components, hooks, providers, utilities, and constants — keeping concerns isolated and easy to navigate.
 
-- `src/app/`: Next.js App Router routes and layouts
-  - `crypto/[[...slug]]`: Crypto market pages (listing/details)
-  - `trade/[[...slug]]`: Trading pages (charts, orderbook, forms)
-- `src/components/`: UI and feature components
-  - `common/`: Shared UI primitives (header, input formatters, tooltips)
-  - `crypto/`: Crypto-specific components, hooks, provider, utils
-  - `trade/`: Trading feature (chart, orderbook, order form, providers, hooks)
-  - `ui/`: Design system primitives (button, checkbox, tabs, tooltip, etc.)
-  - `vectors/`: SVG/React icons
-- `src/config/`: Chain and wallet configuration (chains, connectors, wagmi)
-- `src/constants/`: App-wide constants (routes, query keys)
-- `src/lib/`: Library helpers and mocks (e.g., fiat data)
-- `src/providers/`: App-level providers (e.g., Web3)
-- `src/services/`: Client-side services for markets and trade API calls
-- `src/store/`: Zustand stores and providers (markets, trade/orderbook)
-- `src/types/`: Shared TypeScript types
-- `src/utils/`: Utilities (formatting, debounce, etc.)
+```
+src/
+├── app/                        # Next.js App Router (routes + layouts)
+│   ├── (trading)/
+│   │   ├── trade/[[...slug]]/  # Trading interface (charts, orderbook, forms)
+│   │   └── portfolio/          # Portfolio management
+│   └── layout.tsx              # Root layout
+│
+├── features/                   # Feature modules (self-contained domains)
+│   ├── trade/
+│   │   ├── components/         # ChartArea, OrderBook, OrderForm, TickerOverview,
+│   │   │                       # MarketArea, TradingAccountPanel, AccountTransact
+│   │   ├── hooks/              # useOrderForm, usePlaceOrder, useCancelOrder,
+│   │   │                       # useClosePosition, useTokenBalance, ...
+│   │   ├── providers/          # TradingPair, TradingInstrument, UserTrade contexts
+│   │   ├── utils/              # Order types, pricing, formatting, TWAP logic
+│   │   ├── layouts/            # Responsive layout compositions
+│   │   └── constants/          # Trade-specific constants
+│   └── portfolio/
+│       ├── components/
+│       └── hooks/
+│
+├── components/                 # Shared UI layer
+│   ├── ui/                     # Design system (button, input, tabs, dialog,
+│   │                           # popover, datatable, skeleton, tooltip, ...)
+│   ├── common/                 # App-wide components (Header, Sidebar, ConnectButton)
+│   └── vectors/                # SVG icon components
+│
+├── store/                      # Zustand stores
+│   ├── markets/                # Market data store + provider
+│   └── trade/                  # Instrument, orderbook, order form,
+│                               # user preferences, chart settings
+│
+├── services/                   # API clients and HTTP transport
+├── providers/                  # App-level providers (Web3Provider)
+├── config/                     # Chain definitions, wallet connectors, wagmi config
+├── constants/                  # Routes, query keys, error codes
+├── hooks/                      # Global hooks (useSubscription, useIsMobile)
+├── types/                      # Shared TypeScript type definitions
+└── utils/                      # Formatting (dates, numbers, addresses), debounce, cn
+```
 
-This structure is component- and feature-driven, making it easy to extend markets, trading, and UI primitives independently.
+### Key Architectural Decisions
+
+- **Feature modules** (`src/features/`) encapsulate domain logic. Hooks, context providers and component groups are all colocated.
+- **Zustand stores** are split by domain (`markets`, `trade`) with dedicated slices for orderbook state, instrument data, order form state, user preferences, and chart settings.
+- **Responsive design** uses adaptive components (`adaptive-dialog`, `adaptive-popover`, `adaptive-datatable`) that switch between desktop and mobile presentations.
+- **Security headers** are configured in `next.config.ts` including CSP, HSTS, X-Frame-Options, and referrer policy.
+- **Console stripping** removes `console.*` calls in production mainnet builds.
 
 ## Development Notes
 
-- Charts and order book data are consumed from Binance WebSocket streams for real-time updates.
-- Wallet integration uses RainbowKit and wagmi; ensure `NEXT_PUBLIC_PROJECT_ID` is configured.
-- State and data:
-  - Zustand stores live under `src/store/**`
-  - Server and client fetching via `src/services/**` and React Query
+- Real-time data flows through WebSocket subscriptions managed by a custom `useSubscription` hook.
+- Wallet integration requires a valid `NEXT_PUBLIC_PROJECT_ID` from [WalletConnect Cloud](https://cloud.walletconnect.com/).
+- The `@/*` path alias maps to `src/*` for clean imports.
+- Charts support three rendering modes: klinecharts (candlestick + indicators), lightweight-charts (TradingView), and Konva (canvas-based depth visualization).
 
 ## Contributing
 
-Contributions are welcome! Please read the contributing guidelines in [`CONTRIBUTING.md`](./CONTRIBUTING.md) for details on the workflow, coding style, and how to run checks locally.
+Contributions are welcome. See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for branching conventions, commit standards, and coding guidelines.
 
 ## License
 
-This project is licensed under the MIT License — see [`LICENSE`](./LICENSE) for details.
+MIT — see [`LICENSE`](./LICENSE) for details.
