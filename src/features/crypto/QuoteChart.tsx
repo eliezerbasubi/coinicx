@@ -14,6 +14,7 @@ import {
 import { GraphPeriod } from "@/types/market";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AppLogo from "@/components/vectors/app-logo";
 import { getQuotes } from "@/services/markets";
 import { useCryptoMarketContext } from "@/store/markets/hook";
 import { cn } from "@/utils/cn";
@@ -192,7 +193,7 @@ const QuoteChart = () => {
       <div className="w-full min-h-96">
         {status === "pending" && (
           <div className="min-h-96 flex flex-col items-center justify-center">
-            <p className="text-2xl text-primary font-bold">CoinicX</p>
+            <AppLogo />
           </div>
         )}
         <div ref={chartRef} />

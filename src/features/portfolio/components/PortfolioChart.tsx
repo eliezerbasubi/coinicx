@@ -14,6 +14,7 @@ import {
 
 import { PortfolioChartTab, PortfolioPeriod } from "@/types/portfolio";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AppLogo from "@/components/vectors/app-logo";
 import {
   usePreferencesStore,
   useShallowPreferencesStore,
@@ -213,7 +214,7 @@ const PortfolioChart = () => {
       <div className="w-full h-50 relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-2xl text-primary font-bold">CoinicX</p>
+            <AppLogo />
           </div>
         )}
         {!isLoading && !seriesData.length && (
