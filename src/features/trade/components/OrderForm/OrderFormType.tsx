@@ -74,12 +74,6 @@ const OrderFormType = () => {
     }
   }, [isPerps, currentOrderType]);
 
-  console.log("🚨 - OrderFormType.tsx - 77", {
-    currentOrderType,
-    unfeaturedType,
-    orderType,
-  });
-
   return (
     <div className="flex items-center gap-4 md:px-4 md:h-11 md:border-b border-neutral-gray-200">
       <Visibility visible={!isMobile}>
