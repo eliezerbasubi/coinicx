@@ -2,16 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectButton as RainbowConnectButton } from "@rainbow-me/rainbowkit";
 import { ChartCandlestick, Coins, Replace } from "lucide-react";
-import { useMediaQuery } from "usehooks-ts";
-import { useAccount } from "wagmi";
 
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/utils/cn";
 
-import ConnectButton from "./ConnectButton";
-import SideBarMenu from "./Sidebar";
+import AppLogo from "../vectors/app-logo";
+import AccountButton from "./AccountButton";
+import SideBar from "./Sidebar";
 
 const LINKS = [
   {
@@ -32,12 +30,10 @@ const LINKS = [
 
 const Header = () => {
   const pathname = usePathname();
-  const { isConnected } = useAccount();
-  const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
     <header className="w-full h-16 flex justify-between items-center px-4 md:px-6 md:gap-x-6">
-      <p className="text-xl text-primary font-extrabold">CoinicX</p>
+      <AppLogo className="w-20 md:w-fit h-6" textClassName="hidden md:block" />
 
       <div className="hidden md:flex flex-1 gap-x-6">
         {LINKS.map((link) => (
@@ -57,16 +53,10 @@ const Header = () => {
         ))}
       </div>
 
-      <div className="flex items-center gap-x-4">
-        {(!isConnected && <ConnectButton size="sm" className="w-fit" />) || (
-          <RainbowConnectButton
-            showBalance={false}
-            chainStatus="none"
-            accountStatus="avatar"
-          />
-        )}
+      <div className="flex items-center gap-x-2">
+        <AccountButton />
 
-        {isMobile && <SideBarMenu links={LINKS} />}
+        <SideBar links={LINKS} />
       </div>
     </header>
   );
