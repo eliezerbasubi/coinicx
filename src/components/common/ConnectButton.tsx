@@ -9,14 +9,15 @@ const ConnectButton = forwardRef<
   HTMLButtonElement,
   React.PropsWithChildren<React.ComponentProps<typeof Button>> & {
     disconnectedLabel?: string;
+    showConnecting?: boolean;
   }
->(({ disconnectedLabel, ...props }, ref) => {
+>(({ disconnectedLabel, showConnecting = true, ...props }, ref) => {
   const { isConnecting, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
 
   const getLabel = () => {
-    if (isConnecting) {
+    if (isConnecting && showConnecting) {
       return "Connecting";
     }
     if (!isConnected) {
@@ -33,7 +34,7 @@ const ConnectButton = forwardRef<
       {...props}
       ref={ref}
       className={cn("flex justify-center items-center gap-2", props.className)}
-      disabled={isConnected && (props.disabled || isConnecting)}
+      disabled={(isConnected && props.disabled) || isConnecting}
       onClick={(event) => {
         if (!isConnected) {
           event.preventDefault();

@@ -15,8 +15,9 @@ const AccountButton = () => {
     return (
       <ConnectButton
         size="sm"
+        showConnecting={false}
         disconnectedLabel="Connect"
-        className="w-24 h-7 gap-0 px-0 text-xs md:text-sm"
+        className="w-17 md:w-24 h-7 md:h-8 gap-0 px-0 text-xs md:text-sm"
       />
     );
   }
@@ -25,7 +26,7 @@ const AccountButton = () => {
     <Button
       variant="outline"
       onClick={openAccountModal}
-      className="w-24 md:w-fit gap-x-1 h-7"
+      className="w-24 md:w-fit gap-x-1 h-7 md:h-8"
     >
       <p className="text-xs md:text-sm">{formatAddress(address, 4)}</p>
       <ChevronDown />
