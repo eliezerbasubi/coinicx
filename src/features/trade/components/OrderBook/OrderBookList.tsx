@@ -199,7 +199,7 @@ const OrderBookList = ({
   return (
     <div
       className={cn(
-        "relative z-10 will-change-transform group/orderbook-list",
+        "relative z-5 will-change-transform group/orderbook-list",
         className,
       )}
       style={{ height: containerHeight }}

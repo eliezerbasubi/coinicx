@@ -1,15 +1,9 @@
-import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ROUTES } from "@/constants/routes";
 import { DEFAULT_SPOT_ASSETS } from "@/features/trade/constants";
 import TradingPairProvider from "@/features/trade/providers/trading-pair-provider";
 import { getTradePathParams } from "@/features/trade/utils/getTradePathParams";
-
-export const metadata: Metadata = {
-  title: "CoinicX Spot Trading",
-  description: "Trade beyond the edge",
-};
 
 const TradeLayout = async ({
   params,

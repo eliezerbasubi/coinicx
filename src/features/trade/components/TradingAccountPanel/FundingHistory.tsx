@@ -161,7 +161,7 @@ const FundingHistoryCard = ({ data }: { data: FundingHistoryEntry }) => {
             })}
           />
         </div>
-        <span className="text-[11px] md:text-sm text-neutral-gray-400 font-medium">
+        <span className="text-3xs md:text-sm text-neutral-gray-400 font-medium">
           {new Date(data.time).toLocaleDateString("en-US", {
             day: "2-digit",
             month: "short",
@@ -176,10 +176,11 @@ const FundingHistoryCard = ({ data }: { data: FundingHistoryEntry }) => {
         <CardItem label="Size" value={`${data.szi} ${data.coin}`} />
         <CardItem
           label="Payment"
-          value={`${formatNumber(Number(data.usdc), {
+          value={formatNumber(Number(data.usdc), {
             minimumFractionDigits: 4,
             maximumFractionDigits: 4,
-          })} USDC`}
+            symbol: "USDC",
+          })}
           className={cn("text-buy", {
             "text-sell": Number(data.usdc) < 0,
           })}

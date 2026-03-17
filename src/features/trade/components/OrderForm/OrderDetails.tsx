@@ -124,20 +124,22 @@ export const OrderValueAndMarginRequired = ({
     <>
       <DetailsTile
         label="Order Value"
-        value={`${formatNumber(data.orderValue, {
+        value={formatNumber(data.orderValue, {
           useFallback: true,
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
-        })} ${quote}`}
+          symbol: quote,
+        })}
       />
       <Visibility visible={isPerp}>
         <DetailsTile
           label="Margin"
-          value={`${formatNumber(data.marginRequired, {
+          value={formatNumber(data.marginRequired, {
             useFallback: true,
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-          })} ${quote}`}
+            symbol: quote,
+          })}
         />
       </Visibility>
     </>
@@ -156,7 +158,7 @@ export const MaxOrderSize = () => {
   return (
     <DetailsTile
       label="Max"
-      value={`${formatNumber(maxTradeSz, { useFallback: true })} ${base}`}
+      value={formatNumber(maxTradeSz, { useFallback: true, symbol: base })}
     />
   );
 };
@@ -268,11 +270,12 @@ export const TwapDetails = ({ size }: { size: number }) => {
       <DetailsTile label="Frequency" value="30 seconds" />
       <DetailsTile
         label="Size per Suborder"
-        value={`${formatNumber(sizePerSuborder, {
+        value={formatNumber(sizePerSuborder, {
           useFallback: true,
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
-        })} ${base}`}
+          symbol: base,
+        })}
       />
       <DetailsTile label="Number of Orders" value={numOfOrders || 1} />
     </div>

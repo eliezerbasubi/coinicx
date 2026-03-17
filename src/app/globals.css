@@ -24,6 +24,12 @@
   --text-3xs: 0.6875rem;
 }
 
+@custom-variant standalone {
+  @media (display-mode: standalone) {
+    @slot;
+  }
+}
+
 html {
   /* TODO: REMOVE THIS WHEN HANDLING LIGHT AND DARK MODE */
   color-scheme: light;

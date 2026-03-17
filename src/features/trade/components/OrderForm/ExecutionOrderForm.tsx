@@ -46,6 +46,7 @@ const ExecutionOrderForm = () => {
           id="limitPrice"
           value={limitPrice}
           label="Price"
+          wrapperClassName="pr-1 md:pr-2"
           trailing={
             <div className="flex items-center gap-x-2">
               <span className="text-neutral-300 text-3xs md:text-sm font-medium">
@@ -55,7 +56,7 @@ const ExecutionOrderForm = () => {
               <Button
                 type="button"
                 variant="ghost"
-                className="size-6 bg-neutral-gray-200 text-neutral-300 hover:text-primary hover:bg-primary/10 text-3xs md:text-xs font-semibold"
+                className="w-6 h-5 md:size-6 bg-neutral-gray-200 text-neutral-300 hover:text-primary hover:bg-primary/10 text-3xs md:text-xs font-medium md:font-semibold rounded md:rounded-md"
                 onClick={() => useOrderFormStore.getState().onMidClick()}
               >
                 Mid

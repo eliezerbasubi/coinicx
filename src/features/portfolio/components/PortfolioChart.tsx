@@ -214,7 +214,7 @@ const PortfolioChart = () => {
       <div className="w-full h-50 relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <AppLogo />
+            <AppLogo className="w-fit h-6" />
           </div>
         )}
         {!isLoading && !seriesData.length && (

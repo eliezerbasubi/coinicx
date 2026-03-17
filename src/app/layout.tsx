@@ -29,6 +29,42 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  icons: {
+    icon: [
+      {
+        url: "/favicon.ico",
+        sizes: "32x32",
+        type: "image/x-icon",
+      },
+      {
+        url: "/favicon.ico",
+        sizes: "16x16",
+        type: "image/x-icon",
+      },
+      {
+        url: "/favicon.ico",
+        type: "image/x-icon",
+      },
+      {
+        url: "/manifest-icon-512.maskable.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+      {
+        url: "/manifest-icon-192.maskable.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/manifest-icon-192.maskable.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/manifest-icon-192.maskable.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -46,13 +82,17 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "##181a20",
+  themeColor: "#181a20",
   maximumScale: 1,
   initialScale: 1.0,
   userScalable: false,
+  width: "device-width",
   viewportFit: "cover",
 };
 

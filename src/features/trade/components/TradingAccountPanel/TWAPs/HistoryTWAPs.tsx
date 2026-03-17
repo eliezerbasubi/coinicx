@@ -217,9 +217,10 @@ const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
       <div className="w-full grid grid-cols-4 gap-2 text-sm">
         <CardItem
           label="Total Size"
-          value={`${formatNumber(data.sz, {
+          value={formatNumber(data.sz, {
             minimumFractionDigits: 2,
-          })} ${data.base}`}
+            symbol: data.base,
+          })}
         />
         <CardItem
           label="Executed Size"

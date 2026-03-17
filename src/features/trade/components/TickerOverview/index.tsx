@@ -16,7 +16,11 @@ import { formatNumber } from "@/utils/formatting/numbers";
 import AssetsSelector from "./AssetsSelector";
 import FundingCountdown from "./FundingCountdown";
 
-const TickerOverview = () => {
+type Props = {
+  className?: string;
+};
+
+const TickerOverview = ({ className }: Props) => {
   const isMobile = useIsMobile();
 
   const { base, quote, decimals } = useTradeContext((state) => ({
@@ -27,17 +31,22 @@ const TickerOverview = () => {
 
   const { assetPrice, assetFullName } = useShallowInstrumentStore((s) => ({
     assetPrice: s.assetCtx?.midPx || s.assetCtx?.markPx || 0,
-    assetFullName: s.assetMeta?.fullName ?? s.assetMeta?.base,
+    assetFullName: s.assetMeta?.fullName,
   }));
 
   const mobileViewTab = usePreferencesStore((s) => s.mobileViewTab);
 
   useDocumentTitle(
-    `${formatPriceToDecimal(assetPrice, decimals)} | ${base} ${quote} ${assetFullName && `| ${assetFullName} to ${quote}`} - CoinicX`,
+    `${formatPriceToDecimal(assetPrice, decimals)} | ${base} ${quote || ""} ${assetFullName ? `| ${assetFullName} to ${quote}` : ""} - CoinicX`,
   );
 
   return (
-    <div className="w-full grid grid-cols-2 md:flex md:items-center md:gap-6 bg-primary-dark p-4 md:rounded-md">
+    <div
+      className={cn(
+        "w-full grid grid-cols-2 md:flex md:items-center md:gap-6 bg-primary-dark p-4 md:rounded-md",
+        className,
+      )}
+    >
       <AssetsSelector className="col-span-2" />
 
       <Activity

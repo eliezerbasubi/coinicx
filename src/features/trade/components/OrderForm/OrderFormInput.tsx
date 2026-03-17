@@ -10,7 +10,7 @@ const OrderFormInput = (props: Props) => {
     <InputNumberControl
       {...props}
       labelClassName="text-xs md:text-sm"
-      wrapperClassName="h-8 md:h-9"
+      wrapperClassName={cn("h-8 md:h-9", props.wrapperClassName)}
       className={cn("text-xs md:text-sm", props.className)}
     />
   );

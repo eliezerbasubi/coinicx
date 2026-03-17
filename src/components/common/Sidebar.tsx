@@ -45,7 +45,7 @@ const SideBarMenu = ({ links }: Props) => {
       <Activity mode={open ? "visible" : "hidden"}>
         <div
           className={cn(
-            "fixed z-50 flex items-center bg-background p-4 flex-col justify-between translate-x-full top-0 right-0 transition-transform duration-300 h-screen ease-out w-full",
+            "fixed z-50 flex items-center bg-background p-4 flex-col justify-between translate-x-full inset-0 transition-transform duration-300 h-dvh ease-out w-full",
             {
               "translate-x-0": open,
             },

@@ -12,14 +12,20 @@ const AccountButton = () => {
   const { isConnected, address } = useAccount();
 
   if (!isConnected || !address) {
-    return <ConnectButton size="sm" className="w-28" />;
+    return (
+      <ConnectButton
+        size="sm"
+        disconnectedLabel="Connect"
+        className="w-24 h-7 gap-0 px-0 text-xs md:text-sm"
+      />
+    );
   }
 
   return (
     <Button
       variant="outline"
       onClick={openAccountModal}
-      className="w-26 md:w-fit gap-x-1 h-8"
+      className="w-24 md:w-fit gap-x-1 h-7"
     >
       <p className="text-xs md:text-sm">{formatAddress(address, 4)}</p>
       <ChevronDown />
