@@ -369,13 +369,13 @@ const PreviewOrders = () => {
               Average Price
             </p>
             <p className="text-xs font-medium text-white">
-              {formatPriceToDecimal(avgPrice, 2)} {quote}
+              {formatPriceToDecimal(avgPrice, 2, { symbol: quote })}
             </p>
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-neutral-gray-400">Margin</p>
             <p className="text-xs font-medium text-white">
-              {formatPriceToDecimal(margin, 2)} {quote}
+              {formatPriceToDecimal(margin, 2, { symbol: quote })}
             </p>
           </div>
         </div>

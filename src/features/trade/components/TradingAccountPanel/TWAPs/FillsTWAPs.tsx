@@ -237,17 +237,18 @@ const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
             })}
           />
           <Tag
-            value={`${formatNumber(closedPnl, {
+            value={formatNumber(closedPnl, {
               useSign: true,
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-            })} ${data.feeToken}`}
+              symbol: data.feeToken,
+            })}
             className={cn("text-buy bg-buy/10", {
               "text-sell bg-sell/10": closedPnl < 0,
             })}
           />
         </div>
-        <span className="text-[11px] md:text-sm text-neutral-gray-400 font-medium">
+        <span className="text-3xs md:text-sm text-neutral-gray-400 font-medium">
           {new Date(data.timestamp).toLocaleDateString("en-US", {
             day: "2-digit",
             month: "short",

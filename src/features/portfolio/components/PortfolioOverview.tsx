@@ -177,12 +177,11 @@ const PortfolioOverview = () => {
           indent
           loading={isLoading}
           label="Staking Account"
-          value={
-            formatNumber(stakingValue, {
-              useFallback: true,
-              maximumFractionDigits: 1,
-            }) + " HYPE"
-          }
+          value={formatNumber(stakingValue, {
+            useFallback: true,
+            maximumFractionDigits: 1,
+            symbol: "HYPE",
+          })}
         />
       </div>
     </div>

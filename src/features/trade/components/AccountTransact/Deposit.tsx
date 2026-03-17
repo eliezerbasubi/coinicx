@@ -113,7 +113,11 @@ const Deposit = () => {
         <Visibility visible={currentAssetInfo.network === "arbitrum"}>
           <InfoTile
             label="Available Balance"
-            value={`${formatNumber(Number(tokenBalance || "0"), { minimumFractionDigits: 2, maximumFractionDigits: 6 })} ${currentAssetInfo.symbol}`}
+            value={formatNumber(Number(tokenBalance || "0"), {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 6,
+              symbol: currentAssetInfo.symbol,
+            })}
           />
         </Visibility>
         <InfoTile

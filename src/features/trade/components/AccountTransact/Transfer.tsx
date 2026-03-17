@@ -68,7 +68,11 @@ const TransferTab = () => {
       <div className="w-full space-y-1 bg-neutral-gray-200 p-2 rounded-lg mb-1">
         <InfoTile
           label="Available Balance"
-          value={`${formatNumber(availableBalance, { minimumFractionDigits: 2, maximumFractionDigits: 6 })} USDC`}
+          value={formatNumber(availableBalance, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 6,
+            symbol: "USDC",
+          })}
         />
         <InfoTile label="Estimated time" value={"Instant"} />
       </div>

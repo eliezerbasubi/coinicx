@@ -452,14 +452,15 @@ type PositionCardProps = {
 const PositionCard = ({ data }: PositionCardProps) => {
   const unrealizedPnl = Number(data.unrealizedPnl);
   const returnOnEquity = Number(data.returnOnEquity);
-  const pnlSign = (unrealizedPnl > 0 && "+") || "";
 
-  const pnlLabel = `${pnlSign}${formatNumber(unrealizedPnl, {
+  const pnlLabel = formatNumber(unrealizedPnl, {
     style: "currency",
-  })}`;
+    useSign: true,
+  });
 
-  const roeLabel = `(${pnlSign}${formatNumber(returnOnEquity, {
+  const roeLabel = `(${formatNumber(returnOnEquity, {
     style: "percent",
+    useSign: true,
   })})`;
 
   return (

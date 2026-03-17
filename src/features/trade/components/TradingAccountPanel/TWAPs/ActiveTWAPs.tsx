@@ -242,11 +242,11 @@ const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
       <div className="w-full grid grid-cols-4 gap-2 text-sm">
         <CardItem
           label="Size"
-          value={`${formatNumber(Number(data.sz))} ${data.coin}`}
+          value={formatNumber(Number(data.sz), { symbol: data.coin })}
         />
         <CardItem
           label="Executed Size"
-          value={`${formatNumber(data.executedSz)} ${data.coin}`}
+          value={formatNumber(data.executedSz, { symbol: data.coin })}
         />
         <CardItem
           label="Average Price"
