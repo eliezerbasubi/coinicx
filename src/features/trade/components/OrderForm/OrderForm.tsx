@@ -182,7 +182,7 @@ const OrderFormFooter = () => {
         loading={processing}
         label={label}
         className={cn(
-          "h-8.25 md:h-10 text-xs md:text-base font-medium md:font-bold bg-buy hover:bg-buy/90 text-white capitalize mt-1 transition-colors",
+          "h-8 md:h-10 text-xs md:text-base font-medium md:font-bold bg-buy hover:bg-buy/90 text-white capitalize mt-1 transition-colors",
           {
             "bg-sell hover:bg-sell/90": !isBuyOrder,
             "bg-primary text-background hover:bg-primary/90":

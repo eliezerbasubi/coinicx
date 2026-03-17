@@ -1,11 +1,7 @@
-import AppLogo from "@/components/vectors/app-logo";
+import TradingLoading from "@/features/trade/loading";
 
 const RootLoadingPage = () => {
-  return (
-    <div className="h-[calc(100vh-64px)] flex flex-col items-center justify-center">
-      <AppLogo className="w-fit h-6" />
-    </div>
-  );
+  return <TradingLoading />;
 };
 
 export default RootLoadingPage;

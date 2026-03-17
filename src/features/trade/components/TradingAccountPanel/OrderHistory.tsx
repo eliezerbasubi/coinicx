@@ -245,7 +245,9 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
-              name={data.coin}
+              key={data.base + data.coin}
+              name={data.base}
+              coin={data.coin}
               className="size-4"
               instrumentType={data.dex === null ? "spot" : "perps"}
             />
@@ -265,10 +267,10 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
           />
           <Tag
             value={data.status}
-            className="text-neutral-gray-400 bg-neutral-gray-200 capitalize font-medium"
+            className="text-neutral-gray-400 bg-neutral-gray-200 capitalize"
           />
         </div>
-        <span className="text-[11px] md:text-sm text-neutral-gray-400 font-medium">
+        <span className="text-3xs md:text-sm text-neutral-gray-400 font-medium">
           {new Date(data.timestamp).toLocaleDateString("en-US", {
             day: "2-digit",
             month: "short",
@@ -279,15 +281,21 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
         </span>
       </div>
 
-      <div className="w-full grid grid-cols-5 gap-2 text-sm">
+      <div className="w-full grid grid-cols-4 gap-2 text-sm">
         <CardItem label="Type" value={data.orderType} />
         <CardItem
           label="Size"
-          value={formatNumber(data.sz, { useFallback: true })}
+          value={formatNumber(data.sz, {
+            useFallback: true,
+            maximumFractionDigits: 5,
+          })}
         />
         <CardItem
           label="Filled Size"
-          value={formatNumber(data.filledSz, { useFallback: true })}
+          value={formatNumber(data.filledSz, {
+            useFallback: true,
+            maximumFractionDigits: 5,
+          })}
         />
         <CardItem
           label="Price"
@@ -298,13 +306,18 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
             maximumFractionDigits: 8,
           })}
         />
-        <CardItem
+        {/* <CardItem
           label="Order Value"
           value={formatNumber(data.orderValue, {
             useFallback: true,
             maximumFractionDigits: 6,
           })}
-        />
+        /> */}
+        {/* <CardItem
+          label="Status"
+          value={data.status}
+          className="last:items-start capitalize"
+        /> */}
       </div>
     </div>
   );

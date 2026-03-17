@@ -100,7 +100,7 @@ const OrderFormType = () => {
         trigger={
           <div
             className={cn(
-              "w-full md:w-fit py-1 sm:py-2 px-4 md:px-0 flex items-center gap-x-1 justify-between md:justify-start text-3xs md:text-xs font-semibold bg-neutral-gray-200 md:bg-transparent text-neutral-gray-400 rounded-md md:rounded-none cursor-pointer",
+              "w-full md:w-fit py-1 sm:py-2 px-2 md:px-0 flex items-center gap-x-1 justify-between md:justify-start text-3xs md:text-xs font-semibold bg-neutral-gray-200 md:bg-transparent text-neutral-gray-400 rounded-md md:rounded-none cursor-pointer",
               { "text-white": isUnfeatured || isMobile },
             )}
             // Preselect the unfeatured the order type when the tooltip opens

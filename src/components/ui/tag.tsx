@@ -11,7 +11,7 @@ const Tag = ({ value, className }: Props) => {
   return (
     <div
       className={cn(
-        "inline-block p-0.5 px-1 rounded bg-primary/10 text-primary text-[11px] font-medium",
+        "inline-block p-0.5 px-1 rounded bg-primary/10 text-primary text-3xs font-medium",
         className,
       )}
     >

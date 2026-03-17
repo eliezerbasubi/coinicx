@@ -241,7 +241,6 @@ const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
               useSign: true,
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-              symbol: data.feeToken,
             })}
             className={cn("text-buy bg-buy/10", {
               "text-sell bg-sell/10": closedPnl < 0,

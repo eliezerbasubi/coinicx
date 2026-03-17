@@ -104,7 +104,7 @@ const PortfolioOverview = () => {
   return (
     <div className="w-full md:max-w-72 bg-neutral-gray-200/50 rounded-md p-4 shrink-0 divide-y divide-neutral-gray-200">
       <div className="w-full pb-4">
-        <div className="w-fit flex items-center gap-1 px-2 sm:px-0 mb-3">
+        <div className="w-fit flex items-center gap-1 mb-3">
           <PortfolioTypeButton type="all" />
           <PortfolioTypeButton type="perps" />
         </div>
