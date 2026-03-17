@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
@@ -50,6 +50,8 @@ type Props = {
 
 const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
   const activeTab = useShallowPreferencesStore((s) => s.activeTab);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const counters = useShallowUserTradeStore((s) => ({
     openOrdersCount: s.openOrders.length,
@@ -57,14 +59,37 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
     twapsCount: s.twapStates.twaps.length,
   }));
 
-  // Set default value if the excluded tabs include the current tab
-  useEffect(() => {
-    if (excludeTabs && excludeTabs.includes(activeTab as TabValue)) {
-      usePreferencesStore
-        .getState()
-        .dispatch({ activeTab: defaultTab || TABS[0].value });
+  const scrollTabIntoView = (element: Element | null) => {
+    const container = containerRef.current;
+
+    if (element && container) {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = element.getBoundingClientRect();
+
+      if (tabRect.right > containerRect.right) {
+        container.scrollBy({
+          left: tabRect.right - containerRect.right + 6, // 6px padding
+          behavior: "smooth",
+        });
+      }
     }
-  }, [activeTab, defaultTab, excludeTabs]);
+  };
+
+  // Set default value if the excluded tabs include the current tab
+  // Scroll the current tab into view
+  useEffect(() => {
+    let currentTab = usePreferencesStore.getState().activeTab;
+
+    if (excludeTabs && excludeTabs.includes(currentTab as TabValue)) {
+      currentTab = defaultTab || TABS[0].value;
+
+      usePreferencesStore.getState().dispatch({ activeTab: currentTab });
+    }
+
+    const tabElement = tabRefs.current[currentTab];
+
+    scrollTabIntoView(tabElement);
+  }, []);
 
   return (
     <div
@@ -82,8 +107,9 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
         className="h-full gap-0"
       >
         <TabsList
+          ref={containerRef}
           variant="line"
-          className="w-full px-4 shrink-0 space-x-0 md:space-x-4 justify-start"
+          className="w-full px-4 shrink-0 space-x-0 md:space-x-4 justify-start scroll-smooth"
         >
           {TABS.map((tab) => {
             if (excludeTabs && excludeTabs.includes(tab.value)) return null;
@@ -93,16 +119,16 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
                 key={tab.value}
                 value={tab.value}
                 className="w-fit flex-0 text-xs font-medium"
+                ref={(element) => {
+                  if (element) {
+                    tabRefs.current[tab.value] = element;
+                  }
+                }}
                 onClick={(event) => {
-                  const nextElementSibling =
-                    event.currentTarget.nextElementSibling;
-                  if (nextElementSibling) {
-                    // Scroll the next element into view. Impacting only the horizontal visibility
-                    nextElementSibling.scrollIntoView({
-                      behavior: "smooth",
-                      block: "end",
-                      inline: "nearest",
-                    });
+                  const tabElement = event.currentTarget.nextElementSibling;
+
+                  if (tabElement) {
+                    scrollTabIntoView(tabElement);
                   }
                 }}
               >

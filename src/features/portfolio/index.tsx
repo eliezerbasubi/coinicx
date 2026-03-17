@@ -10,12 +10,12 @@ import PortfolioUserInfo from "./components/PortfolioUserInfo";
 
 const Portfolio = () => {
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 space-y-4 md:space-y-6">
+    <div className="w-full max-w-6xl mx-auto py-4 space-y-3 md:space-y-6">
       {/* Header */}
-      <div className="w-full flex justify-between items-center flex-wrap gap-4">
+      <div className="w-full flex justify-between items-center flex-wrap gap-4 px-4">
         <h1 className="text-2xl font-extrabold text-white">Portfolio</h1>
 
-        <div className="w-full md:w-auto flex items-center gap-2 py-2">
+        <div className="w-full md:w-auto flex items-center gap-2 md:py-2">
           <Button
             variant="default"
             size="sm"
@@ -49,12 +49,14 @@ const Portfolio = () => {
         </div>
       </div>
 
-      <div className="w-full flex flex-col md:flex-row items-stretch gap-4 md:gap-6">
+      <div className="w-full flex flex-col md:flex-row items-stretch gap-3 md:gap-6 px-4">
         <PortfolioOverview />
         <PortfolioChart />
       </div>
 
-      <PortfolioFees />
+      <div className="px-4">
+        <PortfolioFees />
+      </div>
 
       <PortfolioUserInfo />
     </div>

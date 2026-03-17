@@ -32,7 +32,10 @@ const PortfolioFees = () => {
             visible={!isLoading}
             fallback={<Skeleton className="w-24 h-4" />}
           >
-            <p className="text-sm font-semibold text-white">
+            <p
+              suppressHydrationWarning
+              className="text-sm font-semibold text-white"
+            >
               {formatNumber(volume14d, {
                 style: "currency",
                 notation: "compact",
