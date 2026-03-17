@@ -93,6 +93,18 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
                 key={tab.value}
                 value={tab.value}
                 className="w-fit flex-0 text-xs font-medium"
+                onClick={(event) => {
+                  const nextElementSibling =
+                    event.currentTarget.nextElementSibling;
+                  if (nextElementSibling) {
+                    // Scroll the next element into view. Impacting only the horizontal visibility
+                    nextElementSibling.scrollIntoView({
+                      behavior: "smooth",
+                      block: "end",
+                      inline: "nearest",
+                    });
+                  }
+                }}
               >
                 {tab.label}
                 {tab.counter &&
