@@ -25,7 +25,8 @@ const TradingMobileLayout = () => {
   return (
     <div className="w-full bg-trade-dark flex flex-col gap-1 pt-0.5 md:p-1 mb-20">
       <Activity mode={activeTab !== "account" ? "visible" : "hidden"}>
-        <TickerOverview />
+        {/* Stick the ticker overview below the header by increasing to safe area top by the header in standalone mode */}
+        <TickerOverview className="sticky top-16 standalone:top-[calc(env(safe-area-inset-top,0px)+64px)] bg-primary-dark z-6" />
       </Activity>
 
       <Activity mode={activeTab === "markets" ? "visible" : "hidden"}>
@@ -40,10 +41,8 @@ const TradingMobileLayout = () => {
         <UserAccountInfo />
       </Activity>
 
-      <Activity mode={activeTab !== "trade" ? "visible" : "hidden"}>
-        {/* Show all tabs in account tab view */}
-        <TradeUserInfo excludeTabs={activeTab === "account" ? [] : undefined} />
-      </Activity>
+      {/* Show all tabs in account tab view */}
+      <TradeUserInfo excludeTabs={activeTab === "account" ? [] : undefined} />
 
       <BottomNavBar
         value={activeTab}
@@ -88,7 +87,7 @@ const TradeTabView = () => {
   const visibleRows = getVisibleRows(orderType, showTpSl);
 
   return (
-    <div className="w-full bg-primary-dark grid grid-cols-[auto_1fr]">
+    <div className="w-full bg-primary-dark grid grid-cols-[auto_1fr] pb-4">
       <div className="size-full max-w-45 flex flex-col bg-primary-dark rounded-md">
         <OrderBookTable
           hideAvgPriceTooltip

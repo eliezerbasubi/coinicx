@@ -2,7 +2,6 @@ import { cn } from "@/utils/cn";
 
 type Props = {
   className?: string;
-  textClassName?: string;
 };
 
 const AppLogo = ({ className }: Props) => {

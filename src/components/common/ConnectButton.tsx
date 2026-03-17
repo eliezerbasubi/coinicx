@@ -7,8 +7,10 @@ import { cn } from "@/utils/cn";
 
 const ConnectButton = forwardRef<
   HTMLButtonElement,
-  React.PropsWithChildren<React.ComponentProps<typeof Button>>
->((props, ref) => {
+  React.PropsWithChildren<React.ComponentProps<typeof Button>> & {
+    disconnectedLabel?: string;
+  }
+>(({ disconnectedLabel, ...props }, ref) => {
   const { isConnecting, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
@@ -18,7 +20,7 @@ const ConnectButton = forwardRef<
       return "Connecting";
     }
     if (!isConnected) {
-      return "Connect wallet";
+      return disconnectedLabel || "Connect wallet";
     }
     return props.children || props.label;
   };

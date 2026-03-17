@@ -123,7 +123,7 @@ const AdjustMarginMode = () => {
       className="p-0"
       align="start"
       collisionPadding={16}
-      title="Margin Mode"
+      title={<span className="px-4 md:px-0">Margin Mode</span>}
       trigger={
         <Button
           variant="secondary"
@@ -147,7 +147,7 @@ const AdjustMarginMode = () => {
           onClick={() => onAdjustMarginMode(option.value)}
         >
           <p className="text-sm font-medium text-white">{option.title}</p>
-          <p className="text-xs font-medium text-neutral-gray-400">
+          <p className="text-xs font-medium text-neutral-gray-400 mt-1 md:mt-0">
             {option.description}
           </p>
         </button>

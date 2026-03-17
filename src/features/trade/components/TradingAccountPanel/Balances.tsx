@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { InfinityIcon } from "lucide-react";
 
+import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
 import Tag from "@/components/ui/tag";
@@ -295,7 +296,7 @@ const Balances = () => {
       columns={columns}
       data={data}
       loading={false}
-      className="space-y-1.5 mb-3"
+      className="space-y-1.5 mb-3 py-2 md:py-0"
       thClassName="h-8 py-0 font-medium text-xs"
       rowClassName="text-xs font-medium whitespace-nowrap py-0"
       rowCellClassName="py-1"
@@ -365,17 +366,19 @@ const BalanceCard = ({ data }: BalanceCardProps) => {
         </div>
       </div>
 
-      <div className="flex-1 text-right">
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-6 w-fit font-medium text-xs md:text-[13px] rounded-md px-3"
-          label="Transfer"
-          onClick={() =>
-            useAccountTransactStore.getState().openAccountTransact("transfer")
-          }
-        />
-      </div>
+      <Visibility visible={data.coin === "USDC"}>
+        <div className="flex-1 text-right">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-6 w-fit font-medium text-xs md:text-[13px] rounded-md px-3 text-white"
+            label="Transfer"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("transfer")
+            }
+          />
+        </div>
+      </Visibility>
     </div>
   );
 };

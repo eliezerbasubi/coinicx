@@ -51,7 +51,7 @@ const TIFSelector = () => {
       className="p-0"
       align="start"
       collisionPadding={16}
-      title="Time in Force"
+      title={<span className="px-4 md:px-0">Time in Force</span>}
       trigger={
         <div className="flex items-center text-white space-x-1">
           <p className="text-3xs md:text-xs font-medium cursor-pointer uppercase space-x-1">

@@ -193,7 +193,7 @@ const QuoteChart = () => {
       <div className="w-full min-h-96">
         {status === "pending" && (
           <div className="min-h-96 flex flex-col items-center justify-center">
-            <AppLogo />
+            <AppLogo className="w-fit h-6" />
           </div>
         )}
         <div ref={chartRef} />
