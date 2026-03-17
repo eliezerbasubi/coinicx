@@ -128,7 +128,7 @@ export const OrderValueAndMarginRequired = ({
           useFallback: true,
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
-        })} ${quote}`}
+        })} ${quote ?? ""}`}
       />
       <Visibility visible={isPerp}>
         <DetailsTile
@@ -137,7 +137,7 @@ export const OrderValueAndMarginRequired = ({
             useFallback: true,
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-          })} ${quote}`}
+          })} ${quote ?? ""}`}
         />
       </Visibility>
     </>
@@ -272,7 +272,7 @@ export const TwapDetails = ({ size }: { size: number }) => {
           useFallback: true,
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
-        })} ${base}`}
+        })} ${base ?? ""}`}
       />
       <DetailsTile label="Number of Orders" value={numOfOrders || 1} />
     </div>
