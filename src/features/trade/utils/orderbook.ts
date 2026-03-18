@@ -1,4 +1,4 @@
-import { PriceLevel, Tick } from "@/types/orderbook";
+import { PriceLevel, Tick } from "@/lib/types/orderbook";
 
 import { formatPriceToDecimal } from "./formatting";
 import { getPriceDecimals, getPriceSigFigs } from "./prices";

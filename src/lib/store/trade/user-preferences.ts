@@ -6,8 +6,8 @@ import {
   PortfolioChartTab,
   PortfolioPeriod,
   PortfolioType,
-} from "@/types/portfolio";
-import { MarketAreaTabValue, MobileViewTab } from "@/types/trade";
+} from "@/lib/types/portfolio";
+import { MarketAreaTabValue, MobileViewTab } from "@/lib/types/trade";
 
 type PreferencesState = {
   portfolioChartTab: PortfolioChartTab;

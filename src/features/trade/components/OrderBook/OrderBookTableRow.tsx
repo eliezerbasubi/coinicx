@@ -2,12 +2,12 @@
 
 import { memo } from "react";
 
-import { OrderBookType } from "@/types/orderbook";
+import { useOrderFormStore } from "@/lib/store/trade/order-form";
+import { OrderBookType } from "@/lib/types/orderbook";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import { formatPriceToDecimal } from "@/features/trade/utils";
-import { useOrderFormStore } from "@/store/trade/order-form";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 type OrderBookTableRowProps = {
   side: OrderBookType;

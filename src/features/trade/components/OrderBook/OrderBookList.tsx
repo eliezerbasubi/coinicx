@@ -2,16 +2,16 @@ import React, { useCallback, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowOrderBookStore } from "@/lib/store/trade/orderbook";
 import {
   CumulativePriceLevel,
   OrderBookOrientation,
   OrderBookType,
   PriceLevel,
-} from "@/types/orderbook";
+} from "@/lib/types/orderbook";
+import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowOrderBookStore } from "@/store/trade/orderbook";
-import { cn } from "@/utils/cn";
 
 import AveragePriceTooltip from "./AveragePriceTooltip";
 import OrderBookTableRow from "./OrderBookTableRow";

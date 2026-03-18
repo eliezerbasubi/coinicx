@@ -2,7 +2,7 @@
 
 import { Label as LabelPrimitive } from "radix-ui";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 function Label({ className, ...props }: LabelPrimitive.LabelProps) {
   return (

@@ -3,13 +3,18 @@ import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 import { Pen } from "lucide-react";
 
-import { Position } from "@/types/trade";
+import { ROUTES } from "@/lib/constants/routes";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { usePreferencesStore } from "@/lib/store/trade/user-preferences";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { Position } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
 import Tag from "@/components/ui/tag";
-import { ROUTES } from "@/constants/routes";
 import TokenImage from "@/features/trade/components/TokenImage";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import {
@@ -19,11 +24,6 @@ import {
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
 import { isStopLoss, isTakeProfit } from "@/features/trade/utils/orderTypes";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { usePreferencesStore } from "@/store/trade/user-preferences";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";

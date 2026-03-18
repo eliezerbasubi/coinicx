@@ -1,6 +1,7 @@
-import { PriceLevel } from "@/types/orderbook";
-import { debounce } from "@/utils/debounce";
 import { L2BookWsEvent } from "@nktkas/hyperliquid";
+
+import { PriceLevel } from "@/lib/types/orderbook";
+import { debounce } from "@/lib/utils/debounce";
 
 export function createBatchedDiffApplier(
   applyDiff: (diff: L2BookWsEvent, syncSnapshot?: () => void) => void,
@@ -22,7 +23,10 @@ export function createBatchedDiffApplier(
         return Array.from(map.values());
       };
 
-      acc.levels = [mergeLevels(acc.levels[0], cur.levels[0]), mergeLevels(acc.levels[1], cur.levels[1])] as L2BookWsEvent["levels"];
+      acc.levels = [
+        mergeLevels(acc.levels[0], cur.levels[0]),
+        mergeLevels(acc.levels[1], cur.levels[1]),
+      ] as L2BookWsEvent["levels"];
 
       return acc;
     }, bufferedUpdates[0]);

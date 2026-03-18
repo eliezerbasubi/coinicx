@@ -1,8 +1,8 @@
 import React from "react";
 import { cva, VariantProps } from "class-variance-authority";
 
+import { cn } from "@/lib/utils/cn";
 import { useIsDesktop } from "@/hooks/useIsMobile";
-import { cn } from "@/utils/cn";
 
 import { Button } from "./button";
 import {

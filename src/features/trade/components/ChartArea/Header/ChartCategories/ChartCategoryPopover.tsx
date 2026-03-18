@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import { ChartType } from "@/types/trade";
+import { ChartType } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/utils/cn";
 
 import { CATEGORIES } from "./constants";
 

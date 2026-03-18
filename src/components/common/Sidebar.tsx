@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useOnClickOutside } from "usehooks-ts";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 import { Button } from "../ui/button";
 

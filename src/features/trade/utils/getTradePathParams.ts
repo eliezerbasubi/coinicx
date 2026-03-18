@@ -1,4 +1,4 @@
-import { InstrumentType } from "@/types/trade";
+import { InstrumentType } from "@/lib/types/trade";
 
 import { DEFAULT_PERPS_ASSETS, DEFAULT_SPOT_ASSETS } from "../constants";
 

@@ -1,7 +1,7 @@
 import React from "react";
 
+import { cn } from "@/lib/utils/cn";
 import { InputNumberControl } from "@/components/ui/input-number";
-import { cn } from "@/utils/cn";
 
 type Props = React.ComponentProps<typeof InputNumberControl>;
 

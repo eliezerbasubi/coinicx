@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { useShallowOrderBookStore } from "@/store/trade/orderbook";
+import { useShallowOrderBookStore } from "@/lib/store/trade/orderbook";
 
 import { DepthChartData, DepthPoint } from "../types";
 

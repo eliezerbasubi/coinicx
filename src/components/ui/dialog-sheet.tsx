@@ -1,5 +1,6 @@
 import React from "react";
 
+import { cn } from "@/lib/utils/cn";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { cn } from "@/utils/cn";
 
 type PointerDownOutsideEvent = CustomEvent<{
   originalEvent: PointerEvent;

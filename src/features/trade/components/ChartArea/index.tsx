@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import {
   useChartSettingsStore,
   useShallowChartSettingsStore,
-} from "@/store/trade/chart-settings";
+} from "@/lib/store/trade/chart-settings";
 
 import ChartCategories from "./Header/ChartCategories";
 

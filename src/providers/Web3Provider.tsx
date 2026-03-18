@@ -5,11 +5,11 @@ import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 
-import { wagmiConfig } from "@/config/wagmi";
+import { wagmiConfig } from "@/lib/config/wagmi";
 
 import "@rainbow-me/rainbowkit/styles.css";
 
-import { getQueryClient } from "@/utils/getQueryClient";
+import { getQueryClient } from "@/lib/utils/getQueryClient";
 
 type Props = {
   children: React.ReactNode;

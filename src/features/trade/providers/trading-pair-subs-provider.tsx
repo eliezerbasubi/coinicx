@@ -6,15 +6,15 @@ import {
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
-import { useSubscription } from "@/hooks/useSubscription";
-import { hlSubClient } from "@/services/transport";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
+import { hlSubClient } from "@/lib/services/transport";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import {
   useOrderBookStore,
   useShallowOrderBookStore,
-} from "@/store/trade/orderbook";
-import { useUserTradeStore } from "@/store/trade/user-trade";
+} from "@/lib/store/trade/orderbook";
+import { useUserTradeStore } from "@/lib/store/trade/user-trade";
+import { useSubscription } from "@/hooks/useSubscription";
 
 import {
   getMaxSizeDecimals,

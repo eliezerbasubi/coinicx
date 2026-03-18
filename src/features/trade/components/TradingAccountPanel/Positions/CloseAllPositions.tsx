@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from "react";
 
-import { Position } from "@/types/trade";
+import { Position } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TradingButton from "@/components/common/TradingButton";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useClosePosition } from "@/features/trade/hooks/useClosePosition";
 import { useFeeRate } from "@/features/trade/hooks/useUserFees";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 type Props = {
   positions: Position[];

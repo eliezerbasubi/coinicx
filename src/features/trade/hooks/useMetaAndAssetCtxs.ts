@@ -1,14 +1,14 @@
 import { useCallback } from "react";
 import { useQueries } from "@tanstack/react-query";
 
-import { AssetMeta, InstrumentType, SpotMetas } from "@/types/trade";
-import { QUERY_KEYS } from "@/constants/queryKeys";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { hlInfoClient } from "@/lib/services/transport";
+import { AssetMeta, InstrumentType, SpotMetas } from "@/lib/types/trade";
 import {
   mapPerpDataToAssetMeta,
   mapSpotDataToAssetMeta,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
-import { hlInfoClient } from "@/services/transport";
 
 import { getTokenDisplayName } from "../utils/getTokenDisplayName";
 

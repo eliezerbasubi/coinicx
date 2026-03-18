@@ -1,5 +1,12 @@
 import { useMemo } from "react";
 
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
+import { useOrderBookStore } from "@/lib/store/trade/orderbook";
+import { useMaxTradeSz, useUserTradeStore } from "@/lib/store/trade/user-trade";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { DEFAULT_ORDER_MAX_SLIPPAGE } from "@/features/trade/constants";
@@ -13,13 +20,6 @@ import {
   calculateNumberOfOrders,
   calculateSubOrderSize,
 } from "@/features/trade/utils/twap";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { useShallowOrderFormStore } from "@/store/trade/order-form";
-import { useOrderBookStore } from "@/store/trade/orderbook";
-import { useMaxTradeSz, useUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 export const LiquidationPrice = ({ size }: { size: number }) => {
   const { isPerps, coin, decimals } = useTradeContext((s) => ({

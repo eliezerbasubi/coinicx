@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 
-import { ChartType } from "@/types/trade";
+import { ChartType } from "@/lib/types/trade";
 
 type ChartSettingsState = {
   showQuickOrder: boolean;

@@ -1,4 +1,4 @@
-import { useShallowPreferencesStore } from "@/store/trade/user-preferences";
+import { useShallowPreferencesStore } from "@/lib/store/trade/user-preferences";
 
 import { usePortfolioData } from "./usePortfolioData";
 

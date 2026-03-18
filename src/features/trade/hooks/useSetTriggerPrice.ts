@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Position } from "@/types/trade";
+import { Position } from "@/lib/types/trade";
 
 import {
   calculateSlippageAdjustedPrice,

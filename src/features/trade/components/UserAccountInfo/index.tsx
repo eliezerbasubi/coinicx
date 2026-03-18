@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 
+import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
-import { useAccountTransactStore } from "@/store/trade/account-transact";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 const UserAccountInfo = () => {
   return (

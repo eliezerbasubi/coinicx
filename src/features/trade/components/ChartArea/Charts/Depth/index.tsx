@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Layer, Rect, Stage } from "react-konva";
 
-import { useTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/lib/store/trade/hooks";
 
 import { DEPTH_CHART_COLORS, DEPTH_CHART_LAYOUT } from "./constants";
 import { useContainerSize } from "./hooks/useContainerSize";

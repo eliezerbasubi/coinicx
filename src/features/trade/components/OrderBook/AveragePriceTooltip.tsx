@@ -1,9 +1,9 @@
 import React, { memo, useMemo } from "react";
 
-import { OrderBookType, PriceLevel } from "@/types/orderbook";
-import { useTradeContext } from "@/store/trade/hooks";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { OrderBookType, PriceLevel } from "@/lib/types/orderbook";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 
 type Props = {
   hoveredIndex: number;

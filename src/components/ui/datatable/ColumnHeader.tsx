@@ -2,7 +2,7 @@ import React from "react";
 import { Column } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 import { Button } from "../button";
 

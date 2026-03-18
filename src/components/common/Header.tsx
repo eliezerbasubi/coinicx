@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChartCandlestick, Coins, Replace } from "lucide-react";
 
-import { ROUTES } from "@/constants/routes";
-import { cn } from "@/utils/cn";
+import { ROUTES } from "@/lib/constants/routes";
+import { cn } from "@/lib/utils/cn";
 
 import AppLogo from "../vectors/app-logo";
 import AccountButton from "./AccountButton";

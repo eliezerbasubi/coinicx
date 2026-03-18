@@ -3,8 +3,8 @@ import {
   AllDexsClearinghouseStateWsEvent,
 } from "@nktkas/hyperliquid";
 
-import { OrderBook } from "@/types/orderbook";
-import { OrderType } from "@/types/trade";
+import { OrderBook } from "@/lib/types/orderbook";
+import { OrderType } from "@/lib/types/trade";
 
 import { isLimitOrder } from "./orderTypes";
 

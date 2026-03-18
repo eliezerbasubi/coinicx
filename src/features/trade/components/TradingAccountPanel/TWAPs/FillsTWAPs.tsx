@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { cn } from "@/lib/utils/cn";
+import { formatDateTime } from "@/lib/utils/formatting/dates";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
 import TokenImage from "@/features/trade/components/TokenImage";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
-import { formatDateTime } from "@/utils/formatting/dates";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";

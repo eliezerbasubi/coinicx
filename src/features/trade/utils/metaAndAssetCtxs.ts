@@ -5,7 +5,7 @@ import {
   SpotMetaResponse,
 } from "@nktkas/hyperliquid";
 
-import { AssetCxt, AssetMeta } from "@/types/trade";
+import { AssetCxt, AssetMeta } from "@/lib/types/trade";
 
 import { formatSymbol } from "./formatting";
 import { parseQuoteAsset } from "./perps";

@@ -3,22 +3,22 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
 
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import {
+  useInstrumentStore,
+  useShallowInstrumentStore,
+} from "@/lib/store/trade/instrument";
+import {
+  useShallowUserTradeStore,
+  useUserTradeStore,
+} from "@/lib/store/trade/user-trade";
+import { cn } from "@/lib/utils/cn";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputSlider from "@/components/common/FormInputSlider";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 import { InputNumber } from "@/components/ui/input-number";
 import { useEnableTrading } from "@/features/trade/hooks/useEnableTrading";
-import { useTradeContext } from "@/store/trade/hooks";
-import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/store/trade/instrument";
-import {
-  useShallowUserTradeStore,
-  useUserTradeStore,
-} from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
 
 const toastId = "adjust-leverage";
 

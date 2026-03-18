@@ -2,13 +2,13 @@ import { useCallback, useEffect, useRef } from "react";
 import { ISubscription } from "@nktkas/hyperliquid";
 import { Chart, dispose, init, KLineData } from "klinecharts";
 
+import { hlInfoClient, hlSubClient } from "@/lib/services/transport";
+import { useChartSettingsStore } from "@/lib/store/trade/chart-settings";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useInstrumentStore } from "@/lib/store/trade/instrument";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { getQueryClient } from "@/lib/utils/getQueryClient";
 import { getChartTimeRange } from "@/features/trade/utils";
-import { hlInfoClient, hlSubClient } from "@/services/transport";
-import { useChartSettingsStore } from "@/store/trade/chart-settings";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
-import { formatNumber } from "@/utils/formatting/numbers";
-import { getQueryClient } from "@/utils/getQueryClient";
 
 import KlineTooltipTitle from "./KlineTooltipTitle";
 import KlineVolIndicatorTitle from "./KlineVolIndicatorTitle";

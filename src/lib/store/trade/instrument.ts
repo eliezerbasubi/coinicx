@@ -7,15 +7,20 @@ import {
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-import { AllPerpMetas, AssetCxt, AssetMeta, SpotMetas } from "@/types/trade";
-import { QUERY_KEYS } from "@/constants/queryKeys";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import {
+  AllPerpMetas,
+  AssetCxt,
+  AssetMeta,
+  SpotMetas,
+} from "@/lib/types/trade";
+import { getQueryClient } from "@/lib/utils/getQueryClient";
 import {
   mapDataToAssetCtx,
   mapPerpDataToAssetMeta,
   mapSpotDataToAssetMeta,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
-import { getQueryClient } from "@/utils/getQueryClient";
 
 interface InstrumentStoreState {
   assetMeta: AssetMeta | null;

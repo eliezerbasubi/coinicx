@@ -3,15 +3,15 @@
 import React, { useEffect } from "react";
 import { redirect } from "next/navigation";
 
-import { InstrumentType } from "@/types/trade";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/lib/constants/routes";
+import { useInstrumentStore } from "@/lib/store/trade/instrument";
+import TradeStoreProvider from "@/lib/store/trade/provider";
+import { InstrumentType } from "@/lib/types/trade";
 import {
   DEFAULT_PERPS_ASSETS,
   DEFAULT_SPOT_ASSETS,
 } from "@/features/trade/constants";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
-import { useInstrumentStore } from "@/store/trade/instrument";
-import TradeStoreProvider from "@/store/trade/provider";
 
 import { parseBuilderDeployedAsset } from "../utils";
 import TradingPairSubsProvider from "./trading-pair-subs-provider";

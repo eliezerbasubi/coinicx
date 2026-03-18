@@ -6,6 +6,7 @@ import {
   Table,
 } from "@tanstack/react-table";
 
+import { cn } from "@/lib/utils/cn";
 import {
   TableBody,
   TableCell,
@@ -14,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/utils/cn";
 
 export type DataTableRendererProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];

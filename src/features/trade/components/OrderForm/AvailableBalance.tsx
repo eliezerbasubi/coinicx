@@ -1,11 +1,11 @@
 import { PlusCircle } from "lucide-react";
 
-import { useAccountTransactStore } from "@/store/trade/account-transact";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { useShallowOrderFormStore } from "@/store/trade/order-form";
-import { useAvailableToTrade } from "@/store/trade/user-trade";
-import { formatNumber } from "@/utils/formatting/numbers";
+import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
+import { useAvailableToTrade } from "@/lib/store/trade/user-trade";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 
 const AvailableBalance = () => {
   const { base, quote } = useShallowInstrumentStore((s) => ({

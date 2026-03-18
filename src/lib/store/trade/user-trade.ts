@@ -15,7 +15,7 @@ import {
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-import { AllDexsClearinghouseState, SpotBalance } from "@/types/trade";
+import { AllDexsClearinghouseState, SpotBalance } from "@/lib/types/trade";
 
 import { useInstrumentStore } from "./instrument";
 

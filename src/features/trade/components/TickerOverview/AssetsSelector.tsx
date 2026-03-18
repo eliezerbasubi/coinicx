@@ -2,16 +2,16 @@ import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ChevronDown } from "lucide-react";
 
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useShallowPreferencesStore } from "@/lib/store/trade/user-preferences";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import Tag from "@/components/ui/tag";
 import { formatSymbol } from "@/features/trade/utils";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { useShallowPreferencesStore } from "@/store/trade/user-preferences";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
 import AssetsSelectorContent from "./AssetsSelectorContent";

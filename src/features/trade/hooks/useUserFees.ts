@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
-import { hlInfoClient } from "@/services/transport";
+import { hlInfoClient } from "@/lib/services/transport";
 
 import { COINICX_BUILDER_SETTINGS } from "../constants";
 

@@ -7,7 +7,7 @@ import {
   ICurrency,
   MarketType,
   TokenInputType,
-} from "@/types/market";
+} from "@/lib/types/market";
 
 export type AssetsByTokenInputType = Record<
   TokenInputType,

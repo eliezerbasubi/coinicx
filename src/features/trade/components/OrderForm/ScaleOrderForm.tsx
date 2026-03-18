@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import { ScaleDistribution } from "@/types/trade";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/lib/store/trade/order-form";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { ScaleDistribution } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { formatPriceToDecimal, formatSize } from "@/features/trade/utils";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import {
-  useOrderFormStore,
-  useShallowOrderFormStore,
-} from "@/store/trade/order-form";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
 
 import OrderFormInput from "./OrderFormInput";
 import TrailingQuote from "./TrailingQuote";

@@ -2,18 +2,18 @@ import { useMemo, useReducer } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Search } from "lucide-react";
 
-import { Asset } from "@/types/trade";
+import { ROUTES } from "@/lib/constants/routes";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useInstrumentStore } from "@/lib/store/trade/instrument";
+import { Asset } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import { DataTable } from "@/components/ui/datatable";
 import { DataTableColumnHeader } from "@/components/ui/datatable/ColumnHeader";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ROUTES } from "@/constants/routes";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import AssetSymbolTile from "./AssetSymbolTile";
 import { useFavoriteStore } from "./store";

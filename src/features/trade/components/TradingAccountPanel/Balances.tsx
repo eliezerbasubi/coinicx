@@ -2,6 +2,11 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { InfinityIcon } from "lucide-react";
 
+import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
@@ -13,11 +18,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import { getTokenDisplayName } from "@/features/trade/utils/getTokenDisplayName";
-import { useAccountTransactStore } from "@/store/trade/account-transact";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
 

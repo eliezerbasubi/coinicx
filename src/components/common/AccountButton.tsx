@@ -2,8 +2,8 @@ import { useAccountModal } from "@rainbow-me/rainbowkit";
 import { ChevronDown } from "lucide-react";
 import { useAccount } from "wagmi";
 
+import { formatAddress } from "@/lib/utils/formatting/formatAddress";
 import { Button } from "@/components/ui/button";
-import { formatAddress } from "@/utils/formatting/formatAddress";
 
 import ConnectButton from "./ConnectButton";
 

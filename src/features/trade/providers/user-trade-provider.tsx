@@ -3,9 +3,9 @@
 import React from "react";
 import { useAccount } from "wagmi";
 
+import { hlSubClient } from "@/lib/services/transport";
+import { useUserTradeStore } from "@/lib/store/trade/user-trade";
 import { useSubscription } from "@/hooks/useSubscription";
-import { hlSubClient } from "@/services/transport";
-import { useUserTradeStore } from "@/store/trade/user-trade";
 
 type Props = {
   children: React.ReactNode;

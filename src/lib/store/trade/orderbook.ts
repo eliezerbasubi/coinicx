@@ -7,7 +7,7 @@ import {
   OrderBookLayout,
   PriceLevel,
   Tick,
-} from "@/types/orderbook";
+} from "@/lib/types/orderbook";
 import {
   generateTicks,
   mapAmountDepthVisualizer,

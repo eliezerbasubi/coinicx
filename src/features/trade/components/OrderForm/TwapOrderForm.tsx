@@ -1,13 +1,13 @@
 import { useReducer } from "react";
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { convertTimeToMinutes } from "@/features/trade/utils/twap";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
-} from "@/store/trade/order-form";
-import { cn } from "@/utils/cn";
+} from "@/lib/store/trade/order-form";
+import { cn } from "@/lib/utils/cn";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { convertTimeToMinutes } from "@/features/trade/utils/twap";
 
 import OrderFormInput from "./OrderFormInput";
 

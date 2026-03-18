@@ -17,8 +17,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { cn } from "@/lib/utils/cn";
 import { useIsDesktop } from "@/hooks/useIsMobile";
-import { cn } from "@/utils/cn";
 
 import type { DataTableRendererProps } from "../datatable/DataTableRenderer";
 import type { AdaptiveTableCardProps } from "./adaptive-table-card";

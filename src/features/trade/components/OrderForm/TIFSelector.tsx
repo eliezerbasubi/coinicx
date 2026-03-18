@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import AdaptivePopover from "@/components/ui/adaptive-popover";
-import { isLimitOrScaleOrder } from "@/features/trade/utils/orderTypes";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
-} from "@/store/trade/order-form";
-import { cn } from "@/utils/cn";
+} from "@/lib/store/trade/order-form";
+import { cn } from "@/lib/utils/cn";
+import AdaptivePopover from "@/components/ui/adaptive-popover";
+import { isLimitOrScaleOrder } from "@/features/trade/utils/orderTypes";
 
 const TIF_OPTIONS = [
   {

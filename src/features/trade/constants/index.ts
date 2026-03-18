@@ -1,4 +1,4 @@
-import { ChartInterval, TradeType } from "@/types/trade";
+import { ChartInterval, TradeType } from "@/lib/types/trade";
 
 export const DEFAULT_SPOT_ASSETS = {
   base: "HYPE",

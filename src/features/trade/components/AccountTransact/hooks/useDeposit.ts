@@ -9,8 +9,9 @@ import {
   writeContract,
 } from "wagmi/actions";
 
-import { CHAINS_CONFIG_ENV } from "@/config/chains";
-import { ERROR_NAME } from "@/constants/errors";
+import { CHAINS_CONFIG_ENV } from "@/lib/config/chains";
+import { ERROR_NAME } from "@/lib/constants/errors";
+import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { useTokenBalance } from "@/features/trade/hooks/useTokenBalance";
 import {
   ALL_NETWORKS_AND_ASSETS,
@@ -18,7 +19,6 @@ import {
   useUnitFees,
   useUnitOperations,
 } from "@/features/trade/hooks/useUnitProtocol";
-import { useAccountTransactStore } from "@/store/trade/account-transact";
 
 type State = {
   amount: string;

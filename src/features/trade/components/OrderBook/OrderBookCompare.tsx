@@ -1,13 +1,13 @@
 import React from "react";
 
+import { useShallowOrderBookStore } from "@/lib/store/trade/orderbook";
+import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useShallowOrderBookStore } from "@/store/trade/orderbook";
-import { cn } from "@/utils/cn";
 
 const MAX_LEVELS = 10;
 

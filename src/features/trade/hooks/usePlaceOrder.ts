@@ -2,7 +2,13 @@ import { useState } from "react";
 import { OrderParameters } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
 
-import { Order, OrderSide } from "@/types/trade";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useInstrumentStore } from "@/lib/store/trade/instrument";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/lib/store/trade/order-form";
+import { Order, OrderSide } from "@/lib/types/trade";
 import {
   calculateSlippageAdjustedPrice,
   formatPriceToDecimal,
@@ -11,12 +17,6 @@ import {
 } from "@/features/trade/utils";
 import { buildOrder } from "@/features/trade/utils/orders";
 import { isStopOrder } from "@/features/trade/utils/orderTypes";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useInstrumentStore } from "@/store/trade/instrument";
-import {
-  useOrderFormStore,
-  useShallowOrderFormStore,
-} from "@/store/trade/order-form";
 
 import { calculateSubOrderSize, MAX_MINUTES, MIN_MINUTES } from "../utils/twap";
 import { useEnsureTradingEnabled } from "./useEnsureTradingEnabled";

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useInstrumentStore } from "@/store/trade/instrument";
+import { useInstrumentStore } from "@/lib/store/trade/instrument";
 
 import TradingViewWidget from "./TradingViewWidget";
 

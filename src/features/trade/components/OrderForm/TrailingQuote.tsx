@@ -1,4 +1,4 @@
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 
 const TrailingQuote = () => {
   const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);

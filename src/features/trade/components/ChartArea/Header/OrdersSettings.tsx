@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
 import { ListChecks } from "lucide-react";
 
+import { useChartSettingsStore } from "@/lib/store/trade/chart-settings";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useChartSettingsStore } from "@/store/trade/chart-settings";
 
 const OrdersSettings = () => {
   const [open, setOpen] = useState(false);
