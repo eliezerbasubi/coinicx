@@ -46,12 +46,14 @@ const MarketArea = ({ className, excludeTabs }: Props) => {
 
   // Set default value if the excluded tabs include the current tab
   useEffect(() => {
-    if (excludeTabs && excludeTabs.includes(marketActiveTab)) {
+    const currentTab = usePreferencesStore.getState().marketActiveTab;
+
+    if (excludeTabs && excludeTabs.includes(currentTab)) {
       usePreferencesStore
         .getState()
         .dispatch({ marketActiveTab: TABS[0].value });
     }
-  }, [marketActiveTab, excludeTabs]);
+  }, []);
 
   return (
     <div

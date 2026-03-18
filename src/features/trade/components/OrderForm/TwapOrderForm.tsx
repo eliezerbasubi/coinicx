@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useReducer } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -49,10 +49,6 @@ const TwapOrderForm = () => {
     minutes: state.minutes,
   });
 
-  useEffect(() => {
-    useOrderFormStore.getState().setTwapOrder({ minutes: twapMinutes });
-  }, [twapMinutes]);
-
   const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -65,6 +61,13 @@ const TwapOrderForm = () => {
     const periodValue = Math.min(Number(value), max).toString();
 
     dispatch({ [name]: periodValue });
+
+    const twapMinutes = convertTimeToMinutes({
+      ...state,
+      [name]: periodValue,
+    });
+
+    useOrderFormStore.getState().setTwapOrder({ minutes: twapMinutes });
   };
 
   return (

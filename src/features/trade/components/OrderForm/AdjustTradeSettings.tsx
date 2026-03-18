@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { useAccount } from "wagmi";
 
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputSlider from "@/components/common/FormInputSlider";
@@ -22,6 +23,7 @@ import { cn } from "@/utils/cn";
 const toastId = "adjust-leverage";
 
 const AdjustTradeSettings = () => {
+  const { address } = useAccount();
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   if (!isPerps) return null;
@@ -29,7 +31,7 @@ const AdjustTradeSettings = () => {
   return (
     <div className="w-full flex items-center gap-2 md:px-4 md:h-10 mb-1 md:mb-0">
       <AdjustMarginMode />
-      <AdjustLeverage />
+      <AdjustLeverage key={address} />
       {/* User Account unification mode */}
       <Button
         variant="secondary"
@@ -169,10 +171,6 @@ const AdjustLeverage = () => {
   const [open, setOpen] = useState(false);
   const [assetLeverage, setAssetLeverage] = useState(leverage);
   const [processing, setProcessing] = useState(false);
-
-  useEffect(() => {
-    setAssetLeverage(leverage);
-  }, [leverage]);
 
   const onValueChange = (value: string) => {
     const numValue = Number(value);
