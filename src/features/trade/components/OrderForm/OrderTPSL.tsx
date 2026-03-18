@@ -1,3 +1,7 @@
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/lib/store/trade/order-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
@@ -6,10 +10,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { isLimitOrMarketOrder } from "@/features/trade/utils/orderTypes";
-import {
-  useOrderFormStore,
-  useShallowOrderFormStore,
-} from "@/store/trade/order-form";
 
 import OrderTPSLForm from "./OrderTPSLForm";
 

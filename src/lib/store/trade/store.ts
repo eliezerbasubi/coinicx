@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { create } from "zustand";
 
-import { InstrumentType } from "@/types/trade";
+import { InstrumentType } from "@/lib/types/trade";
 import { getPriceDecimals } from "@/features/trade/utils";
 
 import { useOrderFormStore } from "./order-form";

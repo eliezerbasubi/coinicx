@@ -9,7 +9,7 @@ import { AbstractWallet } from "@nktkas/hyperliquid/signing";
 import { toHex } from "viem";
 import { getWalletClient } from "wagmi/actions";
 
-import { wagmiConfig } from "@/config/wagmi";
+import { wagmiConfig } from "@/lib/config/wagmi";
 
 export const isTestnet = process.env.NEXT_PUBLIC_WEB3_NETWORK === "testnet";
 

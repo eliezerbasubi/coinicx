@@ -1,4 +1,4 @@
-import { ChartType } from "@/types/trade";
+import { ChartType } from "@/lib/types/trade";
 
 export const CATEGORIES: Array<{ label: string; value: ChartType }> = [
   { label: "Standard", value: "standard" },

@@ -1,7 +1,7 @@
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
-} from "@/store/trade/order-form";
+} from "@/lib/store/trade/order-form";
 
 import OrderFormInput from "./OrderFormInput";
 

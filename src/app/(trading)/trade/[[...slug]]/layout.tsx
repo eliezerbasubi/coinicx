@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/lib/constants/routes";
 import { DEFAULT_SPOT_ASSETS } from "@/features/trade/constants";
 import TradingPairProvider from "@/features/trade/providers/trading-pair-provider";
 import { getTradePathParams } from "@/features/trade/utils/getTradePathParams";

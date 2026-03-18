@@ -18,7 +18,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 import { DataTablePagination } from "./DataTablePagination";
 import { DataTableRenderer } from "./DataTableRenderer";

@@ -5,10 +5,10 @@ import "./globals.css";
 
 import { Toaster } from "sonner";
 
+import startupImages from "@/lib/utils/appleStartupImages";
 import Header from "@/components/common/Header";
 import Providers from "@/providers";
 import { SerwistProvider } from "@/providers/SerwistProvider";
-import startupImages from "@/utils/appleStartupImages";
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",

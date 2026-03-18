@@ -1,9 +1,4 @@
 export const ROUTES = {
-  crypto: {
-    index: "/crypto",
-    buy: "/crypto/buy",
-    sell: "/crypto/sell",
-  },
   trade: {
     index: "/trade",
     spot: "/trade/spot",

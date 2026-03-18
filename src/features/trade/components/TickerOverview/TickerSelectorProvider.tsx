@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useMemo } from "react";
 
-import { Asset } from "@/types/trade";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { Asset } from "@/lib/types/trade";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import {
   formatSymbol,
   parseBuilderDeployedAsset,
   parseQuoteAsset,
 } from "@/features/trade/utils";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
 
 type Props = {
   children: React.ReactNode;

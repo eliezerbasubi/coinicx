@@ -4,15 +4,15 @@ import { Activity, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Maximize2, Minimize2 } from "lucide-react";
 
-import { MarketAreaTabValue } from "@/types/trade";
-import { useIsMobile } from "@/hooks/useIsMobile";
-import Visibility from "@/components/common/Visibility";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   usePreferencesStore,
   useShallowPreferencesStore,
-} from "@/store/trade/user-preferences";
-import { cn } from "@/utils/cn";
+} from "@/lib/store/trade/user-preferences";
+import { MarketAreaTabValue } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import Visibility from "@/components/common/Visibility";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AssetInfo = dynamic(() => import("../AsssetInfo"), { ssr: false });
 const ChartArea = dynamic(() => import("../ChartArea"), { ssr: false });
@@ -46,12 +46,14 @@ const MarketArea = ({ className, excludeTabs }: Props) => {
 
   // Set default value if the excluded tabs include the current tab
   useEffect(() => {
-    if (excludeTabs && excludeTabs.includes(marketActiveTab)) {
+    const currentTab = usePreferencesStore.getState().marketActiveTab;
+
+    if (excludeTabs && excludeTabs.includes(currentTab)) {
       usePreferencesStore
         .getState()
         .dispatch({ marketActiveTab: TABS[0].value });
     }
-  }, [marketActiveTab, excludeTabs]);
+  }, []);
 
   return (
     <div

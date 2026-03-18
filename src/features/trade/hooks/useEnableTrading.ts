@@ -2,8 +2,8 @@ import { toast } from "sonner";
 import { privateKeyToAccount } from "viem/accounts";
 import { useAccount } from "wagmi";
 
-import { ERROR_NAME } from "@/constants/errors";
-import { hlExchangeClient } from "@/services/transport";
+import { ERROR_NAME } from "@/lib/constants/errors";
+import { hlExchangeClient } from "@/lib/services/transport";
 
 import { COINICX_AGENT_SETTINGS } from "../constants";
 import { useExtraAgents } from "./useExtraAgents";

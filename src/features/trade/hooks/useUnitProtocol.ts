@@ -2,14 +2,18 @@ import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 
-import { GenerateAddressResponse, Operation, UnitAddress } from "@/types/unit";
 import {
   PERPS_NATIVE_CHAINS_ASSETS,
   UNIT_SPOT_ASSETS,
   UnitSpotAssetToken,
-} from "@/constants/unit";
-import { isTestnet, UNIT_API_BASE_URL } from "@/services/transport";
-import { getHLTokenImgUrl } from "@/utils/getHLTokenImgUrl";
+} from "@/lib/constants/unit";
+import { isTestnet, UNIT_API_BASE_URL } from "@/lib/services/transport";
+import {
+  GenerateAddressResponse,
+  Operation,
+  UnitAddress,
+} from "@/lib/types/unit";
+import { getHLTokenImgUrl } from "@/lib/utils/getHLTokenImgUrl";
 
 type UseUnitFeesArgs = { enabled?: boolean };
 

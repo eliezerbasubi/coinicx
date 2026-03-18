@@ -4,13 +4,13 @@ import { useState } from "react";
 import { AlertTriangleIcon, CheckIcon, CopyIcon } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputControl from "@/components/common/FormInputControl";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import { useDeposit } from "./hooks/useDeposit";
 import TokenSelect from "./TokenSelect";

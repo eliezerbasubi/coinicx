@@ -12,15 +12,15 @@ import {
   Time,
 } from "lightweight-charts";
 
-import { PortfolioChartTab, PortfolioPeriod } from "@/types/portfolio";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AppLogo from "@/components/vectors/app-logo";
 import {
   usePreferencesStore,
   useShallowPreferencesStore,
-} from "@/store/trade/user-preferences";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
+} from "@/lib/store/trade/user-preferences";
+import { PortfolioChartTab, PortfolioPeriod } from "@/lib/types/portfolio";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AppLogo from "@/components/vectors/app-logo";
 
 import { usePortfolioMetrics } from "../hooks/usePortfolioMetrics";
 

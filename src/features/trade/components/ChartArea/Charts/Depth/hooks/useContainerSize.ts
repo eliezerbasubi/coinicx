@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useState } from "react";
 
-import { debounce } from "@/utils/debounce";
+import { debounce } from "@/lib/utils/debounce";
 
 export const useContainerSize = (ref: RefObject<HTMLDivElement | null>) => {
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -11,7 +11,10 @@ export const useContainerSize = (ref: RefObject<HTMLDivElement | null>) => {
 
     const update = debounce(() => {
       const rect = element.getBoundingClientRect();
-      setSize({ width: Math.floor(rect.width), height: Math.floor(rect.height) });
+      setSize({
+        width: Math.floor(rect.width),
+        height: Math.floor(rect.height),
+      });
     }, 100);
 
     // Initial measurement

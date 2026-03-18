@@ -2,10 +2,10 @@
 
 import { AlertTriangleIcon, ClipboardIcon } from "lucide-react";
 
+import { cn } from "@/lib/utils/cn";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputControl from "@/components/common/FormInputControl";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/utils/cn";
 
 import { useWithdraw } from "./hooks/useWithdraw";
 import TokenSelect from "./TokenSelect";

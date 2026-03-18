@@ -2,7 +2,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "usehooks-ts";
 
-import { ChartType } from "@/types/trade";
+import { ChartType } from "@/lib/types/trade";
 import Visibility from "@/components/common/Visibility";
 
 import ChartTimeInterval from "../ChartTimeInterval";

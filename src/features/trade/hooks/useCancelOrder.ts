@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { AllPerpMetas, OpenOrder, SpotMetas } from "@/types/trade";
-import { QUERY_KEYS } from "@/constants/queryKeys";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { AllPerpMetas, OpenOrder, SpotMetas } from "@/lib/types/trade";
+import { getQueryClient } from "@/lib/utils/getQueryClient";
 import {
   buildPerpAssetId,
   buildSpotAssetId,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
-import { getQueryClient } from "@/utils/getQueryClient";
 
 import { useEnableTrading } from "./useEnableTrading";
 

@@ -1,8 +1,8 @@
-import { Asset } from "@/types/trade";
+import { Asset } from "@/lib/types/trade";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import Tag from "@/components/ui/tag";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
 import FavoriteButton from "./FavoriteButton";

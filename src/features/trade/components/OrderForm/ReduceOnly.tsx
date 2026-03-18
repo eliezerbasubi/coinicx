@@ -1,9 +1,9 @@
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
-} from "@/store/trade/order-form";
+} from "@/lib/store/trade/order-form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const ReduceOnly = () => {
   const reduceOnly = useShallowOrderFormStore((s) => s.settings.reduceOnly);

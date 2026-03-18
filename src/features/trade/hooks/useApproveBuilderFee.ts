@@ -2,9 +2,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAddress } from "viem";
 import { useAccount } from "wagmi";
 
-import { ERROR_NAME } from "@/constants/errors";
-import { QUERY_KEYS } from "@/constants/queryKeys";
-import { hlExchangeClient, hlInfoClient } from "@/services/transport";
+import { ERROR_NAME } from "@/lib/constants/errors";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { hlExchangeClient, hlInfoClient } from "@/lib/services/transport";
 
 import { COINICX_BUILDER_SETTINGS } from "../constants";
 

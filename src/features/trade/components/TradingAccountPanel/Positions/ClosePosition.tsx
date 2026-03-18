@@ -1,6 +1,8 @@
 import React, { useMemo, useReducer, useState } from "react";
 
-import { Position } from "@/types/trade";
+import { Position } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import FormInputSlider from "@/components/common/FormInputSlider";
 import TradingButton from "@/components/common/TradingButton";
 import Visibility from "@/components/common/Visibility";
@@ -15,8 +17,6 @@ import {
   formatSize,
   roundToDecimals,
 } from "@/features/trade/utils";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 type Props = {
   position: Position;

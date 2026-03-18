@@ -1,6 +1,17 @@
 import { useMemo } from "react";
 
-import { OrderType } from "@/types/trade";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import {
+  useOrderFormStore,
+  useShallowOrderFormStore,
+} from "@/lib/store/trade/order-form";
+import {
+  useAvailableToTrade,
+  useMaxTradeSz,
+  useShallowUserTradeStore,
+} from "@/lib/store/trade/user-trade";
+import { OrderType } from "@/lib/types/trade";
 import {
   calculateMarginRequired,
   calculateOrderValue,
@@ -11,17 +22,6 @@ import {
   isStopOrder,
 } from "@/features/trade/utils/orderTypes";
 import { isValidTwapMinutes } from "@/features/trade/utils/twap";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import {
-  useOrderFormStore,
-  useShallowOrderFormStore,
-} from "@/store/trade/order-form";
-import {
-  useAvailableToTrade,
-  useMaxTradeSz,
-  useShallowUserTradeStore,
-} from "@/store/trade/user-trade";
 
 export const useOrderForm = () => {
   const isSpot = useTradeContext((s) => s.instrumentType === "spot");

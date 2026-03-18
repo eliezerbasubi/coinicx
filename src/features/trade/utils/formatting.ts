@@ -1,4 +1,4 @@
-import { formatNumber, FormatOptions } from "@/utils/formatting/numbers";
+import { formatNumber, FormatOptions } from "@/lib/utils/formatting/numbers";
 
 export const formatSymbol = (base: string, quote: string, isSpot: boolean) => {
   if (isSpot) {

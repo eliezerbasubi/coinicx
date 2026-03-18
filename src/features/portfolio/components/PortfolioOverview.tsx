@@ -2,19 +2,19 @@
 
 import { useMemo } from "react";
 
-import { PortfolioType } from "@/types/portfolio";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import {
+  usePreferencesStore,
+  useShallowPreferencesStore,
+} from "@/lib/store/trade/user-preferences";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { PortfolioType } from "@/lib/types/portfolio";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import {
-  usePreferencesStore,
-  useShallowPreferencesStore,
-} from "@/store/trade/user-preferences";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import { usePortfolioMetrics } from "../hooks/usePortfolioMetrics";
 

@@ -3,7 +3,11 @@
 import React from "react";
 import { MoreHorizontal } from "lucide-react";
 
-import { IOrderBookSettings } from "@/types/orderbook";
+import {
+  useOrderBookStore,
+  useShallowOrderBookStore,
+} from "@/lib/store/trade/orderbook";
+import { IOrderBookSettings } from "@/lib/types/orderbook";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
@@ -12,10 +16,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  useOrderBookStore,
-  useShallowOrderBookStore,
-} from "@/store/trade/orderbook";
 
 const OrderBookSettings = () => {
   const settings = useShallowOrderBookStore((state) => state.settings);

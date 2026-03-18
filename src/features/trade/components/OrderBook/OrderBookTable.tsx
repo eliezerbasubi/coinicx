@@ -2,10 +2,10 @@
 
 import React from "react";
 
-import { OrderBookOrientation } from "@/types/orderbook";
+import { useShallowOrderBookStore } from "@/lib/store/trade/orderbook";
+import { OrderBookOrientation } from "@/lib/types/orderbook";
+import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
-import { useShallowOrderBookStore } from "@/store/trade/orderbook";
-import { cn } from "@/utils/cn";
 
 import OrderBookList from "./OrderBookList";
 import { OrderBookTableHeader } from "./OrderBookTableHeader";

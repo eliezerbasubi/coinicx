@@ -1,7 +1,7 @@
 import React from "react";
 
-import { ChartType } from "@/types/trade";
-import { cn } from "@/utils/cn";
+import { ChartType } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
 
 import { CATEGORIES } from "./constants";
 

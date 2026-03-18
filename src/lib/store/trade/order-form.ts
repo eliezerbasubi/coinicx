@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 
-import { OrderSide, OrderType, ScaleDistribution } from "@/types/trade";
+import { OrderSide, OrderType, ScaleDistribution } from "@/lib/types/trade";
 import { roundToDecimals } from "@/features/trade/utils";
 
 import { useInstrumentStore } from "./instrument";

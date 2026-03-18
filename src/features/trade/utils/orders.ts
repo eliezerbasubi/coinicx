@@ -1,6 +1,6 @@
 import { OrderParameters } from "@nktkas/hyperliquid";
 
-import { HLOrder, Order } from "@/types/trade";
+import { HLOrder, Order } from "@/lib/types/trade";
 
 export function buildOrder(order: Order): HLOrder {
   let orderTypePayload: HLOrder["t"] = { limit: { tif: "Gtc" } };

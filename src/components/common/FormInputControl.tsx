@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
+import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { InputNumberControl } from "@/components/ui/input-number";
-import { cn } from "@/utils/cn";
 
 type Props = {
   max: string | number;

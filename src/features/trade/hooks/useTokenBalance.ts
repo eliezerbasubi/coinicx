@@ -1,7 +1,7 @@
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 
-import { CHAINS_CONFIG_ENV } from "@/config/chains";
+import { CHAINS_CONFIG_ENV } from "@/lib/config/chains";
 
 export const useTokenBalance = () => {
   const { address } = useAccount();

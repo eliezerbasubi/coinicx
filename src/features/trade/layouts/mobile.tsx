@@ -1,14 +1,14 @@
 import { Activity, useRef } from "react";
 import { CandlestickChart, Coins, User } from "lucide-react";
 
-import { MobileViewTab, OrderType } from "@/types/trade";
-import { Button } from "@/components/ui/button";
-import { useShallowOrderFormStore } from "@/store/trade/order-form";
+import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import {
   usePreferencesStore,
   useShallowPreferencesStore,
-} from "@/store/trade/user-preferences";
-import { cn } from "@/utils/cn";
+} from "@/lib/store/trade/user-preferences";
+import { MobileViewTab, OrderType } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { Button } from "@/components/ui/button";
 
 import MarketArea from "../components/MarketArea";
 import OrderBookCompare from "../components/OrderBook/OrderBookCompare";

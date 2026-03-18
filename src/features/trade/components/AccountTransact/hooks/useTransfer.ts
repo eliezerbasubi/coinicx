@@ -1,10 +1,10 @@
 import { useMemo, useReducer } from "react";
 import { toast } from "sonner";
 
-import { hlExchangeClient } from "@/services/transport";
-import { useAccountTransactStore } from "@/store/trade/account-transact";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { formatNumber } from "@/utils/formatting/numbers";
+import { hlExchangeClient } from "@/lib/services/transport";
+import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 
 const toastId = "transfer-account";
 

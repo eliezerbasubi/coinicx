@@ -1,27 +1,29 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { useAccount } from "wagmi";
 
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import {
+  useInstrumentStore,
+  useShallowInstrumentStore,
+} from "@/lib/store/trade/instrument";
+import {
+  useShallowUserTradeStore,
+  useUserTradeStore,
+} from "@/lib/store/trade/user-trade";
+import { cn } from "@/lib/utils/cn";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputSlider from "@/components/common/FormInputSlider";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 import { InputNumber } from "@/components/ui/input-number";
 import { useEnableTrading } from "@/features/trade/hooks/useEnableTrading";
-import { useTradeContext } from "@/store/trade/hooks";
-import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/store/trade/instrument";
-import {
-  useShallowUserTradeStore,
-  useUserTradeStore,
-} from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
 
 const toastId = "adjust-leverage";
 
 const AdjustTradeSettings = () => {
+  const { address } = useAccount();
   const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   if (!isPerps) return null;
@@ -29,7 +31,7 @@ const AdjustTradeSettings = () => {
   return (
     <div className="w-full flex items-center gap-2 md:px-4 md:h-10 mb-1 md:mb-0">
       <AdjustMarginMode />
-      <AdjustLeverage />
+      <AdjustLeverage key={address} />
       {/* User Account unification mode */}
       <Button
         variant="secondary"
@@ -169,10 +171,6 @@ const AdjustLeverage = () => {
   const [open, setOpen] = useState(false);
   const [assetLeverage, setAssetLeverage] = useState(leverage);
   const [processing, setProcessing] = useState(false);
-
-  useEffect(() => {
-    setAssetLeverage(leverage);
-  }, [leverage]);
 
   const onValueChange = (value: string) => {
     const numValue = Number(value);

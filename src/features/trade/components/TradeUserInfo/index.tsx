@@ -1,4 +1,4 @@
-import { useTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/lib/store/trade/hooks";
 
 import TradingAccountPanel from "../TradingAccountPanel";
 

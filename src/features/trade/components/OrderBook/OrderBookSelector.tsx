@@ -3,15 +3,15 @@
 import React, { useMemo, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 
-import { OrderBookLayout, OrderBookLayoutStyle } from "@/types/orderbook";
-import AdaptivePopover from "@/components/ui/adaptive-popover";
-import { Button } from "@/components/ui/button";
-import { VOrderBook, VOrderBookType } from "@/components/vectors/orderbook";
 import {
   useOrderBookStore,
   useShallowOrderBookStore,
-} from "@/store/trade/orderbook";
-import { cn } from "@/utils/cn";
+} from "@/lib/store/trade/orderbook";
+import { OrderBookLayout, OrderBookLayoutStyle } from "@/lib/types/orderbook";
+import { cn } from "@/lib/utils/cn";
+import AdaptivePopover from "@/components/ui/adaptive-popover";
+import { Button } from "@/components/ui/button";
+import { VOrderBook, VOrderBookType } from "@/components/vectors/orderbook";
 
 const LAYOUTS: Array<{
   value: OrderBookLayout;

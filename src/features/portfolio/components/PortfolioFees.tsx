@@ -1,9 +1,9 @@
 "use client";
 
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import { Skeleton } from "@/components/ui/skeleton";
 import Tag from "@/components/ui/tag";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import { usePortfolioData } from "../hooks/usePortfolioData";
 

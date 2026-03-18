@@ -3,15 +3,15 @@
 import React, { Activity } from "react";
 import { useDocumentTitle } from "usehooks-ts";
 
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { usePreferencesStore } from "@/lib/store/trade/user-preferences";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { formatPriceToDecimal } from "@/features/trade/utils";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { usePreferencesStore } from "@/store/trade/user-preferences";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import AssetsSelector from "./AssetsSelector";
 import FundingCountdown from "./FundingCountdown";

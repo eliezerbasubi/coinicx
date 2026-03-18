@@ -1,7 +1,11 @@
 import React, { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { ActiveTwap } from "@/types/trade";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { ActiveTwap } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { formatDateTime } from "@/lib/utils/formatting/dates";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
@@ -10,10 +14,6 @@ import Tag from "@/components/ui/tag";
 import TokenImage from "@/features/trade/components/TokenImage";
 import { useTerminateTwap } from "@/features/trade/hooks/useTerminateTwap";
 import { formatTwapRuntime } from "@/features/trade/utils/twap";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
-import { formatDateTime } from "@/utils/formatting/dates";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";

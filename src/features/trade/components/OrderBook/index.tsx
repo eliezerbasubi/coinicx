@@ -1,8 +1,8 @@
 import React from "react";
 
-import { OrderBookLayoutStyle } from "@/types/orderbook";
+import { OrderBookLayoutStyle } from "@/lib/types/orderbook";
+import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
-import { cn } from "@/utils/cn";
 
 import OrderBookCompare from "./OrderBookCompare";
 import { OrderBookSelector } from "./OrderBookSelector";

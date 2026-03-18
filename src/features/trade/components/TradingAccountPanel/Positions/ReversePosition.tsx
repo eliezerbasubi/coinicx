@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { ArrowDown } from "lucide-react";
 
-import { Position } from "@/types/trade";
+import { Position } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TradingButton from "@/components/common/TradingButton";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import Tag from "@/components/ui/tag";
 import { useReversePosition } from "@/features/trade/hooks/useReversePosition";
 import { useFeeRate } from "@/features/trade/hooks/useUserFees";
 import { formatPriceToDecimal } from "@/features/trade/utils";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 type Props = {
   position: Position;

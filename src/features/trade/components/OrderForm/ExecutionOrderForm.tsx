@@ -1,13 +1,13 @@
 import React from "react";
 
-import Visibility from "@/components/common/Visibility";
-import { Button } from "@/components/ui/button";
-import { isLimitOrder, isStopOrder } from "@/features/trade/utils/orderTypes";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
-} from "@/store/trade/order-form";
+} from "@/lib/store/trade/order-form";
+import Visibility from "@/components/common/Visibility";
+import { Button } from "@/components/ui/button";
+import { isLimitOrder, isStopOrder } from "@/features/trade/utils/orderTypes";
 
 import OrderFormInput from "./OrderFormInput";
 import TrailingQuote from "./TrailingQuote";

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 type Props = {
   className?: string;

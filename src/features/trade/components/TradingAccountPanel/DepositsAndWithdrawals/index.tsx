@@ -2,15 +2,15 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatUnits } from "viem";
 
+import { UNIT_SPOT_ASSETS } from "@/lib/constants/unit";
+import { isTestnet } from "@/lib/services/transport";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { cn } from "@/lib/utils/cn";
+import { formatDateTime } from "@/lib/utils/formatting/dates";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
-import { UNIT_SPOT_ASSETS } from "@/constants/unit";
 import { useUnitOperations } from "@/features/trade/hooks/useUnitProtocol";
-import { isTestnet } from "@/services/transport";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
-import { formatDateTime } from "@/utils/formatting/dates";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import CardItem from "../CardItem";
 import {

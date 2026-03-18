@@ -2,8 +2,8 @@ import React, { forwardRef } from "react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount, useDisconnect } from "wagmi";
 
+import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/utils/cn";
 
 const ConnectButton = forwardRef<
   HTMLButtonElement,

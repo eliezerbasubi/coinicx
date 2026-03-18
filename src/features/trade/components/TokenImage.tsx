@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 
-import { InstrumentType } from "@/types/trade";
-import { cn } from "@/utils/cn";
-import { getHLTokenImgUrl } from "@/utils/getHLTokenImgUrl";
+import { InstrumentType } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
+import { getHLTokenImgUrl } from "@/lib/utils/getHLTokenImgUrl";
 
 type Props = {
   name: string;

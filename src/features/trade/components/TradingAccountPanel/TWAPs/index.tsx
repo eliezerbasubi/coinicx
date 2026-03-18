@@ -1,8 +1,8 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   usePreferencesStore,
   useShallowPreferencesStore,
-} from "@/store/trade/user-preferences";
+} from "@/lib/store/trade/user-preferences";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ActiveTWAPs from "./ActiveTWAPs";
 import FillsTWAPs from "./FillsTWAPs";

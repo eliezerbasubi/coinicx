@@ -1,14 +1,14 @@
 import { ChevronDown } from "lucide-react";
 
+import { useInstrumentStore } from "@/lib/store/trade/instrument";
+import { useOrderFormStore } from "@/lib/store/trade/order-form";
+import { cn } from "@/lib/utils/cn";
 import {
   Popover,
   PopoverClose,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useInstrumentStore } from "@/store/trade/instrument";
-import { useOrderFormStore } from "@/store/trade/order-form";
-import { cn } from "@/utils/cn";
 
 type Props = {
   onValueChange: (value: boolean) => void;

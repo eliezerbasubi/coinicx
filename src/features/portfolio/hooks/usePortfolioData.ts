@@ -2,8 +2,8 @@ import { useQueries } from "@tanstack/react-query";
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
-import { QUERY_KEYS } from "@/constants/queryKeys";
-import { hlInfoClient } from "@/services/transport";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { hlInfoClient } from "@/lib/services/transport";
 
 export const usePortfolioData = () => {
   const { address } = useAccount();

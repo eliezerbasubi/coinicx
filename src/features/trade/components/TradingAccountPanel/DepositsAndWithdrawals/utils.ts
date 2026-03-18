@@ -1,6 +1,6 @@
 import { UserNonFundingLedgerUpdatesResponse } from "@nktkas/hyperliquid";
 
-import { Operation } from "@/types/unit";
+import { Operation } from "@/lib/types/unit";
 import { getTokenDisplayName } from "@/features/trade/utils/getTokenDisplayName";
 
 type NonFundingLedgerDelta =

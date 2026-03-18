@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
 

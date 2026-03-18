@@ -1,11 +1,11 @@
 "use client";
 
-import AdaptiveDialog from "@/components/ui/adaptive-dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AccountTransactVariant,
   useAccountTransactStore,
-} from "@/store/trade/account-transact";
+} from "@/lib/store/trade/account-transact";
+import AdaptiveDialog from "@/components/ui/adaptive-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Deposit from "./Deposit";
 import Transfer from "./Transfer";

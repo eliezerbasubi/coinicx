@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/lib/constants/routes";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import {
   formatSymbol,

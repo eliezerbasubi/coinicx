@@ -2,10 +2,10 @@ import React, { useReducer, useRef } from "react";
 import { CandleSnapshotParameters } from "@nktkas/hyperliquid";
 import { ChevronDown } from "lucide-react";
 
+import { useChartSettingsStore } from "@/lib/store/trade/chart-settings";
+import { cn } from "@/lib/utils/cn";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
-import { useChartSettingsStore } from "@/store/trade/chart-settings";
-import { cn } from "@/utils/cn";
 
 const CHART_INTERVALS: Array<CandleSnapshotParameters["interval"]> = [
   "1m",

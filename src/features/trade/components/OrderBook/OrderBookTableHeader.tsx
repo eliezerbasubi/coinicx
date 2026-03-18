@@ -1,7 +1,7 @@
-import { OrderBookOrientation } from "@/types/orderbook";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowOrderBookStore } from "@/store/trade/orderbook";
-import { cn } from "@/utils/cn";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowOrderBookStore } from "@/lib/store/trade/orderbook";
+import { OrderBookOrientation } from "@/lib/types/orderbook";
+import { cn } from "@/lib/utils/cn";
 
 type Props = {
   className?: string;

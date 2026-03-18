@@ -1,8 +1,8 @@
 import { ArrowUp } from "lucide-react";
 
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 
 type Props = {
   className?: string;

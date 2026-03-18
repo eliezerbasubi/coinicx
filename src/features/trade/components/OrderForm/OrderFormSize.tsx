@@ -1,11 +1,11 @@
 import React from "react";
 
-import FormInputSlider from "@/components/common/FormInputSlider";
-import { useTradeContext } from "@/store/trade/hooks";
+import { useTradeContext } from "@/lib/store/trade/hooks";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
-} from "@/store/trade/order-form";
+} from "@/lib/store/trade/order-form";
+import FormInputSlider from "@/components/common/FormInputSlider";
 
 import OrderFormInput from "./OrderFormInput";
 import SizeCoinSelector from "./SizeCoinSelector";

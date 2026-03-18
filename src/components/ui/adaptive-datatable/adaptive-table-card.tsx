@@ -1,7 +1,7 @@
 import React from "react";
 import { Table } from "@tanstack/react-table";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 export type AdaptiveTableCardProps<TData> = {
   table: Table<TData>;

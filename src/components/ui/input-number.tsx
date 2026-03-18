@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils/cn";
 import {
   buildAllowedCharsRegex,
   COMMON_DECIMAL_SEPARATORS,
@@ -10,12 +10,12 @@ import {
   normalizeDecimalSeparator,
   stripGroupSeparators,
   toParseableNumber,
-} from "@/utils/formatting/normalize-input-number";
+} from "@/lib/utils/formatting/normalize-input-number";
 
 export {
   toParseableNumber,
   toDisplayNumber,
-} from "@/utils/formatting/normalize-input-number";
+} from "@/lib/utils/formatting/normalize-input-number";
 
 type Props = React.DetailedHTMLProps<
   React.InputHTMLAttributes<HTMLInputElement>,

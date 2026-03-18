@@ -2,9 +2,9 @@
 
 import React from "react";
 
+import { hlSubClient } from "@/lib/services/transport";
+import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import { useSubscription } from "@/hooks/useSubscription";
-import { hlSubClient } from "@/services/transport";
-import { useInstrumentStore } from "@/store/trade/instrument";
 
 type Props = {
   children: React.ReactNode;

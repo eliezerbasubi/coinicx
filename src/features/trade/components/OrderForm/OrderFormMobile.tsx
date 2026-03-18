@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
-import { OrderSide } from "@/types/trade";
+import { useOrderFormStore } from "@/lib/store/trade/order-form";
+import { OrderSide } from "@/lib/types/trade";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -11,7 +12,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useOrderFormStore } from "@/store/trade/order-form";
 
 import OrderForm from "./OrderForm";
 

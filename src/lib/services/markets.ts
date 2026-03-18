@@ -1,4 +1,4 @@
-import { ICryptoCurrency, IExchangeRate } from "@/types/market";
+import { ICryptoCurrency, IExchangeRate } from "@/lib/types/market";
 
 export const getCryptoCurrencies = async (): Promise<ICryptoCurrency[]> => {
   const res = await fetch(

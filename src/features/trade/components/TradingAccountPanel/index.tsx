@@ -2,13 +2,13 @@ import { useEffect, useRef } from "react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   usePreferencesStore,
   useShallowPreferencesStore,
-} from "@/store/trade/user-preferences";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { cn } from "@/utils/cn";
+} from "@/lib/store/trade/user-preferences";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { cn } from "@/lib/utils/cn";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Balances from "./Balances";
 import DepositsAndWithdrawals from "./DepositsAndWithdrawals";

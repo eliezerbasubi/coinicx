@@ -3,7 +3,13 @@ import { toast } from "sonner";
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
-import { ERROR_NAME } from "@/constants/errors";
+import { ERROR_NAME } from "@/lib/constants/errors";
+import { hlExchangeClient, hlInfoClient } from "@/lib/services/transport";
+import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { isValidAddress } from "@/lib/utils/isValidAddress";
 import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
 import {
   ALL_NETWORKS_AND_ASSETS,
@@ -11,12 +17,6 @@ import {
   useUnitFees,
 } from "@/features/trade/hooks/useUnitProtocol";
 import { getTokenDisplayName } from "@/features/trade/utils/getTokenDisplayName";
-import { hlExchangeClient, hlInfoClient } from "@/services/transport";
-import { useAccountTransactStore } from "@/store/trade/account-transact";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { useShallowUserTradeStore } from "@/store/trade/user-trade";
-import { formatNumber } from "@/utils/formatting/numbers";
-import { isValidAddress } from "@/utils/isValidAddress";
 
 const toastId = "withdraw-account";
 

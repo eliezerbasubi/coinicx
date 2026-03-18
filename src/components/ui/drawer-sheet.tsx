@@ -1,5 +1,6 @@
 import React from "react";
 
+import { cn } from "@/lib/utils/cn";
 import {
   Drawer,
   DrawerContent,
@@ -8,7 +9,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { cn } from "@/utils/cn";
 
 type PointerDownOutsideEvent = CustomEvent<{
   originalEvent: PointerEvent;

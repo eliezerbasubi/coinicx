@@ -1,13 +1,13 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { TRANSPORT_URL } from "@/lib/services/transport";
+import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { cn } from "@/lib/utils/cn";
+import { formatAddress } from "@/lib/utils/formatting/formatAddress";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
-import { TRANSPORT_URL } from "@/services/transport";
-import { useTradeContext } from "@/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/store/trade/instrument";
-import { cn } from "@/utils/cn";
-import { formatAddress } from "@/utils/formatting/formatAddress";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import TokenImage from "../TokenImage";
 

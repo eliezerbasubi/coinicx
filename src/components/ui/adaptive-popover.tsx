@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import { ChevronDown } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils/cn";
 
 const DrawerSheet = dynamic(() => import("./drawer-sheet"), { ssr: false });
 const PopoverSheet = dynamic(() => import("./popover-sheet"), { ssr: false });

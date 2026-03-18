@@ -2,10 +2,10 @@
 
 import { ArrowLeftRight } from "lucide-react";
 
+import { cn } from "@/lib/utils/cn";
+import { formatNumber } from "@/lib/utils/formatting/numbers";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputControl from "@/components/common/FormInputControl";
-import { cn } from "@/utils/cn";
-import { formatNumber } from "@/utils/formatting/numbers";
 
 import { useTransfer } from "./hooks/useTransfer";
 

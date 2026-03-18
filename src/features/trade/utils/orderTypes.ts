@@ -1,4 +1,4 @@
-import { OrderType } from "@/types/trade";
+import { OrderType } from "@/lib/types/trade";
 
 export function isLimitOrder(type: OrderType) {
   return type === "limit" || type === "stopLimit";
