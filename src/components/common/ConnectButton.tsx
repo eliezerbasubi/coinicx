@@ -1,0 +1,55 @@
+import React, { forwardRef } from "react";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useAccount, useDisconnect } from "wagmi";
+
+import { cn } from "@/lib/utils/cn";
+import { Button } from "@/components/ui/button";
+
+const ConnectButton = forwardRef<
+  HTMLButtonElement,
+  React.PropsWithChildren<React.ComponentProps<typeof Button>> & {
+    disconnectedLabel?: string;
+    showConnecting?: boolean;
+  }
+>(({ disconnectedLabel, showConnecting = true, ...props }, ref) => {
+  const { isConnecting, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { openConnectModal } = useConnectModal();
+
+  const getLabel = () => {
+    if (isConnecting && showConnecting) {
+      return "Connecting";
+    }
+    if (!isConnected) {
+      return disconnectedLabel || "Connect wallet";
+    }
+    return props.children || props.label;
+  };
+
+  const label = getLabel();
+
+  return (
+    <Button
+      suppressHydrationWarning
+      {...props}
+      ref={ref}
+      className={cn("flex justify-center items-center gap-2", props.className)}
+      disabled={(isConnected && props.disabled) || isConnecting}
+      onClick={(event) => {
+        if (!isConnected) {
+          event.preventDefault();
+          disconnect();
+          openConnectModal?.();
+          return;
+        }
+        props.onClick?.(event);
+      }}
+    >
+      {label}
+    </Button>
+  );
+});
+
+ConnectButton.displayName = "ConnectButton";
+
+export default ConnectButton;

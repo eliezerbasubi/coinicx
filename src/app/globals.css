@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@variant fullscreen (&:fullscreen);
+
+@theme {
+  --color-primary: #fcd535;
+  --color-background: #181a20;
+  --color-foreground: #ffffff;
+  --color-primary-dark: #181a20;
+  --color-trade-dark: #0b0e11;
+  --color-buy: #2ebd85;
+  --color-sell: #f6465d;
+  --color-neutral-gray-100: #eaecef;
+  --color-neutral-gray-200: #2b3139;
+  --color-neutral-gray-300: #5e6673;
+  --color-neutral-gray-400: #848e9c;
+  --color-neutral-gray-500: #b7bdc6;
+  --color-neutral-gray-600: #dedede0f;
+}
+
+@theme inline {
+  --font-sans: var(--font-ibm-plex-sans);
+  --text-2xs: 0.625rem;
+  --text-3xs: 0.6875rem;
+}
+
+@custom-variant standalone {
+  @media (display-mode: standalone) {
+    @slot;
+  }
+}
+
+html {
+  /* TODO: REMOVE THIS WHEN HANDLING LIGHT AND DARK MODE */
+  color-scheme: light;
+}
+
+*[role="button"],
+button {
+  cursor: pointer;
+}
+
+/* Customize scroll bar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 9999px;
+  -webkit-border-radius: 9999px;
+  -moz-border-radius: 9999px;
+  -ms-border-radius: 9999px;
+  -o-border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-gray-200);
+  border-radius: 9999px;
+  -webkit-border-radius: 9999px;
+  -moz-border-radius: 9999px;
+  -ms-border-radius: 9999px;
+  -o-border-radius: 9999px;
+}
+.no-scrollbars::-webkit-scrollbar {
+  display: none;
+}
+/* Avoids blocking events when rk modal is opened inside radix-ui modal */
+[aria-labelledby="rk_connect_title"] {
+  pointer-events: auto;
+}

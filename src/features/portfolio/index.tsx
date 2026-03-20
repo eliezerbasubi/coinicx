@@ -1,0 +1,66 @@
+"use client";
+
+import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
+import { Button } from "@/components/ui/button";
+
+import PortfolioChart from "./components/PortfolioChart";
+import PortfolioFees from "./components/PortfolioFees";
+import PortfolioOverview from "./components/PortfolioOverview";
+import PortfolioUserInfo from "./components/PortfolioUserInfo";
+
+const Portfolio = () => {
+  return (
+    <div className="w-full max-w-6xl mx-auto py-4 space-y-3 md:space-y-6">
+      {/* Header */}
+      <div className="w-full flex justify-between items-center flex-wrap gap-4 px-4">
+        <h1 className="text-2xl font-extrabold text-white">Portfolio</h1>
+
+        <div className="w-full md:w-auto flex items-center gap-2 md:py-2">
+          <Button
+            variant="default"
+            size="sm"
+            className="flex-1 text-xs md:text-sm h-7 md:h-8 font-medium"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("deposit")
+            }
+          >
+            Deposit
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1 text-white text-xs md:text-sm h-7 md:h-8 font-medium"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("withdraw")
+            }
+          >
+            Withdraw
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1 text-white text-xs md:text-sm h-7 md:h-8 font-medium"
+            onClick={() =>
+              useAccountTransactStore.getState().openAccountTransact("transfer")
+            }
+          >
+            Transfer
+          </Button>
+        </div>
+      </div>
+
+      <div className="w-full flex flex-col md:flex-row items-stretch gap-3 md:gap-6 px-4">
+        <PortfolioOverview />
+        <PortfolioChart />
+      </div>
+
+      <div className="px-4">
+        <PortfolioFees />
+      </div>
+
+      <PortfolioUserInfo />
+    </div>
+  );
+};
+
+export default Portfolio;

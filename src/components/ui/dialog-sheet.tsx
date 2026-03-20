@@ -1,0 +1,64 @@
+import React from "react";
+
+import { cn } from "@/lib/utils/cn";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+type PointerDownOutsideEvent = CustomEvent<{
+  originalEvent: PointerEvent;
+}>;
+
+type Props = {
+  open?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+  trigger?: React.ReactNode;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  className?: string;
+  onOpenChange?: (open: boolean) => void;
+  onPointerDownOutside?: (event: PointerDownOutsideEvent) => void;
+  onOpenAutoFocus?: (event: Event) => void;
+};
+
+const DialogSheet = ({
+  open,
+  className,
+  children,
+  trigger,
+  title,
+  description,
+  onOpenChange,
+  onPointerDownOutside,
+  onOpenAutoFocus,
+}: Props) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      <DialogContent
+        className={className}
+        onPointerDownOutside={onPointerDownOutside}
+        onOpenAutoFocus={onOpenAutoFocus}
+      >
+        <DialogHeader
+          className={cn({
+            "sr-only": !title && !description,
+            "gap-0": !title || !description,
+          })}
+        >
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default DialogSheet;
