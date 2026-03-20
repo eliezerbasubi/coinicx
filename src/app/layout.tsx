@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "sonner";
 
 import "./globals.css";
-
-import { Toaster } from "sonner";
 
 import startupImages from "@/lib/utils/appleStartupImages";
 import Header from "@/components/common/Header";
@@ -153,6 +153,7 @@ export default function RootLayout({
             {children}
           </Providers>
         </SerwistProvider>
+        <Analytics />
       </body>
     </html>
   );
