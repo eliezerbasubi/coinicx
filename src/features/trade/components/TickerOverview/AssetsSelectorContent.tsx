@@ -387,7 +387,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
 
   return (
     <div className="size-full">
-      <div className="w-full px-3 md:px-0 mt-2 md:mt-0">
+      <div className="w-full mt-2 md:mt-0">
         <div className="w-full flex items-center h-8 px-2 mb-2 rounded-lg border border-neutral-gray-200 hover:border-primary">
           <Search className="text-gray-600 size-4" />
           <input
@@ -425,7 +425,7 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
           </TabsList>
         </Tabs>
 
-        <div className="size-full md:min-h-64 md:max-h-64 overflow-y-auto pb-2">
+        <div className="size-full md:min-h-64 md:max-h-64 overflow-y-auto pb-32 md:pb-2">
           <DataTable
             columns={columns}
             data={data}

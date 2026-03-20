@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, PlusCircle } from "lucide-react";
 
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
@@ -35,7 +35,6 @@ const SwapInput = ({
   onValueChange,
 }: Props) => {
   const [currentPercentage, setCurrentPercentage] = useState(-1);
-  const ref = useRef<HTMLInputElement>(null);
 
   const isSell = type === "sell";
   const showSelectLabel = !tokenName;
@@ -57,7 +56,6 @@ const SwapInput = ({
     if (showSelectLabel) {
       onSelectorClick();
     } else {
-      ref.current?.focus();
       onClick?.(type);
     }
   };
@@ -92,7 +90,6 @@ const SwapInput = ({
 
       <div className="w-full flex items-center justify-between gap-x-2 py-1">
         <InputNumber
-          ref={ref}
           readOnly={readOnly}
           value={value}
           placeholder="0"

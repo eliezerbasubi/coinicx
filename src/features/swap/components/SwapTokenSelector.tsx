@@ -43,9 +43,9 @@ const SwapTokenSelector = ({ open, onOpenChange, onSelect }: Props) => {
       open={open}
       title={<p className="md:pl-3 md:pt-2">Select a token</p>}
       onOpenChange={onOpenChange}
-      className="h-auto md:max-h-auto flex flex-col gap-y-0 px-2 pb-4 md:p-2 md:pb-0"
+      className="h-auto md:max-h-auto flex flex-col gap-y-0 px-4 pb-4 md:p-2 md:pb-0 standalone:pb-0"
     >
-      <div className="w-full px-2 pt-3">
+      <div className="w-full md:px-2 md:pt-3">
         <div className="flex items-center h-9 px-3 md:px-4 mb-1 md:mb-2 rounded-lg border border-neutral-gray-200 hover:border-neutral-gray-400">
           <Search className="text-gray-600 size-5" />
           <input
@@ -72,7 +72,7 @@ const SwapTokenSelector = ({ open, onOpenChange, onSelect }: Props) => {
               {Array.from({ length: 10 }).map((_, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between gap-x-3 px-2 py-1"
+                  className="flex items-center justify-between gap-x-3 md:px-2 py-1"
                 >
                   <Skeleton className="size-8 rounded-full" />
                   <div className="flex-1">
@@ -84,7 +84,7 @@ const SwapTokenSelector = ({ open, onOpenChange, onSelect }: Props) => {
             </>
           )}
 
-          <div className="w-full mb-1 sticky top-0 bg-background pb-2 px-2">
+          <div className="w-full mb-1 sticky top-0 bg-background pb-2 md:px-2">
             <p className="text-neutral-gray-400 text-xs font-medium mb-1">
               Popular Tokens
             </p>
@@ -119,7 +119,7 @@ const SwapTokenSelector = ({ open, onOpenChange, onSelect }: Props) => {
                 key={asset.name}
                 role="button"
                 tabIndex={0}
-                className="flex items-center justify-between gap-x-3 px-2 py-1 rounded-lg cursor-pointer hover:bg-neutral-gray-600"
+                className="flex items-center justify-between gap-x-3 md:px-2 py-1 rounded-lg cursor-pointer hover:bg-neutral-gray-600"
                 onClick={() => onSelectAsset(asset)}
               >
                 <TokenImage
