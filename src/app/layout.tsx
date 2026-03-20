@@ -3,6 +3,7 @@ import { IBM_Plex_Sans } from "next/font/google";
 
 import "./globals.css";
 
+import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "sonner";
 
 import startupImages from "@/lib/utils/appleStartupImages";
@@ -153,6 +154,7 @@ export default function RootLayout({
             {children}
           </Providers>
         </SerwistProvider>
+        <Analytics />
       </body>
     </html>
   );
