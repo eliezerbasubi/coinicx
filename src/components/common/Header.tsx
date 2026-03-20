@@ -18,7 +18,12 @@ const LINKS = [
     id: "trade",
     icon: <Coins />,
   },
-  { href: ROUTES.swap.index, label: "Swap", id: "swap", icon: <Replace /> },
+  {
+    href: ROUTES.swap.index,
+    label: "Swap",
+    id: "swap",
+    icon: <Replace />,
+  },
   {
     href: ROUTES.portfolio.index,
     label: "Portfolio",
