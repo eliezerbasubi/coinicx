@@ -10,6 +10,10 @@ import Header from "@/components/common/Header";
 import Providers from "@/providers";
 import { SerwistProvider } from "@/providers/SerwistProvider";
 
+const APP_NAME = "CoinicX";
+const APP_CREATOR = "@coinicx";
+const APP_TAGLINE = "Trade beyond the edge";
+
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
   subsets: ["latin"],
@@ -17,17 +21,46 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: { template: "%s | CoinicX", default: "Buy | Sell | Swap" },
+  metadataBase: new URL(
+    process.env.APP_BASE_URL ?? "https://coinicx.vercel.app",
+  ),
+  title: { template: `%s | ${APP_NAME}`, default: "Buy | Sell | Swap" },
   manifest: "/manifest.json",
   description:
     "Buy, Sell, Swap and Trade major assets, stocks, memes, forex and commodities with lower fees. No KYC or sign-ups required. Trade beyond the edge.",
-  authors: [{ name: "CoinicX" }],
-  creator: "CoinicX",
-  publisher: "CoinicX",
+  authors: [{ name: APP_NAME }],
+  creator: APP_NAME,
+  publisher: APP_NAME,
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
+  },
+  openGraph: {
+    siteName: APP_NAME,
+    images: [
+      {
+        url: "/app-thumbnail.png",
+        width: 1200,
+        height: 630,
+        alt: `${APP_NAME} - ${APP_TAGLINE}`,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [
+      {
+        url: "/app-thumbnail.png",
+        width: 1200,
+        height: 630,
+        alt: `${APP_NAME}-${APP_TAGLINE}`,
+      },
+    ],
+    creator: APP_CREATOR,
+    site: APP_CREATOR,
   },
   icons: {
     icon: [
@@ -68,7 +101,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "CoinicX",
+    title: APP_NAME,
     startupImage: startupImages,
   },
   robots: {
