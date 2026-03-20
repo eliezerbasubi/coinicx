@@ -5,12 +5,11 @@ import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { hlInfoClient } from "@/lib/services/transport";
 import { AssetMeta, InstrumentType, SpotMetas } from "@/lib/types/trade";
 import {
+  mapDataToSpotMetas,
   mapPerpDataToAssetMeta,
   mapSpotDataToAssetMeta,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
-
-import { getTokenDisplayName } from "../utils/getTokenDisplayName";
 
 export const useMetaAndAssetCtxs = () => {
   const { data, error, loading } = useQueries({
@@ -52,64 +51,7 @@ export const useMetaAndAssetCtxs = () => {
         queryFn: async (): Promise<SpotMetas> => {
           const spotMeta = await hlInfoClient.spotMeta();
 
-          const tokenNamesToUniverseIndex = new Map<
-            string,
-            Map<string, number>
-          >();
-          const spotNamesToTokens = new Map() as SpotMetas["spotNamesToTokens"];
-          const tokensToSpotId = new Map<number, Map<number, number>>();
-
-          for (let index = 0; index < spotMeta.universe.length; index++) {
-            const universe = spotMeta.universe[index];
-            const [baseIndex, quoteIndex] = universe.tokens;
-
-            const baseTokenMeta = spotMeta.tokens[baseIndex];
-            const quoteTokenMeta = spotMeta.tokens[quoteIndex];
-
-            if (!baseTokenMeta || !quoteTokenMeta) continue;
-
-            // Update name in tokens of spotMeta to the display name
-            spotMeta.tokens[baseIndex].name = getTokenDisplayName(
-              baseTokenMeta.name,
-            );
-            spotMeta.tokens[quoteIndex].name = getTokenDisplayName(
-              quoteTokenMeta.name,
-            );
-
-            /** Map spot names to tokens */
-            if (!spotNamesToTokens.has(universe.name)) {
-              spotNamesToTokens.set(universe.name, {
-                baseToken: baseIndex,
-                quoteToken: quoteIndex,
-              });
-            }
-
-            /** Map token names to universe index */
-            if (!tokenNamesToUniverseIndex.has(baseTokenMeta.name)) {
-              tokenNamesToUniverseIndex.set(
-                baseTokenMeta.name,
-                new Map<string, number>(),
-              );
-            }
-
-            tokenNamesToUniverseIndex
-              .get(baseTokenMeta.name)
-              ?.set(quoteTokenMeta.name, index);
-
-            /** Map token indexes to spot index */
-            if (!tokensToSpotId.has(baseIndex)) {
-              tokensToSpotId.set(baseIndex, new Map<number, number>());
-            }
-
-            tokensToSpotId.get(baseIndex)?.set(quoteIndex, universe.index);
-          }
-
-          return {
-            tokenNamesToUniverseIndex,
-            tokensToSpotId,
-            spotNamesToTokens,
-            spotMeta,
-          };
+          return mapDataToSpotMetas(spotMeta);
         },
       },
     ],
