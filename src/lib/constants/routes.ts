@@ -1,4 +1,5 @@
 export const ROUTES = {
+  root: "/",
   trade: {
     index: "/trade",
     spot: "/trade/spot",

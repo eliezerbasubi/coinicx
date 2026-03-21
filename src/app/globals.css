@@ -22,6 +22,9 @@
   --font-sans: var(--font-ibm-plex-sans);
   --text-2xs: 0.625rem;
   --text-3xs: 0.6875rem;
+
+  --spacing-safe-top: env(safe-area-inset-top);
+  --spacing-safe-bottom: env(safe-area-inset-bottom);
 }
 
 @custom-variant standalone {

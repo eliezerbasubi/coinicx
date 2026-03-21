@@ -1,6 +1,9 @@
-import { Activity, useRef } from "react";
-import { CandlestickChart, Coins, User } from "lucide-react";
+import { Activity, useRef, useState } from "react";
+import Link from "next/link";
+import { CandlestickChart, RefreshCcwDot, User } from "lucide-react";
 
+import { ROUTES } from "@/lib/constants/routes";
+import { useTradeContext } from "@/lib/store/trade/hooks";
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import {
   usePreferencesStore,
@@ -8,7 +11,9 @@ import {
 } from "@/lib/store/trade/user-preferences";
 import { MobileViewTab, OrderType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
+import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
+import SwapDrawer from "@/features/swap/components/SwapDrawer";
 
 import MarketArea from "../components/MarketArea";
 import OrderBookCompare from "../components/OrderBook/OrderBookCompare";
@@ -17,39 +22,85 @@ import OrderBookTable from "../components/OrderBook/OrderBookTable";
 import OrderForm from "../components/OrderForm/OrderForm";
 import TickerOverview from "../components/TickerOverview";
 import TradeUserInfo from "../components/TradeUserInfo";
-import UserAccountInfo from "../components/UserAccountInfo";
+import UserAccountInfoMobile from "../components/UserAccountInfo/UserAccountInfoMobile";
+import { DEFAULT_PERPS_ASSETS, DEFAULT_SPOT_ASSETS } from "../constants";
+
+const TRADING_TABS = [
+  { label: "Convert", value: "swap", href: ROUTES.swap.index },
+  {
+    label: "Spot",
+    value: "spot",
+    href: `${ROUTES.trade.spot}/${DEFAULT_SPOT_ASSETS.base}/${DEFAULT_SPOT_ASSETS.quote}`,
+  },
+  {
+    label: "Perps",
+    value: "perps",
+    href: `${ROUTES.trade.perps}/${DEFAULT_PERPS_ASSETS.base}`,
+  },
+];
 
 const TradingMobileLayout = () => {
   const activeTab = useShallowPreferencesStore((s) => s.mobileViewTab);
+  const instrumentType = useTradeContext((s) => s.instrumentType);
+
+  const [isSwapOpen, setIsSwapOpen] = useState(false);
 
   return (
-    <div className="w-full bg-trade-dark flex flex-col gap-1 pt-0.5 md:p-1 mb-20">
-      <Activity mode={activeTab !== "account" ? "visible" : "hidden"}>
-        {/* Stick the ticker overview below the header by increasing to safe area top by the header in standalone mode */}
-        <TickerOverview className="sticky top-16 standalone:top-[calc(env(safe-area-inset-top,0px)+64px)] bg-primary-dark z-6" />
-      </Activity>
+    <div className="w-full">
+      <Visibility visible={activeTab !== "account"}>
+        <div className="sticky top-0 z-10 bg-primary-dark standalone:pt-safe-top">
+          <div className="w-full h-11 flex items-center px-4 md:px-6 gap-x-3 md:gap-x-6">
+            {TRADING_TABS.map((tab) => (
+              <Link
+                key={tab.value}
+                href={tab.href}
+                className={cn("text-neutral-gray-400 font-semibold", {
+                  "text-white": instrumentType === tab.value,
+                })}
+                onClick={(e) => {
+                  if (tab.value === "swap") {
+                    e.preventDefault();
+                    setIsSwapOpen(true);
+                  }
+                }}
+              >
+                {tab.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </Visibility>
+      <div className="w-full bg-trade-dark flex flex-col gap-0.5 mb-20">
+        <Activity mode={activeTab !== "account" ? "visible" : "hidden"}>
+          {/* Stick the ticker overview below the header by increasing to safe area top by the header in standalone mode */}
+          {/* Add the height of the header to the top position of the ticker overview */}
+          <TickerOverview className="sticky top-11 standalone:top-[calc(env(safe-area-inset-top,0px)+44px)] bg-primary-dark z-6 pt-1" />
+        </Activity>
 
-      <Activity mode={activeTab === "markets" ? "visible" : "hidden"}>
-        <MarketArea />
-      </Activity>
+        <Activity mode={activeTab === "markets" ? "visible" : "hidden"}>
+          <MarketArea />
+        </Activity>
 
-      <Activity mode={activeTab === "trade" ? "visible" : "hidden"}>
-        <TradeTabView />
-      </Activity>
+        <Activity mode={activeTab === "trade" ? "visible" : "hidden"}>
+          <TradeTabView />
+        </Activity>
 
-      <Activity mode={activeTab === "account" ? "visible" : "hidden"}>
-        <UserAccountInfo />
-      </Activity>
+        <Activity mode={activeTab === "account" ? "visible" : "hidden"}>
+          <UserAccountInfoMobile />
+        </Activity>
 
-      {/* Show all tabs in account tab view */}
-      <TradeUserInfo excludeTabs={activeTab === "account" ? [] : undefined} />
+        <Activity mode={activeTab !== "account" ? "visible" : "hidden"}>
+          <TradeUserInfo />
+        </Activity>
 
-      <BottomNavBar
-        value={activeTab}
-        onValueChange={(value) =>
-          usePreferencesStore.getState().dispatch({ mobileViewTab: value })
-        }
-      />
+        <BottomNavBar
+          value={activeTab}
+          onValueChange={(value) =>
+            usePreferencesStore.getState().dispatch({ mobileViewTab: value })
+          }
+        />
+      </div>
+      <SwapDrawer open={isSwapOpen} onOpenChange={setIsSwapOpen} />
     </div>
   );
 };
@@ -62,16 +113,20 @@ const TradingMobileLayout = () => {
  * @param showTpSl whether TP/SL form is visible
  * @returns number of visible rows
  */
-const getVisibleRows = (orderType: OrderType, showTpSl?: boolean) => {
-  switch (orderType) {
+const getVisibleRows = (params: {
+  orderType: OrderType;
+  showTpSl?: boolean;
+  isSpot: boolean;
+}) => {
+  switch (params.orderType) {
     case "market":
     case "limit":
-      return showTpSl ? 9 : 7;
+      return params.isSpot ? 4 : params.showTpSl ? 9 : 7;
     case "stopLimit":
       return 8;
     case "scale":
     case "twap":
-      return 9;
+      return params.isSpot ? 5 : 9;
 
     default:
       return 7;
@@ -79,12 +134,14 @@ const getVisibleRows = (orderType: OrderType, showTpSl?: boolean) => {
 };
 
 const TradeTabView = () => {
+  const isSpot = useTradeContext((s) => s.instrumentType === "spot");
+
   const { orderType, showTpSl } = useShallowOrderFormStore((s) => ({
     orderType: s.settings.orderType,
     showTpSl: s.settings.showTpSl,
   }));
 
-  const visibleRows = getVisibleRows(orderType, showTpSl);
+  const visibleRows = getVisibleRows({ orderType, showTpSl, isSpot });
 
   return (
     <div className="w-full bg-primary-dark grid grid-cols-[auto_1fr] pb-4">
@@ -115,7 +172,7 @@ const TradeTabView = () => {
 
 const BOTTOM_NAV_TABS = [
   { label: "Markets", value: "markets", icon: <CandlestickChart /> },
-  { label: "Trade", value: "trade", icon: <Coins /> },
+  { label: "Trade", value: "trade", icon: <RefreshCcwDot /> },
   { label: "Account", value: "account", icon: <User /> },
 ] as const;
 

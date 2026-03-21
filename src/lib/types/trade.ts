@@ -211,3 +211,17 @@ export type SpotMetas = {
   spotNamesToTokens: Map<string, { baseToken: number; quoteToken: number }>;
   tokensToSpotId: Map<number, Map<number, number>>;
 };
+
+export type AccountActivity = {
+  timestamp: number;
+  status: string;
+  action: string;
+  source: string;
+  destination: string;
+  accountChange: number;
+  fee: number;
+  feeToken: string;
+  asset: string;
+  type: string;
+  isIncoming: boolean;
+};

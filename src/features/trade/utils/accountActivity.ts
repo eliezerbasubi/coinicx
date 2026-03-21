@@ -75,6 +75,7 @@ type NonFundingLedgerDeltaPayload = {
   fee: number;
   feeToken: string;
   asset: string;
+  type: string;
   isIncoming: boolean;
 };
 
@@ -89,8 +90,9 @@ export const buildNonFundingLedgerPayload = (
         accountChange: Number(delta.amount) + Number(delta.nativeTokenFee),
         fee: Number(delta.fee),
         feeToken: delta.feeToken,
-        asset: delta.token,
+        asset: getTokenDisplayName(delta.token),
         isIncoming: false,
+        type: "transfer",
       };
     case "deposit":
       return {
@@ -101,6 +103,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: "USDC",
         isIncoming: true,
+        type: "deposit",
       };
     case "accountClassTransfer":
       return {
@@ -111,6 +114,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: "USDC",
         isIncoming: false,
+        type: "transfer",
       };
     case "internalTransfer":
       return {
@@ -121,6 +125,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "USDC",
         asset: "USDC",
         isIncoming: true,
+        type: "transfer",
       };
     case "cStakingTransfer":
       return {
@@ -131,6 +136,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: delta.token,
         isIncoming: !delta.isDeposit, // True if user is withdrawing from staking balance to spot balance
+        type: "transfer",
       };
     case "spotTransfer":
       return {
@@ -141,6 +147,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: delta.feeToken,
         asset: getTokenDisplayName(delta.token),
         isIncoming: false,
+        type: "transfer",
       };
     case "subAccountTransfer":
       return {
@@ -151,6 +158,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: "USDC",
         isIncoming: true,
+        type: "transfer",
       };
     case "withdraw":
       return {
@@ -161,6 +169,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "USDC",
         asset: "USDC",
         isIncoming: false,
+        type: "withdraw",
       };
     case "vaultDeposit":
       return {
@@ -171,6 +180,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: "USDC",
         isIncoming: true,
+        type: "vault",
       };
     case "vaultCreate":
       return {
@@ -181,6 +191,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "USDC",
         asset: "USDC",
         isIncoming: false,
+        type: "vault",
       };
     case "vaultWithdraw":
       return {
@@ -192,6 +203,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "USDC",
         asset: "USDC",
         isIncoming: false,
+        type: "vault",
       };
     case "vaultDistribution":
       return {
@@ -202,6 +214,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: "USDC",
         isIncoming: true,
+        type: "vault",
       };
     case "rewardsClaim":
       return {
@@ -212,6 +225,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: delta.token,
         isIncoming: true,
+        type: "rewards",
       };
     case "deployGasAuction":
       return {
@@ -222,6 +236,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: delta.token,
         isIncoming: false,
+        type: "vault",
       };
     default:
       return {
@@ -232,6 +247,7 @@ export const buildNonFundingLedgerPayload = (
         feeToken: "",
         asset: "USDC",
         isIncoming: true,
+        type: "transfer",
       };
   }
 };

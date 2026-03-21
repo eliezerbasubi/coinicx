@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChartCandlestick, Coins, Replace } from "lucide-react";
+import { ChartCandlestick, Coins, RefreshCw } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
 import { cn } from "@/lib/utils/cn";
@@ -22,7 +22,7 @@ const LINKS = [
     href: ROUTES.swap.index,
     label: "Swap",
     id: "swap",
-    icon: <Replace />,
+    icon: <RefreshCw />,
   },
   {
     href: ROUTES.portfolio.index,
@@ -36,11 +36,14 @@ const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-10 bg-primary-dark standalone:pt-[env(safe-area-inset-top)] md:static">
+    <header className="sticky top-0 z-10 bg-primary-dark standalone:pt-safe-top md:static hidden md:block">
       <div className="w-full h-16 flex justify-between items-center px-4 md:px-6 gap-x-3 md:gap-x-6">
         <AppLogo className="w-15 md:w-20 h-5 md:h-6" />
 
-        <nav role="navigation" className="flex flex-1 gap-x-2 md:gap-x-6">
+        <nav
+          role="navigation"
+          className="hidden md:flex flex-1 gap-x-2 md:gap-x-6"
+        >
           {LINKS.map((link) => (
             <Link
               key={link.id}

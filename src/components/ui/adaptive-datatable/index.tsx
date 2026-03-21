@@ -61,6 +61,9 @@ type Props<TData, TValue> = {
   globalFilterFn?: FilterFnOption<TData>;
   meta?: TableMeta<TData>;
   showPagination?: boolean;
+
+  /** Enforce the UI to render (`table` or `card`). Otherwise the renderer will choose one based on the current media query. */
+  variant?: "card" | "table";
   onPaginationChange?: OnChangeFn<PaginationState>;
 } & Omit<CompProps<TData, TValue>, "table">;
 
@@ -75,6 +78,7 @@ const AdaptiveDataTable = <TData, TValue>({
   skeleton,
   wrapperClassName,
   meta,
+  variant,
   showPagination,
   render,
   onPaginationChange,
@@ -113,7 +117,7 @@ const AdaptiveDataTable = <TData, TValue>({
 
   return (
     <div className={cn("size-full", wrapperClassName)}>
-      {isDesktop ? (
+      {variant === "table" || isDesktop ? (
         <DataTableRenderer
           {...props}
           columns={columns as ColumnDef<unknown, unknown>[]}
@@ -122,9 +126,8 @@ const AdaptiveDataTable = <TData, TValue>({
         />
       ) : (
         <AdaptiveTableCard
+          {...props}
           table={table as Table<unknown>}
-          className={props.className}
-          loading={props.loading}
           skeleton={skeleton}
           render={render as (data: unknown) => React.ReactNode}
         />

@@ -1,10 +1,7 @@
-import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { InfinityIcon } from "lucide-react";
 
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
-import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
@@ -16,8 +13,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
-import { getTokenDisplayName } from "@/features/trade/utils/getTokenDisplayName";
+import { useAccountBalances } from "@/features/trade/hooks/useAccountBalances";
 
 import TokenImage from "../TokenImage";
 
@@ -180,121 +176,12 @@ const columns: ColumnDef<UserBalance>[] = [
 ];
 
 const Balances = () => {
-  const { tokensToSpotId } = useMetaAndAssetCtxs();
-  const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
-  const { spotBalances, allDexsClearinghouseState } = useShallowUserTradeStore(
-    (s) => ({
-      spotBalances: s.spotBalances,
-      allDexsClearinghouseState: s.allDexsClearinghouseState,
-    }),
-  );
-
-  const perpsBalance = useMemo(() => {
-    const data = allDexsClearinghouseState?.assetPositions.reduce(
-      (acc, dexAssetPosition) => {
-        return {
-          unrealizedPnl:
-            acc.unrealizedPnl + Number(dexAssetPosition.position.unrealizedPnl),
-          returnOnEquity:
-            acc.returnOnEquity +
-            Number(dexAssetPosition.position.returnOnEquity),
-        };
-      },
-      { unrealizedPnl: 0, returnOnEquity: 0 },
-    );
-
-    const withdrawable = Number(allDexsClearinghouseState?.withdrawable || "0");
-    const totalMarginUsed = Number(
-      allDexsClearinghouseState?.marginSummary.totalMarginUsed || "0",
-    );
-    const totalBalance = Number(
-      allDexsClearinghouseState?.marginSummary.accountValue || "0",
-    );
-
-    return {
-      coin: "USDC",
-      isSpot: false,
-      totalBalance: totalBalance,
-      availableBalance: totalBalance - totalMarginUsed,
-      withdrawable,
-      usdValue: Number(
-        allDexsClearinghouseState?.marginSummary.accountValue || "0",
-      ),
-      unrealizedPnl: data?.unrealizedPnl || 0,
-      returnOnEquity: data?.returnOnEquity || 0,
-    };
-  }, [allDexsClearinghouseState]);
-
-  const balances = useMemo(
-    () =>
-      spotBalances
-        .filter((balance) => Number(balance.total) > 0)
-        .map((balance) => {
-          const coin = getTokenDisplayName(balance.coin);
-
-          if (balance.token === 0) {
-            return {
-              totalBalance: Number(balance.total),
-              availableBalance: Number(balance.total) - Number(balance.hold),
-              coin,
-              usdValue: Number(balance.total),
-              isSpot: true,
-              unrealizedPnl: 0,
-              returnOnEquity: 0,
-              withdrawable: 0,
-            };
-          }
-
-          // Prefer USDC-quoted pairs (token 0) for accurate USD conversion.
-          const spotId = tokensToSpotId?.get(balance.token)?.get(0);
-
-          if (spotId === undefined)
-            return {
-              totalBalance: Number(balance.total),
-              availableBalance: Number(balance.total) - Number(balance.hold),
-              coin,
-              usdValue: 0,
-              isSpot: true,
-              unrealizedPnl: 0,
-              returnOnEquity: 0,
-              withdrawable: 0,
-            };
-
-          const ctx = spotAssetCtxs[spotId];
-
-          const markPx = Number(ctx?.markPx || "1");
-          const entryNtl = Number(balance.entryNtl);
-          const totalBalance = Number(balance.total);
-          const totalBalanceNtl = totalBalance * markPx;
-
-          const unrealizedPnl = totalBalanceNtl - entryNtl;
-          const returnOnEquity = entryNtl === 0 ? 0 : unrealizedPnl / entryNtl;
-
-          const availableBalance = totalBalance - Number(balance.hold);
-          const usdValue = availableBalance * markPx;
-
-          return {
-            totalBalance,
-            availableBalance,
-            coin,
-            isSpot: true,
-            usdValue,
-            unrealizedPnl,
-            returnOnEquity,
-            withdrawable: availableBalance,
-          };
-        }),
-    [spotBalances, tokensToSpotId, spotAssetCtxs],
-  );
-
-  const data = useMemo(() => {
-    return [perpsBalance, ...balances];
-  }, [balances, perpsBalance]);
+  const data = useAccountBalances();
 
   return (
     <AdaptiveDataTable
       columns={columns}
-      data={data}
+      data={data.balances}
       loading={false}
       className="space-y-1.5 mb-3 py-2 md:py-0"
       thClassName="h-8 py-0 font-medium text-xs"

@@ -8,6 +8,7 @@ export type AdaptiveTableCardProps<TData> = {
   loading?: boolean;
   className?: string;
   skeleton?: React.ReactNode;
+  noData?: React.ReactNode;
   disablePagination?: boolean;
   render?: (data: TData) => React.ReactNode;
 };
@@ -18,6 +19,7 @@ export const AdaptiveTableCard = <TData,>({
   className,
   skeleton,
   disablePagination,
+  noData,
   render,
 }: AdaptiveTableCardProps<TData>) => {
   const { rows } = disablePagination
@@ -33,7 +35,9 @@ export const AdaptiveTableCard = <TData,>({
       ))}
 
       {!Boolean(rows.length) && !loading && (
-        <div className="h-24 flex items-center justify-center">No results</div>
+        <div className="h-24 flex items-center justify-center">
+          {noData || "No results"}
+        </div>
       )}
       {!Boolean(rows.length) &&
         loading &&
