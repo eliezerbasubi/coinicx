@@ -11,6 +11,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AuthenticatedContent from "@/features/trade/components/AuthenticatedContent";
 import { useTradingAccountActivity } from "@/features/trade/hooks/useTradingAccountActivity";
 
 const TradingAccountDataTable = dynamic(
@@ -61,6 +62,7 @@ const TradingAccountActivityDrawer = ({ open, onOpenChange }: Props) => {
               </h1>
             </div>
             <Tabs
+              data-vaul-no-drag
               defaultValue={filterBy}
               onValueChange={setFilterBy}
               className="overflow-x-auto no-scrollbars"
@@ -78,10 +80,12 @@ const TradingAccountActivityDrawer = ({ open, onOpenChange }: Props) => {
               </TabsList>
             </Tabs>
           </div>
-          <TradingAccountDataTable
-            data={filteredActivity}
-            loading={status === "pending"}
-          />
+          <AuthenticatedContent>
+            <TradingAccountDataTable
+              data={filteredActivity}
+              loading={status === "pending"}
+            />
+          </AuthenticatedContent>
         </div>
       </DrawerContent>
     </Drawer>

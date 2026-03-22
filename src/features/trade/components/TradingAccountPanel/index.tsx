@@ -9,6 +9,7 @@ import {
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AuthenticatedContent from "@/features/trade/components/AuthenticatedContent";
 
 import Balances from "./Balances";
 import DepositsAndWithdrawals from "./DepositsAndWithdrawals";
@@ -191,31 +192,6 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
           </TabsContent>
         </AuthenticatedContent>
       </Tabs>
-    </div>
-  );
-};
-
-const AuthenticatedContent = ({ children }: { children: React.ReactNode }) => {
-  const { openConnectModal } = useConnectModal();
-  const { address } = useAccount();
-
-  if (address) {
-    return children;
-  }
-
-  return (
-    <div className="h-full min-h-20 flex items-center justify-center">
-      <p className="text-sm">
-        Please &nbsp;
-        <span
-          role="button"
-          className="text-primary cursor-pointer"
-          onClick={openConnectModal}
-        >
-          connect
-        </span>
-        &nbsp; your wallet first.
-      </p>
     </div>
   );
 };
