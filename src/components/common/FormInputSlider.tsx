@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useWebHaptics } from "web-haptics/react";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -17,6 +18,8 @@ const FormInputSlider = ({
   showLimiters,
   onValueChange,
 }: Props) => {
+  const haptic = useWebHaptics();
+
   const tooltipXPosition = useMemo(() => {
     if (value <= 10) return -11;
     if (value < 20) return -15;
@@ -26,6 +29,11 @@ const FormInputSlider = ({
     if (value > 70 && value <= 99) return -27;
     return -33;
   }, [value]);
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valueAsNumber = Number(e.target.value);
+    onValueChange?.(valueAsNumber);
+  };
 
   return (
     <div className="w-full">
@@ -42,9 +50,8 @@ const FormInputSlider = ({
           min={min ?? 0}
           className="flex-1 my-1 appearance-none outline-none bg-transparent relative z-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:bg-primary-dark [&::-webkit-slider-thumb]:border-3 [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:hover:ring-4 [&::-webkit-slider-thumb]:hover:ring-primary/30 [&::-webkit-slider-thumb]:hover:cursor-grab"
           value={value}
-          onChange={({ target: { valueAsNumber } }) =>
-            onValueChange?.(valueAsNumber)
-          }
+          onChange={onChange}
+          onClick={() => haptic.trigger("light")}
         />
         <div className="w-[calc(100%-1px)] flex justify-between h-1 bg-neutral-gray-200 absolute top-[calc(50%-2px)] z-1">
           {/* Track */}

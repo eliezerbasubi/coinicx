@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { AllPerpMetas, OpenOrder, SpotMetas } from "@/lib/types/trade";
@@ -19,6 +20,7 @@ type UseCancelOrderArgs = {
 };
 
 export const useCancelOrder = (args?: UseCancelOrderArgs) => {
+  const haptic = useWebHaptics();
   const { enableTrading } = useEnableTrading({ toastId });
 
   const [processing, setProcessing] = useState(false);
@@ -102,6 +104,7 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
       const message = `${isCancellingAll ? "Orders" : "Order"} canceled successfully`;
 
       toast.success(message, { id: toastId });
+      haptic.trigger("success");
 
       args?.onSuccess?.();
     } catch (error) {
@@ -111,6 +114,7 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
       toast.error(message, {
         id: toastId,
       });
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }

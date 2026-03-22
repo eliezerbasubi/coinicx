@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 
 import { Position } from "@/lib/types/trade";
 
@@ -25,6 +26,7 @@ type UseSetTriggerPriceArgs = {
 };
 
 export const useSetTriggerPrice = (args?: UseSetTriggerPriceArgs) => {
+  const haptic = useWebHaptics();
   const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
   const [processing, setProcessing] = useState(false);
 
@@ -119,12 +121,14 @@ export const useSetTriggerPrice = (args?: UseSetTriggerPriceArgs) => {
       }
 
       toast.success(message, { id: toastId });
+      haptic.trigger("success");
       args?.onSuccess?.();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to set trigger price";
 
       toast.error(message, { id: toastId });
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }

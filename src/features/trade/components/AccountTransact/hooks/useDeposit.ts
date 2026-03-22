@@ -1,6 +1,7 @@
 import { useMemo, useReducer } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 import { erc20Abi, parseUnits } from "viem";
 import { useAccount, useConfig } from "wagmi";
 import {
@@ -32,6 +33,7 @@ const { assets, networksAndAssets } = ALL_NETWORKS_AND_ASSETS;
 const toastId = "deposit-account";
 
 export const useDeposit = () => {
+  const haptic = useWebHaptics();
   const { address, isConnected } = useAccount();
   const config = useConfig();
   const { tokenBalance } = useTokenBalance();
@@ -145,6 +147,7 @@ export const useDeposit = () => {
       toast.success(`${state.amount} USDC deposited successful`, {
         id: toastId,
       });
+      haptic.trigger("success");
 
       useAccountTransactStore.getState().closeAccountTransact();
     } catch (error: any) {
@@ -162,6 +165,7 @@ export const useDeposit = () => {
       }
 
       toast.error(message, { id: toastId });
+      haptic.trigger("error");
     } finally {
       dispatch({ processing: false });
     }

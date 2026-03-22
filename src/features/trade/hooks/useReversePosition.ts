@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 
 import { Position } from "@/lib/types/trade";
 
@@ -22,6 +23,7 @@ type UseReversePositionArgs = {
 };
 
 export const useReversePosition = (args?: UseReversePositionArgs) => {
+  const haptic = useWebHaptics();
   const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
   const [processing, setProcessing] = useState(false);
 
@@ -79,12 +81,14 @@ export const useReversePosition = (args?: UseReversePositionArgs) => {
       }
 
       toast.success(message, { id: toastId });
+      haptic.trigger("success");
       args?.onSuccess?.();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to reverse position";
 
       toast.error(message, { id: toastId });
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }

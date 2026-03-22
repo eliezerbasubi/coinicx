@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { OrderParameters } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 
 import { useTradeContext } from "@/lib/store/trade/hooks";
 import { useInstrumentStore } from "@/lib/store/trade/instrument";
@@ -24,6 +25,7 @@ import { useEnsureTradingEnabled } from "./useEnsureTradingEnabled";
 const toastId = "place-order";
 
 export const usePlaceOrder = () => {
+  const haptic = useWebHaptics();
   const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
 
   const { settings, orderSide } = useShallowOrderFormStore((s) => ({
@@ -312,6 +314,7 @@ export const usePlaceOrder = () => {
       toast.success("TWAP order created successfully", {
         id: toastId,
       });
+      haptic.trigger("success");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to create TWAP order";
@@ -319,6 +322,7 @@ export const usePlaceOrder = () => {
       toast.error(message, {
         id: toastId,
       });
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }
@@ -402,6 +406,7 @@ export const usePlaceOrder = () => {
       }
 
       toast.success(message, { id: toastId });
+      haptic.trigger("success");
     } catch (error) {
       throw error;
     } finally {
@@ -422,6 +427,7 @@ export const usePlaceOrder = () => {
       toast.error(message, {
         id: toastId,
       });
+      haptic.trigger("error");
     }
   };
 

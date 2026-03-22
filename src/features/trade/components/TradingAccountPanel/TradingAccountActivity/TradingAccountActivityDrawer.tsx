@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { ArrowLeft, History } from "lucide-react";
+import { useWebHaptics } from "web-haptics/react";
 
 import {
   Drawer,
@@ -33,6 +34,7 @@ const ACCOUNT_ACTIVITY_TABS = [
 
 const TradingAccountActivityDrawer = ({ open, onOpenChange }: Props) => {
   const [filterBy, setFilterBy] = useState("all");
+  const haptic = useWebHaptics();
 
   const { data, status } = useTradingAccountActivity();
 
@@ -44,7 +46,7 @@ const TradingAccountActivityDrawer = ({ open, onOpenChange }: Props) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerTitle className="sr-only">Transaction History</DrawerTitle>
-      <DrawerTrigger asChild>
+      <DrawerTrigger asChild onClick={() => haptic.trigger("selection")}>
         <History className="size-4.5 text-white" />
       </DrawerTrigger>
       <DrawerContent className="w-full! border-l-0! px-0 standalone:pt-safe-top">

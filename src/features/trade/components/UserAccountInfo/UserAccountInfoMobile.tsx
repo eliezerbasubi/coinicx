@@ -2,6 +2,7 @@ import { useMemo, useReducer } from "react";
 import { useAccountModal, useConnectModal } from "@rainbow-me/rainbowkit";
 import { User } from "lucide-react";
 import { useAccount } from "wagmi";
+import { useWebHaptics } from "web-haptics/react";
 
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { cn } from "@/lib/utils/cn";
@@ -174,6 +175,7 @@ const OpenAccountButton = () => {
   const { address } = useAccount();
   const { openAccountModal } = useAccountModal();
   const { openConnectModal } = useConnectModal();
+  const haptic = useWebHaptics();
 
   return (
     <Button
@@ -181,6 +183,8 @@ const OpenAccountButton = () => {
       size="icon"
       className="p-0 size-4.5 text-white"
       onClick={() => {
+        haptic.trigger("light");
+
         if (address) {
           openAccountModal?.();
         } else {

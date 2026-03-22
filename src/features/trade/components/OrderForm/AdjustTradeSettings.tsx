@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
+import { useWebHaptics } from "web-haptics/react";
 
 import { useTradeContext } from "@/lib/store/trade/hooks";
 import {
@@ -160,6 +161,7 @@ const AdjustMarginMode = () => {
 
 const AdjustLeverage = () => {
   const { enableTrading } = useEnableTrading({ toastId });
+  const haptic = useWebHaptics();
 
   const leverage = useShallowUserTradeStore((s) =>
     (s.leverage?.value ?? 40).toString(),
@@ -217,6 +219,8 @@ const AdjustLeverage = () => {
       toast.success("Leverage adjusted successfully", {
         id: toastId,
       });
+
+      haptic.trigger("success");
     } catch (error) {
       let message = "Failed to adjust leverage";
 
@@ -227,9 +231,19 @@ const AdjustLeverage = () => {
       toast.error(message, {
         id: toastId,
       });
+
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }
+  };
+
+  const onDirectionClick = (direction: "increase" | "decrease") => {
+    haptic.trigger("medium");
+
+    const multiplier = direction === "increase" ? 1 : -1;
+    const newValue = Number(assetLeverage) + multiplier;
+    onValueChange(newValue.toString());
   };
 
   return (
@@ -257,9 +271,7 @@ const AdjustLeverage = () => {
             role="button"
             tabIndex={0}
             className="outline-0 hover:text-white"
-            onClick={() =>
-              onValueChange((Number(assetLeverage) - 1).toString())
-            }
+            onClick={() => onDirectionClick("decrease")}
           />
           <div className="flex items-center justify-center">
             <InputNumber
@@ -279,9 +291,7 @@ const AdjustLeverage = () => {
             role="button"
             tabIndex={0}
             className="outline-0 hover:text-white"
-            onClick={() =>
-              onValueChange((Number(assetLeverage) + 1).toString())
-            }
+            onClick={() => onDirectionClick("increase")}
           />
         </div>
         <FormInputSlider
@@ -295,7 +305,7 @@ const AdjustLeverage = () => {
         <ConnectButton
           variant="default"
           size="sm"
-          className="w-full mt-4"
+          className="w-full mt-4 h-10 md:h-8"
           label="Confirm"
           disabled={processing}
           loading={processing}

@@ -1,5 +1,6 @@
 import { useMemo, useReducer } from "react";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 
 import { hlExchangeClient } from "@/lib/services/transport";
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
@@ -17,6 +18,7 @@ type State = {
 };
 
 export const useTransfer = () => {
+  const haptic = useWebHaptics();
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     { direction: "spot-to-perps", amount: "", processing: false },
@@ -80,6 +82,7 @@ export const useTransfer = () => {
         `Transferred ${formattedAmount} USDC to ${toPerp ? "Perps" : "Spot"}`,
         { id: toastId },
       );
+      haptic.trigger("success");
 
       useAccountTransactStore.getState().closeAccountTransact();
     } catch (error) {
@@ -87,6 +90,7 @@ export const useTransfer = () => {
         error instanceof Error ? error.message : "Failed to transfer tokens";
 
       toast.error(message, { id: toastId });
+      haptic.trigger("error");
     } finally {
       dispatch({ processing: false });
     }

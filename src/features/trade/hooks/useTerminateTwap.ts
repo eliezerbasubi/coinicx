@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { ActiveTwap, AllPerpMetas, SpotMetas } from "@/lib/types/trade";
@@ -61,6 +62,7 @@ const resolveAssetId = (twap: ActiveTwap): number => {
 };
 
 export const useTerminateTwap = () => {
+  const haptic = useWebHaptics();
   const { enableTrading } = useEnableTrading({ toastId });
 
   const [processing, setProcessing] = useState(false);
@@ -91,11 +93,13 @@ export const useTerminateTwap = () => {
           : "TWAP terminated successfully",
         { id: toastId },
       );
+      haptic.trigger("success");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to terminate TWAP";
 
       toast.error(message, { id: toastId });
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }

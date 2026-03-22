@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 
 import { Position } from "@/lib/types/trade";
 
@@ -26,6 +27,7 @@ type UseClosePositionArgs = {
 };
 
 export const useClosePosition = (args?: UseClosePositionArgs) => {
+  const haptic = useWebHaptics();
   const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
 
   const buildClosingOrders = (params: ClosePositionParams) => {
@@ -110,6 +112,7 @@ export const useClosePosition = (args?: UseClosePositionArgs) => {
       }
 
       toast.success(message, { id: toastId });
+      haptic.trigger("success");
       args?.onSuccess?.();
     } catch (error) {
       const message =
@@ -118,6 +121,7 @@ export const useClosePosition = (args?: UseClosePositionArgs) => {
       toast.error(message, {
         id: toastId,
       });
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }

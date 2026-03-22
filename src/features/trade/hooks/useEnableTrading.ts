@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 import { privateKeyToAccount } from "viem/accounts";
 import { useAccount } from "wagmi";
 
@@ -18,6 +19,7 @@ type UseEnableTradingArgs = {
  * @returns
  */
 export const useEnableTrading = (args?: UseEnableTradingArgs) => {
+  const haptic = useWebHaptics();
   const { address } = useAccount();
   const { data: agent, setOptimisticAgent } = useExtraAgents();
 
@@ -46,6 +48,7 @@ export const useEnableTrading = (args?: UseEnableTradingArgs) => {
         toast.success("Trading enabled successfully", {
           id: args?.toastId,
         });
+        haptic.trigger("success");
       }
 
       const agentWallet = privateKeyToAccount(COINICX_AGENT_SETTINGS.pk);

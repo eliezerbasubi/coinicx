@@ -1,5 +1,6 @@
 import { useMemo, useReducer } from "react";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
@@ -30,6 +31,7 @@ type State = {
 const { assets, networksAndAssets } = ALL_NETWORKS_AND_ASSETS;
 
 export const useWithdraw = () => {
+  const haptic = useWebHaptics();
   const { getUnitFee } = useUnitFees();
   const { generateUnitAddress } = useGenerateUnitAddress();
   const { tokensToSpotId } = useMetaAndAssetCtxs();
@@ -253,6 +255,7 @@ export const useWithdraw = () => {
         `${formattedAmount} ${currentAssetInfo.symbol} withdrawn successfully`,
         { id: toastId },
       );
+      haptic.trigger("success");
 
       useAccountTransactStore.getState().closeAccountTransact();
     } catch (error: any) {
@@ -270,6 +273,7 @@ export const useWithdraw = () => {
       }
 
       toast.error(message, { id: toastId });
+      haptic.trigger("error");
     } finally {
       dispatch({ processing: false });
     }

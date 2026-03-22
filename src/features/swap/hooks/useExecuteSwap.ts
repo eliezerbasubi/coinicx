@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { OrderParameters } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
+import { useWebHaptics } from "web-haptics/react";
 
 import { useEnsureTradingEnabled } from "@/features/trade/hooks/useEnsureTradingEnabled";
 
@@ -9,6 +10,7 @@ import { useSwapStore } from "../store";
 const toastId = "swap-toast";
 
 export const useExecuteSwap = () => {
+  const haptic = useWebHaptics();
   const { getBuilder, enableTrading } = useEnsureTradingEnabled({
     toastId,
   });
@@ -60,10 +62,12 @@ export const useExecuteSwap = () => {
       }
 
       toast.success(message, { id: toastId });
+      haptic.trigger("success");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to swap tokens";
       toast.error(message, { id: toastId });
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }
