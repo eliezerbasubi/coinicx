@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
@@ -14,12 +14,15 @@ import {
   useUserTradeStore,
 } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputSlider from "@/components/common/FormInputSlider";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 import { InputNumber } from "@/components/ui/input-number";
 import { useEnableTrading } from "@/features/trade/hooks/useEnableTrading";
+
+import LeverageDiscreteSlider from "./LeverageDiscreteSlider";
 
 const toastId = "adjust-leverage";
 
@@ -62,6 +65,7 @@ const LEVERAGE_MARGIN_MODES = [
 
 const AdjustMarginMode = () => {
   const { enableTrading } = useEnableTrading({ toastId });
+  const haptic = useWebHaptics();
 
   const marginMode = useUserTradeStore((s) => s.leverage?.type ?? "cross");
 
@@ -104,6 +108,8 @@ const AdjustMarginMode = () => {
       toast.success("Margin mode adjusted successfully", {
         id: toastId,
       });
+
+      haptic.trigger("success");
     } catch (error) {
       let message = "Failed to adjust margin mode";
 
@@ -114,6 +120,8 @@ const AdjustMarginMode = () => {
       toast.error(message, {
         id: toastId,
       });
+
+      haptic.trigger("error");
     } finally {
       setProcessing(false);
     }
@@ -173,6 +181,10 @@ const AdjustLeverage = () => {
   const [open, setOpen] = useState(false);
   const [assetLeverage, setAssetLeverage] = useState(leverage);
   const [processing, setProcessing] = useState(false);
+
+  useEffect(() => {
+    setAssetLeverage(leverage);
+  }, [leverage]);
 
   const onValueChange = (value: string) => {
     const numValue = Number(value);
@@ -266,7 +278,7 @@ const AdjustLeverage = () => {
         <p className="text-white text-sm hidden sm:block font-medium mb-2">
           Adjust Leverage
         </p>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between md:mb-4">
           <ChevronLeft
             role="button"
             tabIndex={0}
@@ -294,12 +306,10 @@ const AdjustLeverage = () => {
             onClick={() => onDirectionClick("increase")}
           />
         </div>
-        <FormInputSlider
-          value={Math.floor((Number(assetLeverage) / maxLeverage) * 100)}
-          min={1}
-          onValueChange={(value) => {
-            onValueChange(Math.floor((value / 100) * maxLeverage).toString());
-          }}
+        <LeverageSlider
+          maxLeverage={maxLeverage}
+          value={assetLeverage}
+          onValueChange={onValueChange}
         />
 
         <ConnectButton
@@ -313,6 +323,40 @@ const AdjustLeverage = () => {
         />
       </div>
     </AdaptivePopover>
+  );
+};
+
+type LeverageProps = {
+  maxLeverage: number;
+  value: string;
+  onValueChange?: (value: string) => void;
+};
+
+const LeverageSlider = ({
+  maxLeverage,
+  value,
+  onValueChange,
+}: LeverageProps) => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <LeverageDiscreteSlider
+        maxLeverage={maxLeverage}
+        value={value}
+        onValueChange={onValueChange}
+      />
+    );
+  }
+
+  return (
+    <FormInputSlider
+      value={Math.floor((Number(value) / maxLeverage) * 100)}
+      min={1}
+      onValueChange={(value) => {
+        onValueChange?.(Math.floor((value / 100) * maxLeverage).toString());
+      }}
+    />
   );
 };
 
