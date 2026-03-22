@@ -3,9 +3,9 @@ import { Search } from "lucide-react";
 
 import { SwapSpotToken } from "@/lib/types/swap";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import TokenImage from "@/components/common/TokenImage";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import TokenImage from "@/features/trade/components/TokenImage";
 
 import { SWAP_POPULAR_TOKENS } from "../constants";
 import { useSwapTokens } from "../hooks/useSwapTokens";

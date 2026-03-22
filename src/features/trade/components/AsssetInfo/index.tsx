@@ -7,9 +7,8 @@ import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { cn } from "@/lib/utils/cn";
 import { formatAddress } from "@/lib/utils/formatting/formatAddress";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
-
-import TokenImage from "../TokenImage";
 
 const AssetInfo = () => {
   const { tokenMeta } = useShallowInstrumentStore((state) => ({

@@ -6,10 +6,10 @@ import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import TokenImage from "@/components/common/TokenImage";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
 
-import TokenImage from "../TokenImage";
 import CardItem from "./CardItem";
 import CoinLink from "./CoinLink";
 import { useSpotToTokenDetails } from "./hooks/useSpotToTokenDetails";

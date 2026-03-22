@@ -4,6 +4,7 @@ import { InfinityIcon } from "lucide-react";
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAccountBalances } from "@/features/trade/hooks/useAccountBalances";
-
-import TokenImage from "../TokenImage";
 
 interface UserBalance {
   coin: string;

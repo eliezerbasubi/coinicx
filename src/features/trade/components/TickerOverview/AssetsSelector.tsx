@@ -8,12 +8,12 @@ import { useShallowPreferencesStore } from "@/lib/store/trade/user-preferences";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import Tag from "@/components/ui/tag";
 import { formatSymbol } from "@/features/trade/utils";
 
-import TokenImage from "../TokenImage";
 import AssetsSelectorContent from "./AssetsSelectorContent";
 import TickerSelectorProvider from "./TickerSelectorProvider";
 

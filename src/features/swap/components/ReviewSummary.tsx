@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
-import TokenImage from "@/features/trade/components/TokenImage";
+import TokenImage from "@/components/common/TokenImage";
 
 import { DIRECT_SWAP_FEE } from "../constants";
 import { useShallowSwapStore } from "../store";

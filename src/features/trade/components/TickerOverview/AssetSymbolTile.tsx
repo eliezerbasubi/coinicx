@@ -1,10 +1,10 @@
 import { Asset } from "@/lib/types/trade";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import Tag from "@/components/ui/tag";
 
-import TokenImage from "../TokenImage";
 import FavoriteButton from "./FavoriteButton";
 
 type Props = {

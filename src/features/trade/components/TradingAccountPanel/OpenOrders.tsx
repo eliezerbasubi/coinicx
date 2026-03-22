@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
 import Tag from "@/components/ui/tag";
-import TokenImage from "@/features/trade/components/TokenImage";
 import { useCancelOrder } from "@/features/trade/hooks/useCancelOrder";
 import { orderTypeLabels } from "@/features/trade/utils/orderTypes";
 

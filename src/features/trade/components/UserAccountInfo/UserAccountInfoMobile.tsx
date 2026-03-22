@@ -8,13 +8,13 @@ import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import AccountActions from "@/components/common/AccountActions";
+import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PortfolioDrawer from "@/features/portfolio/components/PortfolioDrawer";
 import { useAccountBalances } from "@/features/trade/hooks/useAccountBalances";
 
-import TokenImage from "../TokenImage";
 import TradingAccountActivityDrawer from "../TradingAccountPanel/TradingAccountActivity/TradingAccountActivityDrawer";
 import AccountMarginItems from "./AccountMarginItems";
 import PerpEquityItems from "./PerpEquityItems";

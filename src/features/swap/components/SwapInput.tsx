@@ -5,9 +5,9 @@ import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { SwapInputType } from "@/lib/types/swap";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import { InputNumber } from "@/components/ui/input-number";
-import TokenImage from "@/features/trade/components/TokenImage";
 import { removeTrailingZeros } from "@/features/trade/utils";
 
 import { useShallowSwapStore } from "../store";

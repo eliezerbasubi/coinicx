@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils/cn";
+import TokenImage from "@/components/common/TokenImage";
 import { InputNumber } from "@/components/ui/input-number";
-import TokenImage from "@/features/trade/components/TokenImage";
 
 import { useShallowSwapStore } from "../store";
 import { isQuoteAsset, midPrice } from "../utils/swap";
