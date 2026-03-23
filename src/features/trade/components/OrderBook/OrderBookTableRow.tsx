@@ -57,10 +57,10 @@ const OrderBookTableRow = ({
       }}
     >
       <p className={cn("flex-1 text-buy", { "text-sell": side === "asks" })}>
-        {formatPriceToDecimal(price, decimals)}
+        {formatPriceToDecimal(price, decimals, { useFallback: true })}
       </p>
       <p className="text-right flex-1">
-        {formatNumber(amount, { maximumFractionDigits: 5 })}
+        {formatNumber(amount, { maximumFractionDigits: 5, useFallback: true })}
       </p>
       <Visibility visible={!hideCumulativeTotal}>
         <p className="text-right flex-1">
@@ -68,6 +68,7 @@ const OrderBookTableRow = ({
             // We limit fraction digits to 2 from thousands and above
             maximumFractionDigits: rounding && total >= 1e3 ? 2 : 5,
             notation: rounding ? "compact" : undefined,
+            useFallback: true,
           })}
         </p>
       </Visibility>

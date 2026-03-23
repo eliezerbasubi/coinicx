@@ -14,12 +14,13 @@ const ReduceOnly = () => {
         id="reduceOnly"
         checked={reduceOnly}
         className="size-3.5 border-neutral-gray-400 data-[state=checked]:bg-white data-[state=checked]:text-primary-dark data-[state=checked]:border-white"
-        onCheckedChange={(checked) =>
+        onCheckedChange={(checked) => {
+          // If the user is checking the checkbox, we set showTpSl to false
           useOrderFormStore.getState().setSettings({
             reduceOnly: !!checked,
             showTpSl: false,
-          })
-        }
+          });
+        }}
       />
       <Label htmlFor="reduceOnly" className="text-white text-3xs md:text-xs">
         <p>Reduce Only</p>

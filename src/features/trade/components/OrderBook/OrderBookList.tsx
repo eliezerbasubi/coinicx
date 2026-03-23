@@ -135,7 +135,19 @@ const OrderBookList = ({
       index: number;
       style: React.CSSProperties;
     }) => {
-      if (!data?.length) return null;
+      // Handle empty data
+      if (!data?.length)
+        return (
+          <OrderBookTableRow
+            key={index}
+            side={side}
+            price={0}
+            amount={0}
+            decimals={null}
+            progress={50}
+            style={style}
+          />
+        );
 
       // For Asks, Read items in reverse to align them from the lowest to the highest
       const askIndex =

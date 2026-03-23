@@ -30,6 +30,7 @@ const OrderBookTicker = ({ className }: Props) => {
           })}
         >
           {formatNumber(close, {
+            useFallback: true,
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}
@@ -44,6 +45,7 @@ const OrderBookTicker = ({ className }: Props) => {
       <p className="text-3xs md:text-sm text-neutral-gray-400">
         {formatNumber(close, {
           style: "currency",
+          useFallback: true,
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}

@@ -28,11 +28,12 @@ const OrderTPSL = () => {
           id="takeProfitAndStopLoss"
           checked={showTpSl}
           className="size-3.5 border-neutral-gray-400 data-[state=checked]:bg-white data-[state=checked]:text-primary-dark data-[state=checked]:border-white"
-          onCheckedChange={(checked) =>
+          onCheckedChange={(checked) => {
+            // If the user is checking the checkbox, we set reduceOnly to false
             useOrderFormStore
               .getState()
-              .setSettings({ showTpSl: Boolean(checked) })
-          }
+              .setSettings({ showTpSl: Boolean(checked), reduceOnly: false });
+          }}
         />
         <Label htmlFor="takeProfitAndStopLoss">
           <Tooltip>
