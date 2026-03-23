@@ -29,14 +29,17 @@ const AssetSymbolTile = ({ asset }: Props) => {
         <div className="flex items-center gap-x-1">
           <p>{asset.symbol}</p>
           <Visibility visible={asset.isSpot}>
-            <Tag value="SPOT" />
+            <Tag value="SPOT" className="text-2xs md:text-3xs" />
           </Visibility>
 
           <Visibility visible={!!asset.maxLeverage}>
-            <Tag value={`${asset.maxLeverage}x`} />
+            <Tag
+              value={`${asset.maxLeverage}x`}
+              className="text-2xs md:text-3xs"
+            />
           </Visibility>
           <Visibility visible={!!asset.dex}>
-            <Tag value={asset.dex} />
+            <Tag value={asset.dex} className="text-2xs md:text-3xs" />
           </Visibility>
         </div>
 

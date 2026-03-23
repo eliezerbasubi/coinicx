@@ -107,7 +107,7 @@ const AssetsSelector = ({ className }: Props) => {
           open={open}
           triggerRef={triggerRef}
           onOpenChange={setOpen}
-          className="w-full h-full lg:w-3xl pb-0"
+          className="w-full h-full lg:w-3xl p-0 md:pt-4 md:px-4 pb-0"
         >
           <AssetsSelectorContent onSelect={() => setOpen(false)} />
         </AdaptivePopover>
