@@ -7,6 +7,8 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -46,21 +48,35 @@ const TradingAccountActivityDrawer = ({ open, onOpenChange }: Props) => {
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerTitle className="sr-only">Transaction History</DrawerTitle>
       <DrawerTrigger asChild onClick={() => haptic.trigger("selection")}>
         <History className="size-4.5 text-white" />
       </DrawerTrigger>
       <DrawerContent className="w-full! border-l-0! px-0 standalone:pt-safe-top">
-        <div className="w-full overflow-y-auto overflow-x-clip">
+        <div className="w-full overflow-y-auto">
           <div className="w-full sticky top-0 z-10 bg-primary-dark">
-            <div className="flex items-center justify-center gap-2 pt-4 px-4">
+            <DrawerHeader className="p-0">
+              <DrawerTitle className="flex items-center justify-center gap-2 pt-4 px-4">
+                {/* <div className="flex items-center justify-center gap-2 pt-4 px-4"> */}
+                <DrawerClose asChild>
+                  <ArrowLeft className="size-5" />
+                </DrawerClose>
+                <p className="flex-1 text-center text-base text-white font-semibold">
+                  Transaction History
+                </p>
+                {/* </div> */}
+              </DrawerTitle>
+              <DrawerDescription className="sr-only">
+                Showing user's transactions history
+              </DrawerDescription>
+            </DrawerHeader>
+            {/* <div className="flex items-center justify-center gap-2 pt-4 px-4">
               <DrawerClose asChild>
                 <ArrowLeft className="size-5" />
               </DrawerClose>
               <h1 className="flex-1 text-center text-base text-white font-semibold">
                 Transaction History
               </h1>
-            </div>
+            </div> */}
             <Tabs
               data-vaul-no-drag
               defaultValue={filterBy}
@@ -80,7 +96,7 @@ const TradingAccountActivityDrawer = ({ open, onOpenChange }: Props) => {
               </TabsList>
             </Tabs>
           </div>
-          <AuthenticatedContent>
+          <AuthenticatedContent className="h-20">
             <TradingAccountDataTable
               data={filteredActivity}
               loading={status === "pending"}

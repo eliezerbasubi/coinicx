@@ -1,7 +1,15 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
-const AuthenticatedContent = ({ children }: { children: React.ReactNode }) => {
+import { cn } from "@/lib/utils/cn";
+
+const AuthenticatedContent = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
 
@@ -10,7 +18,12 @@ const AuthenticatedContent = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="h-full min-h-20 flex items-center justify-center">
+    <div
+      className={cn(
+        "h-full min-h-20 flex items-center justify-center",
+        className,
+      )}
+    >
       <p className="text-sm">
         Please &nbsp;
         <span

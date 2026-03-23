@@ -5,6 +5,8 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -42,14 +44,19 @@ const PortfolioDrawer = ({ open, onOpenChange }: Props) => {
         <ArrowRight className="size-4" />
       </DrawerTrigger>
       <DrawerContent className="w-full! border-l-0! px-0 standalone:pt-safe-top overflow-y-auto overflow-x-hidden">
-        <div className="w-full sticky top-0 bg-primary-dark flex items-center justify-center gap-2 py-4 px-4">
-          <DrawerClose asChild>
-            <ArrowLeft className="size-5" />
-          </DrawerClose>
-          <h1 className="flex-1 text-center text-base text-white font-semibold">
-            Portfolio
-          </h1>
-        </div>
+        <DrawerHeader className="sticky top-0 z-10 bg-primary-dark gap-0 p-4">
+          <DrawerTitle className="w-full flex items-center justify-center gap-2">
+            <DrawerClose asChild>
+              <ArrowLeft className="size-5" />
+            </DrawerClose>
+            <p className="flex-1 text-center text-base text-white font-semibold">
+              Portfolio
+            </p>
+          </DrawerTitle>
+          <DrawerDescription className="sr-only">
+            Showing user's portfolio
+          </DrawerDescription>
+        </DrawerHeader>
         <div className="w-full space-y-2">
           <div className="w-full flex flex-col md:flex-row items-stretch gap-2 px-4">
             <PortfolioOverview />
