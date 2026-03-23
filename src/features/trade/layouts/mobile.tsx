@@ -12,6 +12,7 @@ import {
 } from "@/lib/store/trade/user-preferences";
 import { MobileViewTab, OrderType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
+import OfflineBanner from "@/components/common/OfflineBanner";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import SwapDrawer from "@/features/swap/components/SwapDrawer";
@@ -69,6 +70,12 @@ const TradingMobileLayout = () => {
               </Link>
             ))}
           </div>
+
+          <Visibility
+            visible={activeTab === "markets" || activeTab === "trade"}
+          >
+            <OfflineBanner />
+          </Visibility>
         </div>
       </Visibility>
       <div className="w-full bg-trade-dark flex flex-col gap-0.5 mb-20">

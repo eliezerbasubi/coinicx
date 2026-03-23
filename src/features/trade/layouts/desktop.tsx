@@ -4,10 +4,12 @@ import OrderForm from "../components/OrderForm/OrderForm";
 import TickerOverview from "../components/TickerOverview";
 import TradeUserInfo from "../components/TradeUserInfo";
 import UserAccountInfo from "../components/UserAccountInfo";
+import OfflineBanner from "@/components/common/OfflineBanner";
 
 const TradingDesktopLayout = () => {
   return (
     <div className="w-full">
+      <OfflineBanner />
       <div className="bg-trade-dark w-full flex gap-1 py-0.5 md:p-1 flex-wrap md:flex-nowrap">
         <div className="w-full space-y-1">
           <TickerOverview />

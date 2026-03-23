@@ -6,12 +6,14 @@ import OrderForm from "../components/OrderForm/OrderForm";
 import TickerOverview from "../components/TickerOverview";
 import TradeUserInfo from "../components/TradeUserInfo";
 import UserAccountInfo from "../components/UserAccountInfo";
+import OfflineBanner from "@/components/common/OfflineBanner";
 
 const TradingTabletLayout = () => {
   const isLargeTablet = useMediaQuery("(min-width: 1024px)");
 
   return (
     <div className="w-full">
+      <OfflineBanner />
       <div className="bg-trade-dark w-full py-0.5 md:p-1">
         <TickerOverview />
         <div className="w-full flex pt-1 gap-1">

@@ -1,5 +1,5 @@
-import React from "react";
 import { Star } from "lucide-react";
+import { useWebHaptics } from "web-haptics/react";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -12,6 +12,7 @@ type Props = {
 
 const FavoriteButton = ({ coin, className }: Props) => {
   const { favourites, toggleFavourite } = useFavoriteStore();
+  const haptic = useWebHaptics();
 
   const isFavourite = favourites.includes(coin);
 
@@ -28,6 +29,8 @@ const FavoriteButton = ({ coin, className }: Props) => {
       onClick={(e) => {
         e.stopPropagation();
         toggleFavourite(coin);
+
+        haptic.trigger("medium");
       }}
     />
   );
