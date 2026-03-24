@@ -57,7 +57,7 @@ const SlippageModal = (props: Props) => {
       collisionPadding={{ right: 8 }}
       className="w-full md:w-80 mt-4 rounded-t-2xl md:rounded-2xl"
     >
-      <div className="w-full p-4 md:p-0">
+      <div className="w-full mt-2 md:mt-0">
         <div className="w-full mb-3">
           <p className="text-sm font-semibold text-white">Slippage Tolerance</p>
           <p className="text-xs text-neutral-gray-400 font-medium mt-1">
@@ -118,7 +118,7 @@ const SlippageModal = (props: Props) => {
           <Button
             type="button"
             label="Done"
-            className="w-full rounded-2xl mt-3"
+            className="w-full mt-3"
             onClick={() => props.onOpenChange?.(false)}
           />
         )}

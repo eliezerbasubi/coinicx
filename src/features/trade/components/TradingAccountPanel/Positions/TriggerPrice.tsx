@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer, useState } from "react";
+import { useMemo, useReducer } from "react";
 
 import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
@@ -25,8 +25,9 @@ import {
 } from "@/features/trade/utils";
 
 type Props = {
+  open?: boolean;
   position: Position;
-  trigger: React.ReactNode;
+  onOpenChange?: (open: boolean) => void;
 };
 
 type GainMode = "roi" | "pnl";
@@ -43,13 +44,11 @@ type State = {
   currentTab: "full" | "partial";
 };
 
-const TriggerPrice = ({ position, trigger }: Props) => {
-  const [open, setOpen] = useState(false);
-
+const TriggerPrice = ({ position, open, onOpenChange }: Props) => {
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={onOpenChange}
       title={
         <div className="flex items-center gap-x-2">
           <span>Set Trigger Price ({position.base})</span>
@@ -67,12 +66,11 @@ const TriggerPrice = ({ position, trigger }: Props) => {
           />
         </div>
       }
-      trigger={trigger}
       className="gap-1"
     >
       <TriggerPriceContent
         position={position}
-        onSuccess={() => setOpen(false)}
+        onSuccess={() => onOpenChange?.(false)}
       />
     </AdaptiveDialog>
   );
@@ -101,11 +99,11 @@ const TriggerPriceContent = ({
       slPrice: "",
       tpGain: "",
       slGain: "",
-      tpGainMode: "roi" as GainMode,
-      slGainMode: "roi" as GainMode,
+      tpGainMode: "roi",
+      slGainMode: "roi",
       size: position.szi,
       sizePercentage: 100,
-      currentTab: "full" as const,
+      currentTab: "full",
     },
   );
 
@@ -304,11 +302,13 @@ const TriggerPriceContent = ({
           </p>
           <div className="grid grid-cols-2 gap-2">
             <InputNumberControl
+              name="tpPrice"
               label="TP Price"
               value={state.tpPrice}
               onValueChange={onTpPriceChange}
             />
             <InputNumberControl
+              name="tpGain"
               label="Gain"
               value={state.tpGain}
               onValueChange={onTpGainChange}
@@ -331,11 +331,13 @@ const TriggerPriceContent = ({
           </p>
           <div className="grid grid-cols-2 gap-2">
             <InputNumberControl
+              name="slPrice"
               label="SL Price"
               value={state.slPrice}
               onValueChange={onSlPriceChange}
             />
             <InputNumberControl
+              name="slLoss"
               label="Loss"
               value={state.slGain}
               onValueChange={onSlGainChange}

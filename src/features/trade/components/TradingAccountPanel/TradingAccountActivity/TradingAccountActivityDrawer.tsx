@@ -51,32 +51,22 @@ const TradingAccountActivityDrawer = ({ open, onOpenChange }: Props) => {
       <DrawerTrigger asChild onClick={() => haptic.trigger("selection")}>
         <History className="size-4.5 text-white" />
       </DrawerTrigger>
-      <DrawerContent className="w-full! border-l-0! px-0 standalone:pt-safe-top">
-        <div className="w-full overflow-y-auto">
+      <DrawerContent className="w-full! border-l-0! px-0 standalone:pt-safe-top pb-0">
+        <div className="w-full overflow-y-auto pb-safe-bottom">
           <div className="w-full sticky top-0 z-10 bg-primary-dark">
             <DrawerHeader className="p-0">
               <DrawerTitle className="flex items-center justify-center gap-2 pt-4 px-4">
-                {/* <div className="flex items-center justify-center gap-2 pt-4 px-4"> */}
                 <DrawerClose asChild>
                   <ArrowLeft className="size-5" />
                 </DrawerClose>
                 <p className="flex-1 text-center text-base text-white font-semibold">
                   Transaction History
                 </p>
-                {/* </div> */}
               </DrawerTitle>
               <DrawerDescription className="sr-only">
                 Showing user's transactions history
               </DrawerDescription>
             </DrawerHeader>
-            {/* <div className="flex items-center justify-center gap-2 pt-4 px-4">
-              <DrawerClose asChild>
-                <ArrowLeft className="size-5" />
-              </DrawerClose>
-              <h1 className="flex-1 text-center text-base text-white font-semibold">
-                Transaction History
-              </h1>
-            </div> */}
             <Tabs
               data-vaul-no-drag
               defaultValue={filterBy}

@@ -199,7 +199,7 @@ type BalanceCardProps = {
 
 const BalanceCard = ({ data }: BalanceCardProps) => {
   return (
-    <div className="flex gap-2 items-center py-1 px-4 last:pb-0">
+    <div className="flex gap-2 items-center py-1 px-2 last:pb-0">
       <div className="flex-1 flex items-center gap-4">
         <div className="size-9 relative">
           <TokenImage

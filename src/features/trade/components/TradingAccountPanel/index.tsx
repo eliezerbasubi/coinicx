@@ -110,7 +110,7 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
         <TabsList
           ref={containerRef}
           variant="line"
-          className="w-full px-4 shrink-0 space-x-0 md:space-x-4 justify-start scroll-smooth"
+          className="w-full px-2 md:px-4 shrink-0 space-x-0 md:space-x-4 justify-start scroll-smooth"
         >
           {TABS.map((tab) => {
             if (excludeTabs && excludeTabs.includes(tab.value)) return null;

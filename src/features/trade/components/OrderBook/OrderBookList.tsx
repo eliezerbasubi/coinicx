@@ -135,6 +135,10 @@ const OrderBookList = ({
       index: number;
       style: React.CSSProperties;
     }) => {
+      const hideTotal =
+        hideCumulativeTotal ||
+        (orientation === "horizontal" && layout === "orderBook");
+
       // Handle empty data
       if (!data?.length)
         return (
@@ -146,6 +150,7 @@ const OrderBookList = ({
             decimals={null}
             progress={50}
             style={style}
+            hideCumulativeTotal={hideTotal}
           />
         );
 
@@ -182,10 +187,7 @@ const OrderBookList = ({
             decimals={decimals}
             rounding={rounding}
             progress={progress >= 1 ? 1 : progress}
-            hideCumulativeTotal={
-              hideCumulativeTotal ||
-              (orientation === "horizontal" && layout === "orderBook")
-            }
+            hideCumulativeTotal={hideTotal}
             style={style}
             onMouseEnter={() => setHoverIndex(index)}
           />

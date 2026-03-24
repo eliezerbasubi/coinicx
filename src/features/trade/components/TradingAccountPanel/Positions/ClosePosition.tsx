@@ -19,8 +19,9 @@ import {
 } from "@/features/trade/utils";
 
 type Props = {
+  open?: boolean;
   position: Position;
-  trigger: React.ReactNode;
+  onOpenChange?: (open: boolean) => void;
 };
 
 type State = {
@@ -41,20 +42,17 @@ const getMidPrice = (midPx: string, pxDecimals: number) => {
   return roundToDecimals(mid, pxDecimals, "floor").toString();
 };
 
-const ClosePosition = ({ position, trigger }: Props) => {
-  const [open, setOpen] = useState(false);
-
+const ClosePosition = ({ position, open, onOpenChange }: Props) => {
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={onOpenChange}
       title={`Close Position (${position.coin})`}
-      trigger={trigger}
       className="gap-1"
     >
       <ClosePositionContent
         position={position}
-        onSuccess={() => setOpen(false)}
+        onSuccess={() => onOpenChange?.(false)}
       />
     </AdaptiveDialog>
   );

@@ -153,7 +153,7 @@ const Badge = ({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex-1 flex items-center justify-center gap-x-2 border border-neutral-gray-200 text-neutral-gray-400 rounded-md px-2 py-1",
+        "flex-1 flex items-center justify-center gap-x-2 border border-neutral-gray-200 text-neutral-gray-400 rounded-md px-px md:px-2 py-px md:py-1",
         { "border-primary/50 text-white": isSelected },
       )}
     >

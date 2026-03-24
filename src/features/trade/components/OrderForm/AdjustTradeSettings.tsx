@@ -40,7 +40,7 @@ const AdjustTradeSettings = () => {
       <Button
         variant="secondary"
         size="sm"
-        className="h-6 md:h-7 px-2 md:px-3 flex-1 text-white text-3xs md:text-xs"
+        className="h-6 md:h-7 px-2 md:px-3 flex-1 bg-neutral-gray-600 text-neutral-gray-400 text-3xs md:text-xs"
       >
         Classic
       </Button>

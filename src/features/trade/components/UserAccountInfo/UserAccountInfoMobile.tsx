@@ -46,7 +46,7 @@ const UserAccountInfoMobile = () => {
 
   return (
     <div className="w-full bg-primary-dark">
-      <div className="sticky top-0 z-10 standalone:pt-safe-top">
+      <div className="sticky top-0 z-10 standalone:pt-safe-top bg-primary-dark">
         <div className="w-full h-11 flex justify-between items-center px-4">
           <div className="flex items-center gap-x-3">
             {ACCOUNT_INFO_TABS.map((tab) => (

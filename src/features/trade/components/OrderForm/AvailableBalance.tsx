@@ -18,14 +18,17 @@ const AvailableBalance = () => {
 
   return (
     <div className="flex items-center justify-between">
-      <p className="text-xs text-neutral-gray-400">Available Balance</p>
+      <p className="text-3xs md:text-xs text-neutral-gray-400">Available</p>
 
       <button type="button" className="flex items-center gap-x-1 outline-0">
-        <p className="text-xs font-medium space-x-1">
+        <p className="text-3xs md:text-xs font-medium space-x-1">
           <span>
-            {(!availableBalance && "0.00") || formatNumber(availableBalance)}
+            {formatNumber(availableBalance, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+              symbol: !isPerps ? (isBuyOrder ? quote : base) : quote,
+            })}
           </span>
-          <span>{!isPerps ? (isBuyOrder ? quote : base) : quote}</span>
         </p>
         <PlusCircle
           className="size-3.5 text-primary"
