@@ -39,7 +39,9 @@ const Portfolio = () => {
         <PortfolioFees />
       </div>
 
-      <PortfolioUserInfo />
+      <div className="md:px-4">
+        <PortfolioUserInfo />
+      </div>
     </div>
   );
 };

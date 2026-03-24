@@ -18,7 +18,11 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Tag from "@/components/ui/tag";
 import { useSetTriggerPrice } from "@/features/trade/hooks/useSetTriggerPrice";
-import { formatPriceToDecimal, roundToDecimals } from "@/features/trade/utils";
+import {
+  formatPriceToDecimal,
+  formatSize,
+  roundToDecimals,
+} from "@/features/trade/utils";
 
 type Props = {
   position: Position;
@@ -230,9 +234,10 @@ const TriggerPriceContent = ({
 
   const onSizePercentageChange = (value: number) => {
     const newSize = positionSize * (value / 100);
+
     dispatch({
       sizePercentage: value,
-      size: newSize.toString(),
+      size: formatSize(newSize, position.szDecimals),
     });
   };
 
