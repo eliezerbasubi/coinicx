@@ -2,8 +2,9 @@ import { useMemo } from "react";
 
 import { hlSubClient } from "@/lib/services/transport";
 import { useSubscriptions } from "@/hooks/useSubscription";
+import { buildSpotAssetId } from "@/features/trade/utils";
 
-import { useShallowSwapStore } from "../store";
+import { useShallowSwapStore, useSwapStore } from "../store";
 import { isQuoteAsset } from "../utils/swap";
 import { useSwapSpotMetas } from "./useSwapTokens";
 
@@ -13,13 +14,10 @@ import { useSwapSpotMetas } from "./useSwapTokens";
  * For routed swaps (base→USDC→base), subscribes to two books.
  */
 export const useSwapOrderBook = () => {
-  const { sellToken, buyToken, applyBookUpdate } = useShallowSwapStore(
-    (s) => ({
-      sellToken: s.sellToken,
-      buyToken: s.buyToken,
-      applyBookUpdate: s.applyBookUpdate,
-    }),
-  );
+  const { sellToken, buyToken } = useShallowSwapStore((s) => ({
+    sellToken: s.sellToken,
+    buyToken: s.buyToken,
+  }));
 
   const { data: spotData } = useSwapSpotMetas();
 
@@ -44,7 +42,7 @@ export const useSwapOrderBook = () => {
 
       return {
         coin: universe.name,
-        assetId: 10000 + universe.index,
+        assetId: buildSpotAssetId(universe.index),
       };
     };
 
@@ -81,7 +79,7 @@ export const useSwapOrderBook = () => {
       const { coin, assetId } = pairInfo.sell;
       subs.push(() =>
         hlSubClient.l2Book({ coin, nSigFigs: null, mantissa: null }, (data) => {
-          applyBookUpdate("sell", {
+          useSwapStore.getState().applyBookUpdate("sell", {
             bids: data.levels[0],
             asks: data.levels[1],
             assetId,
@@ -94,7 +92,7 @@ export const useSwapOrderBook = () => {
       const { coin, assetId } = pairInfo.buy;
       subs.push(() =>
         hlSubClient.l2Book({ coin, nSigFigs: null, mantissa: null }, (data) => {
-          applyBookUpdate("buy", {
+          useSwapStore.getState().applyBookUpdate("buy", {
             bids: data.levels[0],
             asks: data.levels[1],
             assetId,
@@ -104,7 +102,7 @@ export const useSwapOrderBook = () => {
     }
 
     return subs;
-  }, [pairInfo, applyBookUpdate]);
+  }, [pairInfo]);
 
   useSubscriptions(subscribes, [subscribes]);
 

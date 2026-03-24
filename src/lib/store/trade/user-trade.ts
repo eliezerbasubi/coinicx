@@ -25,7 +25,17 @@ type TwapStates = {
   sliceFills: UserTwapSliceFillsWsEvent["twapSliceFills"];
 };
 
-interface UserTradeState {
+// User events that don't need any mutations inside the store
+type UserEventState = {
+  webData: WebData3WsEvent | null;
+  openOrders: OpenOrdersWsEvent["orders"];
+  historicalOrders: UserHistoricalOrdersWsEvent["orderHistory"];
+  fills: UserFillsWsEvent["fills"];
+  fundings: UserFundingsWsEvent["fundings"];
+  nonFundingLedger: UserNonFundingLedgerUpdatesWsEvent["nonFundingLedgerUpdates"];
+};
+
+type UserTradeState = {
   /** Max size in base asset. e.g. BTC for perps */
   maxBaseTradeSz: number;
   /** Max size in quote asset. e.g. BTC for perps */
@@ -36,18 +46,12 @@ interface UserTradeState {
   availableQuoteToTrade: number;
   leverage: ActiveAssetDataResponse["leverage"] | null;
   spotBalances: SpotBalance[];
-  openOrders: OpenOrdersWsEvent["orders"];
-  historicalOrders: UserHistoricalOrdersWsEvent["orderHistory"];
-  fills: UserFillsWsEvent["fills"];
-  fundings: UserFundingsWsEvent["fundings"];
-  nonFundingLedger: UserNonFundingLedgerUpdatesWsEvent["nonFundingLedgerUpdates"];
   twapStates: TwapStates;
-  webData: WebData3WsEvent | null;
   clearinghouseState: AllDexsClearinghouseState | null;
   allDexsClearinghouseState: AllDexsClearinghouseState | null;
-}
+} & UserEventState;
 
-interface UserTradeStoreActions {
+type UserTradeStoreActions = {
   updateLeverage: (
     leverage: Partial<Omit<ActiveAssetDataResponse["leverage"], "rawUsd">>,
   ) => void;
@@ -57,21 +61,16 @@ interface UserTradeStoreActions {
   }) => number;
   applyActiveAssetData: (data: ActiveAssetDataResponse) => void;
   applySpotState: (data: SpotStateWsEvent) => void;
-  applyWebData: (data: WebData3WsEvent) => void;
-  applyOpenOrders: (data: OpenOrdersWsEvent) => void;
   applyClearinghouseState: (data: AllDexsClearinghouseStateWsEvent) => void;
-  applyUserFills: (data: UserFillsWsEvent) => void;
-  applyTwapStates: (data: Partial<TwapStates>) => void;
-  applyUserHistoricalOrders: (data: UserHistoricalOrdersWsEvent) => void;
-  applyUserFundings: (data: UserFundingsWsEvent) => void;
-  applyUserNonFundingLedgerUpdates: (
-    data: UserNonFundingLedgerUpdatesWsEvent,
+  applyUserEventStates: (
+    data: Partial<UserEventState> & Partial<TwapStates>,
   ) => void;
-}
+  reset: () => void;
+};
 
 interface UserTradeStore extends UserTradeState, UserTradeStoreActions {}
 
-export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
+const initialState: UserTradeState = {
   maxBaseTradeSz: 0,
   maxQuoteTradeSz: 0,
   availableBaseToTrade: 0,
@@ -91,6 +90,10 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   },
   clearinghouseState: null,
   allDexsClearinghouseState: null,
+};
+
+export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
+  ...initialState,
   updateLeverage(leverage) {
     const { leverage: currentLeverage } = get();
 
@@ -155,38 +158,6 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       spotBalances: data.spotState.balances,
     });
   },
-  applyWebData(data) {
-    set({
-      webData: data,
-    });
-  },
-  applyOpenOrders(data) {
-    set({
-      openOrders: data.orders,
-    });
-  },
-  applyUserFills(data) {
-    set({
-      fills: data.fills,
-    });
-  },
-  applyTwapStates(data) {
-    const { twapStates } = get();
-
-    set({
-      twapStates: { ...twapStates, ...data },
-    });
-  },
-  applyUserHistoricalOrders(data) {
-    set({
-      historicalOrders: data.orderHistory,
-    });
-  },
-  applyUserFundings(data) {
-    set({
-      fundings: data.fundings,
-    });
-  },
   applyClearinghouseState(data) {
     const assetMeta = useInstrumentStore.getState().assetMeta;
 
@@ -207,9 +178,14 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       allDexsClearinghouseState,
     });
   },
-  applyUserNonFundingLedgerUpdates(data) {
-    set({ nonFundingLedger: data.nonFundingLedgerUpdates });
+  applyUserEventStates(data) {
+    set((state) => ({
+      ...state,
+      ...data,
+      twapStates: { ...state.twapStates, ...data },
+    }));
   },
+  reset: () => set(initialState),
 }));
 
 export const useShallowUserTradeStore = <T>(
@@ -252,9 +228,7 @@ export const useAvailableToTrade = (isBuyOrder: boolean, isSpot: boolean) => {
  * @param data Array of clearinghouse states from all DEXs.
  * @returns Aggregated clearinghouse state.
  */
-export const aggregateClearinghouseStates = (
-  data: AllDexsClearinghouseState[],
-) => {
+const aggregateClearinghouseStates = (data: AllDexsClearinghouseState[]) => {
   const initialClearinghouseState: AllDexsClearinghouseState = {
     assetPositions: [],
     crossMaintenanceMarginUsed: "0.0",
