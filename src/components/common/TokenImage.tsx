@@ -35,7 +35,7 @@ const TokenImage = ({ name, coin, className, instrumentType }: Props) => {
         />
       )) || (
         <div className="bg-primary text-primary-dark size-full grid place-content-center font-semibold">
-          <span>{tokenName.charAt(0)}</span>
+          <span>{name.charAt(0)}</span>
         </div>
       )}
     </div>

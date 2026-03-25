@@ -224,47 +224,36 @@ const BalanceCard = ({ data }: BalanceCardProps) => {
               </span>
             )}
           </p>
-          <div className="flex gap-x-1 text-xs text-neutral-gray-400 font-medium mt-1">
-            <p>
+          <div className="flex gap-x-1 text-xs font-medium">
+            <p className="text-neutral-gray-400">
               {formatNumber(Number(data.totalBalance), {
                 minimumFractionDigits: 2,
                 roundingMode: "trunc",
+                symbol: data.coin,
               })}
-              <span className="ml-1">
-                <span className="mr-1">≈</span>
-                {formatNumber(data.usdValue, {
-                  minimumFractionDigits: 2,
-                  style: "currency",
-                })}
-              </span>
             </p>
-            <Tag
-              value={formatNumber(data.returnOnEquity, {
-                style: "percent",
-                useSign: true,
-                minimumFractionDigits: 2,
-              })}
-              className={cn("text-buy bg-buy/10", {
-                "text-sell bg-sell/10": data.returnOnEquity < 0,
-              })}
-            />
           </div>
         </div>
       </div>
-
-      <Visibility visible={data.coin === "USDC"}>
-        <div className="flex-1 text-right">
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-6 w-fit font-medium text-xs md:text-[13px] rounded-md px-3 text-white"
-            label="Transfer"
-            onClick={() =>
-              useAccountTransactStore.getState().openAccountTransact("transfer")
-            }
-          />
-        </div>
-      </Visibility>
+      <div className="flex-1 text-right">
+        <p className="text-sm font-medium">
+          {formatNumber(data.usdValue, {
+            minimumFractionDigits: 2,
+            style: "currency",
+          })}
+        </p>
+        <p
+          className={cn("text-neutral-gray-400 text-xs font-medium", {
+            "text-buy": data.unrealizedPnl > 0,
+            "text-sell": data.unrealizedPnl < 0,
+          })}
+        >
+          {formatNumber(data.unrealizedPnl, {
+            style: "currency",
+            useSign: data.unrealizedPnl !== 0,
+          })}
+        </p>
+      </div>
     </div>
   );
 };

@@ -19,6 +19,7 @@ const AssetSymbolTile = ({ asset }: Props) => {
       <FavoriteButton coin={asset.coin} />
       <Visibility visible={isMobile}>
         <TokenImage
+          key={asset.coin}
           name={asset.base}
           coin={asset.coin}
           instrumentType={asset.isSpot ? "spot" : "perps"}
