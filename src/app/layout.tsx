@@ -146,7 +146,7 @@ export default function RootLayout({
             theme="dark"
             position="top-center"
             duration={3000}
-            className="font-sans text-sm m-0 items-center rounded-lg px-2 py-0 font-semibold"
+            className="font-sans text-sm m-0 standalone:[&[data-sonner-toaster][data-y-position=top]]:top-safe-top! items-center rounded-lg px-2 py-0 font-semibold"
           />
           <Providers>
             <Header />
