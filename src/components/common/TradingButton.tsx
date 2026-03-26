@@ -26,7 +26,7 @@ const TradingButton = (props: Props) => {
   return (
     <ConnectButton
       {...props}
-      disabled={processing || props.disabled}
+      disabled={processing || (props.disabled && !shouldEnableTrading)}
       loading={processing || props.loading}
       label={label}
       onClick={onClick}

@@ -56,7 +56,7 @@ const TradingMobileLayout = () => {
             <SwapDrawer
               trigger={
                 <div className="text-neutral-gray-400 font-semibold">
-                  <p className="text-xs font-medium">Convert</p>
+                  <p>Convert</p>
                 </div>
               }
             />
