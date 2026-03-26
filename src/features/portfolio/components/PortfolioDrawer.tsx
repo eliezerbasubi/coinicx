@@ -38,7 +38,6 @@ type Props = {
 const PortfolioDrawer = ({ open, onOpenChange }: Props) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerTitle className="sr-only">Portfolio</DrawerTitle>
       <DrawerTrigger className="w-full flex items-center justify-center gap-2 border border-neutral-gray-200 rounded-lg text-neutral-gray-400 px-1 py-1.5">
         <p className="text-xs font-medium">View portfolio</p>
         <ArrowRight className="size-4" />

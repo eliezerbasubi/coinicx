@@ -1,5 +1,4 @@
 import { Activity, useRef, useState } from "react";
-import Link from "next/link";
 import { CandlestickChart, RefreshCcwDot, User } from "lucide-react";
 import { useWebHaptics } from "web-haptics/react";
 
@@ -16,34 +15,37 @@ import OfflineBanner from "@/components/common/OfflineBanner";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import SwapDrawer from "@/features/swap/components/SwapDrawer";
-
-import MarketArea from "../components/MarketArea";
-import OrderBookCompare from "../components/OrderBook/OrderBookCompare";
-import { OrderBookSelector } from "../components/OrderBook/OrderBookSelector";
-import OrderBookTable from "../components/OrderBook/OrderBookTable";
-import OrderForm from "../components/OrderForm/OrderForm";
-import TickerOverview from "../components/TickerOverview";
-import TradeUserInfo from "../components/TradeUserInfo";
-import UserAccountInfoMobile from "../components/UserAccountInfo/UserAccountInfoMobile";
-import { DEFAULT_PERPS_ASSETS, DEFAULT_SPOT_ASSETS } from "../constants";
+import MarketArea from "@/features/trade/components/MarketArea";
+import OrderBookCompare from "@/features/trade/components/OrderBook/OrderBookCompare";
+import { OrderBookSelector } from "@/features/trade/components/OrderBook/OrderBookSelector";
+import OrderBookTable from "@/features/trade/components/OrderBook/OrderBookTable";
+import OrderForm from "@/features/trade/components/OrderForm/OrderForm";
+import TickerOverview from "@/features/trade/components/TickerOverview";
+import TradeUserInfo from "@/features/trade/components/TradeUserInfo";
+import UserAccountInfoMobile from "@/features/trade/components/UserAccountInfo/UserAccountInfoMobile";
+import {
+  DEFAULT_PERPS_ASSETS,
+  DEFAULT_SPOT_ASSETS,
+} from "@/features/trade/constants";
+import { useSelectToken } from "@/features/trade/hooks/useSelectToken";
 
 const TRADING_TABS = [
-  { label: "Convert", value: "swap", href: ROUTES.swap.index },
+  // { label: "Convert", value: "swap", href: ROUTES.swap.index },
   {
     label: "Spot",
     value: "spot",
-    href: `${ROUTES.trade.spot}/${DEFAULT_SPOT_ASSETS.base}/${DEFAULT_SPOT_ASSETS.quote}`,
   },
   {
     label: "Perps",
     value: "perps",
-    href: `${ROUTES.trade.perps}/${DEFAULT_PERPS_ASSETS.base}`,
   },
-];
+] as const;
 
 const TradingMobileLayout = () => {
   const activeTab = useShallowPreferencesStore((s) => s.mobileViewTab);
   const instrumentType = useTradeContext((s) => s.instrumentType);
+
+  const { selectTokenFromData } = useSelectToken();
 
   const [isSwapOpen, setIsSwapOpen] = useState(false);
 
@@ -52,22 +54,34 @@ const TradingMobileLayout = () => {
       <Visibility visible={activeTab !== "account"}>
         <div className="sticky top-0 z-10 bg-primary-dark standalone:pt-safe-top">
           <div className="w-full h-11 flex items-center px-4 md:px-6 gap-x-3 md:gap-x-6">
+            <SwapDrawer
+              trigger={
+                <div className="text-neutral-gray-400 font-semibold">
+                  <p className="text-xs font-medium">Convert</p>
+                </div>
+              }
+            />
             {TRADING_TABS.map((tab) => (
-              <Link
+              <div
                 key={tab.value}
-                href={tab.href}
                 className={cn("text-neutral-gray-400 font-semibold", {
                   "text-white": instrumentType === tab.value,
                 })}
-                onClick={(e) => {
-                  if (tab.value === "swap") {
-                    e.preventDefault();
-                    setIsSwapOpen(true);
-                  }
+                onClick={() => {
+                  const isSpot = tab.value === "spot";
+                  const defaultAsset = isSpot
+                    ? DEFAULT_SPOT_ASSETS
+                    : DEFAULT_PERPS_ASSETS;
+
+                  selectTokenFromData({
+                    baseAsset: defaultAsset.base,
+                    quoteAsset: defaultAsset.quote,
+                    instrumentType: tab.value,
+                  });
                 }}
               >
                 {tab.label}
-              </Link>
+              </div>
             ))}
           </div>
 

@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { InstrumentType } from "@/lib/types/trade";
 import { getPriceDecimals } from "@/features/trade/utils";
 
+import { useInstrumentStore } from "./instrument";
 import { useOrderFormStore } from "./order-form";
 import { useOrderBookStore } from "./orderbook";
 
@@ -22,8 +23,16 @@ export interface TradeStoreState extends TradeStoreProps {
     quote: string;
     coin: string;
     instrumentType: InstrumentType;
+    /** Price of the asset (midPx or markPx) to build price decimals and orderbook ticks */
     price: number;
+    /** Decimals of the asset */
     szDecimals: number;
+    /** Dex of the asset */
+    dex?: string | null;
+    /** Perp dex index of the asset */
+    perpDexIndex?: number;
+    /** Index of the asset */
+    assetIndex?: number;
   }) => void;
   setDecimals: (decimals: number) => void;
 }
@@ -43,7 +52,18 @@ export const createTradeStore = (initialProps: TradeStoreProps) => {
         .getState()
         .setTicks(data.price, data.szDecimals, isSpot);
 
-      const pxDecimals = getPriceDecimals(data.price, data.szDecimals, isSpot);
+      // Calculate price decimals
+      const pxDecimals = data.price
+        ? getPriceDecimals(data.price, data.szDecimals, isSpot)
+        : null;
+
+      // Update asset meta and context
+      useInstrumentStore.getState().setTokenMetaAndAssetCtx({
+        dex: data.dex ?? "",
+        perpDexIndex: data.perpDexIndex ?? 0,
+        assetIndex: data.assetIndex ?? 0,
+        isSpot,
+      });
 
       set({
         decimals: pxDecimals,

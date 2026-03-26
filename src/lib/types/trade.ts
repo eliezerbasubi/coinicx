@@ -102,6 +102,7 @@ export type Asset = {
   isSpot: boolean;
   dex?: string | null;
   perpDexIndex?: number;
+  /** Position of the asset in the universe array for spot and universe for perps */
   index: number;
   symbol: string;
   coin: string;

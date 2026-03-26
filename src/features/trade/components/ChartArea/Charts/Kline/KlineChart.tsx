@@ -5,7 +5,6 @@ import { Chart, dispose, init, KLineData } from "klinecharts";
 import { hlInfoClient, hlSubClient } from "@/lib/services/transport";
 import { useChartSettingsStore } from "@/lib/store/trade/chart-settings";
 import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
 import { getChartTimeRange } from "@/features/trade/utils";
@@ -30,8 +29,10 @@ const KlineChart = () => {
   const volIndicatorWrapperRef = useRef<HTMLDivElement>(null);
   const candleTooltipRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
-  const coin = useInstrumentStore((s) => s.assetMeta?.coin);
-  const decimals = useTradeContext((s) => s.decimals);
+  const { decimals, coin } = useTradeContext((s) => ({
+    decimals: s.decimals,
+    coin: s.coin,
+  }));
 
   const handleCandleTooltip = useCallback((klineData: KLineData) => {
     if (!klineData) return;
@@ -105,35 +106,6 @@ const KlineChart = () => {
         },
         { type: "indicator", content: ["VOL"] },
         { type: "xAxis", options: { order: 9 } },
-        // { type: "xAxis", options: { order: 9 } },
-        // { type: "indicator", content: ["VOL"] },
-        // ...(indicatorsLayout.map((layout) => {
-        //   if (layout.type === "CANDLE") {
-        //     return {
-        //       type: "candle",
-        //       content: layout.indicators.map((indicator) => ({
-        //         name: indicator.name,
-        //         shortName: indicator.name,
-        //         visible: indicator.showSeries,
-        //         series: "price",
-        //         precision: 2,
-        //         calcParams: indicator.params,
-        //         figures: indicator.params.map((param, index) => ({
-        //           type: "line",
-        //           title: `${indicator.name}(${param.period})`,
-        //           key: `${indicator.name}[${index}]`,
-        //           styles: () => ({
-        //             color: param.color,
-        //             size: param.lineWidth,
-        //           }),
-        //         })),
-        //         calc: getIndicatorCalc,
-        //       })),
-        //       options: { order: Number.MIN_SAFE_INTEGER },
-        //     };
-        //   }
-        //   return { type: "indicator", content: ["VOL"] };
-        // }) as LayoutChild[]),
       ],
       styles: kLineStyles,
     });

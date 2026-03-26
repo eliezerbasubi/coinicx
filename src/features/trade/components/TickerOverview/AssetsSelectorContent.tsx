@@ -1,13 +1,12 @@
 import { useMemo, useReducer } from "react";
 import { Search } from "lucide-react";
 
-import { ROUTES } from "@/lib/constants/routes";
 import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import { Asset } from "@/lib/types/trade";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { DataTable } from "@/components/ui/datatable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSelectToken } from "@/features/trade/hooks/useSelectToken";
 
 import { ASSETS_SELECTOR_COLUMNS } from "./Columns";
 import { useFavoriteStore } from "./store";
@@ -34,11 +33,8 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
   const assets = useTickerSelector();
   const { favourites } = useFavoriteStore();
 
-  const { instrumentType, onAssetChange } = useTradeContext((s) => ({
-    instrumentType: s.instrumentType,
-    decimals: s.decimals,
-    onAssetChange: s.onAssetChange,
-  }));
+  const instrumentType = useTradeContext((s) => s.instrumentType);
+  const { selectTokenFromAssetInfo } = useSelectToken();
 
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
@@ -80,45 +76,9 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
   }, [state.search, assetsByTab]);
 
   const onAssetSelected = (asset: Asset) => {
-    const {
-      isSpot,
-      base,
-      quote,
-      coin,
-      index,
-      perpDexIndex,
-      dex,
-      midPx,
-      markPx,
-      szDecimals,
-    } = asset;
-
-    const newPath = isSpot
-      ? [ROUTES.trade.spot, base, quote]
-      : [ROUTES.trade.perps, coin];
-
-    const price = midPx ?? markPx;
-
-    onAssetChange({
-      base,
-      quote,
-      coin,
-      instrumentType: isSpot ? "spot" : "perps",
-      price,
-      szDecimals,
-    });
-
-    // Update asset meta and context
-    useInstrumentStore.getState().setTokenMetaAndAssetCtx({
-      dex: dex ?? "",
-      perpDexIndex: perpDexIndex ?? 0,
-      assetIndex: index,
-      isSpot,
-    });
+    selectTokenFromAssetInfo(asset);
 
     onSelect?.();
-
-    window.history.replaceState({}, "", newPath.join("/"));
   };
 
   return (

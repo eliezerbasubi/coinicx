@@ -7,6 +7,7 @@ import {
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from "@/components/ui/drawer";
 
 import SettingsTrigger from "./SettingsTrigger";
@@ -14,12 +15,14 @@ import SwapForm from "./SwapForm";
 
 type Props = {
   open?: boolean;
+  trigger?: React.ReactNode;
   onOpenChange?: (open: boolean) => void;
 };
 
-const SwapDrawer = ({ open, onOpenChange }: Props) => {
+const SwapDrawer = ({ open, trigger, onOpenChange }: Props) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
+      <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent className="w-full! border-l-0! px-0 pt-4 standalone:pt-safe-top">
         <div
           id="swap-container"

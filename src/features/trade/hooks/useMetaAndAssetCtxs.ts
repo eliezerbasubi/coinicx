@@ -62,7 +62,7 @@ export const useMetaAndAssetCtxs = () => {
       instrumentType: InstrumentType,
       baseAsset: string,
       quoteAsset: string,
-    ): AssetMeta | undefined => {
+    ): (AssetMeta & { universeIndex?: number }) | undefined => {
       if (instrumentType === "spot") {
         if (
           !baseAsset ||
@@ -87,11 +87,16 @@ export const useMetaAndAssetCtxs = () => {
 
         if (!baseTokenMeta || !quoteTokenMeta) return;
 
-        return mapSpotDataToAssetMeta(
+        const meta = mapSpotDataToAssetMeta(
           universe,
           baseTokenMeta,
           quoteTokenMeta.name,
         );
+
+        return {
+          ...meta,
+          universeIndex,
+        };
       }
 
       // Handle perps meta
