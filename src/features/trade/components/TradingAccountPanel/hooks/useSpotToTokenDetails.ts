@@ -19,7 +19,7 @@ export const useSpotToTokenDetails = () => {
         const base = spotMeta.tokens[spotInfo.baseToken].name;
 
         return {
-          href: `${ROUTES.trade.perps}/${base}/${quote}`,
+          href: `${ROUTES.trade.spot}/${base}/${quote}`,
           quote,
           base,
           coin,

@@ -1,4 +1,5 @@
 import { Activity, useRef, useState } from "react";
+import Link from "next/link";
 import { CandlestickChart, RefreshCcwDot, User } from "lucide-react";
 import { useWebHaptics } from "web-haptics/react";
 
@@ -27,25 +28,23 @@ import {
   DEFAULT_PERPS_ASSETS,
   DEFAULT_SPOT_ASSETS,
 } from "@/features/trade/constants";
-import { useSelectToken } from "@/features/trade/hooks/useSelectToken";
 
 const TRADING_TABS = [
-  // { label: "Convert", value: "swap", href: ROUTES.swap.index },
   {
     label: "Spot",
     value: "spot",
+    href: `${ROUTES.trade.spot}/${DEFAULT_SPOT_ASSETS.base}/${DEFAULT_SPOT_ASSETS.quote}`,
   },
   {
     label: "Perps",
     value: "perps",
+    href: `${ROUTES.trade.perps}/${DEFAULT_PERPS_ASSETS.base}`,
   },
 ] as const;
 
 const TradingMobileLayout = () => {
   const activeTab = useShallowPreferencesStore((s) => s.mobileViewTab);
   const instrumentType = useTradeContext((s) => s.instrumentType);
-
-  const { selectTokenFromData } = useSelectToken();
 
   const [isSwapOpen, setIsSwapOpen] = useState(false);
 
@@ -62,26 +61,16 @@ const TradingMobileLayout = () => {
               }
             />
             {TRADING_TABS.map((tab) => (
-              <div
+              <Link
+                prefetch
+                href={tab.href}
                 key={tab.value}
                 className={cn("text-neutral-gray-400 font-semibold", {
                   "text-white": instrumentType === tab.value,
                 })}
-                onClick={() => {
-                  const isSpot = tab.value === "spot";
-                  const defaultAsset = isSpot
-                    ? DEFAULT_SPOT_ASSETS
-                    : DEFAULT_PERPS_ASSETS;
-
-                  selectTokenFromData({
-                    baseAsset: defaultAsset.base,
-                    quoteAsset: defaultAsset.quote,
-                    instrumentType: tab.value,
-                  });
-                }}
               >
                 {tab.label}
-              </div>
+              </Link>
             ))}
           </div>
 

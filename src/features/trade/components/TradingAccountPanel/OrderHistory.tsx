@@ -251,14 +251,8 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
               className="size-4"
               instrumentType={data.dex === null ? "spot" : "perps"}
             />
-            <Link
-              href={data.href}
-              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
-            >
-              {data.symbol}
-            </Link>
+            <CoinLink symbol={data.symbol} dex={data.dex} href={data.href} />
           </div>
-          {data.dex && <Tag value={data.dex} />}
           <Tag
             value={data.direction}
             className={cn("text-buy bg-buy/10", {
