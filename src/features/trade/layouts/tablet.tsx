@@ -1,12 +1,13 @@
 import { useMediaQuery } from "usehooks-ts";
 
+import OfflineBanner from "@/components/common/OfflineBanner";
+
 import MarketArea from "../components/MarketArea";
 import OrderBook from "../components/OrderBook";
 import OrderForm from "../components/OrderForm/OrderForm";
 import TickerOverview from "../components/TickerOverview";
 import TradeUserInfo from "../components/TradeUserInfo";
 import UserAccountInfo from "../components/UserAccountInfo";
-import OfflineBanner from "@/components/common/OfflineBanner";
 
 const TradingTabletLayout = () => {
   const isLargeTablet = useMediaQuery("(min-width: 1024px)");
@@ -17,7 +18,7 @@ const TradingTabletLayout = () => {
       <div className="bg-trade-dark w-full py-0.5 md:p-1">
         <TickerOverview />
         <div className="w-full flex pt-1 gap-1">
-          <div className="flex-1 flex flex-col lg:flex-row-reverse gap-1">
+          <div className="flex-1 flex flex-col lg:flex-row-reverse gap-1 overflow-hidden">
             <MarketArea
               excludeTabs={["orderbook"]}
               className="flex-1 min-h-96 lg:min-h-auto"
