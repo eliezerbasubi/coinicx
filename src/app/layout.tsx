@@ -21,9 +21,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.APP_BASE_URL ?? "https://coinicx.vercel.app",
-  ),
+  metadataBase: new URL(process.env.APP_BASE_URL ?? "https://coinicx.xyz"),
   title: { template: `%s | ${APP_NAME}`, default: "Buy | Sell | Swap" },
   manifest: "/manifest.json",
   description:

@@ -155,8 +155,8 @@ const TradeTabView = () => {
   const visibleRows = getVisibleRows({ orderType, showTpSl, isSpot });
 
   return (
-    <div className="w-full bg-primary-dark grid grid-cols-[auto_1fr] pb-4">
-      <div className="size-full max-w-45 flex flex-col bg-primary-dark rounded-md">
+    <div className="w-full bg-primary-dark grid grid-cols-[auto_1fr] sm:grid-cols-2 pb-4">
+      <div className="size-full max-w-45 sm:max-w-full flex flex-col bg-primary-dark rounded-md">
         <OrderBookTable
           hideAvgPriceTooltip
           hideCumulativeTotal

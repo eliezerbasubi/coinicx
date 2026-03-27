@@ -68,6 +68,15 @@ const OrderFormType = () => {
     useOrderFormStore.getState().setSettings({ orderType: type });
   };
 
+  const onTriggerClick = () => {
+    setOpen(true);
+
+    // Preselect the unfeatured order type before the tooltip opens
+    if (!isMobile) {
+      onTypeChange(unfeaturedType);
+    }
+  };
+
   useEffect(() => {
     if (currentOrderType.perpsOnly && !isPerps) {
       onTypeChange(SUPPORTED_ORDER_TYPES.scale.value);
@@ -103,8 +112,7 @@ const OrderFormType = () => {
               "w-full md:w-fit py-1 sm:py-2 px-2 md:px-0 flex items-center gap-x-1 justify-between md:justify-start text-3xs md:text-xs font-semibold bg-neutral-gray-200 md:bg-transparent text-neutral-gray-400 rounded-md md:rounded-none cursor-pointer",
               { "text-white": isUnfeatured || isMobile },
             )}
-            // Preselect the unfeatured the order type when the tooltip opens
-            onClick={() => (!isMobile ? onTypeChange(unfeaturedType) : null)}
+            onClick={onTriggerClick}
           >
             <p>{selectedOrderTypeLabel}</p>
             <ChevronDown
