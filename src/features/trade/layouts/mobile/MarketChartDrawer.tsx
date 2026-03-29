@@ -16,8 +16,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import AssetsSelector from "@/features/trade/components/AssetsSelector";
+import FavoriteButton from "@/features/trade/components/FavoriteButton";
 import MarketArea from "@/features/trade/components/MarketArea";
-import FavoriteButton from "@/features/trade/components/TickerOverview/FavoriteButton";
 import TickerContexts from "@/features/trade/components/TickerOverview/TickerContexts";
 import TickerPrice from "@/features/trade/components/TickerOverview/TickerPrice";
 import { ORDER_FORM_SIDES } from "@/features/trade/constants";

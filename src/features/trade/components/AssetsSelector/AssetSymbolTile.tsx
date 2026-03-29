@@ -5,7 +5,7 @@ import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import Tag from "@/components/ui/tag";
 
-import FavoriteButton from "../TickerOverview/FavoriteButton";
+import FavoriteButton from "../FavoriteButton";
 
 type Props = {
   asset: Asset;

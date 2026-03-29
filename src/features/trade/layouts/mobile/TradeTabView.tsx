@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils/cn";
 import OfflineBanner from "@/components/common/OfflineBanner";
 import SwapDrawer from "@/features/swap/components/SwapDrawer";
 import AssetsSelector from "@/features/trade/components/AssetsSelector";
+import FavoriteButton from "@/features/trade/components/FavoriteButton";
 import OrderBookCompare from "@/features/trade/components/OrderBook/OrderBookCompare";
 import { OrderBookSelector } from "@/features/trade/components/OrderBook/OrderBookSelector";
 import OrderBookTable from "@/features/trade/components/OrderBook/OrderBookTable";
 import OrderForm from "@/features/trade/components/OrderForm/OrderForm";
-import FavoriteButton from "@/features/trade/components/TickerOverview/FavoriteButton";
 import TradeUserInfo from "@/features/trade/components/TradeUserInfo";
 import {
   DEFAULT_PERPS_ASSETS,

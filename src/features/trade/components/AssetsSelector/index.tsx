@@ -1,4 +1,4 @@
-import { Activity, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { useTradeContext } from "@/lib/store/trade/hooks";
@@ -12,7 +12,6 @@ import AdaptivePopover from "@/components/ui/adaptive-popover";
 import Tag from "@/components/ui/tag";
 import { formatSymbol } from "@/features/trade/utils";
 
-import TickerSelectorProvider from "../TickerOverview/TickerSelectorProvider";
 import AssetsSelectorContent from "./AssetsSelectorContent";
 
 type Props = {
@@ -101,19 +100,15 @@ const AssetsSelector = ({
         </div>
       </div>
 
-      <Activity mode={open ? "visible" : "hidden"}>
-        <TickerSelectorProvider>
-          <AdaptivePopover
-            open={open}
-            triggerRef={triggerRef}
-            collisionPadding={4}
-            onOpenChange={setOpen}
-            className="w-full h-full lg:w-3xl p-0 md:pt-4 md:px-4 pb-0 md:mt-4"
-          >
-            <AssetsSelectorContent onSelect={() => setOpen(false)} />
-          </AdaptivePopover>
-        </TickerSelectorProvider>
-      </Activity>
+      <AdaptivePopover
+        open={open}
+        triggerRef={triggerRef}
+        collisionPadding={4}
+        onOpenChange={setOpen}
+        className="w-full h-full lg:w-3xl p-0 md:pt-4 md:px-4 pb-0 md:mt-4"
+      >
+        <AssetsSelectorContent onSelect={() => setOpen(false)} />
+      </AdaptivePopover>
     </div>
   );
 };
