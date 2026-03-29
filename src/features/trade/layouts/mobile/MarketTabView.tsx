@@ -1,4 +1,11 @@
-import { Activity, useMemo, useReducer, useState } from "react";
+import {
+  Activity,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { ChevronRight, Search } from "lucide-react";
 import { useWebHaptics } from "web-haptics/react";
 
@@ -113,6 +120,8 @@ const SearchOverlay = ({ onOpenChange }: SearchOverlayProps) => {
   const [search, setSearch] = useState("");
   const assets = useAssetsAndContexts();
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const { selectTokenFromAssetInfo } = useSelectToken();
 
   const data = useMemo(() => {
@@ -145,12 +154,17 @@ const SearchOverlay = ({ onOpenChange }: SearchOverlayProps) => {
     usePreferencesStore.getState().dispatch({ mobileViewTab: "trade" });
   };
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <div className="fixed inset-0 z-20 bg-primary-dark overflow-y-auto">
       <div className="w-full flex items-center gap-4 px-3 pt-4 standalone:pt-safe-top sticky top-0 z-10 bg-primary-dark">
-        <div className="w-full flex items-center h-8 px-2 rounded-lg border border-neutral-gray-200 hover:border-primary">
+        <div className="w-full flex items-center h-8 px-2 rounded-lg border border-neutral-gray-200 hover:border-primary focus-within:border-primary">
           <Search className="text-gray-600 size-4" />
           <input
+            ref={inputRef}
             type="search"
             name="search"
             id="search"
@@ -268,6 +282,7 @@ const TrendingListView = ({
               <TokenImage
                 key={asset.base + asset.coin + asset.index}
                 name={asset.base}
+                coin={asset.coin}
                 instrumentType={asset.isSpot ? "spot" : "perps"}
               />
               <div className="flex-1 flex items-center justify-between">
