@@ -1,8 +1,8 @@
 import { useMemo, useReducer } from "react";
 import { toast } from "sonner";
-import { useWebHaptics } from "web-haptics/react";
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
+import { useWebHaptics } from "web-haptics/react";
 
 import { ERROR_NAME } from "@/lib/constants/errors";
 import { hlExchangeClient, hlInfoClient } from "@/lib/services/transport";
@@ -11,7 +11,7 @@ import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { isValidAddress } from "@/lib/utils/isValidAddress";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 import {
   ALL_NETWORKS_AND_ASSETS,
   useGenerateUnitAddress,
@@ -34,7 +34,7 @@ export const useWithdraw = () => {
   const haptic = useWebHaptics();
   const { getUnitFee } = useUnitFees();
   const { generateUnitAddress } = useGenerateUnitAddress();
-  const { tokensToSpotId } = useMetaAndAssetCtxs();
+  const { tokensToSpotId } = useAssetMetas();
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
 
   const [state, dispatch] = useReducer(

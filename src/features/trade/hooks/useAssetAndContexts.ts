@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { Asset } from "@/lib/types/trade";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 import {
   formatSymbol,
   parseBuilderDeployedAsset,
@@ -10,7 +10,7 @@ import {
 } from "@/features/trade/utils";
 
 export const useAssetsAndContexts = () => {
-  const { spotMeta, perpMetas } = useMetaAndAssetCtxs();
+  const { spotMeta, perpMetas } = useAssetMetas();
 
   const { spotAssetCtxs, allDexsAssetCtxs } = useShallowInstrumentStore(
     (s) => ({

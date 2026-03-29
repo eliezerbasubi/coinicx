@@ -1,14 +1,14 @@
 import { useCallback } from "react";
 
 import { ROUTES } from "@/lib/constants/routes";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 import {
   formatSymbol,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
 
 export const useSpotToTokenDetails = () => {
-  const { spotMeta, spotNamesToTokens } = useMetaAndAssetCtxs();
+  const { spotMeta, spotNamesToTokens } = useAssetMetas();
 
   const mapSpotNameToTokenDetails = useCallback(
     (coin: string) => {

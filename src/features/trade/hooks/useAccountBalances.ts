@@ -4,10 +4,10 @@ import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 
 import { getTokenDisplayName } from "../utils/getTokenDisplayName";
-import { useMetaAndAssetCtxs } from "./useMetaAndAssetCtxs";
+import { useAssetMetas } from "./useAssetMetas";
 
 export const useAccountBalances = () => {
-  const { tokensToSpotId } = useMetaAndAssetCtxs();
+  const { tokensToSpotId } = useAssetMetas();
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
   const { spotBalances: accountSpotBalances, allDexsClearinghouseState } =
     useShallowUserTradeStore((s) => ({

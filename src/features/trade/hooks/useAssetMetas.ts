@@ -11,7 +11,7 @@ import {
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
 
-export const useMetaAndAssetCtxs = () => {
+export const useAssetMetas = () => {
   const { data, error, loading } = useQueries({
     combine(result) {
       return {

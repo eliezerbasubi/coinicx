@@ -14,7 +14,7 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 
 import { usePortfolioMetrics } from "../hooks/usePortfolioMetrics";
 
@@ -37,7 +37,7 @@ const PortfolioOverview = () => {
     }),
   );
 
-  const { tokensToSpotId } = useMetaAndAssetCtxs();
+  const { tokensToSpotId } = useAssetMetas();
   const spotAssetCtxsStore = useShallowInstrumentStore((s) => s.spotAssetCtxs);
 
   const spotBalanceInfo = useMemo(() => {
