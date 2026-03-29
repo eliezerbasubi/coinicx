@@ -35,6 +35,7 @@ interface DataTableProps<TData, TValue> extends Omit<
   state?: Partial<TableState>;
   initialState?: Partial<TableState>;
   tableClassName?: string;
+  headerClassName?: string;
   globalFilterFn?: FilterFnOption<TData>;
   showPagination?: boolean;
   meta?: TableMeta<TData>;

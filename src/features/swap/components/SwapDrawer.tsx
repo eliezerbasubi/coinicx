@@ -23,7 +23,7 @@ const SwapDrawer = ({ open, trigger, onOpenChange }: Props) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent className="w-full! border-l-0! px-0 pt-4 standalone:pt-safe-top">
+      <DrawerContent className="px-0 pt-4 standalone:pt-safe-top">
         <div
           id="swap-container"
           className="w-full max-w-116.25 mx-auto px-4 md:px-2 md:pb-4"

@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type FavoriteStore = {
+type FavouriteStore = {
   favourites: string[];
   toggleFavourite: (symbol: string) => void;
 };
 
-export const useFavoriteStore = create<FavoriteStore>()(
+export const useFavouriteStore = create<FavouriteStore>()(
   persist(
     (set, get) => ({
       favourites: [],

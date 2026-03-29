@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 
 import { cn } from "@/lib/utils/cn";
+import { useIsDesktop } from "@/hooks/useIsMobile";
 
 const DrawerSheet = dynamic(() => import("./drawer-sheet"), { ssr: false });
 const PopoverSheet = dynamic(() => import("./popover-sheet"), { ssr: false });
@@ -32,7 +33,7 @@ const AdaptivePopover = ({
   description,
   ...props
 }: Props) => {
-  const isDesktop = useMediaQuery("(min-width: 786px)");
+  const isDesktop = useIsDesktop();
 
   if (!isDesktop) {
     return <DrawerSheet {...props} title={title} description={description} />;

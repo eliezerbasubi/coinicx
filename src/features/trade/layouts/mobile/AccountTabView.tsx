@@ -13,11 +13,10 @@ import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PortfolioDrawer from "@/features/portfolio/components/PortfolioDrawer";
+import TradingAccountActivityDrawer from "@/features/trade/components/TradingAccountPanel/TradingAccountActivity/TradingAccountActivityDrawer";
+import AccountMarginItems from "@/features/trade/components/UserAccountInfo/AccountMarginItems";
+import PerpEquityItems from "@/features/trade/components/UserAccountInfo/PerpEquityItems";
 import { useAccountBalances } from "@/features/trade/hooks/useAccountBalances";
-
-import TradingAccountActivityDrawer from "../TradingAccountPanel/TradingAccountActivity/TradingAccountActivityDrawer";
-import AccountMarginItems from "./AccountMarginItems";
-import PerpEquityItems from "./PerpEquityItems";
 
 const ACCOUNT_INFO_TABS = [
   { label: "Overview", value: "overview" },
@@ -38,7 +37,7 @@ type State = {
   infoTab: "assets" | "accounts";
 };
 
-const UserAccountInfoMobile = () => {
+const AccountTabView = () => {
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     { currentTab: "overview", infoTab: "assets" },
@@ -349,4 +348,4 @@ const PerpsDetails = () => {
   );
 };
 
-export default UserAccountInfoMobile;
+export default AccountTabView;

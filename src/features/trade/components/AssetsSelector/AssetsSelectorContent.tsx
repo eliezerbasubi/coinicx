@@ -1,37 +1,23 @@
 import { useMemo, useReducer } from "react";
 import { Search } from "lucide-react";
 
+import { useFavouriteStore } from "@/lib/store/trade/favourites";
 import { useTradeContext } from "@/lib/store/trade/hooks";
 import { Asset } from "@/lib/types/trade";
-import { useIsMobile } from "@/hooks/useIsMobile";
-import { DataTable } from "@/components/ui/datatable";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAssetsAndContexts } from "@/features/trade/hooks/useAssetAndContexts";
 import { useSelectToken } from "@/features/trade/hooks/useSelectToken";
 
-import { ASSETS_SELECTOR_COLUMNS } from "./Columns";
-import { useFavoriteStore } from "./store";
-import { useTickerSelector } from "./TickerSelectorProvider";
+import AssetsSelectorDataTable from "./AssetsSelectorDataTable";
+import AssetsSelectorTabs from "./AssetsSelectorTabs";
 
 type State = {
   search: string;
   currentTab: string;
 };
 
-const TABS = [
-  { value: "favourites", label: "Favourites" },
-  { value: "perps", label: "Perps" },
-  { value: "spot", label: "Spot" },
-  { value: "xyz", label: "Tradfi" },
-  { value: "flx", label: "Felix Exchange" },
-  { value: "vntl", label: "Ventuals" },
-  { value: "hyna", label: "HyENA" },
-] as const;
-
 const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
-  const isMobile = useIsMobile();
-
-  const assets = useTickerSelector();
-  const { favourites } = useFavoriteStore();
+  const assets = useAssetsAndContexts();
+  const favourites = useFavouriteStore((s) => s.favourites);
 
   const instrumentType = useTradeContext((s) => s.instrumentType);
   const { selectTokenFromAssetInfo } = useSelectToken();
@@ -100,59 +86,17 @@ const AssetsSelectorContent = ({ onSelect }: { onSelect?: () => void }) => {
         </div>
       </div>
       <div className="size-full">
-        <Tabs
+        <AssetsSelectorTabs
           value={state.currentTab}
           onValueChange={(value) => dispatch({ currentTab: value })}
-          className="w-full mb-4 px-2 md:px-0"
-        >
-          <TabsList
-            variant="line"
-            className="w-full flex md:block bg-primary-dark px-3"
-          >
-            {TABS.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="w-fit text-xs font-medium cursor-pointer capitalize py-0.5 first:pl-0 text-neutral-gray-400"
-              >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+          className="mb-4 px-2 md:px-0"
+        />
 
         <div className="size-full md:min-h-64 md:max-h-64 overflow-y-auto pb-32 md:pb-2 px-2 md:px-0">
-          <DataTable
-            columns={ASSETS_SELECTOR_COLUMNS}
+          <AssetsSelectorDataTable
             data={data}
-            rowCount={20}
-            meta={{
-              isMobile,
-            }}
-            state={{
-              pagination: {
-                pageIndex: 0,
-                pageSize: 20,
-              },
-              columnVisibility: {
-                lastPrice: !isMobile,
-                priceMobileOnly: isMobile,
-                change: !isMobile,
-                funding: !isMobile && isPerps,
-                volume: !isMobile,
-                openInterest: !isMobile && isPerps,
-                marketCap: !isMobile && !isPerps,
-              },
-            }}
-            initialState={{
-              sorting: [{ id: "volume", desc: true }],
-            }}
-            tableClassName="w-full text-xs font-medium"
-            thClassName="p-0 pb-1 pr-4 h-auto text-neutral-gray-400 text-xs font-medium whitespace-nowrap"
-            rowClassName="text-white cursor-pointer"
-            rowCellClassName="p-0 py-0.5 md:pr-3"
-            onRowClick={onAssetSelected}
-            noData="No assets found"
+            isPerps={isPerps}
+            onAssetSelected={onAssetSelected}
           />
         </div>
       </div>

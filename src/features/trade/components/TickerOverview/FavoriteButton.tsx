@@ -1,9 +1,8 @@
 import { Star } from "lucide-react";
 import { useWebHaptics } from "web-haptics/react";
 
+import { useFavouriteStore } from "@/lib/store/trade/favourites";
 import { cn } from "@/lib/utils/cn";
-
-import { useFavoriteStore } from "./store";
 
 type Props = {
   className?: string;
@@ -11,26 +10,41 @@ type Props = {
 };
 
 const FavoriteButton = ({ coin, className }: Props) => {
-  const { favourites, toggleFavourite } = useFavoriteStore();
+  const favourites = useFavouriteStore((s) => s.favourites);
   const haptic = useWebHaptics();
 
-  const isFavourite = favourites.includes(coin);
+  const isFavourite = coin && favourites.includes(coin);
 
   return (
     <Star
       role="button"
+      aria-label="Favorite"
+      aria-pressed={isFavourite ? "true" : "false"}
       className={cn(
-        "size-3 text-neutral-gray-400",
+        "size-3 text-neutral-gray-400 outline-0 active:scale-95 transition-transform",
+        className,
         {
           "fill-primary text-primary": isFavourite,
         },
-        className,
       )}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          useFavouriteStore.getState().toggleFavourite(coin);
+          haptic.trigger("medium");
+        }
+      }}
       onClick={(e) => {
         e.stopPropagation();
-        toggleFavourite(coin);
 
-        haptic.trigger("medium");
+        if (coin) {
+          useFavouriteStore.getState().toggleFavourite(coin);
+
+          haptic.trigger("medium");
+        } else {
+          haptic.trigger("error");
+        }
       }}
     />
   );

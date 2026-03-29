@@ -9,7 +9,7 @@ import {
 
 export type ChartType = "standard" | "tradingView" | "depth";
 
-export type MobileViewTab = "markets" | "trade" | "account";
+export type MobileViewTab = "home" | "markets" | "trade" | "account";
 
 export type MarketAreaTabValue = "chart" | "orderbook" | "info";
 
