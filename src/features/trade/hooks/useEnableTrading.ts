@@ -1,7 +1,7 @@
 import { toast } from "sonner";
-import { useWebHaptics } from "web-haptics/react";
 import { privateKeyToAccount } from "viem/accounts";
 import { useAccount } from "wagmi";
+import { useWebHaptics } from "web-haptics/react";
 
 import { ERROR_NAME } from "@/lib/constants/errors";
 import { hlExchangeClient } from "@/lib/services/transport";
@@ -23,14 +23,11 @@ export const useEnableTrading = (args?: UseEnableTradingArgs) => {
   const { address } = useAccount();
   const { data: agent, setOptimisticAgent } = useExtraAgents();
 
-  const shouldEnableTrading = !agent || agent.validUntil < Date.now() / 1000;
+  const shouldEnableTrading = !!agent && agent.validUntil < Date.now() / 1000;
 
   const enableTrading = async () => {
     try {
       if (!address) throw new Error("Wallet is not connected");
-
-      // const agentAddress =
-      //   useUserTradeStore.getState().webData?.userState.agentAddress;
 
       if (shouldEnableTrading) {
         toast.loading("Enabling trading", {

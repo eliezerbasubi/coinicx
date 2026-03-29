@@ -11,7 +11,7 @@ import {
   DEFAULT_PERPS_ASSETS,
   DEFAULT_SPOT_ASSETS,
 } from "@/features/trade/constants";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 
 import { parseBuilderDeployedAsset } from "../utils";
 import TradingPairSubsProvider from "./trading-pair-subs-provider";
@@ -24,7 +24,7 @@ const TradingPairProvider = ({
   base: string;
   quote: string;
 }>) => {
-  const { spotMeta, perpMetas, getTokenMeta } = useMetaAndAssetCtxs();
+  const { spotMeta, perpMetas, getTokenMeta } = useAssetMetas();
 
   const tokenMeta = getTokenMeta(props.instrumentType, props.base, props.quote);
 

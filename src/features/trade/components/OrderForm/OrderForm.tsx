@@ -12,6 +12,7 @@ import { OrderSide } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import TradingButton from "@/components/common/TradingButton";
 import Visibility from "@/components/common/Visibility";
+import { ORDER_FORM_SIDES } from "@/features/trade/constants";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
 import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
@@ -34,17 +35,6 @@ import ReduceOnly from "./ReduceOnly";
 import ScaleOrderForm from "./ScaleOrderForm";
 import TIFSelector from "./TIFSelector";
 import TwapOrderForm from "./TwapOrderForm";
-
-const ORDER_FORM_SIDES: Record<OrderSide, { spot: string; perp: string }> = {
-  buy: {
-    spot: "Buy",
-    perp: "Long",
-  },
-  sell: {
-    spot: "Sell",
-    perp: "Short",
-  },
-};
 
 type Props = {
   className?: string;

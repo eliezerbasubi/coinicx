@@ -60,3 +60,14 @@ export const COINICX_AGENT_SETTINGS = {
   agentAddress: "0x7344fe7714C7a16314ea35DdB1004C7574347D6E",
   pk: "0xab6d6cd084b1c897a44f7525476f612d234ec892bed4537f8039532cd491e09e",
 } as const;
+
+export const ORDER_FORM_SIDES = {
+  buy: {
+    spot: "Buy",
+    perp: "Long",
+  },
+  sell: {
+    spot: "Sell",
+    perp: "Short",
+  },
+} as const;

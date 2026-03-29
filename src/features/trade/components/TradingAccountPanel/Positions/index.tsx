@@ -6,7 +6,7 @@ import { Position } from "@/lib/types/trade";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 import {
   buildPerpAssetId,
   getPriceDecimals,
@@ -27,7 +27,7 @@ const Positions = () => {
     null,
   );
 
-  const { perpMetas, spotMeta } = useMetaAndAssetCtxs();
+  const { perpMetas, spotMeta } = useAssetMetas();
   const { positions, openOrders } = useShallowUserTradeStore((s) => ({
     positions: s.allDexsClearinghouseState?.assetPositions,
     openOrders: s.openOrders,

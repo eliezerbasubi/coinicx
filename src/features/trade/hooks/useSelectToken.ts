@@ -2,10 +2,10 @@ import { ROUTES } from "@/lib/constants/routes";
 import { useTradeContext } from "@/lib/store/trade/hooks";
 import { Asset, InstrumentType } from "@/lib/types/trade";
 
-import { useMetaAndAssetCtxs } from "./useMetaAndAssetCtxs";
+import { useAssetMetas } from "./useAssetMetas";
 
 export const useSelectToken = () => {
-  const { getTokenMeta } = useMetaAndAssetCtxs();
+  const { getTokenMeta } = useAssetMetas();
 
   const { onAssetChange } = useTradeContext((s) => ({
     onAssetChange: s.onAssetChange,

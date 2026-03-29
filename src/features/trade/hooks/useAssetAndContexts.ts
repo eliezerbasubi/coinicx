@@ -1,38 +1,16 @@
-import React, { createContext, useContext, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { Asset } from "@/lib/types/trade";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 import {
   formatSymbol,
   parseBuilderDeployedAsset,
   parseQuoteAsset,
 } from "@/features/trade/utils";
 
-type Props = {
-  children: React.ReactNode;
-};
-
-type InstrumentAssetCtxs = Record<"perps" | "spot", Asset[]>;
-
-type State = {
-  assets: InstrumentAssetCtxs;
-};
-
-const TickerSelectorContext = createContext<State>({
-  assets: { spot: [], perps: [] },
-});
-
-export const useTickerSelector = () => {
-  const context = useContext(TickerSelectorContext);
-  if (!context)
-    throw new Error("Missing TickerSelectorContext.Provider in the tree");
-
-  return context.assets;
-};
-
-const TickerSelectorProvider = ({ children }: Props) => {
-  const { spotMeta, perpMetas } = useMetaAndAssetCtxs();
+export const useAssetsAndContexts = () => {
+  const { spotMeta, perpMetas } = useAssetMetas();
 
   const { spotAssetCtxs, allDexsAssetCtxs } = useShallowInstrumentStore(
     (s) => ({
@@ -41,7 +19,7 @@ const TickerSelectorProvider = ({ children }: Props) => {
     }),
   );
 
-  const spotAssets = useMemo(() => {
+  const spotAssets = useMemo<Asset[]>(() => {
     if (!spotMeta) return [];
 
     const assets = [];
@@ -83,7 +61,7 @@ const TickerSelectorProvider = ({ children }: Props) => {
     return assets;
   }, [spotAssetCtxs, spotMeta]);
 
-  const perpAssets = useMemo(() => {
+  const perpAssets = useMemo<Asset[]>(() => {
     if (!perpMetas) return [];
 
     const assets = [];
@@ -138,16 +116,8 @@ const TickerSelectorProvider = ({ children }: Props) => {
     return assets;
   }, [allDexsAssetCtxs, perpMetas]);
 
-  const value = useMemo(
-    () => ({ assets: { spot: spotAssets, perps: perpAssets } }),
+  return useMemo(
+    () => ({ spot: spotAssets, perps: perpAssets }),
     [spotAssets, perpAssets],
   );
-
-  return (
-    <TickerSelectorContext.Provider value={value}>
-      {children}
-    </TickerSelectorContext.Provider>
-  );
 };
-
-export default TickerSelectorProvider;

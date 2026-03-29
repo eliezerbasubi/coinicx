@@ -10,7 +10,7 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { DEFAULT_ORDER_MAX_SLIPPAGE } from "@/features/trade/constants";
-import { useMetaAndAssetCtxs } from "@/features/trade/hooks/useMetaAndAssetCtxs";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 import { useUserFees } from "@/features/trade/hooks/useUserFees";
 import {
   estimateLiquidationPrice,
@@ -28,7 +28,7 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
     decimals: s.decimals ?? 10,
   }));
 
-  const { perpMetas } = useMetaAndAssetCtxs();
+  const { perpMetas } = useAssetMetas();
 
   const { assetMeta, assetCtx } = useShallowInstrumentStore((s) => ({
     assetMeta: s.assetMeta,
