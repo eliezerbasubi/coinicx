@@ -66,7 +66,7 @@ const MarketChartDrawer = () => {
             <MarketArea />
           </div>
 
-          <DrawerFooter className="fixed inset-x-0 bottom-0 z-10 pt-2 flex flex-row items-center bg-primary-dark">
+          <DrawerFooter className="fixed inset-x-0 bottom-4 z-10 pt-2 flex flex-row items-center bg-primary-dark">
             {Object.entries(ORDER_FORM_SIDES).map(([side, label]) => (
               <DrawerClose
                 key={side}

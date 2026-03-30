@@ -119,7 +119,7 @@ const TradeTabView = () => {
           </div>
         </div>
       </div>
-      <div className="w-full bg-primary-dark grid grid-cols-[auto_1fr] sm:grid-cols-2 pb-4">
+      <div className="w-full bg-primary-dark grid grid-cols-[0.8fr_1fr] sm:grid-cols-2 pb-4">
         <div className="size-full max-w-45 sm:max-w-full flex flex-col bg-primary-dark rounded-md">
           <OrderBookTable
             hideAvgPriceTooltip

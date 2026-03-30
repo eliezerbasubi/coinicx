@@ -252,6 +252,7 @@ const KlineChart = () => {
 
   return (
     <div
+      data-vaul-no-drag
       id="klinechart"
       className="relative size-full flex-1 border-l border-neutral-gray-200"
       ref={chartWrapperRef}

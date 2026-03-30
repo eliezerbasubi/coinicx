@@ -4,7 +4,9 @@ import {
   ArrowRightLeft,
   BanknoteArrowDown,
   BanknoteArrowUp,
+  ChartNoAxesCombined,
   ChevronDown,
+  RefreshCcwDot,
   Send,
 } from "lucide-react";
 import { useAccount } from "wagmi";
@@ -19,6 +21,7 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import ConnectButton from "@/components/common/ConnectButton";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
+import PortfolioDrawer from "@/features/portfolio/components/PortfolioDrawer";
 import SwapDrawer from "@/features/swap/components/SwapDrawer";
 import { useAccountBalances } from "@/features/trade/hooks/useAccountBalances";
 import { useAssetsAndContexts } from "@/features/trade/hooks/useAssetAndContexts";
@@ -107,7 +110,7 @@ const AccountActions = () => {
   const haptic = useWebHaptics();
 
   return (
-    <div className="grid grid-cols-4 gap-2 my-2">
+    <div className="grid grid-cols-4 gap-x-2 gap-y-3 my-2">
       <AccountActionCard
         icon={<BanknoteArrowUp />}
         label="Deposit"
@@ -140,6 +143,21 @@ const AccountActions = () => {
           <AccountActionCard icon={<ArrowRightLeft />} label="Convert" />
         }
       />
+
+      <AccountActionCard
+        icon={<RefreshCcwDot />}
+        label="Trade"
+        onClick={() => {
+          usePreferencesStore.getState().dispatch({ mobileViewTab: "trade" });
+          haptic.trigger("light");
+        }}
+      />
+
+      <PortfolioDrawer
+        trigger={
+          <AccountActionCard icon={<ChartNoAxesCombined />} label="Portfolio" />
+        }
+      />
     </div>
   );
 };
@@ -157,15 +175,17 @@ const AccountActionCard = ({
 
   return (
     <Button
-      variant="secondary"
-      className="size-full bg-neutral-gray-600 rounded-xl p-3 text-white flex-col active:scale-95 transition-transform"
+      variant="ghost"
+      className="size-full p-0 text-white flex-col active:scale-95 transition-transform"
       {...props}
       onClick={(e) => {
         haptic.trigger("light");
         onClick?.(e);
       }}
     >
-      <div className="[&>svg]:size-7">{icon}</div>
+      <div className="bg-neutral-gray-600 rounded-xl p-3 [&>svg]:size-7">
+        {icon}
+      </div>
       <p className="text-3xs text-neutral-gray-400">{label}</p>
     </Button>
   );
@@ -191,8 +211,7 @@ const TokensOverview = () => {
 
   const [activeTab, setActiveTab] =
     useState<(typeof TOKENS_TABS)[number]["value"]>("gainers");
-  const [activeTypeTab, setActiveTypeTab] =
-    useState<(typeof TOKENS_TYPE_TAB)[number]["value"]>("spot");
+  const [activeTypeTab, setActiveTypeTab] = useState<"spot" | "perps">("spot");
 
   const tokens = useMemo(() => {
     if (activeTypeTab === "spot") {
@@ -242,9 +261,9 @@ const TokensOverview = () => {
   };
 
   return (
-    <div className="w-full mb-18">
-      <p className="text-sm font-semibold my-4">Tokens</p>
-      <div className="w-full min-h-95 bg-neutral-gray-600 rounded-lg p-3">
+    <div className="w-full mb-18 mt-6">
+      {/* <p className="text-sm font-semibold my-4">Markets</p> */}
+      <div className="w-full min-h-90 bg-neutral-gray-600 rounded-lg p-3">
         <div className="flex items-center justify-between">
           {TOKENS_TABS.map((tab) => (
             <div
@@ -300,7 +319,7 @@ const TokensOverview = () => {
             </div>
           </div>
           <div className="w-full">
-            {sortedTokens.slice(0, 10).map((token) => {
+            {sortedTokens.slice(0, 8).map((token) => {
               const changeInPercentage = token.prevDayPx
                 ? ((token.midPx - token.prevDayPx) / token.prevDayPx) * 100
                 : 0;
@@ -314,7 +333,7 @@ const TokensOverview = () => {
               return (
                 <div
                   key={token.coin}
-                  className="w-full grid grid-cols-3 py-2 active:scale-98 transition-transform"
+                  className="w-full grid grid-cols-3 py-2 last:pb-0 active:scale-98 transition-transform"
                   onClick={() => handleSelectToken(token)}
                 >
                   <p className="text-xs font-medium">{token.symbol}</p>

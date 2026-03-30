@@ -27,6 +27,7 @@ const ChartArea = () => {
       />
       <div
         id="chartArea"
+        data-vaul-no-drag
         className="w-full h-96 md:h-75 lg:h-125 group-fullscreen/market:lg:w-full group-fullscreen/market:xl:w-full group-fullscreen/market:h-dvh"
       >
         <Activity mode={chartType === "standard" ? "visible" : "hidden"}>

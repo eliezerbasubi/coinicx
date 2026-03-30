@@ -32,16 +32,14 @@ const PortfolioFees = dynamic(() => import("./PortfolioFees"), {
 
 type Props = {
   open?: boolean;
+  trigger?: React.ReactNode;
   onOpenChange?: (open: boolean) => void;
 };
 
-const PortfolioDrawer = ({ open, onOpenChange }: Props) => {
+const PortfolioDrawer = ({ open, trigger, onOpenChange }: Props) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerTrigger className="w-full flex items-center justify-center gap-2 border border-neutral-gray-200 rounded-lg text-neutral-gray-400 px-1 py-1.5">
-        <p className="text-xs font-medium">View portfolio</p>
-        <ArrowRight className="size-4" />
-      </DrawerTrigger>
+      <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent className="w-full! border-l-0! px-0 standalone:pt-safe-top overflow-y-auto overflow-x-hidden">
         <DrawerHeader className="sticky top-0 z-10 bg-primary-dark gap-0 p-4">
           <DrawerTitle className="w-full flex items-center justify-center gap-2">

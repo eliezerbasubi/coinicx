@@ -1,6 +1,6 @@
 import { useMemo, useReducer } from "react";
 import { useAccountModal, useConnectModal } from "@rainbow-me/rainbowkit";
-import { User } from "lucide-react";
+import { ArrowRight, User } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useWebHaptics } from "web-haptics/react";
 
@@ -81,7 +81,18 @@ const AccountTabView = () => {
         </Visibility>
 
         <AccountActions primary="deposit" />
-        <PortfolioDrawer />
+
+        <PortfolioDrawer
+          trigger={
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2 border border-neutral-gray-200 rounded-lg text-neutral-gray-400 px-1 py-1.5"
+            >
+              <p className="text-xs font-medium">View portfolio</p>
+              <ArrowRight className="size-4" />
+            </Button>
+          }
+        />
       </div>
 
       <Tabs
