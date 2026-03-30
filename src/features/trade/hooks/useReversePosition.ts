@@ -3,14 +3,14 @@ import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
 import { Position } from "@/lib/types/trade";
+import { useAgentClient } from "@/hooks/useAgentClient";
 
 import {
   calculateSlippageAdjustedPrice,
   formatSize,
   roundToDecimals,
 } from "../utils";
-import { buildOrder } from "../utils/orders";
-import { useEnsureTradingEnabled } from "./useEnsureTradingEnabled";
+import { buildOrder, getBuilder } from "../utils/orders";
 
 const toastId = "reverse-position";
 
@@ -24,7 +24,7 @@ type UseReversePositionArgs = {
 
 export const useReversePosition = (args?: UseReversePositionArgs) => {
   const haptic = useWebHaptics();
-  const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
+  const { getAgentClient } = useAgentClient();
   const [processing, setProcessing] = useState(false);
 
   const reversePosition = async (params: ReversePositionParams) => {
@@ -63,7 +63,7 @@ export const useReversePosition = (args?: UseReversePositionArgs) => {
 
       toast.loading("Reversing position", { id: toastId });
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       const { response } = await exchClient.order({
         orders: [order],

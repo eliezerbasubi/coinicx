@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
 import { Position } from "@/lib/types/trade";
+import { useAgentClient } from "@/hooks/useAgentClient";
 
 import {
   calculateSlippageAdjustedPrice,
@@ -10,8 +11,7 @@ import {
   getPriceDecimals,
   roundToDecimals,
 } from "../utils";
-import { buildOrder } from "../utils/orders";
-import { useEnsureTradingEnabled } from "./useEnsureTradingEnabled";
+import { buildOrder, getBuilder } from "../utils/orders";
 
 const toastId = "close-position";
 
@@ -28,7 +28,7 @@ type UseClosePositionArgs = {
 
 export const useClosePosition = (args?: UseClosePositionArgs) => {
   const haptic = useWebHaptics();
-  const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
+  const { getAgentClient } = useAgentClient();
 
   const buildClosingOrders = (params: ClosePositionParams) => {
     const {
@@ -91,7 +91,7 @@ export const useClosePosition = (args?: UseClosePositionArgs) => {
         },
       );
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       const { response } = await exchClient.order({
         orders,

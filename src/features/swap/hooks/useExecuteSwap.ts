@@ -3,7 +3,8 @@ import { OrderParameters } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
-import { useEnsureTradingEnabled } from "@/features/trade/hooks/useEnsureTradingEnabled";
+import { useAgentClient } from "@/hooks/useAgentClient";
+import { getBuilder } from "@/features/trade/utils/orders";
 
 import { useSwapStore } from "../store";
 
@@ -11,9 +12,7 @@ const toastId = "swap-toast";
 
 export const useExecuteSwap = () => {
   const haptic = useWebHaptics();
-  const { getBuilder, enableTrading } = useEnsureTradingEnabled({
-    toastId,
-  });
+  const { getAgentClient } = useAgentClient();
 
   const [processing, setProcessing] = useState(false);
 
@@ -30,7 +29,7 @@ export const useExecuteSwap = () => {
         { id: toastId },
       );
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       const builder = getBuilder(Number(orders[0].a));
 

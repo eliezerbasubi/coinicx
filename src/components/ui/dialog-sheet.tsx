@@ -22,6 +22,7 @@ type Props = {
   title?: React.ReactNode;
   description?: React.ReactNode;
   className?: string;
+  headerClassName?: string;
   onOpenChange?: (open: boolean) => void;
   onPointerDownOutside?: (event: PointerDownOutsideEvent) => void;
   onOpenAutoFocus?: (event: Event) => void;
@@ -34,6 +35,7 @@ const DialogSheet = ({
   trigger,
   title,
   description,
+  headerClassName,
   onOpenChange,
   onPointerDownOutside,
   onOpenAutoFocus,
@@ -47,10 +49,13 @@ const DialogSheet = ({
         onOpenAutoFocus={onOpenAutoFocus}
       >
         <DialogHeader
-          className={cn({
-            "sr-only": !title && !description,
-            "gap-0": !title || !description,
-          })}
+          className={cn(
+            {
+              "sr-only": !title && !description,
+              "gap-0": !title || !description,
+            },
+            headerClassName,
+          )}
         >
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

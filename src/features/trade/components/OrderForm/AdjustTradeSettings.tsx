@@ -14,13 +14,13 @@ import {
   useUserTradeStore,
 } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
+import { useAgentClient } from "@/hooks/useAgentClient";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputSlider from "@/components/common/FormInputSlider";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 import { InputNumber } from "@/components/ui/input-number";
-import { useEnableTrading } from "@/features/trade/hooks/useEnableTrading";
 
 import LeverageDiscreteSlider from "./LeverageDiscreteSlider";
 
@@ -64,7 +64,7 @@ const LEVERAGE_MARGIN_MODES = [
 ];
 
 const AdjustMarginMode = () => {
-  const { enableTrading } = useEnableTrading({ toastId });
+  const { getAgentClient } = useAgentClient();
   const haptic = useWebHaptics();
 
   const marginMode = useUserTradeStore((s) => s.leverage?.type ?? "cross");
@@ -87,7 +87,7 @@ const AdjustMarginMode = () => {
 
       setProcessing(true);
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       toast.loading("Adjusting margin mode", {
         id: toastId,
@@ -168,7 +168,7 @@ const AdjustMarginMode = () => {
 };
 
 const AdjustLeverage = () => {
-  const { enableTrading } = useEnableTrading({ toastId });
+  const { getAgentClient } = useAgentClient();
   const haptic = useWebHaptics();
 
   const leverage = useShallowUserTradeStore((s) =>
@@ -210,7 +210,7 @@ const AdjustLeverage = () => {
 
       setProcessing(true);
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       toast.loading("Adjusting leverage", {
         id: toastId,

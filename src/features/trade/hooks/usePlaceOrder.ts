@@ -10,23 +10,23 @@ import {
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
 import { Order, OrderSide } from "@/lib/types/trade";
+import { useAgentClient } from "@/hooks/useAgentClient";
 import {
   calculateSlippageAdjustedPrice,
   formatPriceToDecimal,
   formatSize,
   roundToDecimals,
 } from "@/features/trade/utils";
-import { buildOrder } from "@/features/trade/utils/orders";
+import { buildOrder, getBuilder } from "@/features/trade/utils/orders";
 import { isStopOrder } from "@/features/trade/utils/orderTypes";
 
 import { calculateSubOrderSize, MAX_MINUTES, MIN_MINUTES } from "../utils/twap";
-import { useEnsureTradingEnabled } from "./useEnsureTradingEnabled";
 
 const toastId = "place-order";
 
 export const usePlaceOrder = () => {
   const haptic = useWebHaptics();
-  const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
+  const { getAgentClient } = useAgentClient();
 
   const { settings, orderSide } = useShallowOrderFormStore((s) => ({
     settings: s.settings,
@@ -298,7 +298,7 @@ export const usePlaceOrder = () => {
         id: toastId,
       });
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       await exchClient.twapOrder({
         twap: {
@@ -368,7 +368,7 @@ export const usePlaceOrder = () => {
         id: toastId,
       });
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       const { response } = await exchClient.order({
         orders: orderPayload.orders,

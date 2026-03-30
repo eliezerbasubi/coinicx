@@ -5,13 +5,12 @@ import { useWebHaptics } from "web-haptics/react";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { AllPerpMetas, OpenOrder, SpotMetas } from "@/lib/types/trade";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
+import { useAgentClient } from "@/hooks/useAgentClient";
 import {
   buildPerpAssetId,
   buildSpotAssetId,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
-
-import { useEnableTrading } from "./useEnableTrading";
 
 const toastId = "close-position";
 
@@ -21,7 +20,7 @@ type UseCancelOrderArgs = {
 
 export const useCancelOrder = (args?: UseCancelOrderArgs) => {
   const haptic = useWebHaptics();
-  const { enableTrading } = useEnableTrading({ toastId });
+  const { getAgentClient } = useAgentClient();
 
   const [processing, setProcessing] = useState(false);
 
@@ -95,7 +94,7 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
         },
       );
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       await exchClient.cancel({
         cancels,

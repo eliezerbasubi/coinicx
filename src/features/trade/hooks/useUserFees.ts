@@ -2,9 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
+import { COINICX_BUILDER_SETTINGS } from "@/lib/constants/trade";
 import { hlInfoClient } from "@/lib/services/transport";
-
-import { COINICX_BUILDER_SETTINGS } from "../constants";
 
 export const useUserFees = () => {
   const { address } = useAccount();

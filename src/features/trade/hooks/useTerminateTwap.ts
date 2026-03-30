@@ -5,13 +5,12 @@ import { useWebHaptics } from "web-haptics/react";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { ActiveTwap, AllPerpMetas, SpotMetas } from "@/lib/types/trade";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
+import { useAgentClient } from "@/hooks/useAgentClient";
 import {
   buildPerpAssetId,
   buildSpotAssetId,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
-
-import { useEnableTrading } from "./useEnableTrading";
 
 const toastId = "terminate-twap";
 
@@ -63,7 +62,7 @@ const resolveAssetId = (twap: ActiveTwap): number => {
 
 export const useTerminateTwap = () => {
   const haptic = useWebHaptics();
-  const { enableTrading } = useEnableTrading({ toastId });
+  const { getAgentClient } = useAgentClient();
 
   const [processing, setProcessing] = useState(false);
 
@@ -80,7 +79,7 @@ export const useTerminateTwap = () => {
         { id: toastId },
       );
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       for (const twap of twaps) {
         const assetId = resolveAssetId(twap);

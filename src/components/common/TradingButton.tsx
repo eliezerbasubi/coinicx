@@ -1,36 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { useEnsureTradingEnabled } from "@/features/trade/hooks/useEnsureTradingEnabled";
+import { useApproveBuilderFee } from "@/hooks/useApproveBuilderFee";
+import { useEnableTrading } from "@/hooks/useEnableTrading";
 
 import ConnectButton from "./ConnectButton";
+import EnableTradingModal from "./EnableTradingModal";
 
 type Props = React.ComponentProps<typeof ConnectButton>;
 
-const toastId = "enable-trading";
-
 const TradingButton = (props: Props) => {
-  const { shouldEnableTrading, processing, approveFeeAndEnableTrading } =
-    useEnsureTradingEnabled({ toastId });
+  const { isEnableTradingRequired } = useEnableTrading();
+  const { hasApprovedBuilderFee } = useApproveBuilderFee();
+
+  const [open, setOpen] = useState(false);
+
+  const requiresApproval = !hasApprovedBuilderFee || isEnableTradingRequired;
 
   const onClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (shouldEnableTrading) {
-      return approveFeeAndEnableTrading();
+    if (requiresApproval) {
+      setOpen(true);
+      return;
     }
+
     return props.onClick?.(e);
   };
 
-  const label = shouldEnableTrading
+  const label = requiresApproval
     ? "Enable Trading"
     : props.label || props.children;
 
   return (
-    <ConnectButton
-      {...props}
-      disabled={processing || (props.disabled && !shouldEnableTrading)}
-      loading={processing || props.loading}
-      label={label}
-      onClick={onClick}
-    />
+    <>
+      <ConnectButton
+        {...props}
+        disabled={props.disabled && !requiresApproval}
+        loading={props.loading}
+        label={label}
+        onClick={onClick}
+      />
+      <EnableTradingModal open={open} onOpenChange={setOpen} />
+    </>
   );
 };
 

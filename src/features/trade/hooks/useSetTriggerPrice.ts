@@ -3,14 +3,14 @@ import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
 import { Position } from "@/lib/types/trade";
+import { useAgentClient } from "@/hooks/useAgentClient";
 
 import {
   calculateSlippageAdjustedPrice,
   formatSize,
   roundToDecimals,
 } from "../utils";
-import { buildOrder } from "../utils/orders";
-import { useEnsureTradingEnabled } from "./useEnsureTradingEnabled";
+import { buildOrder, getBuilder } from "../utils/orders";
 
 const toastId = "trigger-price";
 
@@ -27,7 +27,7 @@ type UseSetTriggerPriceArgs = {
 
 export const useSetTriggerPrice = (args?: UseSetTriggerPriceArgs) => {
   const haptic = useWebHaptics();
-  const { getBuilder, enableTrading } = useEnsureTradingEnabled({ toastId });
+  const { getAgentClient } = useAgentClient();
   const [processing, setProcessing] = useState(false);
 
   const setTriggerPrice = async (params: TriggerPriceParams) => {
@@ -103,7 +103,7 @@ export const useSetTriggerPrice = (args?: UseSetTriggerPriceArgs) => {
       setProcessing(true);
       toast.loading("Setting trigger price", { id: toastId });
 
-      const exchClient = await enableTrading();
+      const exchClient = await getAgentClient();
 
       const { response } = await exchClient.order({
         orders,

@@ -4,10 +4,10 @@ import { useAccount } from "wagmi";
 
 import { ERROR_NAME } from "@/lib/constants/errors";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { COINICX_BUILDER_SETTINGS } from "@/lib/constants/trade";
 import { hlExchangeClient, hlInfoClient } from "@/lib/services/transport";
 
-import { COINICX_BUILDER_SETTINGS } from "../constants";
-
+/** Total max fee rate for charging perps and spot (in tenths of bips). Equivalent to 0.01% */
 const MAX_FEE_RATE = 100;
 
 export const useApproveBuilderFee = () => {
@@ -29,21 +29,11 @@ export const useApproveBuilderFee = () => {
       }),
   });
 
-  const getBuilder = (assetId: number) => {
-    // Spot Ids start at 10_000
-    const isSpot = assetId > 10_000;
-
-    const fee = isSpot
-      ? COINICX_BUILDER_SETTINGS.spot
-      : COINICX_BUILDER_SETTINGS.perps;
-    return {
-      b: COINICX_BUILDER_SETTINGS.b,
-      f: fee,
-    };
-  };
+  const hasApprovedBuilderFee =
+    !!maxBuilderFee && maxBuilderFee >= MAX_FEE_RATE;
 
   const approveBuilderFee = async () => {
-    if (maxBuilderFee && maxBuilderFee >= MAX_FEE_RATE) return true;
+    if (hasApprovedBuilderFee) return true;
 
     try {
       const exchClient = await hlExchangeClient();
@@ -61,11 +51,12 @@ export const useApproveBuilderFee = () => {
     } catch (error) {
       let message = "Failed to approve builder fee";
 
-      if (
-        error instanceof Error &&
-        error.name === ERROR_NAME.AbstractWalletError
-      ) {
-        message = "User rejected transaction signature";
+      if (error instanceof Error) {
+        if (error.name === ERROR_NAME.AbstractWalletError) {
+          message = "User rejected transaction signature";
+        } else {
+          message = error.message;
+        }
       }
 
       throw new Error(message);
@@ -74,7 +65,7 @@ export const useApproveBuilderFee = () => {
 
   return {
     maxBuilderFeeStatus,
-    getBuilder,
+    hasApprovedBuilderFee,
     approveBuilderFee,
   };
 };
