@@ -287,13 +287,13 @@ const TrendingListView = ({
               />
               <div className="flex-1 flex items-center justify-between">
                 <div>
-                  <p className="text-white font-medium text-sm flex items-center gap-2">
+                  <div className="text-white font-medium text-sm flex items-center gap-2">
                     <span>{asset.base}</span>
                     {asset.dex && <Tag value={asset.dex} />}
                     {asset.maxLeverage && (
                       <Tag value={`${asset.maxLeverage}x`} />
                     )}
-                  </p>
+                  </div>
                   <p className="text-neutral-gray-400 text-xs space-x-1">
                     <span>
                       {formatNumber(
@@ -398,7 +398,7 @@ const ResultListView = ({
                 className="size-4"
               />
               <div className="flex-1 flex items-center justify-between">
-                <p className="text-white font-medium text-sm flex items-center gap-2">
+                <div className="text-white font-medium text-sm flex items-center gap-2">
                   <span>{asset.symbol}</span>
                   {asset.dex && (
                     <Tag value={asset.dex} className="text-2xs md:text-3xs" />
@@ -409,7 +409,7 @@ const ResultListView = ({
                       className="text-2xs md:text-3xs"
                     />
                   )}
-                </p>
+                </div>
                 <div className="text-right">
                   <p className="text-white font-medium text-xs">
                     {formatNumber(asset.midPx)}

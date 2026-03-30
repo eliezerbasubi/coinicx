@@ -6,6 +6,7 @@ import { ArrowDown } from "lucide-react";
 import { SwapInputType } from "@/lib/types/swap";
 import { cn } from "@/lib/utils/cn";
 import ConnectButton from "@/components/common/ConnectButton";
+import TradingButton from "@/components/common/TradingButton";
 import { Button } from "@/components/ui/button";
 
 import { useExecuteSwap } from "../hooks/useExecuteSwap";
@@ -120,7 +121,7 @@ const SwapForm = () => {
           <ReviewSummary />
         </div>
       </div>
-      <ConnectButton
+      <TradingButton
         label={buttonLabel}
         disabled={!!isDisabled || !!insufficientBalance}
         loading={processing}

@@ -4,9 +4,8 @@ import { isAddressEqual, zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { COINICX_AGENT_SETTINGS } from "@/lib/constants/trade";
 import { hlInfoClient } from "@/lib/services/transport";
-
-import { COINICX_AGENT_SETTINGS } from "../constants";
 
 export const useExtraAgents = () => {
   const { address } = useAccount();

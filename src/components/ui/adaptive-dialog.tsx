@@ -12,6 +12,7 @@ type Props = {
   title?: React.ReactNode;
   description?: React.ReactNode;
   className?: string;
+  headerClassName?: string;
   onOpenChange?: (open: boolean) => void;
 };
 

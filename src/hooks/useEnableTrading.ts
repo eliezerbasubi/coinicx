@@ -1,12 +1,10 @@
 import { toast } from "sonner";
-import { privateKeyToAccount } from "viem/accounts";
 import { useAccount } from "wagmi";
-import { useWebHaptics } from "web-haptics/react";
 
 import { ERROR_NAME } from "@/lib/constants/errors";
+import { COINICX_AGENT_SETTINGS } from "@/lib/constants/trade";
 import { hlExchangeClient } from "@/lib/services/transport";
 
-import { COINICX_AGENT_SETTINGS } from "../constants";
 import { useExtraAgents } from "./useExtraAgents";
 
 type UseEnableTradingArgs = {
@@ -19,11 +17,10 @@ type UseEnableTradingArgs = {
  * @returns
  */
 export const useEnableTrading = (args?: UseEnableTradingArgs) => {
-  const haptic = useWebHaptics();
   const { address } = useAccount();
   const { data: agent, setOptimisticAgent } = useExtraAgents();
 
-  const shouldEnableTrading =
+  const isEnableTradingRequired =
     !!address && (!agent || agent.validUntil < Date.now() / 1000);
 
   const enableTrading = async () => {
@@ -31,29 +28,26 @@ export const useEnableTrading = (args?: UseEnableTradingArgs) => {
       if (!address) throw new Error("Wallet is not connected");
       if (!COINICX_AGENT_SETTINGS.pk) throw new Error("Agent PK is not set");
 
-      if (shouldEnableTrading) {
-        toast.loading("Enabling trading", {
-          id: args?.toastId,
-        });
+      // User has already approved the agent wallet
+      if (!isEnableTradingRequired) return true;
 
-        const exchClient = await hlExchangeClient();
-        await exchClient.approveAgent(COINICX_AGENT_SETTINGS);
+      toast.loading("Enabling trading", {
+        id: args?.toastId,
+      });
 
-        setOptimisticAgent({
-          name: COINICX_AGENT_SETTINGS.agentName,
-          address: COINICX_AGENT_SETTINGS.agentAddress,
-        });
+      const exchClient = await hlExchangeClient();
+      await exchClient.approveAgent(COINICX_AGENT_SETTINGS);
 
-        toast.success("Trading enabled successfully", {
-          id: args?.toastId,
-        });
-        haptic.trigger("success");
-      }
+      setOptimisticAgent({
+        name: COINICX_AGENT_SETTINGS.agentName,
+        address: COINICX_AGENT_SETTINGS.agentAddress,
+      });
 
-      const agentWallet = privateKeyToAccount(COINICX_AGENT_SETTINGS.pk);
-      const agentExchClient = await hlExchangeClient({ wallet: agentWallet });
+      toast.success("Trading enabled successfully", {
+        id: args?.toastId,
+      });
 
-      return agentExchClient;
+      return true;
     } catch (error) {
       let message = "Failed to enable trading";
 
@@ -68,5 +62,5 @@ export const useEnableTrading = (args?: UseEnableTradingArgs) => {
     }
   };
 
-  return { shouldEnableTrading, enableTrading };
+  return { isEnableTradingRequired, enableTrading };
 };

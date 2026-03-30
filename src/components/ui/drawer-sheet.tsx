@@ -21,6 +21,7 @@ type Props = {
   title?: React.ReactNode;
   description?: React.ReactNode;
   className?: string;
+  headerClassName?: string;
   onOpenChange?: (open: boolean) => void;
   onPointerDownOutside?: (event: PointerDownOutsideEvent) => void;
   onOpenAutoFocus?: (event: Event) => void;
@@ -33,6 +34,7 @@ const DrawerSheet = ({
   children,
   title,
   description,
+  headerClassName,
   onOpenChange,
   onPointerDownOutside,
   onOpenAutoFocus,
@@ -45,7 +47,9 @@ const DrawerSheet = ({
         onPointerDownOutside={onPointerDownOutside}
         onOpenAutoFocus={onOpenAutoFocus}
       >
-        <DrawerHeader className={cn({ "sr-only": !title && !description })}>
+        <DrawerHeader
+          className={cn({ "sr-only": !title && !description }, headerClassName)}
+        >
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
