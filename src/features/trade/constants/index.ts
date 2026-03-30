@@ -58,7 +58,9 @@ export const COINICX_BUILDER_SETTINGS = {
 export const COINICX_AGENT_SETTINGS = {
   agentName: "CoinicX",
   agentAddress: "0x7344fe7714C7a16314ea35DdB1004C7574347D6E",
-  pk: "0xab6d6cd084b1c897a44f7525476f612d234ec892bed4537f8039532cd491e09e",
+  // This wallet does not and should not hold funds, it's just for signing messages
+  // on behalf of the user
+  pk: process.env.NEXT_PUBLIC_AGENT_PK as `0x${string}`,
 } as const;
 
 export const ORDER_FORM_SIDES = {

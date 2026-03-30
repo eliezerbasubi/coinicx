@@ -23,11 +23,13 @@ export const useEnableTrading = (args?: UseEnableTradingArgs) => {
   const { address } = useAccount();
   const { data: agent, setOptimisticAgent } = useExtraAgents();
 
-  const shouldEnableTrading = !!agent && agent.validUntil < Date.now() / 1000;
+  const shouldEnableTrading =
+    !!address && (!agent || agent.validUntil < Date.now() / 1000);
 
   const enableTrading = async () => {
     try {
       if (!address) throw new Error("Wallet is not connected");
+      if (!COINICX_AGENT_SETTINGS.pk) throw new Error("Agent PK is not set");
 
       if (shouldEnableTrading) {
         toast.loading("Enabling trading", {

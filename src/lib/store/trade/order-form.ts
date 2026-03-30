@@ -82,8 +82,8 @@ const initialState: OrderFormState = {
     slPrice: "",
   },
   settings: {
-    isSzInNtl: false,
-    orderType: "limit",
+    isSzInNtl: true,
+    orderType: "market",
     showTpSl: false,
     reduceOnly: false,
     timeInForce: "Gtc",
