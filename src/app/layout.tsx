@@ -138,7 +138,11 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${ibmPlexSans.variable} ${ibmPlexSans.className} font-sans antialiased bg-primary-dark text-white min-h-dvh`}
       >
-        <SerwistProvider swUrl="/serwist/sw.js">
+        <SerwistProvider
+          swUrl="/serwist/sw.js"
+          disable={process.env.NODE_ENV === "development"}
+          reloadOnOnline={false}
+        >
           <Toaster
             toastOptions={{ className: "min-h-[32px]" }}
             theme="dark"
