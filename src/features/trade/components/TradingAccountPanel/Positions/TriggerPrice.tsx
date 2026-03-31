@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Summary } from "@/components/ui/summary";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Tag from "@/components/ui/tag";
 import { useSetTriggerPrice } from "@/features/trade/hooks/useSetTriggerPrice";
@@ -463,7 +464,7 @@ const PositionSummary = ({
   pxDecimals: number;
 }) => {
   return (
-    <div className="w-full divide-y-[0.5px] divide-neutral-gray-300 bg-neutral-gray-200 p-2 rounded-lg">
+    <Summary className="w-full space-y-0 divide-y-[0.5px] divide-neutral-gray-300 bg-neutral-gray-600 p-2 rounded-lg">
       <PositionSummaryTile
         type="tp"
         pnl={tpPnl}
@@ -472,8 +473,6 @@ const PositionSummary = ({
         pxDecimals={pxDecimals}
       />
 
-      {/* <div className="w-full h-[0.5px] bg-neutral-gray-300 my-1" /> */}
-
       <PositionSummaryTile
         type="sl"
         pnl={slPnl}
@@ -481,7 +480,7 @@ const PositionSummary = ({
         price={Number(slPrice)}
         pxDecimals={pxDecimals}
       />
-    </div>
+    </Summary>
   );
 };
 

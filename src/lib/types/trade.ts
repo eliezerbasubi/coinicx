@@ -226,3 +226,5 @@ export type AccountActivity = {
   type: string;
   isIncoming: boolean;
 };
+
+export type PositionAction = "close" | "reverse" | "tpsl" | "margin";

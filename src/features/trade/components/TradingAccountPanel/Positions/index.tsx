@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
-import { Position } from "@/lib/types/trade";
+import { Position, PositionAction } from "@/lib/types/trade";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
@@ -14,9 +14,10 @@ import {
 } from "@/features/trade/utils";
 import { isStopLoss, isTakeProfit } from "@/features/trade/utils/orderTypes";
 
+import AdjustIsolatedMargin from "./AdjustIsolatedMargin";
 import CloseAllPositions from "./CloseAllPositions";
 import ClosePosition from "./ClosePosition";
-import { POSITION_COLUMNS, PositionAction, PositionTableMeta } from "./Columns";
+import { POSITION_COLUMNS, PositionTableMeta } from "./Columns";
 import PositionCard from "./PositionCard";
 import ReversePosition from "./ReversePosition";
 import TriggerPrice from "./TriggerPrice";
@@ -230,6 +231,11 @@ const Positions = () => {
           <TriggerPrice
             position={currentPosition.current}
             open={positionAction === "tpsl"}
+            onOpenChange={onCloseModal}
+          />
+          <AdjustIsolatedMargin
+            position={currentPosition.current}
+            open={positionAction === "margin"}
             onOpenChange={onCloseModal}
           />
         </>

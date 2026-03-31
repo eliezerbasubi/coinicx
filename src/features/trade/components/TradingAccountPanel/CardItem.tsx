@@ -5,7 +5,7 @@ const CardItem = ({
   value,
   className,
 }: {
-  label: string;
+  label: React.ReactNode;
   value: React.ReactNode;
   className?: string;
 }) => {
@@ -16,7 +16,9 @@ const CardItem = ({
         className,
       )}
     >
-      <p className="text-[11px] md:text-sm text-neutral-gray-400">{label}</p>
+      <div className="text-[11px] md:text-sm text-neutral-gray-400">
+        {label}
+      </div>
       <div className="text-xs">{value}</div>
     </div>
   );

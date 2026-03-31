@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputControl from "@/components/common/FormInputControl";
+import { Summary, SummaryItem } from "@/components/ui/summary";
 
 import { useTransfer } from "./hooks/useTransfer";
 
@@ -65,8 +66,8 @@ const TransferTab = () => {
           }
         />
       </div>
-      <div className="w-full space-y-1 bg-neutral-gray-200 p-2 rounded-lg mb-1">
-        <InfoTile
+      <Summary className="mb-1">
+        <SummaryItem
           label="Available Balance"
           value={formatNumber(availableBalance, {
             minimumFractionDigits: 2,
@@ -74,8 +75,8 @@ const TransferTab = () => {
             symbol: "USDC",
           })}
         />
-        <InfoTile label="Estimated time" value={"Instant"} />
-      </div>
+        <SummaryItem label="Estimated time" value={"Instant"} />
+      </Summary>
 
       <ConnectButton
         className="w-full"
@@ -92,18 +93,5 @@ const TransferTab = () => {
     </div>
   );
 };
-
-const InfoTile = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) => (
-  <div className="flex justify-between items-center">
-    <p className="text-xs text-neutral-gray-400">{label}</p>
-    <p className="text-xs text-white font-medium">{value}</p>
-  </div>
-);
 
 export default TransferTab;

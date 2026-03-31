@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer, useState } from "react";
+import { useMemo, useReducer } from "react";
 
 import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
@@ -9,6 +9,7 @@ import Visibility from "@/components/common/Visibility";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import { Button } from "@/components/ui/button";
 import { InputNumberControl } from "@/components/ui/input-number";
+import { Summary, SummaryItem } from "@/components/ui/summary";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClosePosition } from "@/features/trade/hooks/useClosePosition";
 import { useFeeRate } from "@/features/trade/hooks/useUserFees";
@@ -223,29 +224,22 @@ const ClosePositionContent = ({
           />
         </div>
 
-        <div className="w-full space-y-1 bg-neutral-gray-200 p-2 rounded-lg mb-2">
-          <div className="w-full flex items-center justify-between">
-            <p className="text-xs text-neutral-gray-400 font-medium">
-              Expected {estimatedNetPnl >= 0 ? "profit" : "loss"}
-            </p>
-            <p
-              className={cn("text-xs text-buy font-medium", {
-                "text-sell": estimatedNetPnl < 0,
-              })}
-            >
-              {formatNumber(estimatedNetPnl, {
-                style: "currency",
-                useSign: true,
-              })}
-            </p>
-          </div>
-          <div className="w-full flex items-center justify-between">
-            <p className="text-xs text-neutral-gray-400 font-medium">Fees</p>
-            <p className="text-xs text-white font-medium">
-              {formatNumber(estimatedFee, { style: "currency" })}
-            </p>
-          </div>
-        </div>
+        <Summary className="mb-2">
+          <SummaryItem
+            label="Expected PNL"
+            value={formatNumber(estimatedNetPnl, {
+              style: "currency",
+              useSign: true,
+            })}
+            valueClassName={cn("text-buy", {
+              "text-sell": estimatedNetPnl < 0,
+            })}
+          />
+          <SummaryItem
+            label="Fees"
+            value={formatNumber(estimatedFee, { style: "currency" })}
+          />
+        </Summary>
 
         <TradingButton
           label={limitPriceWarning || "Confirm"}

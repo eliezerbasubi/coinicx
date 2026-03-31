@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
@@ -7,6 +7,7 @@ import TradingButton from "@/components/common/TradingButton";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Summary, SummaryItem } from "@/components/ui/summary";
 import { useClosePosition } from "@/features/trade/hooks/useClosePosition";
 import { useFeeRate } from "@/features/trade/hooks/useUserFees";
 
@@ -127,29 +128,22 @@ const CloseAllPositionContent = ({
         </RadioGroup>
       </div>
 
-      <div className="w-full space-y-1 bg-neutral-gray-200 p-2 rounded-lg mb-1">
-        <div className="w-full flex items-center justify-between">
-          <p className="text-xs text-neutral-gray-400 font-medium">
-            Estimated PNL
-          </p>
-          <p
-            className={cn("text-xs text-buy font-medium", {
-              "text-sell": totalPnl < 0,
-            })}
-          >
-            {formatNumber(totalPnl, {
-              style: "currency",
-              useSign: true,
-            })}
-          </p>
-        </div>
-        <div className="w-full flex items-center justify-between">
-          <p className="text-xs text-neutral-gray-400 font-medium">Fees</p>
-          <p className="text-xs text-white font-medium">
-            {formatNumber(totalFee, { style: "currency" })}
-          </p>
-        </div>
-      </div>
+      <Summary className="mb-2">
+        <SummaryItem
+          label="Estimated PNL"
+          value={formatNumber(totalPnl, {
+            style: "currency",
+            useSign: true,
+          })}
+          valueClassName={cn("text-buy", {
+            "text-sell": totalPnl < 0,
+          })}
+        />
+        <SummaryItem
+          label="Fees"
+          value={formatNumber(totalFee, { style: "currency" })}
+        />
+      </Summary>
 
       <TradingButton
         label={"Confirm"}

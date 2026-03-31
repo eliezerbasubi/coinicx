@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Table } from "@tanstack/react-table";
+import { ChevronRight } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
-import { Position } from "@/lib/types/trade";
+import { Position, PositionAction } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
@@ -14,10 +14,7 @@ import CardItem from "../CardItem";
 
 type Props = {
   data: Position;
-  onActionClick: (
-    position: Position,
-    action: "close" | "reverse" | "tpsl",
-  ) => void;
+  onActionClick: (position: Position, action: PositionAction) => void;
 };
 const PositionCard = ({ data, onActionClick }: Props) => {
   const unrealizedPnl = Number(data.unrealizedPnl);
@@ -31,7 +28,11 @@ const PositionCard = ({ data, onActionClick }: Props) => {
   const roeLabel = `(${formatNumber(returnOnEquity, {
     style: "percent",
     useSign: true,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   })})`;
+
+  const netFunding = -Number(data.cumFunding.sinceOpen);
 
   return (
     <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
@@ -83,13 +84,26 @@ const PositionCard = ({ data, onActionClick }: Props) => {
         />
         <CardItem
           label="PnL (ROE %)"
-          value={`${pnlLabel} ${roeLabel}`}
+          value={`${pnlLabel}${roeLabel}`}
           className={cn("text-buy", {
             "text-sell": unrealizedPnl < 0,
           })}
         />
         <CardItem
-          label="Margin"
+          label={
+            <div
+              className="flex items-center gap-x-0.5"
+              onClick={() =>
+                data.leverage.type === "isolated" &&
+                onActionClick(data, "margin")
+              }
+            >
+              <span>Margin</span>
+              {data.leverage.type === "isolated" && (
+                <ChevronRight className="size-3" />
+              )}
+            </div>
+          }
           value={formatNumber(Number(data.marginUsed), {
             style: "currency",
             useFallback: true,
@@ -97,9 +111,14 @@ const PositionCard = ({ data, onActionClick }: Props) => {
         />
         <CardItem
           label="Funding"
-          value={formatNumber(Number(data.cumFunding.allTime), {
+          className={cn("text-buy", {
+            "text-sell": netFunding < 0,
+          })}
+          value={formatNumber(netFunding, {
             style: "currency",
             useFallback: true,
+            useSign: true,
+            maximumFractionDigits: 5,
           })}
         />
         <CardItem
