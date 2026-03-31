@@ -12,27 +12,21 @@ import { formatPriceToDecimal } from "@/features/trade/utils";
 
 type Props = {
   position: Position;
-  // trigger: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 };
 
 const ReversePosition = ({ position, open, onOpenChange }: Props) => {
-  // const [open, setOpen] = useState(false);
-
   return (
     <AdaptiveDialog
       open={open}
       onOpenChange={onOpenChange}
-      // onOpenChange={setOpen}
       title={`Reverse Position (${position.base})`}
-      // trigger={trigger}
       className="gap-1"
     >
       <ReversePositionContent
         position={position}
         onSuccess={() => onOpenChange?.(false)}
-        // onSuccess={() => setOpen(false)}
       />
     </AdaptiveDialog>
   );

@@ -7,11 +7,26 @@ import { InputNumberControl } from "@/components/ui/input-number";
 type Props = {
   max: string | number;
   onValueChange: (value: string) => void;
+
+  /**
+   * Function to parse the value when a percentage is selected.
+   * @note This is useful for cases where you need to convert the percentage value to a specific format.
+   * @note Don't pass the function for updating the value here, pass it to the onValueChange prop.
+   * @param value - The value with the percentage applied.
+   * @returns The parsed value.
+   */
+  onPercentValueChange?: (value: number) => number;
 } & React.ComponentProps<typeof InputNumberControl>;
 
 const PERCENTAGES = [10, 25, 50, 75, 100];
 
-const FormInputControl = ({ value, max, onValueChange, ...props }: Props) => {
+const FormInputControl = ({
+  value,
+  max,
+  onValueChange,
+  onPercentValueChange,
+  ...props
+}: Props) => {
   const [currentPercentage, setCurrentPercentage] = useState(100);
 
   const maxValue = Number(max);
@@ -32,15 +47,22 @@ const FormInputControl = ({ value, max, onValueChange, ...props }: Props) => {
             key={percentage}
             size="sm"
             variant="secondary"
-            className={cn("h-6 w-fit text-xs font-semibold", {
-              "bg-primary/10 text-primary":
-                value && currentPercentage === percentage,
-            })}
+            className={cn(
+              "h-6 w-fit text-xs font-semibold bg-neutral-gray-600 hover:bg-primary/10 hover:text-primary",
+              {
+                "bg-primary/10 text-primary":
+                  value && currentPercentage === percentage,
+              },
+            )}
             label={percentage === 100 ? "Max" : `${percentage}%`}
             disabled={!maxValue}
             onClick={() => {
+              const value = maxValue * (percentage / 100);
+              const percentValue = onPercentValueChange?.(value) || value;
+
               setCurrentPercentage(percentage);
-              onValueChange?.((maxValue * (percentage / 100)).toString());
+
+              onValueChange?.(percentValue.toString());
             }}
           />
         ))}

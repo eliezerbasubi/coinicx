@@ -1,18 +1,16 @@
 import { CSSProperties } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Pen } from "lucide-react";
+import { ChevronRight, Pen } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
 import { usePreferencesStore } from "@/lib/store/trade/user-preferences";
-import { Position } from "@/lib/types/trade";
+import { Position, PositionAction } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 
 import CoinLink from "../CoinLink";
 import CloseAllPositions from "./CloseAllPositions";
-
-export type PositionAction = "close" | "reverse" | "tpsl";
 
 export type PositionTableMeta = {
   positions: Position[];
@@ -161,17 +159,28 @@ export const POSITION_COLUMNS: ColumnDef<Position>[] = [
   {
     id: "margin",
     header: "Margin",
-    cell({ row: { original } }) {
+    cell({ row: { original }, table }) {
+      const { setCurrentPosition } = table.options
+        .meta as unknown as PositionTableMeta;
       return (
-        <span className="space-x-1">
-          <span>
+        <div
+          onClick={() => setCurrentPosition(original, "margin")}
+          className={cn("space-x-0.5 flex items-center", {
+            "underline decoration-dashed cursor-pointer":
+              original.leverage.type === "isolated",
+          })}
+        >
+          <p>
             {formatNumber(Number(original.marginUsed), {
               style: "currency",
               useFallback: true,
             })}
-          </span>
-          <span className="capitalize">({original.leverage.type})</span>
-        </span>
+          </p>
+          <p className="capitalize">({original.leverage.type})</p>
+          {original.leverage.type === "isolated" && (
+            <ChevronRight className="size-3.5 stroke-3 text-neutral-gray-400" />
+          )}
+        </div>
       );
     },
   },
@@ -179,11 +188,22 @@ export const POSITION_COLUMNS: ColumnDef<Position>[] = [
     id: "funding",
     header: "Funding",
     cell({ row: { original } }) {
+      // Calculates the net funding gain/loss for a position to display on the UI.
+      // For a short position, a negative cumFunding.sinceOpen indicates funding received (gain),
+      // while a positive value indicates funding paid (loss).
+      const netFunding = -Number(original.cumFunding.sinceOpen);
+
       return (
-        <span>
-          {formatNumber(Number(original.cumFunding.allTime), {
+        <span
+          className={cn("text-buy", {
+            "text-sell": netFunding < 0,
+          })}
+        >
+          {formatNumber(netFunding, {
             style: "currency",
             useFallback: true,
+            useSign: true,
+            maximumFractionDigits: 5,
           })}
         </span>
       );
