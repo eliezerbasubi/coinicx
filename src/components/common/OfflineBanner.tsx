@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 const OfflineBanner = () => {

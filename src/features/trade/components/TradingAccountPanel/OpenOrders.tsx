@@ -215,7 +215,7 @@ const OpenOrders = () => {
           // Good for performance. Better than calling table.getRowModel().rows inside header
           openOrders: data,
         }}
-        className="space-y-1.5 mb-3"
+        className="space-y-1 md:space-y-1.5 mb-3"
         wrapperClassName="px-2 md:p-0"
         thClassName="h-8 py-0 font-medium text-xs"
         rowClassName="text-xs font-medium whitespace-nowrap py-0"

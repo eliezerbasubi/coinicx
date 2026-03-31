@@ -80,7 +80,7 @@ const TradeTabView = () => {
   });
 
   return (
-    <div className="bg-trade-dark flex flex-col gap-0.5 mb-20">
+    <div className="bg-trade-dark flex flex-col gap-0.5 mb-16">
       <div className="sticky top-0 z-10 bg-primary-dark standalone:pt-safe-top">
         <div className="w-full h-11 flex items-center px-4 md:px-6 gap-x-3 md:gap-x-6">
           <SwapDrawer
