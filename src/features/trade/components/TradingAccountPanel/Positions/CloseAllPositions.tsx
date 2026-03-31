@@ -12,19 +12,22 @@ import { useClosePosition } from "@/features/trade/hooks/useClosePosition";
 import { useFeeRate } from "@/features/trade/hooks/useUserFees";
 
 type Props = {
+  open?: boolean;
+  trigger?: React.ReactNode;
   positions: Position[];
+  onOpenChange?: (open: boolean) => void;
 };
 
-const CloseAllPositions = ({ positions }: Props) => {
-  const [open, setOpen] = useState(false);
-
+const CloseAllPositions = ({
+  open,
+  positions,
+  trigger,
+  onOpenChange,
+}: Props) => {
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={(open) => {
-        if (!positions.length) return;
-        setOpen(open);
-      }}
+      onOpenChange={onOpenChange}
       title={"Close all positions"}
       description={
         <span className="text-xs text-neutral-gray-400">
@@ -32,20 +35,12 @@ const CloseAllPositions = ({ positions }: Props) => {
           orders
         </span>
       }
-      trigger={
-        <p
-          className={cn("text-primary text-xs font-medium cursor-pointer", {
-            "text-neutral-gray-400": !positions.length,
-          })}
-        >
-          Close All
-        </p>
-      }
+      trigger={trigger}
       className="gap-1"
     >
       <CloseAllPositionContent
         positions={positions}
-        onSuccess={() => setOpen(false)}
+        onSuccess={() => onOpenChange?.(false)}
       />
     </AdaptiveDialog>
   );
