@@ -11,6 +11,7 @@ import FormInputControl from "@/components/common/FormInputControl";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Summary, SummaryItem } from "@/components/ui/summary";
 
 import { useDeposit } from "./hooks/useDeposit";
 import TokenSelect from "./TokenSelect";
@@ -109,9 +110,9 @@ const Deposit = () => {
         </div>
       </Visibility>
 
-      <div className="w-full space-y-1 bg-neutral-gray-200 p-2 rounded-lg mb-1">
+      <Summary className="mb-1">
         <Visibility visible={currentAssetInfo.network === "arbitrum"}>
-          <InfoTile
+          <SummaryItem
             label="Available Balance"
             value={formatNumber(Number(tokenBalance || "0"), {
               minimumFractionDigits: 2,
@@ -120,21 +121,21 @@ const Deposit = () => {
             })}
           />
         </Visibility>
-        <InfoTile
+        <SummaryItem
           label="Minimum deposit"
           value={`${minDepositAmount} ${currentAssetInfo.symbol}`}
         />
-        <InfoTile
+        <SummaryItem
           label="Estimated time"
           value={
             unitFees?.depositEta ?? currentNetworkInfo.depositEta ?? "Instant"
           }
         />
-        <InfoTile
+        <SummaryItem
           label="Network fee"
           value={`${unitFees?.depositFee ? unitFees.depositFee + " " + currentAssetInfo.symbol : "Free"}`}
         />
-      </div>
+      </Summary>
 
       <Visibility visible={currentAssetInfo.network !== "arbitrum"}>
         <div className="flex items-start gap-1.5 text-xs text-yellow-500 bg-yellow-500/10 rounded-md p-2">
@@ -160,19 +161,6 @@ const Deposit = () => {
     </div>
   );
 };
-
-const InfoTile = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) => (
-  <div className="flex justify-between items-center">
-    <p className="text-xs text-neutral-gray-400">{label}</p>
-    <p className="text-xs text-white font-medium">{value}</p>
-  </div>
-);
 
 const CopyButton = ({ content }: { content: string }) => {
   const [copied, setCopied] = useState(false);

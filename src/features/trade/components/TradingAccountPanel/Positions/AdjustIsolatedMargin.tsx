@@ -6,6 +6,7 @@ import FormInputControl from "@/components/common/FormInputControl";
 import TradingButton from "@/components/common/TradingButton";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import { Button } from "@/components/ui/button";
+import { Summary, SummaryItem } from "@/components/ui/summary";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdjustIsolatedMargin } from "@/features/trade/hooks/useAdjustIsolatedMargin";
 import { roundToDecimals } from "@/features/trade/utils";
@@ -113,29 +114,22 @@ const AdjustIsolatedMarginContent = ({
           />
         </div>
 
-        <div className="w-full space-y-1 bg-neutral-gray-600 p-2 rounded-lg mb-2">
-          <div className="w-full flex items-center justify-between">
-            <p className="text-xs text-neutral-gray-400 font-medium">
-              Current Margin
-            </p>
-            <p className="text-xs text-white font-medium">
-              {formatNumber(Number(position.marginUsed), { style: "currency" })}
-            </p>
-          </div>
-
-          <div className="w-full flex items-center justify-between">
-            <p className="flex-1 text-xs text-neutral-gray-400 font-medium">
-              Margin available to{" "}
-              {state.currentTab === "addMargin" ? "add" : "reduce"}
-            </p>
-            <p className="text-xs text-white font-medium">
-              {formatNumber(availableMargin, {
-                style: "currency",
-                roundingMode,
-              })}
-            </p>
-          </div>
-
+        <Summary className="mb-2">
+          <SummaryItem
+            label="Current Margin"
+            value={formatNumber(Number(position.marginUsed), {
+              style: "currency",
+            })}
+          />
+          <SummaryItem
+            label={`Margin available to ${
+              state.currentTab === "addMargin" ? "add" : "reduce"
+            }`}
+            value={formatNumber(availableMargin, {
+              style: "currency",
+              roundingMode,
+            })}
+          />
           <Button
             variant="ghost"
             className="size-fit p-0 text-xs text-primary"
@@ -145,7 +139,7 @@ const AdjustIsolatedMarginContent = ({
           >
             Deposit for more margin
           </Button>
-        </div>
+        </Summary>
 
         <TradingButton
           label={label}

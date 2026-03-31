@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils/cn";
 import ConnectButton from "@/components/common/ConnectButton";
 import FormInputControl from "@/components/common/FormInputControl";
 import { Input } from "@/components/ui/input";
+import { Summary, SummaryItem } from "@/components/ui/summary";
 
 import { useWithdraw } from "./hooks/useWithdraw";
 import TokenSelect from "./TokenSelect";
@@ -69,16 +70,16 @@ const WithdrawTab = () => {
         }
       />
 
-      <div className="w-full space-y-1 bg-neutral-gray-200 p-2 rounded-lg mb-1">
-        <InfoTile
+      <Summary className="mb-1">
+        <SummaryItem
           label="Available Balance"
           value={`${currentAssetInfo.balance} ${currentAssetInfo.symbol}`}
         />
-        <InfoTile
+        <SummaryItem
           label="Minimum withdraw"
           value={`${currentAssetInfo.minAmount} ${currentAssetInfo.symbol}`}
         />
-        <InfoTile
+        <SummaryItem
           label="Estimated time"
           value={
             unitFees?.withdrawEta ??
@@ -86,11 +87,11 @@ const WithdrawTab = () => {
             "Instant"
           }
         />
-        <InfoTile
+        <SummaryItem
           label="Network fee"
           value={`${withdrawFee + " " + currentAssetInfo.symbol}`}
         />
-      </div>
+      </Summary>
 
       <div className="flex items-start gap-1.5 text-xs text-yellow-500 bg-yellow-500/10 rounded-md p-2">
         <AlertTriangleIcon className="size-3.5 shrink-0 mt-0.5" />
@@ -109,18 +110,5 @@ const WithdrawTab = () => {
     </div>
   );
 };
-
-const InfoTile = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) => (
-  <div className="flex justify-between items-center">
-    <p className="text-xs text-neutral-gray-400">{label}</p>
-    <p className="text-xs text-white font-medium">{value}</p>
-  </div>
-);
 
 export default WithdrawTab;
