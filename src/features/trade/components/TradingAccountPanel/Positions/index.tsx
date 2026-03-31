@@ -27,6 +27,7 @@ const Positions = () => {
   const [positionAction, setPositionAction] = useState<PositionAction | null>(
     null,
   );
+  const [openCloseAll, setOpenCloseAll] = useState(false);
 
   const { perpMetas, spotMeta } = useAssetMetas();
   const { positions, openOrders } = useShallowUserTradeStore((s) => ({
@@ -176,7 +177,12 @@ const Positions = () => {
     <div className="w-full">
       <Visibility visible={isMobile && !!data.length}>
         <div className="w-full flex md:hidden justify-end pt-2 px-4">
-          <CloseAllPositions positions={data} />
+          <p
+            onClick={() => setOpenCloseAll(true)}
+            className="text-primary text-xs font-medium cursor-pointer"
+          >
+            Close All
+          </p>
         </div>
       </Visibility>
       <AdaptiveDataTable
@@ -188,6 +194,7 @@ const Positions = () => {
             // Good for performance. Better than calling table.getRowModel().rows inside header
             positions: data,
             setCurrentPosition,
+            setOpenCloseAll,
           } as PositionTableMeta
         }
         loading={false}
@@ -197,7 +204,7 @@ const Positions = () => {
             pageSize: 30,
           },
         }}
-        className="space-y-1.5 mb-3"
+        className="space-y-1 md:space-y-1.5 mb-3"
         wrapperClassName="p-2 md:p-0"
         thClassName="h-8 py-0 font-medium text-xs"
         rowClassName="text-xs font-medium whitespace-nowrap py-0"
@@ -214,7 +221,11 @@ const Positions = () => {
        * Sliding down to close the drawer was skipping some pixels causing the interaction to lag.
        * Clicking anywhere inside the drawer was triggering a re-render on the elements outside the drawer.
        * To resolve those issues we decided to move the drawers outside the columns and card components.
-       * Issue observed on IPhone in standalone mode.
+       * Update: Close All button was not working in standalone mode even when it's being rendered outside the columns component on mobile.
+       * The issue was observed when there is a pixel shift on the TradingAccountActivity panel. For instance when scrolling through TWAPs history
+       * and the tabs list is sticky. Switching to positions tab when the list is not filling the remaining space would cause the Close All positions drawer to misbehave.
+       
+       * Issue observed on iPhone in standalone mode.
        */}
       {currentPosition.current && (
         <>
@@ -240,6 +251,11 @@ const Positions = () => {
           />
         </>
       )}
+      <CloseAllPositions
+        positions={data}
+        open={openCloseAll}
+        onOpenChange={setOpenCloseAll}
+      />
     </div>
   );
 };

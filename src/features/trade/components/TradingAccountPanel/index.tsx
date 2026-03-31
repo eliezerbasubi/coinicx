@@ -1,6 +1,4 @@
 import { useEffect, useRef } from "react";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useAccount } from "wagmi";
 
 import {
   usePreferencesStore,
@@ -8,6 +6,7 @@ import {
 } from "@/lib/store/trade/user-preferences";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AuthenticatedContent from "@/features/trade/components/AuthenticatedContent";
 
@@ -54,6 +53,8 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const isOnline = useOnlineStatus();
+
   const counters = useShallowUserTradeStore((s) => ({
     openOrdersCount: s.openOrders.length,
     positionsCount: s.allDexsClearinghouseState?.assetPositions.length || 0,
@@ -95,7 +96,7 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
   return (
     <div
       className={cn(
-        "w-full min-h-85 md:max-h-85 overflow-hidden bg-primary-dark",
+        "w-full min-h-85 md:max-h-85 md:overflow-hidden bg-primary-dark",
         className,
       )}
     >
@@ -110,7 +111,13 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
         <TabsList
           ref={containerRef}
           variant="line"
-          className="w-full px-2 md:px-4 shrink-0 space-x-0 md:space-x-4 justify-start scroll-smooth"
+          className={cn(
+            "w-full px-2 md:px-4 shrink-0 space-x-0 md:space-x-4 justify-start scroll-smooth sticky md:static z-2 top-20 standalone:top-[calc(env(safe-area-inset-top)+80px)] bg-primary-dark",
+            {
+              "top-[96px] standalone:top-[calc(env(safe-area-inset-top)+96px)]":
+                !isOnline,
+            },
+          )}
         >
           {TABS.map((tab) => {
             if (excludeTabs && excludeTabs.includes(tab.value)) return null;

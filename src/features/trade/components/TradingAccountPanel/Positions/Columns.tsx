@@ -10,11 +10,11 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 
 import CoinLink from "../CoinLink";
-import CloseAllPositions from "./CloseAllPositions";
 
 export type PositionTableMeta = {
   positions: Position[];
   setCurrentPosition: (position: Position, action: PositionAction) => void;
+  setOpenCloseAll: (open: boolean) => void;
 };
 
 export const POSITION_COLUMNS: ColumnDef<Position>[] = [
@@ -212,10 +212,19 @@ export const POSITION_COLUMNS: ColumnDef<Position>[] = [
   {
     id: "closeAll",
     header({ table }) {
-      const positions = (table.options.meta as unknown as PositionTableMeta)
-        ?.positions;
+      const { positions, setOpenCloseAll } = table.options
+        .meta as unknown as PositionTableMeta;
 
-      return <CloseAllPositions positions={positions} />;
+      return (
+        <p
+          onClick={() => positions.length && setOpenCloseAll(true)}
+          className={cn("text-primary text-xs font-medium cursor-pointer", {
+            "text-neutral-gray-400": !positions.length,
+          })}
+        >
+          Close All
+        </p>
+      );
     },
     cell({ row: { original }, table }) {
       const { setCurrentPosition } = table.options

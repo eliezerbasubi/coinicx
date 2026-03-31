@@ -40,7 +40,9 @@ const PositionCard = ({ data, onActionClick }: Props) => {
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
+              key={data.base + data.coin + data.assetId}
               name={data.base}
+              coin={data.coin}
               className="size-4"
               instrumentType="perps"
             />
@@ -75,19 +77,19 @@ const PositionCard = ({ data, onActionClick }: Props) => {
           })}
         />
         <CardItem
+          label="PnL (ROE %)"
+          value={`${pnlLabel} ${roeLabel}`}
+          className={cn("text-buy col-span-2", {
+            "text-sell": unrealizedPnl < 0,
+          })}
+        />
+        <CardItem
           label="Entry Price"
           value={formatPriceToDecimal(Number(data.entryPx), data.pxDecimals)}
         />
         <CardItem
           label="Mark Price"
           value={formatPriceToDecimal(Number(data.markPx), data.pxDecimals)}
-        />
-        <CardItem
-          label="PnL (ROE %)"
-          value={`${pnlLabel}${roeLabel}`}
-          className={cn("text-buy", {
-            "text-sell": unrealizedPnl < 0,
-          })}
         />
         <CardItem
           label={

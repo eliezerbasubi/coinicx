@@ -28,12 +28,16 @@ import { useAssetsAndContexts } from "@/features/trade/hooks/useAssetAndContexts
 import { useSelectToken } from "@/features/trade/hooks/useSelectToken";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
 
+import PositionsOverview from "../../components/TradingAccountPanel/Positions/PositionsOverview";
+
 const HomeTabView = () => {
   return (
     <div className="w-full p-4 standalone:pt-safe-top">
       <AccountOverview />
 
       <AccountActions />
+
+      <PositionsOverview />
 
       <TokensOverview />
     </div>
@@ -110,7 +114,7 @@ const AccountActions = () => {
   const haptic = useWebHaptics();
 
   return (
-    <div className="grid grid-cols-4 gap-x-2 gap-y-3 my-2">
+    <div className="grid grid-cols-4 gap-x-2 gap-y-3 mt-2 mb-6">
       <AccountActionCard
         icon={<BanknoteArrowUp />}
         label="Deposit"
@@ -261,7 +265,7 @@ const TokensOverview = () => {
   };
 
   return (
-    <div className="w-full mb-18 mt-6">
+    <div className="w-full mb-18">
       {/* <p className="text-sm font-semibold my-4">Markets</p> */}
       <div className="w-full min-h-90 bg-neutral-gray-600 rounded-lg p-3">
         <div className="flex items-center justify-between">
