@@ -168,7 +168,7 @@ const OrderFormFooter = () => {
       <TradingButton
         type="button"
         size="default"
-        disabled={disabled || processing}
+        disabled={!hasInsufficientMargin && (disabled || processing)}
         loading={processing}
         label={label}
         className={cn(
