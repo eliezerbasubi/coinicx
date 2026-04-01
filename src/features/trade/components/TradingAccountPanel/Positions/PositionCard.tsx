@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
-import { Position, PositionAction } from "@/lib/types/trade";
+import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
@@ -11,12 +11,15 @@ import Tag from "@/components/ui/tag";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 
 import CardItem from "../CardItem";
+import AdjustIsolatedMargin from "./AdjustIsolatedMargin";
+import ClosePosition from "./ClosePosition";
+import ReversePosition from "./ReversePosition";
+import TriggerPrice from "./TriggerPrice";
 
 type Props = {
   data: Position;
-  onActionClick: (position: Position, action: PositionAction) => void;
 };
-const PositionCard = ({ data, onActionClick }: Props) => {
+const PositionCard = ({ data }: Props) => {
   const unrealizedPnl = Number(data.unrealizedPnl);
   const returnOnEquity = Number(data.returnOnEquity);
 
@@ -91,25 +94,31 @@ const PositionCard = ({ data, onActionClick }: Props) => {
           label="Mark Price"
           value={formatPriceToDecimal(Number(data.markPx), data.pxDecimals)}
         />
-        <CardItem
-          label={
-            <div
-              className="flex items-center gap-x-0.5"
-              onClick={() =>
-                data.leverage.type === "isolated" &&
-                onActionClick(data, "margin")
+
+        <AdjustIsolatedMargin
+          position={data}
+          trigger={
+            <CardItem
+              label={
+                <div
+                  className="flex items-center gap-x-0.5"
+                  // onClick={() =>
+                  //   data.leverage.type === "isolated" &&
+                  //   onActionClick(data, "margin")
+                  // }
+                >
+                  <span>Margin</span>
+                  {data.leverage.type === "isolated" && (
+                    <ChevronRight className="size-3" />
+                  )}
+                </div>
               }
-            >
-              <span>Margin</span>
-              {data.leverage.type === "isolated" && (
-                <ChevronRight className="size-3" />
-              )}
-            </div>
+              value={formatNumber(Number(data.marginUsed), {
+                style: "currency",
+                useFallback: true,
+              })}
+            />
           }
-          value={formatNumber(Number(data.marginUsed), {
-            style: "currency",
-            useFallback: true,
-          })}
         />
         <CardItem
           label="Funding"
@@ -133,26 +142,38 @@ const PositionCard = ({ data, onActionClick }: Props) => {
       </div>
 
       <div className="mt-2 grid grid-cols-3 gap-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-7 text-xs text-white"
-          label="Close Position"
-          onClick={() => onActionClick(data, "close")}
+        <ClosePosition
+          position={data}
+          trigger={
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 text-xs text-white"
+              label="Close Position"
+            />
+          }
         />
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-7 text-xs text-white"
-          label="Reverse"
-          onClick={() => onActionClick(data, "reverse")}
+        <ReversePosition
+          position={data}
+          trigger={
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 text-xs text-white"
+              label="Reverse"
+            />
+          }
         />
-        <Button
-          variant="secondary"
-          size="sm"
-          className="h-7 text-xs text-white"
-          label="TP/SL"
-          onClick={() => onActionClick(data, "tpsl")}
+        <TriggerPrice
+          position={data}
+          trigger={
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 text-xs text-white"
+              label="TP/SL"
+            />
+          }
         />
       </div>
     </div>

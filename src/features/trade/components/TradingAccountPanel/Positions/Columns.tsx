@@ -10,11 +10,14 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 
 import CoinLink from "../CoinLink";
+import AdjustIsolatedMargin from "./AdjustIsolatedMargin";
+import CloseAllPositions from "./CloseAllPositions";
+import ClosePosition from "./ClosePosition";
+import ReversePosition from "./ReversePosition";
+import TriggerPrice from "./TriggerPrice";
 
 export type PositionTableMeta = {
   positions: Position[];
-  setCurrentPosition: (position: Position, action: PositionAction) => void;
-  setOpenCloseAll: (open: boolean) => void;
 };
 
 export const POSITION_COLUMNS: ColumnDef<Position>[] = [
@@ -159,28 +162,30 @@ export const POSITION_COLUMNS: ColumnDef<Position>[] = [
   {
     id: "margin",
     header: "Margin",
-    cell({ row: { original }, table }) {
-      const { setCurrentPosition } = table.options
-        .meta as unknown as PositionTableMeta;
+    cell({ row: { original } }) {
       return (
-        <div
-          onClick={() => setCurrentPosition(original, "margin")}
-          className={cn("space-x-0.5 flex items-center", {
-            "underline decoration-dashed cursor-pointer":
-              original.leverage.type === "isolated",
-          })}
-        >
-          <p>
-            {formatNumber(Number(original.marginUsed), {
-              style: "currency",
-              useFallback: true,
-            })}
-          </p>
-          <p className="capitalize">({original.leverage.type})</p>
-          {original.leverage.type === "isolated" && (
-            <ChevronRight className="size-3.5 stroke-3 text-neutral-gray-400" />
-          )}
-        </div>
+        <AdjustIsolatedMargin
+          position={original}
+          trigger={
+            <div
+              className={cn("space-x-0.5 flex items-center", {
+                "underline decoration-dashed cursor-pointer":
+                  original.leverage.type === "isolated",
+              })}
+            >
+              <p>
+                {formatNumber(Number(original.marginUsed), {
+                  style: "currency",
+                  useFallback: true,
+                })}
+              </p>
+              <p className="capitalize">({original.leverage.type})</p>
+              {original.leverage.type === "isolated" && (
+                <ChevronRight className="size-3.5 stroke-3 text-neutral-gray-400" />
+              )}
+            </div>
+          }
+        />
       );
     },
   },
@@ -212,37 +217,29 @@ export const POSITION_COLUMNS: ColumnDef<Position>[] = [
   {
     id: "closeAll",
     header({ table }) {
-      const { positions, setOpenCloseAll } = table.options
-        .meta as unknown as PositionTableMeta;
+      const { positions } = table.options.meta as unknown as PositionTableMeta;
 
-      return (
-        <p
-          onClick={() => positions.length && setOpenCloseAll(true)}
-          className={cn("text-primary text-xs font-medium cursor-pointer", {
-            "text-neutral-gray-400": !positions.length,
-          })}
-        >
-          Close All
-        </p>
-      );
+      return <CloseAllPositions positions={positions} />;
     },
-    cell({ row: { original }, table }) {
-      const { setCurrentPosition } = table.options
-        .meta as unknown as PositionTableMeta;
+    cell({ row: { original } }) {
       return (
         <div className="flex items-center gap-x-2">
-          <p
-            onClick={() => setCurrentPosition(original, "close")}
-            className="text-primary text-xs font-medium cursor-pointer"
-          >
-            Close
-          </p>
-          <p
-            onClick={() => setCurrentPosition(original, "reverse")}
-            className="text-primary text-xs font-medium cursor-pointer"
-          >
-            Reverse
-          </p>
+          <ClosePosition
+            position={original}
+            trigger={
+              <p className="text-primary text-xs font-medium cursor-pointer">
+                Close
+              </p>
+            }
+          />
+          <ReversePosition
+            position={original}
+            trigger={
+              <p className="text-primary text-xs font-medium cursor-pointer">
+                Reverse
+              </p>
+            }
+          />
         </div>
       );
     },
@@ -250,7 +247,7 @@ export const POSITION_COLUMNS: ColumnDef<Position>[] = [
   {
     id: "tpsl",
     header: "TP/SL",
-    cell({ row: { original }, table }) {
+    cell({ row: { original } }) {
       const formattedTpPrice = formatPriceToDecimal(
         Number(original.tpPrice || "0"),
         original.pxDecimals,
@@ -263,31 +260,29 @@ export const POSITION_COLUMNS: ColumnDef<Position>[] = [
       );
 
       return (
-        <div
-          onClick={() =>
-            (
-              table.options.meta as unknown as PositionTableMeta
-            ).setCurrentPosition(original, "tpsl")
-          }
-          className="flex items-center gap-x-1 cursor-pointer"
-        >
-          <p
-            onClick={(e) => {
-              e.preventDefault();
+        <TriggerPrice
+          position={original}
+          trigger={
+            <div className="flex items-center gap-x-1 cursor-pointer">
+              <p
+                onClick={(e) => {
+                  e.preventDefault();
 
-              usePreferencesStore
-                .getState()
-                .dispatch({ activeTab: "openOrders" });
-            }}
-            className={cn({
-              "border-b border-transparent hover:border-primary hover:text-primary":
-                !!original.tpPrice || !!original.slPrice,
-            })}
-          >
-            {formattedTpPrice}/{formattedSlPrice}
-          </p>
-          <Pen className="size-4 text-primary" />
-        </div>
+                  usePreferencesStore
+                    .getState()
+                    .dispatch({ activeTab: "openOrders" });
+                }}
+                className={cn({
+                  "border-b border-transparent hover:border-primary hover:text-primary":
+                    !!original.tpPrice || !!original.slPrice,
+                })}
+              >
+                {formattedTpPrice}/{formattedSlPrice}
+              </p>
+              <Pen className="size-4 text-primary" />
+            </div>
+          }
+        />
       );
     },
   },

@@ -23,12 +23,11 @@ import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import PortfolioDrawer from "@/features/portfolio/components/PortfolioDrawer";
 import SwapDrawer from "@/features/swap/components/SwapDrawer";
+import PositionsOverview from "@/features/trade/components/TradingAccountPanel/Positions/PositionsOverview";
 import { useAccountBalances } from "@/features/trade/hooks/useAccountBalances";
 import { useAssetsAndContexts } from "@/features/trade/hooks/useAssetAndContexts";
 import { useSelectToken } from "@/features/trade/hooks/useSelectToken";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
-
-import PositionsOverview from "../../components/TradingAccountPanel/Positions/PositionsOverview";
 
 const HomeTabView = () => {
   return (
