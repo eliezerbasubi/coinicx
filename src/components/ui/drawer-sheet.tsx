@@ -41,8 +41,13 @@ const DrawerSheet = ({
 }: Props) => {
   const [controlOpen, setControlOpen] = useState(!!open);
 
+  const isOpen = open ?? controlOpen;
+
   const handleOpenChange = (value: boolean) => {
-    setControlOpen(value);
+    if (open === undefined) {
+      setControlOpen(value);
+    }
+
     onOpenChange?.(value);
   };
 
@@ -62,7 +67,7 @@ const DrawerSheet = ({
         <Slot.Root onClick={() => handleOpenChange(true)}>{trigger}</Slot.Root>
       )}
 
-      <Drawer open={controlOpen} onOpenChange={handleOpenChange}>
+      <Drawer open={isOpen} onOpenChange={handleOpenChange}>
         <DrawerContent
           className={className}
           onPointerDownOutside={onPointerDownOutside}
