@@ -90,6 +90,7 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
         variant="underline"
         title="Liquidation Price"
         trigger={<DetailsLabel>Liquidation Price</DetailsLabel>}
+        className="break-after-avoid"
       >
         <p>
           The liquidation price is the price at which your position will be
@@ -282,19 +283,25 @@ export const TwapDetails = ({ size }: { size: number }) => {
   );
 };
 
-type DetailsProps = { children: React.ReactNode; className?: string };
+type DetailsProps = {
+  children: React.ReactNode;
+  className?: string;
+} & React.ComponentProps<"p">;
 
-const DetailsLabel = ({ children, className }: DetailsProps) => {
+const DetailsLabel = ({ children, className, ...props }: DetailsProps) => {
   return (
-    <p className={cn("text-3xs md:text-xs text-neutral-gray-400", className)}>
+    <p
+      className={cn("text-3xs md:text-xs text-neutral-gray-400", className)}
+      {...props}
+    >
       {children}
     </p>
   );
 };
 
-const DetailsValue = ({ children, className }: DetailsProps) => {
+const DetailsValue = ({ children, className, ...props }: DetailsProps) => {
   return (
-    <p className={cn("text-3xs md:text-xs font-medium", className)}>
+    <p className={cn("text-3xs md:text-xs font-medium", className)} {...props}>
       {children}
     </p>
   );

@@ -106,6 +106,7 @@ const OrderFormType = () => {
         side="bottom"
         title="Order Types"
         onOpenChange={setOpen}
+        delayDuration={0}
         trigger={
           <div
             className={cn(

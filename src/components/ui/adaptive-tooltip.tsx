@@ -26,6 +26,7 @@ type Props = {
   hideArrow?: boolean;
   variant?: "default" | "underline";
   side?: React.ComponentProps<typeof TooltipContent>["side"];
+  delayDuration?: number;
   onOpenChange?: (open: boolean) => void;
 };
 
@@ -47,6 +48,7 @@ const AdaptiveTooltip = ({
   title,
   description,
   side,
+  delayDuration,
   variant = "default",
   ...props
 }: Props & VariantProps<typeof adaptiveTooltipVariants>) => {
@@ -54,7 +56,11 @@ const AdaptiveTooltip = ({
 
   if (isDesktop) {
     return (
-      <Tooltip open={props.open} onOpenChange={props.onOpenChange}>
+      <Tooltip
+        delayDuration={delayDuration}
+        open={props.open}
+        onOpenChange={props.onOpenChange}
+      >
         <TooltipTrigger
           asChild
           className={cn({
