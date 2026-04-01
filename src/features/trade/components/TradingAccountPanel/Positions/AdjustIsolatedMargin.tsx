@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { Position } from "@/lib/types/trade";
@@ -13,23 +15,27 @@ import { roundToDecimals } from "@/features/trade/utils";
 
 type Props = {
   position: Position;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  trigger: React.ReactNode;
 };
 
-const AdjustIsolatedMargin = ({ position, open, onOpenChange }: Props) => {
+const AdjustIsolatedMargin = ({ position, trigger }: Props) => {
+  const [open, setOpen] = useState(false);
+
+  if (position.leverage.type !== "isolated") return trigger;
+
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={setOpen}
       title="Adjust Margin"
       description="Add margin to keep your position safer and lower the risk of liquidation or reduce extra margin to use for other positions."
       className="gap-1"
       headerClassName="gap-3"
+      trigger={trigger}
     >
       <AdjustIsolatedMarginContent
         position={position}
-        onSuccess={() => onOpenChange?.(false)}
+        onSuccess={() => setOpen(false)}
       />
     </AdaptiveDialog>
   );

@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from "react";
+import { useMemo, useReducer, useState } from "react";
 
 import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
@@ -26,9 +26,8 @@ import {
 } from "@/features/trade/utils";
 
 type Props = {
-  open?: boolean;
   position: Position;
-  onOpenChange?: (open: boolean) => void;
+  trigger: React.ReactNode;
 };
 
 type GainMode = "roi" | "pnl";
@@ -45,11 +44,14 @@ type State = {
   currentTab: "full" | "partial";
 };
 
-const TriggerPrice = ({ position, open, onOpenChange }: Props) => {
+const TriggerPrice = ({ position, trigger }: Props) => {
+  const [open, setOpen] = useState(false);
+
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={setOpen}
+      trigger={trigger}
       title={
         <div className="flex items-center gap-x-2">
           <span>Set Trigger Price ({position.base})</span>
@@ -71,7 +73,7 @@ const TriggerPrice = ({ position, open, onOpenChange }: Props) => {
     >
       <TriggerPriceContent
         position={position}
-        onSuccess={() => onOpenChange?.(false)}
+        onSuccess={() => setOpen(false)}
       />
     </AdaptiveDialog>
   );

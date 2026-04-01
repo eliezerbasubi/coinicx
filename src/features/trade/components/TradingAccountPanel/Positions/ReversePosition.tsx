@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ArrowDown } from "lucide-react";
 
 import { Position } from "@/lib/types/trade";
@@ -13,21 +14,23 @@ import { formatPriceToDecimal } from "@/features/trade/utils";
 
 type Props = {
   position: Position;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  trigger: React.ReactNode;
 };
 
-const ReversePosition = ({ position, open, onOpenChange }: Props) => {
+const ReversePosition = ({ position, trigger }: Props) => {
+  const [open, setOpen] = useState(false);
+
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={setOpen}
       title={`Reverse Position (${position.base})`}
+      trigger={trigger}
       className="gap-1"
     >
       <ReversePositionContent
         position={position}
-        onSuccess={() => onOpenChange?.(false)}
+        onSuccess={() => setOpen(false)}
       />
     </AdaptiveDialog>
   );

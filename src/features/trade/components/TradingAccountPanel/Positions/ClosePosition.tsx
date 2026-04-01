@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from "react";
+import { useMemo, useReducer, useState } from "react";
 
 import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
@@ -20,9 +20,8 @@ import {
 } from "@/features/trade/utils";
 
 type Props = {
-  open?: boolean;
   position: Position;
-  onOpenChange?: (open: boolean) => void;
+  trigger: React.ReactNode;
 };
 
 type State = {
@@ -43,17 +42,19 @@ const getMidPrice = (midPx: string, pxDecimals: number) => {
   return roundToDecimals(mid, pxDecimals, "floor").toString();
 };
 
-const ClosePosition = ({ position, open, onOpenChange }: Props) => {
+const ClosePosition = ({ position, trigger }: Props) => {
+  const [open, setOpen] = useState(false);
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={setOpen}
       title={`Close Position (${position.coin})`}
+      trigger={trigger}
       className="gap-1"
     >
       <ClosePositionContent
         position={position}
-        onSuccess={() => onOpenChange?.(false)}
+        onSuccess={() => setOpen(false)}
       />
     </AdaptiveDialog>
   );
