@@ -16,6 +16,7 @@ import { useFeeRate } from "@/features/trade/hooks/useUserFees";
 import {
   formatPriceToDecimal,
   formatSize,
+  parseBuilderDeployedAsset,
   roundToDecimals,
 } from "@/features/trade/utils";
 
@@ -44,11 +45,12 @@ const getMidPrice = (midPx: string, pxDecimals: number) => {
 
 const ClosePosition = ({ position, trigger }: Props) => {
   const [open, setOpen] = useState(false);
+
   return (
     <AdaptiveDialog
       open={open}
       onOpenChange={setOpen}
-      title={`Close Position (${position.coin})`}
+      title={`Close Position (${position.base})`}
       trigger={trigger}
       className="gap-1"
     >
@@ -72,7 +74,7 @@ const ClosePositionContent = ({
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     {
-      size: position.szi,
+      size: Math.abs(Number(position.szi)).toString(),
       szPercent: 100,
       limitPrice: getMidPrice(position.midPx, position.pxDecimals),
       currentTab: "market",
@@ -206,10 +208,12 @@ const ClosePositionContent = ({
 
           <InputNumberControl
             label="Size"
-            trailing={<p className="font-medium">{position.coin}</p>}
+            trailing={<p className="font-medium text-sm">{position.base}</p>}
             value={state.size}
             onValueChange={(value) => dispatch({ size: value })}
             max={position.szi}
+            labelClassName="text-sm"
+            className="text-sm"
           />
           <FormInputSlider
             showLimiters

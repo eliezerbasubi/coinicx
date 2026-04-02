@@ -101,11 +101,10 @@ const PositionCard = ({ data }: Props) => {
             <CardItem
               label={
                 <div
-                  className="flex items-center gap-x-0.5"
-                  // onClick={() =>
-                  //   data.leverage.type === "isolated" &&
-                  //   onActionClick(data, "margin")
-                  // }
+                  className={cn("flex items-center gap-x-0.5", {
+                    "underline decoration-dashed cursor-pointer":
+                      data.leverage.type === "isolated",
+                  })}
                 >
                   <span>Margin</span>
                   {data.leverage.type === "isolated" && (

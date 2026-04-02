@@ -307,12 +307,16 @@ const TriggerPriceContent = ({
             <InputNumberControl
               name="tpPrice"
               label="TP Price"
+              labelClassName="text-xs"
+              className="text-xs"
               value={state.tpPrice}
               onValueChange={onTpPriceChange}
             />
             <InputNumberControl
               name="tpGain"
               label="Gain"
+              labelClassName="text-xs"
+              className="text-xs"
               value={state.tpGain}
               onValueChange={onTpGainChange}
               trailing={
@@ -336,12 +340,16 @@ const TriggerPriceContent = ({
             <InputNumberControl
               name="slPrice"
               label="SL Price"
+              labelClassName="text-xs"
+              className="text-xs"
               value={state.slPrice}
               onValueChange={onSlPriceChange}
             />
             <InputNumberControl
               name="slLoss"
               label="Loss"
+              labelClassName="text-xs"
+              className="text-xs"
               value={state.slGain}
               onValueChange={onSlGainChange}
               trailing={
