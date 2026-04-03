@@ -18,16 +18,35 @@ export const useUserFees = () => {
   return { data, status };
 };
 
-export const useFeeRate = ({ isMarket }: { isMarket: boolean }) => {
+export const useFeeRate = ({
+  isMarket,
+  isSpot = false,
+}: {
+  isMarket: boolean;
+  isSpot?: boolean;
+}) => {
   const { data: feesData } = useUserFees();
 
-  // Fee rates: taker for market, maker for limit
-  const feeRate = isMarket
-    ? Number(feesData?.userCrossRate ?? "0")
+  // Fee rates: taker (cross) for market, maker (add) for limit
+  const crossRate = isSpot
+    ? Number(feesData?.userSpotCrossRate ?? "0")
+    : Number(feesData?.userCrossRate ?? "0");
+
+  const addRate = isSpot
+    ? Number(feesData?.userSpotAddRate ?? "0")
     : Number(feesData?.userAddRate ?? "0");
 
-  // Builder fee: tenths of basis points → decimal
-  const builderFeeRate = (COINICX_BUILDER_SETTINGS.perps * 0.001) / 100;
+  const rate = isMarket ? crossRate : addRate;
 
-  return feeRate + builderFeeRate;
+  // Builder fee: tenths of basis points → decimal
+  const fee = isSpot
+    ? COINICX_BUILDER_SETTINGS.spot
+    : COINICX_BUILDER_SETTINGS.perps;
+  const builderFeeRate = (fee * 0.001) / 100;
+
+  return {
+    rate,
+    builderFeeRate,
+    total: rate + builderFeeRate,
+  };
 };

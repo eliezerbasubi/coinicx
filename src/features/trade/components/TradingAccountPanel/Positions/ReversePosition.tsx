@@ -56,7 +56,7 @@ const ReversePositionContent = ({
   // Fees: closing current + opening reverse (both at current size)
   const closingValue = currentSize * markPrice;
   const openingValue = currentSize * markPrice;
-  const totalFees = (closingValue + openingValue) * feeRate;
+  const totalFees = (closingValue + openingValue) * feeRate.total;
 
   return (
     <div className="w-full space-y-2">
