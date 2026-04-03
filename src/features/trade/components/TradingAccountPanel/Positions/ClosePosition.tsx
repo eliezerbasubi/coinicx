@@ -96,7 +96,7 @@ const ClosePositionContent = ({
 
   // Estimated values
   const closeValue = closeSize * closePrice;
-  const estimatedFee = closeValue * feeRate;
+  const estimatedFee = closeValue * feeRate.total;
 
   const rawPnl = position.isLong
     ? (closePrice - entryPrice) * closeSize

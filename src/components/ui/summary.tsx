@@ -1,29 +1,28 @@
 import { cn } from "@/lib/utils/cn";
 
 export const SummaryLabel = ({
-  label,
+  children,
   className,
-}: {
-  label: React.ReactNode;
-  className?: string;
-}) => {
+  ...props
+}: React.ComponentProps<"div">) => {
   return (
-    <div className={cn("text-xs text-neutral-gray-400 font-medium", className)}>
-      {label}
+    <div
+      className={cn("text-xs text-neutral-gray-400 font-medium", className)}
+      {...props}
+    >
+      {children}
     </div>
   );
 };
 
 export const SummaryValue = ({
-  value,
+  children,
   className,
-}: {
-  value: React.ReactNode;
-  className?: string;
-}) => {
+  ...props
+}: React.ComponentProps<"div">) => {
   return (
-    <div className={cn("text-xs text-white font-medium", className)}>
-      {value}
+    <div className={cn("text-xs text-white font-medium", className)} {...props}>
+      {children}
     </div>
   );
 };
@@ -43,8 +42,8 @@ export const SummaryItem = ({
 }) => {
   return (
     <div className={cn("flex items-center justify-between", className)}>
-      <SummaryLabel label={label} className={labelClassName} />
-      <SummaryValue value={value} className={valueClassName} />
+      <SummaryLabel className={labelClassName}>{label}</SummaryLabel>
+      <SummaryValue className={valueClassName}>{value}</SummaryValue>
     </div>
   );
 };

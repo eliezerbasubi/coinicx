@@ -6,7 +6,7 @@ import { InputNumberControl } from "@/components/ui/input-number";
 
 type Props = {
   max: string | number;
-  onValueChange: (value: string) => void;
+  onValueChange?: (value: string) => void;
 
   /**
    * Function to parse the value when a percentage is selected.
@@ -37,7 +37,7 @@ const FormInputControl = ({
         value={value}
         {...props}
         onChange={(e) => {
-          onValueChange(e.target.value);
+          onValueChange?.(e.target.value);
           setCurrentPercentage(-1);
         }}
       />

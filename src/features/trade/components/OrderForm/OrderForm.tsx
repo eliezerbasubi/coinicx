@@ -17,6 +17,7 @@ import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
 import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
 
+import { isUSDCQuote } from "../../utils/shared";
 import AdjustTradeSettings from "./AdjustTradeSettings";
 import AvailableBalance from "./AvailableBalance";
 import ExecutionOrderForm from "./ExecutionOrderForm";
@@ -145,12 +146,20 @@ const OrderFormFooter = () => {
 
   const { processing, onPlaceOrder } = usePlaceOrder();
 
-  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
+  const { isPerps, isUSDC, openSwapModal } = useTradeContext((s) => ({
+    isPerps: s.instrumentType === "perps",
+    isUSDC: isUSDCQuote(s.quote),
+    openSwapModal: s.openSwapModal,
+  }));
 
   const labelKey = isPerps ? "perp" : "spot";
 
   const label = useMemo(() => {
     if (hasInsufficientMargin) {
+      // If quote is not USDC, we request the user to swap first
+      if (!isUSDC && isPerps) return "Swap";
+
+      // Otherwise we request the user to deposit
       return "Deposit";
     }
 
@@ -158,8 +167,11 @@ const OrderFormFooter = () => {
   }, [hasInsufficientMargin, orderSide, labelKey]);
 
   const placeOrder = () => {
-    if (hasInsufficientMargin)
+    if (hasInsufficientMargin) {
+      if (!isUSDC && isPerps) return openSwapModal(true);
+
       return useAccountTransactStore.getState().openAccountTransact("deposit");
+    }
     return onPlaceOrder();
   };
 

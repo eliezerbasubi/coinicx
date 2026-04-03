@@ -18,6 +18,7 @@ export interface TradeStoreProps {
 export interface TradeStoreState extends TradeStoreProps {
   /** Price decimals of the current asset */
   decimals: number | null;
+  swapModalOpen: boolean;
   onAssetChange: (data: {
     base: string;
     quote: string;
@@ -35,12 +36,14 @@ export interface TradeStoreState extends TradeStoreProps {
     assetIndex?: number;
   }) => void;
   setDecimals: (decimals: number) => void;
+  openSwapModal: (open?: boolean) => void;
 }
 
 export const createTradeStore = (initialProps: TradeStoreProps) => {
   return create<TradeStoreState>()((set) => ({
     ...initialProps,
     decimals: null,
+    swapModalOpen: false,
     onAssetChange: (data) => {
       const isSpot = data.instrumentType === "spot";
 
@@ -74,6 +77,7 @@ export const createTradeStore = (initialProps: TradeStoreProps) => {
       });
     },
     setDecimals: (decimals) => set({ decimals }),
+    openSwapModal: (open = true) => set({ swapModalOpen: open }),
   }));
 };
 

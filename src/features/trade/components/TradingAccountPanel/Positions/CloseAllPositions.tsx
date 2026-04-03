@@ -84,7 +84,7 @@ const CloseAllPositionContent = ({
         : (entryPrice - closePrice) * size;
 
       pnl += rawPnl;
-      fee += closeValue * feeRate;
+      fee += closeValue * feeRate.total;
     }
 
     return { totalPnl: pnl - fee, totalFee: fee };
