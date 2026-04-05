@@ -42,14 +42,14 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
 
         if (!tokens) throw new Error("No data found for coin" + order.coin);
 
-        const spotId = spotMetas?.tokensToSpotId
+        const spot = spotMetas?.tokenIndicesToSpot
           ?.get(tokens.baseToken)
           ?.get(tokens.quoteToken);
 
-        if (!spotId)
+        if (!spot)
           throw new Error("No asset ID mateched for coin" + order.coin);
 
-        return { a: buildSpotAssetId(spotId), o: order.oid };
+        return { a: buildSpotAssetId(spot.spotId), o: order.oid };
       }
 
       // Resolve perp asset ID at cancel time

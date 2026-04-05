@@ -34,7 +34,7 @@ export const useSwapTokens = () => {
   const tokens = useMemo<SwapSpotToken[]>(() => {
     if (!data) return [];
 
-    const { spotMeta, tokensToSpotId } = data;
+    const { spotMeta, tokenIndicesToSpot } = data;
     const balanceByToken = new Map<number, string>();
 
     for (const balance of spotBalances) {
@@ -54,9 +54,9 @@ export const useSwapTokens = () => {
       let balanceNtl: string | undefined;
 
       if (hasBalance && token.index !== 0) {
-        const spotId = tokensToSpotId.get(token.index)?.get(0);
-        if (spotId !== undefined) {
-          const markPx = Number(spotAssetCtxs[spotId]?.markPx || "0");
+        const spot = tokenIndicesToSpot.get(token.index)?.get(0);
+        if (spot !== undefined) {
+          const markPx = Number(spotAssetCtxs[spot.spotName]?.markPx || "0");
           balanceNtl = (Number(balance) * markPx).toString();
         }
       } else if (hasBalance) {

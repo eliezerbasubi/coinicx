@@ -22,10 +22,12 @@ import {
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
 
+type SpotAssetCtx = Record<string, SpotAssetCtxsWsEvent[number]>;
+
 interface InstrumentStoreState {
   assetMeta: AssetMeta | null;
   assetCtx: AssetCxt | null;
-  spotAssetCtxs: SpotAssetCtxsWsEvent;
+  spotAssetCtxs: SpotAssetCtx;
   allDexsAssetCtxs: AllDexsAssetCtxsWsEvent["ctxs"];
   setTokenMeta: (meta: AssetMeta) => void;
   setAssetCtx: (
@@ -45,7 +47,7 @@ export const useInstrumentStore = create<InstrumentStoreState>()(
   (set, get) => ({
     assetMeta: null,
     assetCtx: null,
-    spotAssetCtxs: [],
+    spotAssetCtxs: {},
     allDexsAssetCtxs: [],
     setTokenMeta: (meta) => set({ assetMeta: meta }),
     setAssetCtx: (data) => {
@@ -105,7 +107,15 @@ export const useInstrumentStore = create<InstrumentStoreState>()(
       }
     },
     applySpotAssetCtxs(data) {
-      set({ spotAssetCtxs: data });
+      const spotAssetCtxs = data.reduce(
+        (acc, curr) => {
+          acc[curr.coin] = curr;
+          return acc;
+        },
+        {} as Record<string, SpotAssetCtxsWsEvent[number]>,
+      );
+
+      set({ spotAssetCtxs });
     },
     applyAllDexsAssetCtxs(data) {
       set({ allDexsAssetCtxs: data });

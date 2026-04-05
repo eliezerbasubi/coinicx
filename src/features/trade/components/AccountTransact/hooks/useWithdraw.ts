@@ -34,7 +34,7 @@ export const useWithdraw = () => {
   const haptic = useWebHaptics();
   const { getUnitFee } = useUnitFees();
   const { generateUnitAddress } = useGenerateUnitAddress();
-  const { tokensToSpotId } = useAssetMetas();
+  const { tokenIndicesToSpot } = useAssetMetas();
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
 
   const [state, dispatch] = useReducer(
@@ -59,13 +59,13 @@ export const useWithdraw = () => {
     return spotBalances.reduce(
       (acc, curr) => {
         if (Number(curr.total)) {
-          const spotId = tokensToSpotId?.get(curr.token)?.get(0);
+          const spot = tokenIndicesToSpot?.get(curr.token)?.get(0);
           const balance = Number(curr.total) - Number(curr.hold);
 
           const displayName = getTokenDisplayName(curr.coin);
 
-          if (spotId) {
-            const ctx = spotAssetCtxs[spotId];
+          if (spot) {
+            const ctx = spotAssetCtxs[spot.spotName];
 
             if (ctx) {
               acc[displayName] = {
@@ -82,7 +82,7 @@ export const useWithdraw = () => {
       },
       {} as Record<string, { balanceNtl: number; balance: number }>,
     );
-  }, [spotBalances, tokensToSpotId, spotAssetCtxs]);
+  }, [spotBalances, tokenIndicesToSpot, spotAssetCtxs]);
 
   const tokens = useMemo(() => {
     return Object.values(assets).map((asset) => {

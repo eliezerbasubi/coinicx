@@ -67,19 +67,17 @@ export const useTransferAndSwap = () => {
     const universe = spotMeta.universe[universeIndex];
     if (!universe) return null;
 
-    const spotId = universe.index;
     const baseTokenMeta = spotMeta.tokens[universe.tokens[0]];
 
     return {
-      spotId,
       coin: universe.name,
-      assetId: buildSpotAssetId(spotId),
+      assetId: buildSpotAssetId(universe.index),
       szDecimals: baseTokenMeta?.szDecimals ?? 0,
     };
   }, [spotMeta, tokenNamesToUniverseIndex, quote]);
 
   const midPrice = quoteSpotInfo
-    ? Number(spotAssetCtxs[quoteSpotInfo.spotId]?.midPx ?? "0")
+    ? Number(spotAssetCtxs[quoteSpotInfo.coin]?.midPx ?? "0")
     : 0;
 
   const maxAmount = roundToDecimals(

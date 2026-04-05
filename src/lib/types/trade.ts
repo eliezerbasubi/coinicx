@@ -208,9 +208,19 @@ export type ActiveTwap = {
 
 export type SpotMetas = {
   spotMeta: SpotMetaResponse;
+  /** Map of token name to universe index */
   tokenNamesToUniverseIndex: Map<string, Map<string, number>>;
+
+  /** Map of spot name to token indices */
   spotNamesToTokens: Map<string, { baseToken: number; quoteToken: number }>;
-  tokensToSpotId: Map<number, Map<number, number>>;
+
+  /** Map of token indices to spot id and spot name.
+   *  The first map key is the base token index, the second map key is the quote token index.
+   */
+  tokenIndicesToSpot: Map<
+    number,
+    Map<number, { spotId: number; spotName: string }>
+  >;
 };
 
 export type AccountActivity = {

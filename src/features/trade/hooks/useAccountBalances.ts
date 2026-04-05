@@ -7,7 +7,7 @@ import { getTokenDisplayName } from "../utils/getTokenDisplayName";
 import { useAssetMetas } from "./useAssetMetas";
 
 export const useAccountBalances = () => {
-  const { tokensToSpotId } = useAssetMetas();
+  const { tokenIndicesToSpot } = useAssetMetas();
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
   const { spotBalances: accountSpotBalances, allDexsClearinghouseState } =
     useShallowUserTradeStore((s) => ({
@@ -75,9 +75,9 @@ export const useAccountBalances = () => {
         }
 
         // Prefer USDC-quoted pairs (token 0) for accurate USD conversion.
-        const spotId = tokensToSpotId?.get(balance.token)?.get(0);
+        const spot = tokenIndicesToSpot?.get(balance.token)?.get(0);
 
-        if (spotId === undefined) {
+        if (spot === undefined) {
           return {
             totalBalance: Number(balance.total),
             availableBalance: Number(balance.total) - Number(balance.hold),
@@ -90,7 +90,7 @@ export const useAccountBalances = () => {
           };
         }
 
-        const ctx = spotAssetCtxs[spotId];
+        const ctx = spotAssetCtxs[spot.spotName];
 
         const markPx = Number(ctx?.markPx || "1");
         const entryNtl = Number(balance.entryNtl);
@@ -121,7 +121,7 @@ export const useAccountBalances = () => {
       });
 
     return { balances, spotEquity, totalReturnOnEquity, totalUnrealizedPnl };
-  }, [accountSpotBalances, tokensToSpotId, spotAssetCtxs]);
+  }, [accountSpotBalances, tokenIndicesToSpot, spotAssetCtxs]);
 
   return {
     balances: [perpsBalance, ...spotAccount.balances],

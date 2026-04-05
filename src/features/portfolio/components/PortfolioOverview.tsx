@@ -37,11 +37,11 @@ const PortfolioOverview = () => {
     }),
   );
 
-  const { tokensToSpotId } = useAssetMetas();
-  const spotAssetCtxsStore = useShallowInstrumentStore((s) => s.spotAssetCtxs);
+  const { tokenIndicesToSpot } = useAssetMetas();
+  const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
 
   const spotBalanceInfo = useMemo(() => {
-    if (!tokensToSpotId?.size)
+    if (!tokenIndicesToSpot?.size)
       return {
         equity: 0,
         hypeMarkPx: 0,
@@ -56,15 +56,15 @@ const PortfolioOverview = () => {
             hypeMarkPx: 0,
           };
 
-        const tokenMap = tokensToSpotId.get(balance.token);
+        const tokenMap = tokenIndicesToSpot.get(balance.token);
 
         if (!tokenMap) return acc;
 
-        const spotId = tokenMap.get(0);
+        const spot = tokenMap.get(0);
 
-        if (spotId === undefined) return acc;
+        if (spot === undefined) return acc;
 
-        const ctx = spotAssetCtxsStore[spotId];
+        const ctx = spotAssetCtxs[spot.spotName];
         const markPx = Number(ctx?.markPx ?? "0");
 
         if (balance.coin === "HYPE") {
@@ -77,7 +77,7 @@ const PortfolioOverview = () => {
       },
       { equity: 0, hypeMarkPx: 0 },
     );
-  }, [spotBalances, spotAssetCtxsStore, tokensToSpotId]);
+  }, [spotBalances, spotAssetCtxs, tokenIndicesToSpot]);
 
   const totalVaultEquity = useMemo(() => {
     if (!perpDexStates?.length) return 0;

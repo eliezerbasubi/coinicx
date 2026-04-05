@@ -25,13 +25,13 @@ const resolveAssetId = (twap: ActiveTwap): number => {
 
     if (!tokens) throw new Error("No data found for coin " + twap.coin);
 
-    const spotId = spotMetas?.tokensToSpotId
+    const spot = spotMetas?.tokenIndicesToSpot
       ?.get(tokens.baseToken)
       ?.get(tokens.quoteToken);
 
-    if (!spotId) throw new Error("No asset ID matched for coin " + twap.coin);
+    if (!spot) throw new Error("No asset ID matched for coin " + twap.coin);
 
-    return buildSpotAssetId(spotId);
+    return buildSpotAssetId(spot.spotId);
   }
 
   const allPerpMetas = queryClient.getQueryData<AllPerpMetas>([

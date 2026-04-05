@@ -26,13 +26,13 @@ export const useAssetsAndContexts = () => {
 
     for (let index = 0; index < spotMeta.universe.length; index++) {
       const universe = spotMeta.universe[index];
-      const spotId = universe.index;
+      const spotName = universe.name;
       const [baseIndex, quoteIndex] = universe.tokens;
 
       const baseTokenMeta = spotMeta.tokens[baseIndex];
       const quoteTokenMeta = spotMeta.tokens[quoteIndex];
 
-      const context = spotAssetCtxs[spotId];
+      const context = spotAssetCtxs[spotName];
 
       if (!context || !baseTokenMeta || !quoteTokenMeta) continue;
 
