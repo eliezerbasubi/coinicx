@@ -1,28 +1,24 @@
 import { createContext } from "react";
 import { create } from "zustand";
 
-import {
-  MarketEvent,
-  MarketOutcome,
-  ParsedRecurringMetadata,
-} from "@/features/predict/types";
+import { MarketEvent, ParsedRecurringMetadata } from "@/features/predict/types";
 
 export interface MarketEventStoreProps {
   marketEvent: MarketEvent & ParsedRecurringMetadata;
-
-  /** The currently active market outcome. Only applicable for categorical markets */
-  activeMarketOutcome?: MarketOutcome;
 }
 
 export interface MarketEventStoreState extends MarketEventStoreProps {
-  setActiveMarketOutcome: (outcome: MarketOutcome) => void;
+  /** The currently active market outcome. Only applicable for categorical markets */
+  activeOutcomeIndex: number;
+  setActiveOutcomeIndex: (index: number) => void;
 }
 
 export const createMarketEventStore = (initialProps: MarketEventStoreProps) => {
   return create<MarketEventStoreState>()((set) => ({
     ...initialProps,
-    setActiveMarketOutcome: (outcome: MarketOutcome) =>
-      set({ activeMarketOutcome: outcome }),
+    activeOutcomeIndex: 0,
+    setActiveOutcomeIndex: (index: number) =>
+      set({ activeOutcomeIndex: index }),
   }));
 };
 

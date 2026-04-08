@@ -22,12 +22,6 @@ const MarketEventStoreProvider = ({
   useEffect(() => {
     storeRef.current?.setState({
       ...props,
-
-      // For categorical markets, we need to set the active market outcome.
-      activeMarketOutcome:
-        props.marketEvent.type === "categorical"
-          ? props.marketEvent.outcomes[0]
-          : undefined,
     });
   }, [props]);
 

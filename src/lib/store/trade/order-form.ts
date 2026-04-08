@@ -40,6 +40,7 @@ type TwapOrder = {
 
 type OrderFormState = {
   orderSide: OrderSide;
+  predictSideIndex: number;
   szPercent: number;
   settings: OrderFormSettings;
   tpslState: TPSLState;
@@ -49,6 +50,7 @@ type OrderFormState = {
 } & ExecutionOrder;
 
 type OrderFormActions = {
+  setPredictSideIndex: (index: number) => void;
   setOrderSide: (orderSide: OrderSide) => void;
   setSettings: (settings: Partial<OrderFormSettings>) => void;
   setTpslState: (data: Partial<TPSLState>) => void;
@@ -73,6 +75,7 @@ type OrderFormStore = OrderFormState & OrderFormActions;
 
 const initialState: OrderFormState = {
   orderSide: "buy",
+  predictSideIndex: 0, // 0 for yes, 1 for no
   size: "",
   szPercent: 0,
   limitPrice: "",
@@ -102,6 +105,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
       ...initialState,
       setOrderSide: (orderSide) => set({ orderSide }),
       setScaleOrder: (scaleOrder) => set({ scaleOrder }),
+      setPredictSideIndex: (index) => set({ predictSideIndex: index }),
       setTpslState(data) {
         set((state) => ({ ...state, ...data }));
       },

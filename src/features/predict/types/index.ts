@@ -71,17 +71,43 @@ export interface MarketEvent {
 
   /** The categories of the market event. */
   categories: string[];
-
-  // /** The underlying asset of the market event. Only applicable for recurring events */
-  // underlyingAsset: string | null;
-
-  // /** The period of the market event. Only applicable for recurring events */
-  // period: string | null;
 }
 
-// export interface MarketEvent extends MarketEventMeta {
-//   volume: number;
-//   openInterest: number;
-//   markPx: number;
-//   midPx: number;
-// }
+interface MarketEventMetaSide {
+  name: string;
+  token?: number;
+}
+
+export interface MarketEventMetaOutcome {
+  coin: string;
+  title: string;
+  sides: MarketEventMetaSide[];
+}
+
+export interface MarketEventMeta {
+  title: string;
+  description: string;
+  slug: string;
+  coin: string | null;
+  questionId: number | null;
+  resolution: number;
+  type: "recurring" | "binary" | "categorical";
+  sides: MarketEventMetaSide[];
+  outcomes: MarketEventMetaOutcome[];
+  settledOutcomes: number[];
+  categories: string[];
+  recurringPayload: ParsedRecurringPayload | null;
+}
+
+export interface MarketEventCtx {
+  openInterest: number;
+  volume: number;
+  sides: {
+    volume: number;
+    volumeInBase: number;
+    markPx: number;
+    midPx: number;
+    prevDayPx: number;
+    openInterest: number;
+  }[];
+}

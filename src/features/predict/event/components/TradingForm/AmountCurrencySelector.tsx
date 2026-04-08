@@ -1,6 +1,5 @@
 import { ChevronDown } from "lucide-react";
 
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -10,11 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-type Props = {
-  onValueChange?: (value: boolean) => void;
-};
-
-const AmountCurrencySelector = ({ onValueChange }: Props) => {
+const AmountCurrencySelector = () => {
   const isSzInNtl = useOrderFormStore((s) => s.settings.isSzInNtl);
 
   const options = [
@@ -38,7 +33,11 @@ const AmountCurrencySelector = ({ onValueChange }: Props) => {
         {options.map((option) => (
           <PopoverClose
             key={option.label}
-            onClick={() => onValueChange?.(option.value)}
+            onClick={() =>
+              useOrderFormStore
+                .getState()
+                .setSettings({ isSzInNtl: option.value })
+            }
             className={cn(
               "text-sm text-left text-neutral-gray-400 hover:bg-neutral-gray-200 hover:text-white font-medium py-2 px-3",
               {
