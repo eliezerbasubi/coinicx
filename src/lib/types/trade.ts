@@ -41,8 +41,6 @@ export type OrderSide = "buy" | "sell";
 
 export type OrderFormLimitOffsetType = "offset" | "pnl";
 
-export type TradeType = "spot" | "isolated" | "cross" | "grid";
-
 export type InstrumentType = "spot" | "perps";
 
 export type ScaleDistribution = "equal" | "increasing" | "decreasing";

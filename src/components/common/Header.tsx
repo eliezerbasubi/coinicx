@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChartCandlestick, Coins, RefreshCw } from "lucide-react";
+import {
+  ChartCandlestick,
+  Coins,
+  RefreshCw,
+  TrendingUpDown,
+} from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
 import { cn } from "@/lib/utils/cn";
@@ -23,6 +28,12 @@ const LINKS = [
     label: "Swap",
     id: "swap",
     icon: <RefreshCw />,
+  },
+  {
+    href: ROUTES.predict.index,
+    label: "Predict",
+    id: "predict",
+    icon: <TrendingUpDown />,
   },
   {
     href: ROUTES.portfolio.index,

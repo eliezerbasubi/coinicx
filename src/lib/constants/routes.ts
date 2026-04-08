@@ -11,4 +11,8 @@ export const ROUTES = {
   portfolio: {
     index: "/portfolio",
   },
+  predict: {
+    index: "/predict",
+    event: "/predict/event",
+  },
 };

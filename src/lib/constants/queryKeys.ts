@@ -10,4 +10,5 @@ export const QUERY_KEYS = {
   portfolio: "portfolio",
   delegatorSummary: "delegatorSummary",
   userFees: "user-fees",
+  predictionMarketEvents: "predictionMarketEvents",
 } as const;

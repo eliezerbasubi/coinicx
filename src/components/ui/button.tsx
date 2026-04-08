@@ -50,14 +50,22 @@ function Button({
   }) {
   const Comp = asChild ? Slot.Root : "button";
 
+  const children = asChild ? (
+    props.children
+  ) : (
+    <>
+      {loading && <LoaderCircle className="animate-spin size-5 mr-1" />}
+      {props.children || label}
+    </>
+  );
+
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     >
-      {loading && <LoaderCircle className="animate-spin size-5 mr-1" />}
-      {props.children || label}
+      {children}
     </Comp>
   );
 }
