@@ -1,5 +1,4 @@
 export * from "./orderbook";
-export * from "./batchDiffApplier";
 export * from "./getTradePathParams";
 export * from "./metaAndAssetCtxs";
 export * from "./perps";
