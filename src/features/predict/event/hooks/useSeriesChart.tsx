@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { CandleSnapshotResponse } from "@nktkas/hyperliquid";
 import {
   createChart,
+  createSeriesMarkers,
   IChartApi,
   ISeriesApi,
   LineData,
@@ -268,6 +269,16 @@ export const useSeriesChart = ({
       });
 
       lineSeries.setData(series);
+
+      createSeriesMarkers(lineSeries, [
+        {
+          time: series[series.length - 1].time,
+          position: "inBar",
+          shape: "circle",
+          color,
+          size: 1,
+        },
+      ]);
 
       seriesApis.push(lineSeries);
     });
