@@ -18,7 +18,7 @@ const MarketEventHeader = () => {
   );
 
   return (
-    <div className="w-full">
+    <div className="w-full sticky top-16 z-10 bg-primary-dark py-4">
       <div className="flex items-center gap-2 mb-4">
         <Link prefetch href={ROUTES.predict.index}>
           <p className="text-xs font-medium text-neutral-gray-400 hover:text-white transition-colors">

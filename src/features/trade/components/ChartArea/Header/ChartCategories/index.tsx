@@ -1,11 +1,10 @@
-import React from "react";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "usehooks-ts";
 
 import { ChartType } from "@/lib/types/trade";
+import { ChartTimeInterval } from "@/components/common/ChartTimeInterval";
 import Visibility from "@/components/common/Visibility";
 
-import ChartTimeInterval from "../../../../../../components/common/ChartTimeInterval";
 import OrdersSettings from "../OrdersSettings";
 
 const ChartCategoryPopover = dynamic(() => import("./ChartCategoryPopover"), {

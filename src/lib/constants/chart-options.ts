@@ -6,7 +6,7 @@ import {
   LineStyle,
 } from "lightweight-charts";
 
-const CHART_HEIGHT = 200;
+export const CHART_HEIGHT = 200;
 
 export const BASE_CHART_OPTIONS: DeepPartial<ChartOptions> = {
   height: CHART_HEIGHT,

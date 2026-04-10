@@ -1,4 +1,4 @@
-import React, { useReducer, useRef } from "react";
+import { useReducer, useRef } from "react";
 import { CandleSnapshotParameters } from "@nktkas/hyperliquid";
 import { ChevronDown } from "lucide-react";
 
@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils/cn";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 
-const CHART_INTERVALS: Array<CandleSnapshotParameters["interval"]> = [
+import Visibility from "./Visibility";
+
+type CandleSnapshotInterval = CandleSnapshotParameters["interval"];
+
+const CHART_INTERVALS: CandleSnapshotInterval[] = [
   "1m",
   "3m",
   "5m",
@@ -27,61 +31,68 @@ const CHART_INTERVALS: Array<CandleSnapshotParameters["interval"]> = [
   "1M",
 ];
 
-type Props = {
+type TimeIntervalListProps = {
   className?: string;
+  interval?: CandleSnapshotInterval;
+  items: CandleSnapshotInterval[];
+  children?: React.ReactNode;
+  onIntervalChange?: (interval: CandleSnapshotInterval) => void;
 };
 
-const ChartTimeInterval = ({ className }: Props) => {
-  const { interval: currentInterval, bookmarkIntervals } =
-    useShallowChartSettingsStore((s) => ({
-      interval: s.interval,
-      bookmarkIntervals: s.bookmarkIntervals,
-    }));
-
-  const onIntervalChange = (interval: CandleSnapshotParameters["interval"]) => {
-    useChartSettingsStore.getState().setSettings({ interval });
-  };
-
+export const TimeIntervalList = ({
+  className,
+  items,
+  interval,
+  children,
+  onIntervalChange,
+}: TimeIntervalListProps) => {
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      {bookmarkIntervals.map((interval) => {
+      {items.map((item) => {
         return (
           <div
-            key={interval}
+            key={item}
             role="button"
             tabIndex={0}
             className={cn(
               "text-3xs md:text-xs text-neutral-gray-400 font-medium md:font-semibold cursor-pointer transition-colors",
               {
-                "text-white": interval === currentInterval,
+                "text-white": item === interval,
               },
             )}
-            onClick={() => onIntervalChange(interval)}
+            onClick={() => onIntervalChange?.(item)}
           >
-            {capitalize(interval)}
+            {capitalize(item)}
           </div>
         );
       })}
-      <MoreIntervals />
+      {children}
     </div>
   );
 };
 
-export default ChartTimeInterval;
-
+type TimeIntervalPopoverProps = {
+  bookmarkIntervals: CandleSnapshotInterval[];
+  interval: CandleSnapshotInterval;
+  enablePinning?: boolean;
+  onPin?: (interval: CandleSnapshotInterval) => void;
+  onConfirm?: (pins: CandleSnapshotInterval[]) => void;
+  onReset?: () => void;
+};
 type State = {
   open: boolean;
   pinning: boolean;
-  pins: CandleSnapshotParameters["interval"][];
+  pins: CandleSnapshotInterval[];
 };
 
-const MoreIntervals = () => {
-  const { interval: currentInterval, bookmarkIntervals } =
-    useShallowChartSettingsStore((s) => ({
-      interval: s.interval,
-      bookmarkIntervals: s.bookmarkIntervals,
-    }));
-
+export const TimeIntervalPopover = ({
+  bookmarkIntervals,
+  interval,
+  onPin,
+  onConfirm,
+  onReset,
+  enablePinning = true,
+}: TimeIntervalPopoverProps) => {
   const [{ open, pinning, pins }, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     { open: false, pinning: false, pins: bookmarkIntervals },
@@ -89,7 +100,7 @@ const MoreIntervals = () => {
 
   const triggerRef = useRef<HTMLDivElement>(null);
 
-  const isNotBookmarked = !bookmarkIntervals.includes(currentInterval);
+  const isNotBookmarked = !bookmarkIntervals.includes(interval);
 
   const onEditPins = () => {
     if (!pinning) {
@@ -99,12 +110,13 @@ const MoreIntervals = () => {
     }
 
     // Reset default pins
-    useChartSettingsStore.getState().resetBookmarkIntervals();
+    onReset?.();
   };
 
-  const onSelectPin = (interval: CandleSnapshotParameters["interval"]) => {
+  const onSelectPin = (interval: CandleSnapshotInterval) => {
     if (!pinning) {
-      useChartSettingsStore.getState().setSettings({ interval });
+      onPin?.(interval);
+
       dispatch({ open: false });
     } else {
       // Toggle pin
@@ -117,7 +129,8 @@ const MoreIntervals = () => {
   };
 
   const onConfirmPins = () => {
-    useChartSettingsStore.getState().setSettings({ bookmarkIntervals: pins });
+    onConfirm?.(pins);
+
     dispatch({ pinning: false, open: false });
   };
 
@@ -136,7 +149,7 @@ const MoreIntervals = () => {
           )}
           onClick={() => dispatch({ open: !open })}
         >
-          {isNotBookmarked ? capitalize(currentInterval) : "More"}
+          {isNotBookmarked ? capitalize(interval) : "More"}
           <ChevronDown
             strokeWidth={2.5}
             className={cn("transition-transform size-3 md:size-4", {
@@ -150,16 +163,16 @@ const MoreIntervals = () => {
       className="md:mt-3 md:p-2"
     >
       <div className="grid grid-cols-5 gap-2 mt-3 md:mt-0">
-        {CHART_INTERVALS.map((interval) => {
-          const isBookmarked = bookmarkIntervals.includes(interval);
+        {CHART_INTERVALS.map((chartInterval) => {
+          const isBookmarked = bookmarkIntervals.includes(chartInterval);
           if (isBookmarked && !pinning) return null;
 
-          const isCurrent = interval === currentInterval;
-          const isPinned = pins.length > 0 && pins.includes(interval);
+          const isCurrent = chartInterval === interval;
+          const isPinned = pins.length > 0 && pins.includes(chartInterval);
 
           return (
             <Button
-              key={interval}
+              key={chartInterval}
               variant="secondary"
               className={cn(
                 "bg-neutral-gray-200 hover:text-white h-8 p-0 text-xs text-neutral-gray-400 font-semibold cursor-pointer transition-colors border border-transparent",
@@ -169,40 +182,80 @@ const MoreIntervals = () => {
                     isPinned,
                 },
               )}
-              onClick={() => onSelectPin(interval)}
+              onClick={() => onSelectPin(chartInterval)}
             >
-              {capitalize(interval)}
+              {capitalize(chartInterval)}
             </Button>
           );
         })}
       </div>
 
-      <div
-        className={cn("w-full mt-3 grid gap-x-2", { "grid-cols-2": pinning })}
-      >
-        <Button
-          size="sm"
-          variant="outline"
-          className={cn("border-neutral-gray-200 text-xs font-semibold", {
-            "border-primary text-primary text-sm": pinning,
-          })}
-          onClick={onEditPins}
+      <Visibility visible={enablePinning}>
+        <div
+          className={cn("w-full mt-3 grid gap-x-2", { "grid-cols-2": pinning })}
         >
-          {pinning ? "Reset" : "Pin Intervals"}
-        </Button>
-
-        {pinning && (
           <Button
             size="sm"
-            variant="default"
-            className="text-sm font-semibold"
-            onClick={onConfirmPins}
+            variant="outline"
+            className={cn("border-neutral-gray-200 text-xs font-semibold", {
+              "border-primary text-primary text-sm": pinning,
+            })}
+            onClick={onEditPins}
           >
-            Confirm
+            {pinning ? "Reset" : "Pin Intervals"}
           </Button>
-        )}
-      </div>
+
+          {pinning && (
+            <Button
+              size="sm"
+              variant="default"
+              className="text-sm font-semibold"
+              onClick={onConfirmPins}
+            >
+              Confirm
+            </Button>
+          )}
+        </div>
+      </Visibility>
     </AdaptivePopover>
+  );
+};
+
+type Props = {
+  className?: string;
+};
+
+export const ChartTimeInterval = ({ className }: Props) => {
+  const { interval, bookmarkIntervals } = useShallowChartSettingsStore((s) => ({
+    interval: s.interval,
+    bookmarkIntervals: s.bookmarkIntervals,
+  }));
+
+  return (
+    <TimeIntervalList
+      items={bookmarkIntervals}
+      interval={interval}
+      onIntervalChange={(interval) =>
+        useChartSettingsStore.getState().setSettings({ interval })
+      }
+      className={className}
+    >
+      <TimeIntervalPopover
+        bookmarkIntervals={bookmarkIntervals}
+        interval={interval}
+        onPin={(interval) =>
+          useChartSettingsStore.getState().setSettings({ interval })
+        }
+        onConfirm={(pins) =>
+          useChartSettingsStore
+            .getState()
+            .setSettings({ bookmarkIntervals: pins })
+        }
+        onReset={() =>
+          useChartSettingsStore.getState().resetBookmarkIntervals()
+        }
+      />
+    </TimeIntervalList>
   );
 };
 

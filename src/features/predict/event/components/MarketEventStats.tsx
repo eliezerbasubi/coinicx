@@ -32,28 +32,30 @@ const Stat = ({ variant, showOnEmpty, value, label }: StatProps) => {
   );
 };
 
-export const VolumeStat = ({ variant, showOnEmpty }: Props) => {
-  const volume = useMarketEventContext((s) => s.marketEventCtx.volume);
-
+export const VolumeStat = ({
+  variant,
+  value,
+  showOnEmpty,
+}: Omit<StatProps, "label">) => {
   return (
     <Stat
       variant={variant}
-      value={volume}
+      value={value}
       label="Vol"
       showOnEmpty={showOnEmpty}
     />
   );
 };
 
-export const OpenInterestStat = ({ variant, showOnEmpty }: Props) => {
-  const openInterest = useMarketEventContext(
-    (s) => s.marketEventCtx.openInterest,
-  );
-
+export const OpenInterestStat = ({
+  variant,
+  value,
+  showOnEmpty,
+}: Omit<StatProps, "label">) => {
   return (
     <Stat
       variant={variant}
-      value={openInterest}
+      value={value}
       label="OI"
       showOnEmpty={showOnEmpty}
     />
@@ -61,10 +63,19 @@ export const OpenInterestStat = ({ variant, showOnEmpty }: Props) => {
 };
 
 export const MarketEventStats = ({ variant, showOnEmpty }: Props) => {
+  const { openInterest, volume } = useMarketEventContext((s) => ({
+    openInterest: s.marketEventCtx.openInterest,
+    volume: s.marketEventCtx.volume,
+  }));
+
   return (
     <React.Fragment>
-      <VolumeStat variant={variant} showOnEmpty={showOnEmpty} />
-      <OpenInterestStat variant={variant} showOnEmpty={showOnEmpty} />
+      <VolumeStat variant={variant} value={volume} showOnEmpty={showOnEmpty} />
+      <OpenInterestStat
+        variant={variant}
+        value={openInterest}
+        showOnEmpty={showOnEmpty}
+      />
     </React.Fragment>
   );
 };

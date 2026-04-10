@@ -5,53 +5,10 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
+import { MarketEventMetaOutcome } from "@/features/predict/types";
 
-import { MarketEventMetaOutcome } from "../../types";
-import MarketSideActions from "./MarketSideActions";
-
-const CategoricalOutcomes = () => {
-  const { marketEventMeta, setActiveOutcomeIndex } = useMarketEventContext(
-    (s) => ({
-      marketEventMeta: s.marketEventMeta,
-      setActiveOutcomeIndex: s.setActiveOutcomeIndex,
-    }),
-  );
-
-  return (
-    <Accordion type="single" collapsible className="w-full mt-4 space-y-1">
-      {marketEventMeta.outcomes.map((outcome, index) => {
-        return (
-          <AccordionItem
-            key={outcome.coin}
-            value={outcome.coin}
-            className="not-last:border-0"
-          >
-            <AccordionTrigger
-              hideArrow
-              onClick={() => setActiveOutcomeIndex(index)}
-              className="border-0 hover:no-underline py-0"
-            >
-              <MarketEventAccordionTrigger
-                outcome={outcome}
-                outcomeIndex={index}
-              />
-            </AccordionTrigger>
-            <AccordionContent>
-              Yes. It adheres to the WAI-ARIA design pattern.
-            </AccordionContent>
-          </AccordionItem>
-        );
-      })}
-    </Accordion>
-  );
-};
+import MarketSideActions from "../MarketSideActions";
 
 const defaultSide = {
   volume: 0,
@@ -62,7 +19,7 @@ const defaultSide = {
   openInterest: 0,
 };
 
-const MarketEventAccordionTrigger = ({
+const MarketEventTile = ({
   outcome,
   outcomeIndex,
   ...props
@@ -96,10 +53,7 @@ const MarketEventAccordionTrigger = ({
   const volume = primarySide.volume;
 
   return (
-    <div
-      className="w-full flex items-center gap-2 bg-neutral-gray-600 rounded-md p-3"
-      {...props}
-    >
+    <div className="w-full flex items-center gap-2 p-3" {...props}>
       <div className="flex-1">
         <p className="text-sm font-medium text-white">{outcome.title}</p>
 
@@ -172,4 +126,4 @@ const MarketEventAccordionTrigger = ({
   );
 };
 
-export default CategoricalOutcomes;
+export default MarketEventTile;

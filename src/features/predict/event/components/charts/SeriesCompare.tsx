@@ -1,12 +1,13 @@
 import { CandleSnapshotResponse } from "@nktkas/hyperliquid";
 import { ArrowUp } from "lucide-react";
 
+import { CHART_HEIGHT } from "@/lib/constants/chart-options";
 import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
 import AppLogo from "@/components/vectors/app-logo";
 
-import { useSeriesChart, type SeriesInfo } from "./hooks/useSeriesChart";
-import { useSeriesChartSubs } from "./hooks/useSeriesChartSubs";
+import { useSeriesChart, type SeriesInfo } from "../../hooks/useSeriesChart";
+import { useSeriesChartSubs } from "../../hooks/useSeriesChartSubs";
 
 const SeriesCompare = ({
   seriesInfo,
@@ -102,19 +103,21 @@ const SeriesCompare = ({
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center size-full min-h-60">
-          <span className="text-neutral-gray-400 text-sm">Loading chart…</span>
-        </div>
-      ) : isError ? (
-        <div className="flex items-center justify-center size-full min-h-60">
-          <span className="text-neutral-gray-400 text-sm">
-            Failed to load chart data
-          </span>
-        </div>
-      ) : (
-        <div ref={containerRef} className="size-full" />
-      )}
+      <div className="flex flex-col" style={{ minHeight: CHART_HEIGHT }}>
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center size-full">
+            <AppLogo className="h-5" />
+          </div>
+        ) : isError ? (
+          <div className="flex items-center justify-center size-full">
+            <span className="text-neutral-gray-400 text-sm">
+              Failed to load chart data
+            </span>
+          </div>
+        ) : (
+          <div ref={containerRef} className="size-full" />
+        )}
+      </div>
 
       <div
         ref={tooltipRef}
