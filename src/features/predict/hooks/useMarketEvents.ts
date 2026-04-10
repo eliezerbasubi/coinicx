@@ -2,11 +2,11 @@ import { useMemo } from "react";
 
 import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 
-import { MarketEvent, SideSpec } from "../types";
-import { detectCategories } from "../utils/detectCategories";
-import { buildSideCoin, isRecurring } from "../utils/outcomes";
-import { parseReccuringTitle } from "../utils/parseMetadata";
-import { slugify } from "../utils/shared";
+import { MarketEvent, SideSpec } from "../lib/types";
+import { detectCategories } from "../lib/utils/detectCategories";
+import { buildSideCoin, isRecurring } from "../lib/utils/outcomes";
+import { parseReccuringTitle } from "../lib/utils/parseMetadata";
+import { slugify } from "../lib/utils/shared";
 import { useMarketEventsMetas } from "./useMarketEventsMetas";
 
 export const useMarketEvents = () => {

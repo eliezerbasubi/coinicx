@@ -7,7 +7,7 @@ import { useQueries } from "@tanstack/react-query";
 
 import { hlInfoClient } from "@/lib/services/transport";
 import { getChartTimeRange } from "@/lib/utils/intervalFormatter";
-import { MarketEventMetaSide } from "@/features/predict/types";
+import { MarketEventMetaSide } from "@/features/predict/lib/types";
 
 type UseFetchSnapshotsArgs = {
   outcomeMetas: { title: string; sides: MarketEventMetaSide[] }[];

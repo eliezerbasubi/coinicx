@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { create } from "zustand";
 
-import { MarketEventCtx, MarketEventMeta } from "@/features/predict/types";
+import { MarketEventCtx, MarketEventMeta } from "@/features/predict/lib/types";
 
 export interface MarketEventStoreProps {
   marketEventMeta: MarketEventMeta;

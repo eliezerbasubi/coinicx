@@ -1,7 +1,7 @@
 import React from "react";
 
 import { formatNumber } from "@/lib/utils/formatting/numbers";
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
 type Props = {
   variant: "compact" | "full";

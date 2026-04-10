@@ -1,7 +1,7 @@
 import { useChartSettingsStore } from "@/lib/store/trade/chart-settings";
 import { ChartTimeInterval } from "@/components/common/ChartTimeInterval";
 import Visibility from "@/components/common/Visibility";
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
 import { useFetchSnapshots } from "../hooks/useFetchSnapshots";
 import SeriesCompare from "./charts/SeriesCompare";

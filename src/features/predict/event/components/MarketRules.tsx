@@ -1,4 +1,4 @@
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
 const MarketRules = () => {
   const description = useMarketEventContext(

@@ -6,7 +6,10 @@ import {
   TimeIntervalList,
   TimeIntervalPopover,
 } from "@/components/common/ChartTimeInterval";
-import { MarketEventMetaOutcome, SideSpecCtx } from "@/features/predict/types";
+import {
+  MarketEventMetaOutcome,
+  SideSpecCtx,
+} from "@/features/predict/lib/types";
 
 import { useFetchSnapshots } from "../../hooks/useFetchSnapshots";
 import SeriesCompare from "../charts/SeriesCompare";

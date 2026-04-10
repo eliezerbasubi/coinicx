@@ -3,11 +3,11 @@ import Link from "next/link";
 
 import { ROUTES } from "@/lib/constants/routes";
 import TokenImage from "@/components/common/TokenImage";
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import {
   formatDateFromPeriod,
   parseExpiry,
-} from "@/features/predict/utils/parseMetadata";
+} from "@/features/predict/lib/utils/parseMetadata";
 
 import LiveMarketDetails from "./LiveMarketDetails";
 import { MarketEventStats } from "./MarketEventStats";

@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { PREDICTION_CATEGORIES } from "../constants/categories";
+import { PREDICTION_CATEGORIES } from "../lib/constants/categories";
 import MarketEventsListing from "./components/MarketEventsListing";
 
 const PredictionMarkets = () => {

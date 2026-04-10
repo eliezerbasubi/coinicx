@@ -4,9 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { hlInfoClient } from "@/lib/services/transport";
 
-import { isRecurring } from "../utils/outcomes";
-import { parseReccuringTitle } from "../utils/parseMetadata";
-import { slugify } from "../utils/shared";
+import { isRecurring } from "../lib/utils/outcomes";
+import { parseReccuringTitle } from "../lib/utils/parseMetadata";
+import { slugify } from "../lib/utils/shared";
 
 export const useMarketEventsMetas = () => {
   const { data, isLoading, error } = useQuery({

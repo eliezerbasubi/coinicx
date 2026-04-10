@@ -5,12 +5,12 @@ import { notFound } from "next/navigation";
 
 import { useMarketEventsMetas } from "../hooks/useMarketEventsMetas";
 import { useSpotMetas } from "../hooks/useSpotMetas";
-import MarketEventStoreProvider from "../store/market-event/provider";
-import { MarketEventMeta, MarketEventMetaOutcome } from "../types";
-import { detectCategories } from "../utils/detectCategories";
-import { buildSideCoin, isRecurring } from "../utils/outcomes";
-import { parseRecurringMetadata } from "../utils/parseMetadata";
-import { slugify } from "../utils/shared";
+import MarketEventStoreProvider from "../lib/store/market-event/provider";
+import { MarketEventMeta, MarketEventMetaOutcome } from "../lib/types";
+import { detectCategories } from "../lib/utils/detectCategories";
+import { buildSideCoin, isRecurring } from "../lib/utils/outcomes";
+import { parseRecurringMetadata } from "../lib/utils/parseMetadata";
+import { slugify } from "../lib/utils/shared";
 import MarketEventCtxProvider from "./market-event-ctx-provider";
 
 type Props = {

@@ -5,8 +5,8 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
-import { MarketEventMetaOutcome } from "@/features/predict/types";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
+import { MarketEventMetaOutcome } from "@/features/predict/lib/types";
 
 import MarketSideActions from "../MarketSideActions";
 

@@ -8,8 +8,8 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { useSpotMetas } from "@/features/predict/hooks/useSpotMetas";
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
-import { parseExpiry } from "@/features/predict/utils/parseMetadata";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
+import { parseExpiry } from "@/features/predict/lib/utils/parseMetadata";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
 
 const LiveMarketDetails = () => {

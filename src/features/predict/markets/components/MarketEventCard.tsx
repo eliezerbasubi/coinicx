@@ -7,12 +7,12 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
-import { MarketEvent } from "@/features/predict/types";
+import { MarketEvent } from "@/features/predict/lib/types";
 import {
   convertPeriodToMinutes,
   parseRecurringMetadata,
-} from "@/features/predict/utils/parseMetadata";
-import { slugify } from "@/features/predict/utils/shared";
+} from "@/features/predict/lib/utils/parseMetadata";
+import { slugify } from "@/features/predict/lib/utils/shared";
 
 type Props = {
   data: MarketEvent;

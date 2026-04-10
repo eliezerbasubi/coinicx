@@ -7,7 +7,7 @@ import {
 import { OrderSide } from "@/lib/types/trade";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
 import MarketSideActions from "../MarketSideActions";
 import PredictOrderTypes from "./PredictOrderTypes";

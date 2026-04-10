@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { Button } from "@/components/ui/button";
-import { MarketEvent } from "@/features/predict/types";
+import { MarketEvent } from "@/features/predict/lib/types";
 
 type Props = {
   asChild?: boolean;

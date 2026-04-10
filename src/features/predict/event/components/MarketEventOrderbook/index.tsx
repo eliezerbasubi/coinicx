@@ -6,8 +6,8 @@ import {
 } from "@/lib/store/trade/orderbook";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
-import { MarketEventMetaSide } from "@/features/predict/types";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
+import { MarketEventMetaSide } from "@/features/predict/lib/types";
 
 import MarketEventOrderBookList from "./MarketEventOrderbookList";
 

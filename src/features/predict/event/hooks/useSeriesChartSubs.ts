@@ -4,7 +4,7 @@ import { CandleWsEvent } from "@nktkas/hyperliquid";
 import { hlSubClient } from "@/lib/services/transport";
 import { useShallowChartSettingsStore } from "@/lib/store/trade/chart-settings";
 import { useSubscriptions } from "@/hooks/useSubscription";
-import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
 type SeriesChartSubsArgs = {
   onCandleUpdate: (candle: CandleWsEvent, seriesIndex: number) => void;

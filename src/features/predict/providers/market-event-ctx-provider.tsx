@@ -2,9 +2,9 @@ import { useEffect } from "react";
 
 import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 
-import { useMarketEventContext } from "../store/market-event/hooks";
-import { MarketEventMetaSide } from "../types";
-import { buildSideCoin } from "../utils/outcomes";
+import { useMarketEventContext } from "../lib/store/market-event/hooks";
+import { MarketEventMetaSide } from "../lib/types";
+import { buildSideCoin } from "../lib/utils/outcomes";
 
 // We separate context from meta to avoid unnecessary renders
 const MarketEventCtxProvider = () => {
