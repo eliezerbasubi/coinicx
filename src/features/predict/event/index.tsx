@@ -1,6 +1,7 @@
 "use client";
 
 import CategoricalOutcomes from "./components/CategoricalOutcomes";
+import Charting from "./components/Charting";
 import MarketEventHeader from "./components/MarketEventHeader";
 import MarketRules from "./components/MarketRules";
 import TradingForm from "./components/TradingForm";
@@ -12,8 +13,7 @@ const MarketEvent = () => {
       <main className="w-full">
         <MarketEventHeader />
 
-        {/* Chart will go here */}
-        <div className="w-full flex items-center gap-2 min-h-60 bg-neutral-gray-600 rounded-lg mt-4"></div>
+        <Charting />
 
         {/* Categorical outcomes */}
         <CategoricalOutcomes />

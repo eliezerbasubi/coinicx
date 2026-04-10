@@ -1,5 +1,7 @@
 import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
 
+import { formatDate } from "@/lib/utils/formatting/dates";
+
 import { ParsedRecurringMetadata, ParsedRecurringPayload } from "../types";
 import { slugify } from "./shared";
 
@@ -9,19 +11,7 @@ export function formatExpiryDate(
 ) {
   const date = parseExpiry(expiry);
 
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "numeric",
-    hour12: true,
-  };
-
-  const formatterOptions = options ?? defaultOptions;
-
-  const formatter = new Intl.DateTimeFormat("en-US", formatterOptions);
-
-  return formatter.format(date);
+  return formatDate(date, options);
 }
 
 export function parseExpiry(s: string): Date {

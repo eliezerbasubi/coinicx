@@ -43,7 +43,7 @@ export const useMarketEvents = () => {
     const questionOutcomes = new Map<number, number>();
 
     // Populate the map of question outcomes
-    for (const question of data.questions) {
+    for (const question of data.slugToQuestion.values()) {
       const categoricalEventIndex = marketEvents.push({
         coin: null,
         title: question.name,
@@ -66,9 +66,9 @@ export const useMarketEvents = () => {
     }
 
     // Map through outcomes to create market events
-    for (const outcome of data.outcomes) {
-      // Skip "Other" outcomes with "N/A" description as it's considered as a fallback outcome
-      if (outcome.name === "Other" && outcome.description === "N/A") continue;
+    for (const outcome of data.slugToOutcomeSpec.values()) {
+      // Skip fallback outcomes
+      if (data.fallbackOutcomes.has(outcome.outcome)) continue;
 
       const coin = buildSideCoin(outcome.outcome, 0);
       const ctx = spotAssetCtxs[coin];
@@ -82,11 +82,14 @@ export const useMarketEvents = () => {
         const sides = outcome.sideSpecs.map((sideSpec, index) => {
           const side = mapSideSpecToSide(sideSpec.name, outcome.outcome, index);
 
-          categoricalEvent.volume += side.volume;
+          // Open interest is the total of both sides
           categoricalEvent.openInterest += side.openInterest;
 
           return side;
         });
+
+        // Consider the first side spec as the main side spec cause it has the same coin as the outcome
+        categoricalEvent.volume += sides[0].volume;
 
         categoricalEvent.outcomes.push({
           coin: buildSideCoin(outcome.outcome, 0),
@@ -95,10 +98,11 @@ export const useMarketEvents = () => {
           description: outcome.description,
           sides,
         });
-      }
-      // Check if the outcome is a recurring outcome
-      else if (isRecurring(outcome)) {
-        const { title, slug } = parseReccuringTitle(outcome);
+      } else {
+        const isRecurringOutcome = isRecurring(outcome);
+        const parsedMetadata = isRecurringOutcome
+          ? parseReccuringTitle(outcome)
+          : { title: outcome.name, slug: slugify(outcome.name) };
 
         const sides = outcome.sideSpecs.map((sideSpec, index) =>
           mapSideSpecToSide(sideSpec.name, outcome.outcome, index),
@@ -106,33 +110,12 @@ export const useMarketEvents = () => {
 
         marketEvents.push({
           coin: buildSideCoin(outcome.outcome, 0),
-          title,
+          title: parsedMetadata.title,
+          // Don't parse description
           description: outcome.description,
-          slug,
+          slug: parsedMetadata.slug,
           resolution: outcome.outcome,
-          type: "recurring",
-          questionId: null,
-          volume: Number(ctx?.dayNtlVlm ?? 0),
-          openInterest: sides[0].openInterest + sides[1].openInterest,
-          outcomes: [],
-          settledOutcomes: [],
-          categories: detectCategories(outcome.name, outcome.description),
-          sides,
-        });
-      }
-      // Consider the rest binary outcomes
-      else {
-        const sides = outcome.sideSpecs.map((sideSpec, index) =>
-          mapSideSpecToSide(sideSpec.name, outcome.outcome, index),
-        );
-
-        marketEvents.push({
-          coin: buildSideCoin(outcome.outcome, 0),
-          title: outcome.name,
-          description: outcome.description,
-          slug: slugify(outcome.name),
-          resolution: outcome.outcome,
-          type: "binary",
+          type: isRecurringOutcome ? "recurring" : "binary",
           questionId: null,
           volume: Number(ctx?.dayNtlVlm ?? 0),
           openInterest: sides[0].openInterest + sides[1].openInterest,

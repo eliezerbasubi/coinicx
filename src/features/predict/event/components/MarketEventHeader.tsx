@@ -2,9 +2,7 @@ import React from "react";
 import Link from "next/link";
 
 import { ROUTES } from "@/lib/constants/routes";
-import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
-import Visibility from "@/components/common/Visibility";
 import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
 import {
   formatDateFromPeriod,
@@ -12,78 +10,62 @@ import {
 } from "@/features/predict/utils/parseMetadata";
 
 import LiveMarketDetails from "./LiveMarketDetails";
+import { MarketEventStats } from "./MarketEventStats";
 
 const MarketEventHeader = () => {
-  const marketEvent = useMarketEventContext((state) => state.marketEvent);
+  const marketEventMeta = useMarketEventContext(
+    (state) => state.marketEventMeta,
+  );
 
   return (
     <div className="w-full">
       <div className="flex items-center gap-2 mb-4">
-        <Link href={ROUTES.predict.index}>
+        <Link prefetch href={ROUTES.predict.index}>
           <p className="text-xs font-medium text-neutral-gray-400 hover:text-white transition-colors">
             Markets
           </p>
         </Link>
         <p className="text-xs font-medium text-neutral-gray-400">/</p>
         <p className="text-xs font-medium text-neutral-gray-400">
-          {marketEvent.title}
+          {marketEventMeta.title}
         </p>
       </div>
       <div className="w-full flex items-center gap-4">
-        <Visibility visible={!!marketEvent.underlying}>
+        {marketEventMeta.recurringPayload?.underlying && (
           <TokenImage
-            name={marketEvent.underlying}
+            name={marketEventMeta.recurringPayload?.underlying}
             instrumentType="spot"
             className="size-16 rounded-lg"
           />
-        </Visibility>
+        )}
 
         <div className="flex-1">
           <div className="flex items-center gap-1 text-neutral-gray-400 mb-1">
-            {marketEvent.categories.map((category, index) => (
+            {marketEventMeta.categories.map((category, index) => (
               <React.Fragment key={category}>
                 <p className="text-xs font-medium capitalize">{category}</p>
-                {index < marketEvent.categories.length - 1 && (
+                {index < marketEventMeta.categories.length - 1 && (
                   <span className="text-xs font-medium">·</span>
                 )}
               </React.Fragment>
             ))}
           </div>
           <h1 className="flex-1 text-xl font-semibold line-clamp-2">
-            {marketEvent.title}
+            {marketEventMeta.title}
           </h1>
 
           <div className="flex items-center gap-1 mt-1 divide-x divide-neutral-gray-200">
-            <Visibility visible={!!marketEvent.volume}>
-              <p className="text-xs font-medium text-neutral-gray-400 pr-2">
-                <span>
-                  {formatNumber(marketEvent.volume, {
-                    style: "currency",
-                    notation: "compact",
-                  })}
-                </span>
-                <span className="ml-1">Vol</span>
-              </p>
-            </Visibility>
-            <Visibility visible={!!marketEvent.openInterest}>
-              <p className="text-xs font-medium text-neutral-gray-400 pr-2">
-                <span>
-                  {formatNumber(marketEvent.openInterest, {
-                    style: "currency",
-                    notation: "compact",
-                  })}
-                </span>
-                <span className="ml-1">OI</span>
-              </p>
-            </Visibility>
-            {marketEvent.expiry && (
+            <MarketEventStats variant="compact" showOnEmpty={false} />
+            {marketEventMeta.recurringPayload?.expiry && (
               <p className="text-xs font-medium text-neutral-gray-400 pl-1">
-                <span>{formatExpiryDate(marketEvent.expiry)}</span>
+                <span>
+                  {formatExpiryDate(marketEventMeta.recurringPayload.expiry)}
+                </span>
                 <span>-</span>
                 <span>
                   {formatDateFromPeriod(
-                    marketEvent.period,
-                    marketEvent.expiry,
+                    marketEventMeta.recurringPayload.period,
+                    marketEventMeta.recurringPayload.expiry,
                     {
                       hour: "2-digit",
                       minute: "2-digit",

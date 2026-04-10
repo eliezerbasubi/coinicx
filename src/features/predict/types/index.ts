@@ -1,7 +1,4 @@
-export interface SideSpec {
-  name: string;
-  coin: string;
-
+export interface SideSpecCtx {
   /** The volume of the side spec */
   volume: number;
 
@@ -13,6 +10,11 @@ export interface SideSpec {
 
   /** The sum of the open interest of the two sides. Circulating supply of the market event */
   openInterest: number;
+}
+
+export interface SideSpec extends SideSpecCtx {
+  name: string;
+  coin: string;
 }
 
 export interface MarketOutcome {
@@ -73,14 +75,12 @@ export interface MarketEvent {
   categories: string[];
 }
 
-interface MarketEventMetaSide {
+export interface MarketEventMetaSide {
   name: string;
-  token?: number;
+  coin: string;
 }
 
-export interface MarketEventMetaOutcome {
-  coin: string;
-  title: string;
+export interface MarketEventMetaOutcome extends Omit<MarketOutcome, "sides"> {
   sides: MarketEventMetaSide[];
 }
 
@@ -102,12 +102,6 @@ export interface MarketEventMeta {
 export interface MarketEventCtx {
   openInterest: number;
   volume: number;
-  sides: {
-    volume: number;
-    volumeInBase: number;
-    markPx: number;
-    midPx: number;
-    prevDayPx: number;
-    openInterest: number;
-  }[];
+  outcomes: { sides: SideSpecCtx[] }[];
+  sides: SideSpecCtx[];
 }

@@ -9,16 +9,15 @@ import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { useSpotMetas } from "@/features/predict/hooks/useSpotMetas";
 import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
-import {
-  parseExpiry,
-  parseRecurringDescription,
-} from "@/features/predict/utils/parseMetadata";
+import { parseExpiry } from "@/features/predict/utils/parseMetadata";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
 
 const LiveMarketDetails = () => {
-  const marketEvent = useMarketEventContext((state) => state.marketEvent);
+  const marketEventMeta = useMarketEventContext(
+    (state) => state.marketEventMeta,
+  );
 
-  const recurringPayload = parseRecurringDescription(marketEvent.description);
+  const recurringPayload = marketEventMeta.recurringPayload;
 
   const spotAssetCtxs = useInstrumentStore((s) => s.spotAssetCtxs);
   const spotMetas = useSpotMetas();

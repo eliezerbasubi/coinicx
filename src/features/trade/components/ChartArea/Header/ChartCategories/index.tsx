@@ -5,7 +5,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { ChartType } from "@/lib/types/trade";
 import Visibility from "@/components/common/Visibility";
 
-import ChartTimeInterval from "../ChartTimeInterval";
+import ChartTimeInterval from "../../../../../../components/common/ChartTimeInterval";
 import OrdersSettings from "../OrdersSettings";
 
 const ChartCategoryPopover = dynamic(() => import("./ChartCategoryPopover"), {

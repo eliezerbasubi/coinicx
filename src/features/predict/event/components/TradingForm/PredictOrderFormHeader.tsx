@@ -18,22 +18,29 @@ const PredictOrderFormHeader = () => {
     orderSide: s.orderSide,
   }));
 
-  const { marketEvent, activeMarketOutcome } = useMarketEventContext((s) => ({
-    marketEvent: s.marketEvent,
-    activeMarketOutcome: s.marketEvent.outcomes[s.activeOutcomeIndex],
-  }));
+  const { marketEvent, marketEventSidesCtx } = useMarketEventContext((s) => {
+    const marketEvent =
+      s.marketEventMeta.outcomes[s.activeOutcomeIndex] ?? s.marketEventMeta;
 
-  const currentMarketOutcome = activeMarketOutcome ?? marketEvent;
+    const sidesCtxs =
+      s.marketEventCtx.outcomes[s.activeOutcomeIndex]?.sides ??
+      s.marketEventCtx.sides;
+
+    return {
+      marketEvent,
+      marketEventSidesCtx: sidesCtxs,
+    };
+  });
+
+  const volume = marketEventSidesCtx[sideIndex]?.volume || 0;
 
   return (
     <React.Fragment>
       <div className="px-4 pt-4">
-        <p className="text-sm font-medium text-white">
-          {currentMarketOutcome.title}
-        </p>
+        <p className="text-sm font-medium text-white">{marketEvent.title}</p>
         <p className="text-xs font-medium text-neutral-gray-400">
           <span>
-            {formatNumber(currentMarketOutcome.sides[sideIndex]?.volume ?? 0, {
+            {formatNumber(volume, {
               style: "currency",
               notation: "compact",
             })}
@@ -66,7 +73,10 @@ const PredictOrderFormHeader = () => {
       </Tabs>
 
       <MarketSideActions
-        sides={currentMarketOutcome.sides}
+        sides={marketEvent.sides.map((side, index) => ({
+          ...side,
+          ...marketEventSidesCtx[index],
+        }))}
         currentSideIndex={sideIndex}
         className="bg-neutral-gray-200 text-neutral-gray-400"
         wrapperClassName="grid grid-cols-2 gap-2 p-4"

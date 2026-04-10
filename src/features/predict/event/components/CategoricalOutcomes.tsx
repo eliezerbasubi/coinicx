@@ -13,18 +13,20 @@ import {
 } from "@/components/ui/accordion";
 import { useMarketEventContext } from "@/features/predict/store/market-event/hooks";
 
-import { MarketOutcome } from "../../types";
+import { MarketEventMetaOutcome } from "../../types";
 import MarketSideActions from "./MarketSideActions";
 
 const CategoricalOutcomes = () => {
-  const { marketEvent, setActiveOutcomeIndex } = useMarketEventContext((s) => ({
-    marketEvent: s.marketEvent,
-    setActiveOutcomeIndex: s.setActiveOutcomeIndex,
-  }));
+  const { marketEventMeta, setActiveOutcomeIndex } = useMarketEventContext(
+    (s) => ({
+      marketEventMeta: s.marketEventMeta,
+      setActiveOutcomeIndex: s.setActiveOutcomeIndex,
+    }),
+  );
 
   return (
     <Accordion type="single" collapsible className="w-full mt-4 space-y-1">
-      {marketEvent.outcomes.map((outcome, index) => {
+      {marketEventMeta.outcomes.map((outcome, index) => {
         return (
           <AccordionItem
             key={outcome.coin}
@@ -51,32 +53,47 @@ const CategoricalOutcomes = () => {
   );
 };
 
+const defaultSide = {
+  volume: 0,
+  volumeInBase: 0,
+  markPx: 0,
+  midPx: 0,
+  prevDayPx: 0,
+  openInterest: 0,
+};
+
 const MarketEventAccordionTrigger = ({
   outcome,
   outcomeIndex,
   ...props
 }: {
-  outcome: MarketOutcome;
+  outcome: MarketEventMetaOutcome;
   outcomeIndex: number;
 } & React.ComponentProps<"div">) => {
-  const { activeMarketOutcome, setActiveOutcomeIndex } = useMarketEventContext(
-    (s) => ({
-      activeMarketOutcome: s.marketEvent.outcomes[s.activeOutcomeIndex],
+  const { activeMarketOutcome, outcomesCtxs, setActiveOutcomeIndex } =
+    useMarketEventContext((s) => ({
+      activeMarketOutcome: s.marketEventMeta.outcomes[s.activeOutcomeIndex],
+      outcomesCtxs: s.marketEventCtx.outcomes,
       setActiveOutcomeIndex: s.setActiveOutcomeIndex,
-    }),
-  );
+    }));
   const sideIndex = useShallowOrderFormStore((s) => s.predictSideIndex);
 
-  const primarySide = outcome.sides[0];
-  const price = primarySide.midPx || primarySide.markPx;
-  const change = primarySide.markPx - primarySide.prevDayPx;
+  const sidesContexts = outcomesCtxs?.[outcomeIndex]?.sides ?? [
+    defaultSide,
+    defaultSide,
+  ];
+  const primarySide = sidesContexts[0];
+  const midPx = primarySide.midPx ?? 0;
+  const markPx = primarySide.markPx ?? 0;
+  const prevDayPx = primarySide.prevDayPx ?? 0;
 
-  const changeInPercentage = change
-    ? (change / primarySide.prevDayPx) * 100
-    : 0;
+  const price = midPx || markPx;
+  const change = markPx - prevDayPx;
 
-  const openInterest =
-    outcome.sides[0].openInterest + outcome.sides[1].openInterest;
+  const changeInPercentage = change ? (change / prevDayPx) * 100 : 0;
+
+  const openInterest = primarySide.openInterest;
+  const volume = primarySide.volume;
 
   return (
     <div
@@ -89,7 +106,7 @@ const MarketEventAccordionTrigger = ({
         <div className="flex items gap-2 divide-x divide-neutral-gray-200">
           <p className="text-xs font-medium text-neutral-gray-400 pr-2">
             <span>
-              {formatNumber(primarySide.volume, {
+              {formatNumber(volume, {
                 style: "currency",
                 notation: "compact",
               })}
@@ -134,7 +151,10 @@ const MarketEventAccordionTrigger = ({
 
       <MarketSideActions
         asChild
-        sides={outcome.sides}
+        sides={outcome.sides.map((side, index) => ({
+          ...side,
+          ...sidesContexts[index],
+        }))}
         label="Buy"
         wrapperClassName="flex-1 flex items-center justify-end gap-2"
         className="w-[136px]"

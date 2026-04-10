@@ -14,3 +14,24 @@ export const formatDateTime = (value: number | string | Date): string => {
 
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 };
+
+export const formatDate = (
+  value: number | string | Date,
+  options?: Intl.DateTimeFormatOptions,
+) => {
+  const date = new Date(value);
+
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "numeric",
+    hour12: true,
+  };
+
+  const formatterOptions = options ?? defaultOptions;
+
+  const formatter = new Intl.DateTimeFormat("en-US", formatterOptions);
+
+  return formatter.format(date);
+};

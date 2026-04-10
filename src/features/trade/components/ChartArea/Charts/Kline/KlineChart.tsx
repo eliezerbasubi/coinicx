@@ -7,7 +7,7 @@ import { useChartSettingsStore } from "@/lib/store/trade/chart-settings";
 import { useTradeContext } from "@/lib/store/trade/hooks";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
-import { getChartTimeRange } from "@/features/trade/utils";
+import { getChartTimeRange } from "@/lib/utils/intervalFormatter";
 
 import KlineTooltipTitle from "./KlineTooltipTitle";
 import KlineVolIndicatorTitle from "./KlineVolIndicatorTitle";
