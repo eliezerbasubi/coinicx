@@ -23,7 +23,7 @@ export const mapCumulativeDepthVisualizer = (
 export const mapAmountDepthVisualizer = (
   levels: PriceLevel[],
 ): PriceLevel[] => {
-  return levels.map((level) => ({ px: level.px, sz: level.sz }));
+  return levels.map((level) => ({ px: level.px, sz: level.sz, n: level.n }));
 };
 
 const getTickValue = (tick: L2BookTick) => {
