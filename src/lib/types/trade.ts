@@ -9,9 +9,13 @@ import {
 
 export type ChartType = "standard" | "tradingView" | "depth";
 
+export type ChartView = "line" | "candlestick";
+
 export type MobileViewTab = "home" | "markets" | "trade" | "account";
 
 export type MarketAreaTabValue = "chart" | "orderbook" | "info";
+
+export type CandleSnapshotInterval = CandleSnapshotParameters["interval"];
 
 export type ChartIntervalType =
   | "second"
@@ -26,7 +30,7 @@ export interface ChartInterval {
   type: ChartIntervalType;
   span: number;
   listed?: boolean;
-  value: CandleSnapshotParameters["interval"];
+  value: CandleSnapshotInterval;
 }
 
 export type OrderType =

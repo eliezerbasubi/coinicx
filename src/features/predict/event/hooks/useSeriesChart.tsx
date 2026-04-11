@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { CandleSnapshotResponse } from "@nktkas/hyperliquid";
 import {
+  CandlestickData,
+  CandlestickSeries,
   createChart,
   createSeriesMarkers,
   IChartApi,
@@ -12,7 +14,7 @@ import {
 } from "lightweight-charts";
 
 import { BASE_CHART_OPTIONS } from "@/lib/constants/chart-options";
-import { useShallowChartSettingsStore } from "@/lib/store/trade/chart-settings";
+import { CandleSnapshotInterval, ChartView } from "@/lib/types/trade";
 import { formatDate } from "@/lib/utils/formatting/dates";
 import { tickMarkFormatter } from "@/lib/utils/intervalFormatter";
 
@@ -29,8 +31,8 @@ const BINARY_SERIES_COLORS = [
 ] as const;
 
 export interface SeriesInfo {
-  name: string;
   coin: string;
+  title: string;
   sideName: string;
   sideIndex: number;
 }
@@ -38,23 +40,29 @@ export interface SeriesInfo {
 type UseSeriesChartArgs = {
   seriesInfo: SeriesInfo[];
   snapshots: Array<CandleSnapshotResponse>;
+  chartView?: ChartView;
+  interval: CandleSnapshotInterval;
+  chartOptions?: Partial<{ height: number }>;
 };
 
 export const useSeriesChart = ({
   seriesInfo,
   snapshots,
+  interval,
+  chartView = "line",
+  chartOptions,
 }: UseSeriesChartArgs) => {
-  const interval = useShallowChartSettingsStore((s) => s.interval);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesApisRef = useRef<ISeriesApi<"Line">[]>([]);
+  const seriesApisRef = useRef<ISeriesApi<"Line" | "Candlestick">[]>([]);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const legendRef = useRef<HTMLDivElement>(null);
 
   const seriesData = useMemo(() => {
-    return snapshots.filter(Boolean).map(snapshotToLineData);
-  }, [snapshots]);
+    return snapshots
+      .filter(Boolean)
+      .map((snapshot) => snapshotToSeriesData(snapshot, chartView));
+  }, [snapshots, chartView]);
 
   const handleUpdateLegend = useCallback((param?: MouseEventParams<Time>) => {
     const validCrosshairPoint = !(
@@ -191,7 +199,7 @@ export const useSeriesChart = ({
 
         // if there are more than one series(categorical outcomes), use the series name, otherwise use the side name
         const name =
-          seriesInfo.length > 1 ? sideInfo?.name : sideInfo?.sideName;
+          seriesInfo.length > 1 ? sideInfo?.title : sideInfo?.sideName;
 
         const chance = data.value * 100;
 
@@ -233,59 +241,103 @@ export const useSeriesChart = ({
     tooltip.style.top = `${top}px`;
   }, []);
 
+  const createLineSeries = useCallback(
+    (chart: IChartApi) => {
+      const seriesApis: ISeriesApi<"Line">[] = [];
+
+      seriesData.forEach((series, index) => {
+        // if there are more than one series(categorical outcomes), use the series color, otherwise use the side color
+        const color =
+          seriesInfo.length > 1
+            ? SERIES_COLORS[index % SERIES_COLORS.length]
+            : BINARY_SERIES_COLORS[seriesInfo[index].sideIndex];
+
+        const lineSeries = chart.addSeries(LineSeries, {
+          color,
+          lineWidth: 2,
+          priceLineVisible: false,
+          crosshairMarkerVisible: true,
+        });
+
+        lineSeries.priceScale().applyOptions({
+          autoScale: true,
+          scaleMargins: { top: 0.1, bottom: 0.15 },
+        });
+
+        lineSeries.setData(series);
+
+        createSeriesMarkers(lineSeries, [
+          {
+            time: series[series.length - 1].time,
+            position: "inBar",
+            shape: "circle",
+            color,
+            size: 0.5,
+          },
+        ]);
+
+        seriesApis.push(lineSeries);
+      });
+
+      seriesApisRef.current = seriesApis;
+
+      handleUpdateLegend();
+    },
+    [seriesData],
+  );
+
+  const createCandleSeries = useCallback(
+    (chart: IChartApi) => {
+      const seriesApis: ISeriesApi<"Candlestick">[] = [];
+
+      const series = chart.addSeries(CandlestickSeries);
+
+      series.setData(seriesData[0]);
+
+      seriesApis.push(series);
+
+      seriesApisRef.current = seriesApis;
+    },
+    [seriesData],
+  );
+
   useEffect(() => {
     const tooltipEl = tooltipRef.current;
-    if (!containerRef.current || !seriesData.length) return;
+    if (!containerRef.current || !seriesData.flat().length) return;
 
     const chart = createChart(containerRef.current, {
       ...BASE_CHART_OPTIONS,
+      ...chartOptions,
       timeScale: {
         ...BASE_CHART_OPTIONS.timeScale,
         visible: true,
-        tickMarkFormatter: (time: number) => tickMarkFormatter(time, interval),
+        tickMarkFormatter: (time: number) =>
+          tickMarkFormatter(time / 1000, interval),
       },
+      grid: {
+        ...BASE_CHART_OPTIONS.grid,
+        horzLines: {
+          ...BASE_CHART_OPTIONS.grid?.horzLines,
+          visible: chartView === "candlestick",
+        },
+      },
+      crosshair: {
+        ...BASE_CHART_OPTIONS.crosshair,
+        vertLine: {
+          ...BASE_CHART_OPTIONS.crosshair?.vertLine,
+          labelVisible: chartView === "candlestick",
+        },
+      },
+      handleScroll: chartView === "candlestick",
+      handleScale: chartView === "candlestick",
       width: containerRef.current.clientWidth,
     });
 
-    const seriesApis: ISeriesApi<"Line">[] = [];
-
-    seriesData.forEach((series, index) => {
-      // if there are more than one series(categorical outcomes), use the series color, otherwise use the side color
-      const color =
-        seriesInfo.length > 1
-          ? SERIES_COLORS[index % SERIES_COLORS.length]
-          : BINARY_SERIES_COLORS[seriesInfo[index].sideIndex];
-
-      const lineSeries = chart.addSeries(LineSeries, {
-        color,
-        lineWidth: 2,
-        priceLineVisible: false,
-        crosshairMarkerVisible: true,
-      });
-
-      lineSeries.priceScale().applyOptions({
-        autoScale: true,
-        scaleMargins: { top: 0.1, bottom: 0.15 },
-      });
-
-      lineSeries.setData(series);
-
-      createSeriesMarkers(lineSeries, [
-        {
-          time: series[series.length - 1].time,
-          position: "inBar",
-          shape: "circle",
-          color,
-          size: 1,
-        },
-      ]);
-
-      seriesApis.push(lineSeries);
-    });
-
-    seriesApisRef.current = seriesApis;
-
-    handleUpdateLegend();
+    if (chartView === "candlestick") {
+      createCandleSeries(chart);
+    } else {
+      createLineSeries(chart);
+    }
 
     chart.timeScale().fitContent();
 
@@ -294,7 +346,9 @@ export const useSeriesChart = ({
       handleTooltip(param);
     };
 
-    chart.subscribeCrosshairMove(handleCrosshairMove);
+    if (chartView === "line") {
+      chart.subscribeCrosshairMove(handleCrosshairMove);
+    }
 
     return () => {
       chart.remove();
@@ -312,7 +366,7 @@ export const useSeriesChart = ({
     const seriesApi = seriesApisRef.current[seriesIndex];
     if (!seriesApi) return;
 
-    const lineData = candleToLineData(candle);
+    const lineData = candleToSeriesData(candle, chartView);
 
     seriesApi.update(lineData);
   };
@@ -326,9 +380,21 @@ export const useSeriesChart = ({
   };
 };
 
-export const candleToLineData = (candle: CandleSnapshotResponse[number]) => {
+export const candleToSeriesData = (
+  candle: CandleSnapshotResponse[number],
+  chartView: ChartView,
+) => {
+  if (chartView === "candlestick") {
+    return {
+      time: candle.T as Time,
+      open: Number(candle.o),
+      high: Number(candle.h),
+      low: Number(candle.l),
+      close: Number(candle.c),
+    };
+  }
   return {
-    time: (candle.T / 1000) as Time,
+    time: candle.T as Time,
     value: Number(candle.c),
   };
 };
@@ -337,16 +403,17 @@ export const candleToLineData = (candle: CandleSnapshotResponse[number]) => {
  * Transforms candle snapshot data into lightweight-charts line data.
  * Uses the closing price as the value (represents probability/chance).
  */
-const snapshotToLineData = (
+const snapshotToSeriesData = (
   snapshot: CandleSnapshotResponse,
-): LineData<Time>[] => {
-  return snapshot.map(candleToLineData);
+  chartView: ChartView,
+): (CandlestickData<Time> | LineData<Time>)[] => {
+  return snapshot.map((candle) => candleToSeriesData(candle, chartView));
 };
 
-const getLastBar = (series: ISeriesApi<"Line">) => {
+const getLastBar = (series: ISeriesApi<"Line" | "Candlestick">) => {
   return series?.dataByIndex(Number.MAX_SAFE_INTEGER, -1) as LineData<Time>;
 };
 
-const getFirstBar = (series: ISeriesApi<"Line">) => {
+const getFirstBar = (series: ISeriesApi<"Line" | "Candlestick">) => {
   return series.dataByIndex(0, Number.MAX_SAFE_INTEGER) as LineData<Time>;
 };

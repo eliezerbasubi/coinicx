@@ -5,10 +5,11 @@ import {
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
 import { OrderSide } from "@/lib/types/trade";
-import { formatNumber } from "@/lib/utils/formatting/numbers";
+import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
+import { VolumeStat } from "../MarketEventStats";
 import MarketSideActions from "../MarketSideActions";
 import PredictOrderTypes from "./PredictOrderTypes";
 
@@ -18,36 +19,32 @@ const PredictOrderFormHeader = () => {
     orderSide: s.orderSide,
   }));
 
-  const { marketEvent, marketEventSidesCtx } = useMarketEventContext((s) => {
-    const marketEvent =
-      s.marketEventMeta.outcomes[s.activeOutcomeIndex] ?? s.marketEventMeta;
+  const { marketEvent, marketEventType, marketEventSidesCtx } =
+    useMarketEventContext((s) => {
+      const marketEvent =
+        s.marketEventMeta.outcomes[s.activeOutcomeIndex] ?? s.marketEventMeta;
 
-    const sidesCtxs =
-      s.marketEventCtx.outcomes[s.activeOutcomeIndex]?.sides ??
-      s.marketEventCtx.sides;
+      const sidesCtxs =
+        s.marketEventCtx.outcomes[s.activeOutcomeIndex]?.sides ??
+        s.marketEventCtx.sides;
 
-    return {
-      marketEvent,
-      marketEventSidesCtx: sidesCtxs,
-    };
-  });
+      return {
+        marketEvent,
+        marketEventType: s.marketEventMeta.type,
+        marketEventSidesCtx: sidesCtxs,
+      };
+    });
 
   const volume = marketEventSidesCtx[sideIndex]?.volume || 0;
 
   return (
     <React.Fragment>
-      <div className="px-4 pt-4">
-        <p className="text-sm font-medium text-white">{marketEvent.title}</p>
-        <p className="text-xs font-medium text-neutral-gray-400">
-          <span>
-            {formatNumber(volume, {
-              style: "currency",
-              notation: "compact",
-            })}
-          </span>
-          <span className="ml-1">Vol</span>
-        </p>
-      </div>
+      <Visibility visible={marketEventType === "categorical"}>
+        <div className="px-4 pt-4">
+          <p className="text-sm font-medium text-white">{marketEvent.title}</p>
+          <VolumeStat value={volume} variant="compact" />
+        </div>
+      </Visibility>
       <Tabs
         defaultValue="buy"
         value={orderSide}

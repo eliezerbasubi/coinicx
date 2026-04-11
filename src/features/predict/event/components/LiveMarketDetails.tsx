@@ -7,7 +7,10 @@ import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
-import { useSpotMetas } from "@/features/predict/hooks/useSpotMetas";
+import {
+  useSpotAssetMeta,
+  useSpotMetas,
+} from "@/features/predict/hooks/useSpotMetas";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import { parseExpiry } from "@/features/predict/lib/utils/parseMetadata";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
@@ -20,26 +23,14 @@ const LiveMarketDetails = () => {
   const recurringPayload = marketEventMeta.recurringPayload;
 
   const spotAssetCtxs = useInstrumentStore((s) => s.spotAssetCtxs);
-  const spotMetas = useSpotMetas();
+  const spotAssetMeta = useSpotAssetMeta({
+    assetName: recurringPayload?.underlying ?? null,
+  });
 
   const activeAsset = useMemo(() => {
-    if (!recurringPayload || !spotMetas) return null;
+    if (!recurringPayload || !spotAssetMeta) return null;
 
-    const universeIndex = spotMetas.tokenNamesToUniverseIndex
-      ?.get(recurringPayload.underlying)
-      ?.get("USDC"); // USDH and USDC are both stablecoins, so we use USDC as the quote asset
-
-    if (!universeIndex) return null;
-
-    const universe = spotMetas.spotMeta.universe[universeIndex];
-
-    if (!universe) return null;
-
-    const baseTokenMeta = spotMetas.spotMeta.tokens[universe.tokens[0]];
-
-    if (!baseTokenMeta) return null;
-
-    const ctx = spotAssetCtxs[universe.name];
+    const ctx = spotAssetCtxs[spotAssetMeta.universe.name];
     const markPx = Number(ctx?.markPx || 0);
     const prevDayPx = Number(ctx?.prevDayPx || 0);
     const priceChange = markPx - prevDayPx;
@@ -47,11 +38,13 @@ const LiveMarketDetails = () => {
 
     return {
       price,
-      pxDecimals: getPriceDecimals(price, baseTokenMeta.szDecimals, true),
+      pxDecimals: ctx
+        ? getPriceDecimals(price, spotAssetMeta.meta.szDecimals, true)
+        : 2,
       priceChange,
       priceChangePercent: prevDayPx ? (priceChange / prevDayPx) * 100 : 0,
     };
-  }, [spotAssetCtxs, spotMetas, recurringPayload]);
+  }, [spotAssetCtxs, spotAssetMeta, recurringPayload]);
 
   if (!recurringPayload) return null;
 
@@ -145,7 +138,7 @@ const Countdown = ({ expiry }: { expiry: string }) => {
     `0${Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))}`.slice(-2);
   const seconds = `0${Math.floor((timeLeft % (1000 * 60)) / 1000)}`.slice(-2);
 
-  if (timeLeft <= 0)
+  if (timeLeft <= 0) {
     return (
       <Button
         variant="secondary"
@@ -164,6 +157,7 @@ const Countdown = ({ expiry }: { expiry: string }) => {
         <ChevronRight className="size-4 text-neutral-gray-100" />
       </Button>
     );
+  }
 
   return (
     <div className="flex items-center gap-2">

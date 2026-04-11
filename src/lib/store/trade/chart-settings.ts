@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 
-import { ChartType } from "@/lib/types/trade";
+import { ChartType, ChartView } from "@/lib/types/trade";
 
 type ChartSettingsState = {
   showQuickOrder: boolean;
@@ -14,6 +14,7 @@ type ChartSettingsState = {
   interval: CandleSnapshotParameters["interval"];
   bookmarkIntervals: CandleSnapshotParameters["interval"][];
   chartType: ChartType;
+  chartView: ChartView;
 };
 
 const bookmarkIntervals: Array<CandleSnapshotParameters["interval"]> = [
@@ -44,6 +45,7 @@ export const useChartSettingsStore = create<ChartSettingsStore>()(
       bookmarkIntervals,
       interval: "1h",
       chartType: "standard",
+      chartView: "candlestick",
       setSettings: (settings) => set((state) => ({ ...state, ...settings })),
       resetBookmarkIntervals: () => set({ bookmarkIntervals }),
     }),

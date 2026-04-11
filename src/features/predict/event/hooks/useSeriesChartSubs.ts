@@ -2,53 +2,31 @@ import { useMemo } from "react";
 import { CandleWsEvent } from "@nktkas/hyperliquid";
 
 import { hlSubClient } from "@/lib/services/transport";
-import { useShallowChartSettingsStore } from "@/lib/store/trade/chart-settings";
+import { CandleSnapshotInterval } from "@/lib/types/trade";
 import { useSubscriptions } from "@/hooks/useSubscription";
-import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
 type SeriesChartSubsArgs = {
+  interval: CandleSnapshotInterval;
+  coins: string[];
   onCandleUpdate: (candle: CandleWsEvent, seriesIndex: number) => void;
 };
 
 /**
  * Subscribe to realtime candle updates and forward them to the chart.
  */
-export const useSeriesChartSubs = ({ onCandleUpdate }: SeriesChartSubsArgs) => {
-  const { marketEventMeta, chartOutcomeSideIndex } = useMarketEventContext(
-    (s) => ({
-      marketEventMeta: s.marketEventMeta,
-      chartOutcomeSideIndex: s.chartOutcomeSideIndex,
-    }),
-  );
-
-  const interval = useShallowChartSettingsStore((s) => s.interval);
-
+export const useSeriesChartSubs = ({
+  coins,
+  interval,
+  onCandleUpdate,
+}: SeriesChartSubsArgs) => {
   const subscribes = useMemo(() => {
-    if (marketEventMeta.outcomes.length) {
-      return marketEventMeta.outcomes.slice(0, 3).map(
-        (outcome, index) => () =>
-          hlSubClient.candle(
-            { coin: outcome.sides[chartOutcomeSideIndex].coin, interval },
-            (data) => {
-              onCandleUpdate(data, index);
-            },
-          ),
-      );
-    }
-
-    return [
-      () =>
-        hlSubClient.candle(
-          {
-            coin: marketEventMeta.sides[chartOutcomeSideIndex].coin,
-            interval,
-          },
-          (data) => {
-            onCandleUpdate(data, 0);
-          },
-        ),
-    ];
-  }, [interval, chartOutcomeSideIndex]);
+    return coins.map(
+      (coin, index) => () =>
+        hlSubClient.candle({ coin, interval }, (data) => {
+          onCandleUpdate(data, index);
+        }),
+    );
+  }, [coins]);
 
   useSubscriptions(subscribes, [subscribes]);
 };

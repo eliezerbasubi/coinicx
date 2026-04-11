@@ -11,8 +11,7 @@ import {
   SideSpecCtx,
 } from "@/features/predict/lib/types";
 
-import { useFetchSnapshots } from "../../hooks/useFetchSnapshots";
-import SeriesCompare from "../charts/SeriesCompare";
+import SeriesChart from "../charts/SeriesCompare";
 import { OpenInterestStat, VolumeStat } from "../MarketEventStats";
 import SwitchOutcomeTooltip from "../SwitchOutcomeTooltip";
 
@@ -37,21 +36,20 @@ const OutcomeGraph = ({ outcomeMeta, sidesCtxs }: Props) => {
     { sideIndex: 0, interval: chartSettings.interval },
   );
 
-  const { snapshots, seriesInfo, isLoading, isError } = useFetchSnapshots({
-    outcomeMetas: [outcomeMeta],
-    interval: state.interval,
-    sideIndex: state.sideIndex,
-  });
-
   const oppositeSideIndex = state.sideIndex === 0 ? 1 : 0;
 
   return (
     <div className="w-full min-h-60 overflow-hidden">
-      <SeriesCompare
-        isLoading={isLoading}
-        isError={isError}
-        seriesInfo={seriesInfo}
-        snapshots={snapshots}
+      <SeriesChart
+        seriesInfo={[
+          {
+            coin: outcomeMeta.sides[state.sideIndex].coin,
+            title: outcomeMeta.title,
+            sideName: outcomeMeta.sides[state.sideIndex].name,
+            sideIndex: state.sideIndex,
+          },
+        ]}
+        interval={state.interval}
       />
 
       <div className="w-full flex justify-between min-h-10 px-4">

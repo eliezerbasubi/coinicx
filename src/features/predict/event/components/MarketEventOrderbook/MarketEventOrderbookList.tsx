@@ -126,7 +126,8 @@ const OrderBookTableRow = ({
   style?: React.CSSProperties;
   showLabelType?: boolean;
 }) => {
-  const xPos = Math.round(-100 + progress * 100);
+  const cappedProgress = Math.min(progress, 1);
+  const xPos = Math.round(-100 + cappedProgress * 100);
 
   return (
     <div

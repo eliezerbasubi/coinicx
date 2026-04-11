@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   CandleSnapshotParameters,
   CandleSnapshotResponse,
@@ -7,31 +6,16 @@ import { useQueries } from "@tanstack/react-query";
 
 import { hlInfoClient } from "@/lib/services/transport";
 import { getChartTimeRange } from "@/lib/utils/intervalFormatter";
-import { MarketEventMetaSide } from "@/features/predict/lib/types";
 
 type UseFetchSnapshotsArgs = {
-  outcomeMetas: { title: string; sides: MarketEventMetaSide[] }[];
+  coins: string[];
   interval: CandleSnapshotParameters["interval"];
-  sideIndex: number;
 };
 
 export const useFetchSnapshots = ({
-  outcomeMetas,
+  coins,
   interval,
-  sideIndex,
 }: UseFetchSnapshotsArgs) => {
-  /**
-   * Build the series info (name + coin) for each outcome to chart.
-   */
-  const seriesInfo = useMemo(() => {
-    return outcomeMetas.map((meta) => ({
-      name: meta.title,
-      coin: meta.sides[sideIndex].coin,
-      sideName: meta.sides[sideIndex].name,
-      sideIndex,
-    }));
-  }, [outcomeMetas, sideIndex]);
-
   /**
    * Fetch candle snapshots for each outcome.
    */
@@ -39,6 +23,7 @@ export const useFetchSnapshots = ({
     data: snapshots,
     isLoading,
     isError,
+    refetch,
   } = useQueries({
     combine(results) {
       return {
@@ -47,15 +32,22 @@ export const useFetchSnapshots = ({
         ) as Array<CandleSnapshotResponse>,
         isLoading: results.some((result) => result.isLoading),
         isError: results.some((result) => result.isError),
+        refetch: (type: "all" | "failed" = "all") => {
+          results.forEach((result) => {
+            if (type === "all" || (type === "failed" && result.isError)) {
+              result.refetch();
+            }
+          });
+        },
       };
     },
-    queries: seriesInfo.map((info) => ({
-      queryKey: ["asset-candle-snapshot", info.coin, interval],
+    queries: coins.map((coin) => ({
+      queryKey: ["asset-candle-snapshot", coin, interval],
       queryFn: () => {
         const timeRange = getChartTimeRange(interval);
 
         return hlInfoClient.candleSnapshot({
-          coin: info.coin,
+          coin,
           interval,
           startTime: timeRange.startTime,
         });
@@ -65,8 +57,8 @@ export const useFetchSnapshots = ({
 
   return {
     snapshots,
-    seriesInfo,
     isLoading,
     isError,
+    refetch,
   };
 };

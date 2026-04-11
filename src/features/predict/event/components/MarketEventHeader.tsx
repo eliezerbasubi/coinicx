@@ -9,7 +9,6 @@ import {
   parseExpiry,
 } from "@/features/predict/lib/utils/parseMetadata";
 
-import LiveMarketDetails from "./LiveMarketDetails";
 import { MarketEventStats } from "./MarketEventStats";
 
 const MarketEventHeader = () => {
@@ -79,8 +78,6 @@ const MarketEventHeader = () => {
           </div>
         </div>
       </div>
-
-      <LiveMarketDetails />
     </div>
   );
 };
