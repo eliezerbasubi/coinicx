@@ -3,6 +3,7 @@
 import React, { use, useMemo } from "react";
 import { notFound } from "next/navigation";
 
+import PredictEventPageSkeleton from "../components/PredictEventPageSkeleton";
 import { useMarketEventsMetas } from "../hooks/useMarketEventsMetas";
 import { useSpotMetas } from "../hooks/useSpotMetas";
 import MarketEventStoreProvider from "../lib/store/market-event/provider";
@@ -21,7 +22,7 @@ type Props = {
 const MarketEventProvider = ({ children, params }: Props) => {
   const { slug } = use(params);
 
-  const { data, isLoading, error } = useMarketEventsMetas();
+  const { data, isLoading } = useMarketEventsMetas();
 
   const marketEventMeta = useMemo<MarketEventMeta | null>(() => {
     if (!data) return null;
@@ -112,10 +113,7 @@ const MarketEventProvider = ({ children, params }: Props) => {
     notifyOnChangeProps: [],
   });
 
-  // TODO: use useSuspenseQuery in useMarketEvents so that we don't need to handle the loading state here.
-  if (isLoading) return <div>Loading...</div>;
-
-  if (error) return <div>Error...</div>;
+  if (isLoading) return <PredictEventPageSkeleton />;
 
   if (!marketEventMeta) return notFound();
 

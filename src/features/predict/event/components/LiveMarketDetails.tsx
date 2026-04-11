@@ -40,14 +40,16 @@ const LiveMarketDetails = () => {
     if (!baseTokenMeta) return null;
 
     const ctx = spotAssetCtxs[universe.name];
-    const priceChange = Number(ctx.markPx) - Number(ctx.prevDayPx);
-    const price = Number(ctx.midPx || ctx?.markPx);
+    const markPx = Number(ctx?.markPx || 0);
+    const prevDayPx = Number(ctx?.prevDayPx || 0);
+    const priceChange = markPx - prevDayPx;
+    const price = Number(ctx?.midPx || markPx);
 
     return {
       price,
       pxDecimals: getPriceDecimals(price, baseTokenMeta.szDecimals, true),
       priceChange,
-      priceChangePercent: (priceChange / Number(ctx.prevDayPx)) * 100,
+      priceChangePercent: prevDayPx ? (priceChange / prevDayPx) * 100 : 0,
     };
   }, [spotAssetCtxs, spotMetas, recurringPayload]);
 
@@ -57,10 +59,10 @@ const LiveMarketDetails = () => {
     <div className="w-full flex items-center justify-between gap-2 my-6">
       <div className="flex-1 flex items-center divide-x divide-neutral-gray-200">
         <div className="w-fit pr-4">
-          <p className="text-xs font-medium text-neutral-gray-400">
+          <p className="text-sm font-medium text-neutral-gray-400">
             Price To Beat
           </p>
-          <p className="text-base font-medium text-neutral-gray-400">
+          <p className="text-xl font-bold text-neutral-gray-400">
             {formatPriceToDecimal(
               Number(recurringPayload.targetPrice),
               activeAsset?.pxDecimals ?? 2,
@@ -70,25 +72,23 @@ const LiveMarketDetails = () => {
         </div>
         {activeAsset && (
           <div className="w-fit pl-4">
-            <div className="text-xs font-medium text-primary flex items-center gap-1">
+            <div className="text-sm font-medium text-primary flex items-center gap-1">
               <p>Current Price</p>
               <div
-                className={cn("text-xs font-medium flex items-center", {
-                  "text-buy": activeAsset.priceChange > 0,
-                  "text-sell": activeAsset.priceChange < 0,
-                })}
-              >
-                <ArrowUp
-                  className={cn("text-buy size-4 rotate-180", {
+                className={cn(
+                  "text-xs text-buy font-medium flex items-center",
+                  {
                     "text-sell": activeAsset.priceChange < 0,
-                  })}
-                />
+                  },
+                )}
+              >
+                <ArrowUp className="size-4 rotate-180" />
 
                 <p>
                   <span>
                     {formatPriceToDecimal(
                       activeAsset.priceChange,
-                      activeAsset.pxDecimals,
+                      activeAsset.pxDecimals ?? 2,
                       { style: "currency" },
                     )}
                   </span>
@@ -96,7 +96,6 @@ const LiveMarketDetails = () => {
                     (
                     {formatNumber(activeAsset.priceChangePercent / 100, {
                       style: "percent",
-                      useFallback: true,
                       useSign: true,
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -106,7 +105,7 @@ const LiveMarketDetails = () => {
                 </p>
               </div>
             </div>
-            <p className="text-base font-medium text-primary">
+            <p className="text-xl font-bold text-primary">
               {formatPriceToDecimal(
                 Number(activeAsset.price),
                 activeAsset.pxDecimals,

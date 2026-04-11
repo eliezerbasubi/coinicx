@@ -30,6 +30,7 @@ const PredictOrderTypes = () => {
         delayDuration={0}
         trigger={
           <div
+            suppressHydrationWarning
             className={cn(
               "w-full md:w-fit px-2 md:px-0 flex items-center gap-x-1 justify-between md:justify-start text-xs md:text-sm font-semibold bg-neutral-gray-200 md:bg-transparent text-neutral-gray-400 rounded-md md:rounded-none cursor-pointer",
             )}

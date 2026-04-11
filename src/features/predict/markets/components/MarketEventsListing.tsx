@@ -1,17 +1,23 @@
-import React from "react";
+import MarketEventListingSkeleton from "@/features/predict/components/MarketEventListingSkeleton";
+import PredictError from "@/features/predict/components/PredictError";
+import { useMarketEvents } from "@/features/predict/hooks/useMarketEvents";
 
-import { useMarketEvents } from "../../hooks/useMarketEvents";
 import MarketEventCard from "./MarketEventCard";
 
 const MarketEventsListing = () => {
-  const { marketEvents, isLoading, error } = useMarketEvents();
+  const { marketEvents, error, isLoading } = useMarketEvents();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <MarketEventListingSkeleton />;
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <PredictError
+        title="Something went wrong"
+        description="We're having trouble loading market events. Please try again later."
+      />
+    );
   }
 
   return (
