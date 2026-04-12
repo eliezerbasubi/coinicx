@@ -43,7 +43,7 @@ export const useMarketEvents = () => {
     const questionOutcomes = new Map<number, number>();
 
     // Populate the map of question outcomes
-    for (const question of data.slugToQuestion.values()) {
+    for (const question of data.slugToQuestionSpec.values()) {
       const categoricalEventIndex = marketEvents.push({
         coin: null,
         title: question.name,

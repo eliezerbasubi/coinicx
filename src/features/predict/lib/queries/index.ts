@@ -21,10 +21,17 @@ export const getMarketEventsMetas = async () => {
     string,
     OutcomeMetaResponse["outcomes"][number]
   >();
+
   const outcomeToSlug = new Map<number, string>();
-  const slugToQuestion = new Map<
+
+  const slugToQuestionSpec = new Map<
     string,
     OutcomeMetaResponse["questions"][number]
+  >();
+
+  const outcomeToQuestionMeta = new Map<
+    number,
+    { question: number; slug: string }
   >();
 
   const fallbackOutcomes = new Set<number>();
@@ -43,13 +50,22 @@ export const getMarketEventsMetas = async () => {
   }
 
   for (const question of data.questions) {
-    slugToQuestion.set(slugify(question.name), question);
+    slugToQuestionSpec.set(slugify(question.name), question);
+
+    for (const outcome of question.namedOutcomes) {
+      outcomeToQuestionMeta.set(outcome, {
+        question: question.question,
+        slug: slugify(question.name),
+      });
+    }
+
     fallbackOutcomes.add(question.fallbackOutcome);
   }
 
   return {
     slugToOutcomeSpec,
-    slugToQuestion,
+    slugToQuestionSpec,
+    outcomeToQuestionMeta,
     outcomeToSlug,
     fallbackOutcomes,
   };

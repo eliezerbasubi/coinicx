@@ -2,9 +2,6 @@
 
 import React, { useEffect, useRef } from "react";
 
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
-
-import { buildSideCoin } from "../../utils/outcomes";
 import {
   createMarketEventStore,
   MarketEventContext,

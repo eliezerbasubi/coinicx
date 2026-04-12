@@ -33,13 +33,13 @@ export const createMarketEventStore = (initialProps: MarketEventStoreProps) => {
   return create<MarketEventStoreState>()((set) => ({
     ...initialProps,
     activeOutcomeIndex: 0,
+    chartOutcomeSideIndex: 0,
     marketEventCtx: {
       openInterest: 0,
       volume: 0,
       sides: [defaultSide, defaultSide],
       outcomes: [],
     },
-    chartOutcomeSideIndex: 0,
     setMarketEventCtx: (marketEventCtx: MarketEventCtx) =>
       set({ marketEventCtx }),
     setActiveOutcomeIndex: (index: number) =>
