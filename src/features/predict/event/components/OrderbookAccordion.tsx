@@ -21,16 +21,14 @@ const OrderbookAccordion = () => {
     }),
   );
 
-  if (marketEventMeta.type === "categorical") return null;
-
   return (
     <Accordion
       type="single"
       collapsible
-      className="mt-4 bg-neutral-gray-600 rounded-xl overflow-hidden"
+      className="mt-4 bg-neutral-gray-600 rounded-lg overflow-hidden"
     >
       <AccordionItem value="orderbook" className="isolate">
-        <AccordionTrigger className="py-6 px-4 text-white border-0 hover:no-underline">
+        <AccordionTrigger className="p-4 text-white border-0 hover:no-underline [&>svg]:stroke-3 items-center">
           <p className="text-base font-semibold">Order Book</p>
         </AccordionTrigger>
         <AccordionContent className="bg-primary-dark m-px">

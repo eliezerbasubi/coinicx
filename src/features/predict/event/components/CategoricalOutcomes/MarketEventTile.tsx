@@ -4,11 +4,11 @@ import {
 } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { useIsLaptop } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
+import { MarketSideActions } from "@/features/predict/components/MarketSideActions";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import { MarketEventMetaOutcome } from "@/features/predict/lib/types";
-
-import MarketSideActions from "../MarketSideActions";
 
 const defaultSide = {
   volume: 0,
@@ -27,13 +27,21 @@ const MarketEventTile = ({
   outcome: MarketEventMetaOutcome;
   outcomeIndex: number;
 } & React.ComponentProps<"div">) => {
-  const { activeMarketOutcome, outcomesCtxs, setActiveOutcomeIndex } =
-    useMarketEventContext((s) => ({
-      activeMarketOutcome: s.marketEventMeta.outcomes[s.activeOutcomeIndex],
-      outcomesCtxs: s.marketEventCtx.outcomes,
-      setActiveOutcomeIndex: s.setActiveOutcomeIndex,
-    }));
+  const {
+    activeMarketOutcome,
+    outcomesCtxs,
+    setActiveOutcomeIndex,
+    openTradingWidgetDrawer,
+  } = useMarketEventContext((s) => ({
+    activeMarketOutcome: s.marketEventMeta.outcomes[s.activeOutcomeIndex],
+    outcomesCtxs: s.marketEventCtx.outcomes,
+    setActiveOutcomeIndex: s.setActiveOutcomeIndex,
+    openTradingWidgetDrawer: s.openTradingWidgetDrawer,
+  }));
+
   const sideIndex = useShallowOrderFormStore((s) => s.predictSideIndex);
+
+  const isLaptop = useIsLaptop();
 
   const sidesContexts = outcomesCtxs?.[outcomeIndex]?.sides ?? [
     defaultSide,
@@ -53,9 +61,14 @@ const MarketEventTile = ({
   const volume = primarySide.volume;
 
   return (
-    <div className="w-full flex items-center gap-2 p-3" {...props}>
+    <div
+      className="w-full grid grid-cols-1 md:flex items-center gap-2 p-3"
+      {...props}
+    >
       <div className="flex-1">
-        <p className="text-sm font-medium text-white">{outcome.title}</p>
+        <p className="text-sm font-medium text-white text-left">
+          {outcome.title}
+        </p>
 
         <div className="flex items gap-2 divide-x divide-neutral-gray-200">
           <p className="text-xs font-medium text-neutral-gray-400 pr-2">
@@ -81,7 +94,7 @@ const MarketEventTile = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 items-center place-content-center gap-2">
+      <div className="flex flex-col items-end md:grid grid-cols-2 md:items-center place-content-center md:gap-2">
         <p className="text-xl font-semibold text-white text-right">
           {formatNumber((price * 100) / 100, {
             style: "percent",
@@ -110,16 +123,21 @@ const MarketEventTile = ({
           ...sidesContexts[index],
         }))}
         label="Buy"
-        wrapperClassName="flex-1 flex items-center justify-end gap-2"
-        className="w-[136px]"
+        wrapperClassName="flex-1 grid grid-cols-2 col-span-2 md:flex items-center justify-end gap-2"
+        className="w-full md:w-[136px]"
         currentSideIndex={
           activeMarketOutcome?.coin === outcome.coin ? sideIndex : undefined
         }
         onClick={(sideIndex, e) => {
           e?.stopPropagation();
 
+          if (isLaptop) {
+            setActiveOutcomeIndex(outcomeIndex);
+          } else {
+            openTradingWidgetDrawer(true);
+          }
+
           useOrderFormStore.getState().setPredictSideIndex(sideIndex);
-          setActiveOutcomeIndex(outcomeIndex);
         }}
       />
     </div>

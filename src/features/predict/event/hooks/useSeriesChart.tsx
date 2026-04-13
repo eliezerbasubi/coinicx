@@ -311,8 +311,7 @@ export const useSeriesChart = ({
       timeScale: {
         ...BASE_CHART_OPTIONS.timeScale,
         visible: true,
-        tickMarkFormatter: (time: number) =>
-          tickMarkFormatter(time / 1000, interval),
+        tickMarkFormatter: (time: number) => tickMarkFormatter(time, interval),
       },
       grid: {
         ...BASE_CHART_OPTIONS.grid,

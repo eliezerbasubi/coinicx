@@ -5,6 +5,7 @@ import { MarketEventCtx, MarketEventMeta } from "@/features/predict/lib/types";
 
 export interface MarketEventStoreProps {
   marketEventMeta: MarketEventMeta;
+  categoricalOutcomeIndex?: number;
 }
 
 export interface MarketEventStoreState extends MarketEventStoreProps {
@@ -15,6 +16,9 @@ export interface MarketEventStoreState extends MarketEventStoreProps {
   /** The currently active chart outcome side index. @default 0 for yes side */
   chartOutcomeSideIndex: number;
 
+  tradingWidgetDrawerOpen: boolean;
+
+  openTradingWidgetDrawer: (open: boolean) => void;
   setActiveOutcomeIndex: (outcomeIndex: number) => void;
   setMarketEventCtx: (marketEventCtx: MarketEventCtx) => void;
   setChartOutcomeSideIndex: (sideIndex: number) => void;
@@ -32,14 +36,17 @@ const defaultSide = {
 export const createMarketEventStore = (initialProps: MarketEventStoreProps) => {
   return create<MarketEventStoreState>()((set) => ({
     ...initialProps,
-    activeOutcomeIndex: 0,
+    activeOutcomeIndex: initialProps.categoricalOutcomeIndex ?? 0,
     chartOutcomeSideIndex: 0,
+    tradingWidgetDrawerOpen: false,
     marketEventCtx: {
       openInterest: 0,
       volume: 0,
       sides: [defaultSide, defaultSide],
       outcomes: [],
     },
+    openTradingWidgetDrawer: (open: boolean) =>
+      set({ tradingWidgetDrawerOpen: open }),
     setMarketEventCtx: (marketEventCtx: MarketEventCtx) =>
       set({ marketEventCtx }),
     setActiveOutcomeIndex: (index: number) =>

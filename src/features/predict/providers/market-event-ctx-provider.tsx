@@ -4,7 +4,6 @@ import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 
 import { useMarketEventContext } from "../lib/store/market-event/hooks";
 import { MarketEventMetaSide } from "../lib/types";
-import { buildSideCoin } from "../lib/utils/outcomes";
 
 // We separate context from meta to avoid unnecessary renders
 const MarketEventCtxProvider = () => {

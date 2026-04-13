@@ -2,17 +2,18 @@ import Link from "next/link";
 import { Repeat, Star } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
+import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
-import { MarketEvent } from "@/features/predict/lib/types";
+import { TradingWidgetMarketsDrawer } from "@/features/predict/components/TradingWidgetDrawer";
+import { MarketEvent, SideSpec } from "@/features/predict/lib/types";
 import {
   convertPeriodToMinutes,
   parseRecurringMetadata,
 } from "@/features/predict/lib/utils/parseMetadata";
-import { slugify } from "@/features/predict/lib/utils/shared";
 
 type Props = {
   data: MarketEvent;
@@ -53,7 +54,7 @@ const MarketEventCard = ({ data }: Props) => {
         {/* Categorical outcomes */}
         <Visibility visible={data.type === "categorical"}>
           <div className="space-y-2 h-[71px] overflow-y-auto no-scrollbars">
-            {data.outcomes.map((outcome) => (
+            {data.outcomes.map((outcome, outcomeIndex) => (
               <div
                 key={outcome.outcome}
                 className="w-full flex justify-between items-center gap-2"
@@ -74,25 +75,14 @@ const MarketEventCard = ({ data }: Props) => {
                 </div>
                 <div className="flex items-center gap-1">
                   {outcome.sides.map((side, index) => (
-                    <Button
-                      asChild
+                    <SideButton
                       key={side.coin}
-                      size="sm"
-                      variant="default"
-                      className={cn(
-                        "w-fit h-[27px] bg-buy/10 text-buy hover:bg-buy hover:text-white",
-                        {
-                          "bg-sell/10 text-sell hover:bg-sell hover:text-white":
-                            index === 1,
-                        },
-                      )}
-                    >
-                      <Link
-                        href={`${ROUTES.predict.event}/${data.slug}?marketSlug=${slugify(outcome.title)}&outcomeIndex=${index}`}
-                      >
-                        {side.name}
-                      </Link>
-                    </Button>
+                      side={side}
+                      outcomeIndex={outcomeIndex}
+                      sideIndex={index}
+                      data={data}
+                      className="w-fit h-[27px]"
+                    />
                   ))}
                 </div>
               </div>
@@ -103,24 +93,12 @@ const MarketEventCard = ({ data }: Props) => {
         {/* Binary outcomes */}
         <div className="grid grid-cols-2 gap-2">
           {data.sides.map((side, index) => (
-            <Button
-              asChild
+            <SideButton
               key={side.coin}
-              variant="default"
-              className={cn(
-                "bg-buy/10 text-buy hover:bg-buy hover:text-white",
-                {
-                  "bg-sell/10 text-sell hover:bg-sell hover:text-white":
-                    index === 1,
-                },
-              )}
-            >
-              <Link
-                href={`${ROUTES.predict.event}/${data.slug}?outcomeIndex=${index}`}
-              >
-                {side.name}
-              </Link>
-            </Button>
+              side={side}
+              sideIndex={index}
+              data={data}
+            />
           ))}
         </div>
         <div className="w-full flex items-center justify-between text-sm text-neutral-gray-400">
@@ -128,8 +106,8 @@ const MarketEventCard = ({ data }: Props) => {
             <Visibility visible={isLive}>
               <div className="flex items-center gap-2">
                 <div className="relative flex items-center justify-center">
-                  <div className="size-[7px] rounded-full bg-red-500 relative z-10"></div>
-                  <div className="absolute -inset-px size-[9px] rounded-full bg-red-500 opacity-75 animate-ping"></div>
+                  <div className="size-[7px] rounded-full bg-red-500 relative z-10" />
+                  <div className="absolute -inset-px size-[9px] rounded-full bg-red-500 opacity-75 animate-ping" />
                 </div>
                 <p className="uppercase text-red-500 text-sm">Live</p>
 
@@ -165,6 +143,68 @@ const MarketEventCard = ({ data }: Props) => {
       </div>
     </div>
   );
+};
+
+const SideButton = ({
+  side,
+  sideIndex,
+  data,
+  className,
+  outcomeIndex,
+}: {
+  side: SideSpec;
+  sideIndex: number;
+  data: MarketEvent;
+  outcomeIndex?: number;
+  className?: string;
+}) => {
+  return (
+    <TradingWidgetMarketsDrawer
+      key={side.coin}
+      marketEventMeta={mapMarketEventToMeta({ ...data, coin: side.coin })}
+      outcomeIndex={outcomeIndex}
+      trigger={
+        <Button
+          variant="default"
+          className={cn(
+            "bg-buy/10 text-buy hover:bg-buy hover:text-white",
+            {
+              "bg-sell/10 text-sell hover:bg-sell hover:text-white":
+                sideIndex === 1,
+            },
+            className,
+          )}
+          onClick={() => {
+            useOrderFormStore.getState().setPredictSideIndex(sideIndex);
+          }}
+        >
+          {side.name}
+        </Button>
+      }
+    />
+  );
+};
+
+const mapMarketEventToMeta = (data: MarketEvent) => {
+  const parsedMetadata = parseRecurringMetadata(
+    data.description,
+    data.resolution,
+  );
+
+  return {
+    title: data.title,
+    type: data.type,
+    resolution: data.resolution,
+    slug: data.slug,
+    sides: data.sides,
+    outcomes: data.outcomes,
+    coin: data.coin,
+    categories: data.categories,
+    questionId: data.questionId,
+    recurringPayload: parsedMetadata,
+    settledOutcomes: data.settledOutcomes,
+    description: data.description,
+  };
 };
 
 export default MarketEventCard;

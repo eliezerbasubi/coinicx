@@ -5,15 +5,26 @@ import {
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
 import { OrderSide } from "@/lib/types/trade";
+import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
 import { VolumeStat } from "../MarketEventStats";
-import MarketSideActions from "../MarketSideActions";
-import PredictOrderTypes from "./PredictOrderTypes";
+import { MarketSideActions } from "../MarketSideActions";
+import PredictOrderTypes from "./TradingWidgetOrderTypes";
 
-const PredictOrderFormHeader = () => {
+type Props = {
+  sideClassName?: string;
+  tabsClassName?: string;
+  showEventTitle?: boolean;
+};
+
+const TradingWidgetHeader = ({
+  sideClassName,
+  tabsClassName,
+  showEventTitle = true,
+}: Props) => {
   const { orderSide, sideIndex } = useShallowOrderFormStore((s) => ({
     sideIndex: s.predictSideIndex,
     orderSide: s.orderSide,
@@ -39,7 +50,7 @@ const PredictOrderFormHeader = () => {
 
   return (
     <React.Fragment>
-      <Visibility visible={marketEventType === "categorical"}>
+      <Visibility visible={showEventTitle}>
         <div className="px-4 pt-4">
           <p className="text-sm font-medium text-white">{marketEvent.title}</p>
           <VolumeStat value={volume} variant="compact" />
@@ -48,6 +59,7 @@ const PredictOrderFormHeader = () => {
       <Tabs
         defaultValue="buy"
         value={orderSide}
+        className="h-8 md:h-11"
         onValueChange={(value) => {
           useOrderFormStore
             .getState()
@@ -56,12 +68,15 @@ const PredictOrderFormHeader = () => {
       >
         <TabsList
           variant="line"
-          className="w-full flex items-center justify-between px-4"
+          className={cn(
+            "w-full flex items-center justify-between px-4 pt-0 md:pt-[3px]",
+            tabsClassName,
+          )}
         >
-          <TabsTrigger value="buy" className="flex-0 text-sm">
+          <TabsTrigger value="buy" className="flex-0 text-xs md:text-sm">
             Buy
           </TabsTrigger>
-          <TabsTrigger value="sell" className="flex-0 text-sm">
+          <TabsTrigger value="sell" className="flex-0 text-xs md:text-sm">
             Sell
           </TabsTrigger>
 
@@ -75,8 +90,11 @@ const PredictOrderFormHeader = () => {
           ...marketEventSidesCtx[index],
         }))}
         currentSideIndex={sideIndex}
-        className="bg-neutral-gray-200 text-neutral-gray-400"
-        wrapperClassName="grid grid-cols-2 gap-2 p-4"
+        className={cn(
+          "bg-neutral-gray-200 text-neutral-gray-400",
+          sideClassName,
+        )}
+        wrapperClassName="grid grid-cols-2 gap-2 p-2 md:p-4"
         onClick={(sideIndex) =>
           useOrderFormStore.getState().setPredictSideIndex(sideIndex)
         }
@@ -85,4 +103,4 @@ const PredictOrderFormHeader = () => {
   );
 };
 
-export default PredictOrderFormHeader;
+export default TradingWidgetHeader;

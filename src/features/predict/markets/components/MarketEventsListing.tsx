@@ -21,7 +21,7 @@ const MarketEventsListing = () => {
   }
 
   return (
-    <div className="grid grid-cols-4 gap-3 py-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 md:gap-3 py-4">
       {marketEvents.map((event) => (
         <MarketEventCard key={event.coin} data={event} />
       ))}

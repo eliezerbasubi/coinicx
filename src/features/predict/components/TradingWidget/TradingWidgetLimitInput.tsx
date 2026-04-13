@@ -5,7 +5,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { InputNumberControl } from "@/components/ui/input-number";
 
-const PredictOrderFormLimit = () => {
+const TradingWidgetLimitInput = () => {
   const { orderType, limitPrice } = useShallowOrderFormStore((s) => ({
     orderType: s.settings.orderType,
     triggerPrice: s.triggerPrice,
@@ -44,4 +44,4 @@ const PredictOrderFormLimit = () => {
   );
 };
 
-export default PredictOrderFormLimit;
+export default TradingWidgetLimitInput;

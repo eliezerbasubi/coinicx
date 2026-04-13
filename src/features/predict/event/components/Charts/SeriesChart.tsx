@@ -53,29 +53,31 @@ const SeriesChart = ({ seriesInfo, interval, chartView = "line" }: Props) => {
       <Visibility visible={chartView === "line"}>
         <div
           ref={legendRef}
-          className="flex items-center gap-x-4 min-h-10 px-4 py-2"
+          className="flex items-center min-h-10 px-2 md:px-4 py-2"
         >
           {/* Show legend only for categorical outcomes */}
           <Visibility
             visible={!isError && hasSnapshots && snapshots.length > 1}
           >
-            {seriesInfo.map((info) => {
-              return (
-                <div key={info.coin} className="flex items-center gap-1">
-                  <span
-                    data-series-marker
-                    className="size-2 rounded-full shrink-0"
-                  />
-                  <span className="text-xs font-medium text-neutral-gray-400 line-clamp-1">
-                    {info.title}
-                  </span>
-                  <span
-                    data-chance
-                    className="min-w-9 text-xs font-medium lining-nums tabular-nums"
-                  />
-                </div>
-              );
-            })}
+            <div className="flex items-start md:items-center flex-col md:flex-row gap-2 md:gap-4">
+              {seriesInfo.map((info) => {
+                return (
+                  <div key={info.coin} className="flex items-center gap-1">
+                    <span
+                      data-series-marker
+                      className="size-2 rounded-full shrink-0"
+                    />
+                    <span className="text-xs font-medium text-neutral-gray-400 line-clamp-1">
+                      {info.title}
+                    </span>
+                    <span
+                      data-chance
+                      className="min-w-9 text-xs font-medium lining-nums tabular-nums"
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </Visibility>
 
           {/* Show chance and change for binary outcomes */}
@@ -122,7 +124,7 @@ const SeriesChart = ({ seriesInfo, interval, chartView = "line" }: Props) => {
             </div>
           </Visibility>
 
-          <div className="flex-1 flex justify-end">
+          <div className="ml-auto self-end md:self-auto">
             <AppLogo className="h-5 opacity-40" />
           </div>
         </div>

@@ -84,6 +84,8 @@ export interface MarketEventMetaOutcome extends Omit<MarketOutcome, "sides"> {
   sides: MarketEventMetaSide[];
 }
 
+export type MarketEventType = "recurring" | "binary" | "categorical";
+
 export interface MarketEventMeta {
   title: string;
   description: string;
@@ -91,7 +93,7 @@ export interface MarketEventMeta {
   coin: string | null;
   questionId: number | null;
   resolution: number;
-  type: "recurring" | "binary" | "categorical";
+  type: MarketEventType;
   sides: MarketEventMetaSide[];
   outcomes: MarketEventMetaOutcome[];
   settledOutcomes: number[];

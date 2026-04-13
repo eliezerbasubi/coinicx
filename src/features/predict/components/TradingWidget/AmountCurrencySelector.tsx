@@ -13,7 +13,7 @@ const AmountCurrencySelector = () => {
   const isSzInNtl = useOrderFormStore((s) => s.settings.isSzInNtl);
 
   const options = [
-    { label: "In Contracts", value: false },
+    { label: "In Shares", value: false },
     { label: "In Dollars", value: true },
   ];
 
@@ -39,7 +39,7 @@ const AmountCurrencySelector = () => {
                 .setSettings({ isSzInNtl: option.value })
             }
             className={cn(
-              "text-sm text-left text-neutral-gray-400 hover:bg-neutral-gray-200 hover:text-white font-medium py-2 px-3",
+              "text-xs text-left text-neutral-gray-400 hover:bg-neutral-gray-200 hover:text-white font-medium py-2 px-3",
               {
                 "bg-neutral-gray-200 text-white": isSzInNtl === option.value,
               },

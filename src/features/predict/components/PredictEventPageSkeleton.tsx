@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const PredictEventPageSkeleton = () => {
   return (
     <div className="w-full h-[calc(100vh-64px)]">
-      <div className="size-full max-w-7xl mx-auto px-4 md:px-0 flex gap-8">
+      <div className="size-full max-w-7xl mx-auto px-4 md:px-6 xl:px-0 flex gap-4 xl:gap-8">
         <div className="flex-1 space-y-2 mt-4">
           {/* Breadcrumbs */}
           <Skeleton className="w-3/4 bg-neutral-gray-600" />

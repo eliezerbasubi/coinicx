@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 import { useSpotAssetMeta } from "@/features/predict/hooks/useSpotMetas";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
-import SeriesChart from "./charts/SeriesCompare";
+import { MarketEventStats } from "../../components/MarketEventStats";
+import SeriesChart from "./Charts/SeriesChart";
 import LiveMarketDetails from "./LiveMarketDetails";
-import { MarketEventStats } from "./MarketEventStats";
 import SwitchOutcomeTooltip from "./SwitchOutcomeTooltip";
 
 const CHART_VIEWS = [
@@ -93,21 +93,25 @@ const MarketEventChart = () => {
         <LiveMarketDetails />
       </Visibility>
 
-      <div className="w-full min-h-60 bg-neutral-gray-600 rounded-lg overflow-hidden">
+      <div className="w-full min-h-60 bg-neutral-gray-600 rounded-lg overflow-hidden pb-4 md:pb-2">
         <SeriesChart
           seriesInfo={seriesInfo}
           chartView={chartView}
           interval={interval}
         />
 
-        <div className="w-full flex justify-between min-h-10 px-4">
+        <div className="w-full flex justify-between flex-wrap-reverse md:flex-nowrap gap-4 md:gap-0 min-h-10 px-3 md:px-4">
           <div className="flex items-center gap-2 divide-x divide-neutral-gray-200">
             <MarketEventStats variant="full" showOnEmpty={true} />
           </div>
 
-          <div className="flex items-center divide-x divide-neutral-gray-200">
+          <div className="flex items-center flex-1 md:flex-0 justify-end divide-x divide-neutral-gray-200">
             <Visibility visible={marketEventMeta.type !== "recurring"}>
-              <ChartTimeInterval className="[&>div]:text-xs gap-2.5 pr-2" />
+              <ChartTimeInterval
+                className={cn("[&>div]:text-xs gap-2.5", {
+                  "pr-2": marketEventMeta.type !== "categorical",
+                })}
+              />
 
               {/* Only show switch outcome tooltip for non-categorical markets */}
               <Visibility visible={marketEventMeta.type !== "categorical"}>

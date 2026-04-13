@@ -6,7 +6,7 @@ import FormInputControl from "@/components/common/FormInputControl";
 
 import AmountCurrencySelector from "./AmountCurrencySelector";
 
-const PredictOrderFormSize = () => {
+const TradingWidgetOrderSize = () => {
   const size = useShallowOrderFormStore((s) => s.size);
 
   return (
@@ -26,7 +26,7 @@ const PredictOrderFormSize = () => {
           </div>
         }
         placeholder="0.00"
-        wrapperClassName="border-none my-4 px-0"
+        wrapperClassName="border-none my-2 md:my-4 px-0"
         percentClassName="px-1.5"
         className="text-2xl"
         max={100}
@@ -38,4 +38,4 @@ const PredictOrderFormSize = () => {
   );
 };
 
-export default PredictOrderFormSize;
+export default TradingWidgetOrderSize;

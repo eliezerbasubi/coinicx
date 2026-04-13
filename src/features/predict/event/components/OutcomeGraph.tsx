@@ -7,13 +7,16 @@ import {
   TimeIntervalPopover,
 } from "@/components/common/ChartTimeInterval";
 import {
+  OpenInterestStat,
+  VolumeStat,
+} from "@/features/predict/components/MarketEventStats";
+import {
   MarketEventMetaOutcome,
   SideSpecCtx,
 } from "@/features/predict/lib/types";
 
-import SeriesChart from "../charts/SeriesCompare";
-import { OpenInterestStat, VolumeStat } from "../MarketEventStats";
-import SwitchOutcomeTooltip from "../SwitchOutcomeTooltip";
+import SeriesChart from "./Charts/SeriesChart";
+import SwitchOutcomeTooltip from "./SwitchOutcomeTooltip";
 
 type Props = {
   outcomeMeta: MarketEventMetaOutcome;
@@ -52,7 +55,7 @@ const OutcomeGraph = ({ outcomeMeta, sidesCtxs }: Props) => {
         interval={state.interval}
       />
 
-      <div className="w-full flex justify-between min-h-10 px-4">
+      <div className="w-full flex justify-between flex-wrap-reverse md:flex-nowrap gap-4 md:gap-0 min-h-10 px-0 md:px-4">
         <div className="flex items-center gap-2 divide-x divide-neutral-gray-200">
           <VolumeStat
             value={sidesCtxs[state.sideIndex].volume}
@@ -66,7 +69,7 @@ const OutcomeGraph = ({ outcomeMeta, sidesCtxs }: Props) => {
           />
         </div>
 
-        <div className="flex items-center divide-x divide-neutral-gray-200">
+        <div className="flex items-center flex-1 md:flex-0 justify-end divide-x divide-neutral-gray-200">
           <TimeIntervalList
             items={bookmarkIntervals}
             interval={interval}

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils/cn";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { SUPPORTED_ORDER_TYPES } from "@/features/trade/constants";
 
-const PredictOrderTypes = () => {
+const TradingWidgetOrderTypes = () => {
   const orderType = useShallowOrderFormStore((s) => s.settings.orderType);
 
   const [open, setOpen] = useState(false);
@@ -32,11 +32,11 @@ const PredictOrderTypes = () => {
           <div
             suppressHydrationWarning
             className={cn(
-              "w-full md:w-fit px-2 md:px-0 flex items-center gap-x-1 justify-between md:justify-start text-xs md:text-sm font-semibold bg-neutral-gray-200 md:bg-transparent text-neutral-gray-400 rounded-md md:rounded-none cursor-pointer",
+              "w-fit px-2 md:px-0 flex items-center gap-x-1 justify-between md:justify-start text-xs md:text-sm font-medium text-neutral-gray-400 rounded-md md:rounded-none cursor-pointer",
             )}
             onClick={() => setOpen(!open)}
           >
-            <p>Market</p>
+            <p>{SUPPORTED_ORDER_TYPES[orderType].label}</p>
             <ChevronDown className="size-5 text-neutral-gray-400" />
           </div>
         }
@@ -72,4 +72,4 @@ const PredictOrderTypes = () => {
   );
 };
 
-export default PredictOrderTypes;
+export default TradingWidgetOrderTypes;
