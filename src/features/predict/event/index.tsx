@@ -9,6 +9,7 @@ import TradingWidget from "../components/TradingWidget";
 import { useMarketEventContext } from "../lib/store/market-event/hooks";
 import BottomNavActions from "./components/BottomNavActions";
 import CategoricalOutcomes from "./components/CategoricalOutcomes";
+import MarketEventBreadcrumbs from "./components/MarketEventBreadcrumbs";
 import MarketEventChart from "./components/MarketEventChart";
 import MarketEventHeader from "./components/MarketEventHeader";
 import MarketRules from "./components/MarketRules";
@@ -30,7 +31,10 @@ const MarketEvent = () => {
     <div className="size-full max-w-7xl mx-auto px-4 md:px-6 xl:px-0 flex gap-4 xl:gap-8 pb-12 lg:pb-0">
       {/* Main Content */}
       <main className="size-full">
-        <MarketEventHeader />
+        <div className="w-full sticky md:top-16 z-10 bg-primary-dark py-4">
+          <MarketEventBreadcrumbs />
+          <MarketEventHeader />
+        </div>
 
         <MarketEventChart />
 

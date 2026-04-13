@@ -1,7 +1,6 @@
 import React from "react";
-import Link from "next/link";
 
-import { ROUTES } from "@/lib/constants/routes";
+import { cn } from "@/lib/utils/cn";
 import TokenImage from "@/components/common/TokenImage";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import {
@@ -11,71 +10,66 @@ import {
 
 import { MarketEventStats } from "../../components/MarketEventStats";
 
-const MarketEventHeader = () => {
+type Props = {
+  className?: string;
+  titleRef?: React.Ref<HTMLHeadingElement>;
+};
+
+const MarketEventHeader = ({ className, titleRef }: Props) => {
   const marketEventMeta = useMarketEventContext(
     (state) => state.marketEventMeta,
   );
 
   return (
-    <div className="w-full sticky md:top-16 z-10 bg-primary-dark py-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Link prefetch href={ROUTES.predict.index}>
-          <p className="text-xs font-medium text-neutral-gray-400 hover:text-white transition-colors">
-            Markets
-          </p>
-        </Link>
-        <p className="text-xs font-medium text-neutral-gray-400">/</p>
-        <p className="text-xs font-medium text-neutral-gray-400">
+    <div className={cn("w-full flex items-center gap-4", className)}>
+      {marketEventMeta.recurringPayload?.underlying && (
+        <TokenImage
+          name={marketEventMeta.recurringPayload?.underlying}
+          instrumentType="spot"
+          className="size-10 md:size-16 rounded-lg"
+        />
+      )}
+
+      <div className="flex-1">
+        <div className="flex items-center gap-1 text-neutral-gray-400 mb-1">
+          {marketEventMeta.categories.map((category, index) => (
+            <React.Fragment key={category}>
+              <p className="text-xs font-medium capitalize">{category}</p>
+              {index < marketEventMeta.categories.length - 1 && (
+                <span className="text-xs font-medium">·</span>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+        <h1
+          ref={titleRef}
+          className="flex-1 text-base md:text-xl font-semibold line-clamp-2"
+        >
           {marketEventMeta.title}
-        </p>
-      </div>
-      <div className="w-full flex items-center gap-4">
-        {marketEventMeta.recurringPayload?.underlying && (
-          <TokenImage
-            name={marketEventMeta.recurringPayload?.underlying}
-            instrumentType="spot"
-            className="size-16 rounded-lg"
-          />
-        )}
+        </h1>
 
-        <div className="flex-1">
-          <div className="flex items-center gap-1 text-neutral-gray-400 mb-1">
-            {marketEventMeta.categories.map((category, index) => (
-              <React.Fragment key={category}>
-                <p className="text-xs font-medium capitalize">{category}</p>
-                {index < marketEventMeta.categories.length - 1 && (
-                  <span className="text-xs font-medium">·</span>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-          <h1 className="flex-1 text-xl font-semibold line-clamp-2">
-            {marketEventMeta.title}
-          </h1>
-
-          <div className="flex items-center gap-1 mt-1 divide-x divide-neutral-gray-200">
-            <MarketEventStats variant="compact" showOnEmpty={false} />
-            {marketEventMeta.recurringPayload?.expiry && (
-              <p className="text-xs font-medium text-neutral-gray-400 pl-1">
-                <span>
-                  {formatExpiryDate(marketEventMeta.recurringPayload.expiry)}
-                </span>
-                <span>-</span>
-                <span>
-                  {formatDateFromPeriod(
-                    marketEventMeta.recurringPayload.period,
-                    marketEventMeta.recurringPayload.expiry,
-                    {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    },
-                  )}{" "}
-                  UTC
-                </span>
-              </p>
-            )}
-          </div>
+        <div className="flex items-center gap-1 mt-1 divide-x divide-neutral-gray-200">
+          <MarketEventStats variant="compact" showOnEmpty={false} />
+          {marketEventMeta.recurringPayload?.expiry && (
+            <p className="text-xs font-medium text-neutral-gray-400 pl-1">
+              <span>
+                {formatExpiryDate(marketEventMeta.recurringPayload.expiry)}
+              </span>
+              <span>-</span>
+              <span>
+                {formatDateFromPeriod(
+                  marketEventMeta.recurringPayload.period,
+                  marketEventMeta.recurringPayload.expiry,
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  },
+                )}{" "}
+                UTC
+              </span>
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -19,12 +19,10 @@ import MarketEventCtxProvider from "./market-event-ctx-provider";
 
 type Props = {
   children: React.ReactNode;
-  params: Promise<{ slug: string }>;
+  slug: string;
 };
 
-const MarketEventProvider = ({ children, params }: Props) => {
-  const { slug } = use(params);
-
+const MarketEventProvider = ({ children, slug }: Props) => {
   const { data, isLoading } = usePredictionsMetas();
 
   const marketEventMeta = useMemo<MarketEventMeta | null>(() => {
@@ -149,7 +147,7 @@ const mapQuestionToMarketEventMeta = (params: {
     recurringPayload: null,
     sides: [],
     outcomes: question.namedOutcomes
-      .map((namedOutcome, index) => {
+      .map((namedOutcome) => {
         const slug = outcomeToSlug.get(namedOutcome);
 
         if (!slug) return null;

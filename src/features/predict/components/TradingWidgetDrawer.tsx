@@ -46,6 +46,7 @@ export const TradingWidgetMarketsDrawer = ({
       trigger={trigger}
       className="gap-1"
     >
+      {/* We wrap with MarketEventStoreProvider because trading widget only need few details from the market event */}
       <MarketEventStoreProvider
         marketEventMeta={marketEventMeta}
         categoricalOutcomeIndex={outcomeIndex}

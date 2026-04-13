@@ -7,10 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
-import {
-  useSpotAssetMeta,
-  useSpotMetas,
-} from "@/features/predict/hooks/useSpotMetas";
+import { useSpotAssetMeta } from "@/features/predict/hooks/useSpotMetas";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import { parseExpiry } from "@/features/predict/lib/utils/parseMetadata";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
@@ -49,7 +46,7 @@ const LiveMarketDetails = () => {
   if (!recurringPayload) return null;
 
   return (
-    <div className="w-full flex items-center justify-between gap-2 my-6">
+    <div className="w-full flex flex-col-reverse md:flex-row md:items-center justify-between gap-4 md:gap-2 mb-6 md:my-6">
       <div className="flex-1 flex items-center divide-x divide-neutral-gray-200">
         <div className="w-fit pr-4">
           <p className="text-sm font-medium text-neutral-gray-400">

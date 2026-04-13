@@ -1,4 +1,5 @@
 import React from "react";
+import { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
@@ -7,6 +8,11 @@ import { getPredictionsMetas } from "@/features/predict/lib/queries";
 
 type Props = {
   children: React.ReactNode;
+};
+
+export const metadata: Metadata = {
+  title: "Prediction Markets",
+  description: "Explore and trade on the world's most exciting events",
 };
 
 const PredictLayout = async ({ children }: Props) => {

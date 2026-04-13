@@ -32,22 +32,6 @@ const BottomNavActions = ({ className }: Props) => {
             useOrderFormStore.getState().setPredictSideIndex(index);
           }}
         />
-        // <TradingWidgetDrawer
-        //   key={side.coin}
-        //   marketEventTitle={marketEventMeta.title}
-        //   trigger={
-        //     <MarketSideButton
-        //       isCurrent
-        //       side={{ ...side, ...marketEventCtx.sides[index] }}
-        //       index={index}
-        //       label="Buy"
-        //       className="h-11"
-        //       onClick={() => {
-        //         useOrderFormStore.getState().setPredictSideIndex(index);
-        //       }}
-        //     />
-        //   }
-        // />
       ))}
     </div>
   );

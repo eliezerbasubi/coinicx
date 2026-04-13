@@ -70,7 +70,7 @@ const MarketEventOutcomeDrawer = ({ open, onOpenChange }: Props) => {
             <MarketSideButton
               key={side.coin}
               isCurrent
-              side={{ ...side, ...sidesCtxs[index] }}
+              side={{ ...side, ...sidesCtxs?.[index] }}
               index={index}
               label="Buy"
               className="h-11"

@@ -1,3 +1,5 @@
+import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Repeat, Star } from "lucide-react";
 
@@ -5,6 +7,7 @@ import { ROUTES } from "@/lib/constants/routes";
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { useIsLaptop } from "@/hooks/useIsMobile";
 import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
@@ -14,6 +17,11 @@ import {
   convertPeriodToMinutes,
   parseRecurringMetadata,
 } from "@/features/predict/lib/utils/parseMetadata";
+
+const MarketEventDrawer = dynamic(
+  () => import("@/features/predict/event/components/MarketEventDrawer"),
+  { ssr: false },
+);
 
 type Props = {
   data: MarketEvent;
@@ -30,6 +38,10 @@ const MarketEventCard = ({ data }: Props) => {
     !!recurringPayload?.period &&
     convertPeriodToMinutes(recurringPayload.period) < 24 * 60;
 
+  const isLaptop = useIsLaptop();
+
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="w-full flex flex-col min-h-[160px] shadow-md rounded-lg border border-neutral-gray-200 px-3 pt-3 pb-2 bg-neutral-gray-600">
       <div className="flex items-center gap-2">
@@ -43,6 +55,13 @@ const MarketEventCard = ({ data }: Props) => {
         <Link
           href={`${ROUTES.predict.event}/${data.slug}`}
           className="hover:underline"
+          onClick={(e) => {
+            if (!isLaptop) {
+              e.preventDefault();
+
+              setOpen(true);
+            }
+          }}
         >
           <p className="flex-1 text-sm font-medium line-clamp-2">
             {data.title}
@@ -141,6 +160,16 @@ const MarketEventCard = ({ data }: Props) => {
           </div>
         </div>
       </div>
+
+      <Visibility visible={!isLaptop}>
+        <MarketEventDrawer
+          open={open}
+          onOpenChange={setOpen}
+          slug={data.slug}
+          type={data.type}
+          title={data.title}
+        />
+      </Visibility>
     </div>
   );
 };
@@ -186,11 +215,6 @@ const SideButton = ({
 };
 
 const mapMarketEventToMeta = (data: MarketEvent) => {
-  const parsedMetadata = parseRecurringMetadata(
-    data.description,
-    data.resolution,
-  );
-
   return {
     title: data.title,
     type: data.type,
@@ -201,7 +225,7 @@ const mapMarketEventToMeta = (data: MarketEvent) => {
     coin: data.coin,
     categories: data.categories,
     questionId: data.questionId,
-    recurringPayload: parsedMetadata,
+    recurringPayload: null,
     settledOutcomes: data.settledOutcomes,
     description: data.description,
   };

@@ -8,6 +8,7 @@ import {
   ChevronDown,
   RefreshCcwDot,
   Send,
+  Sparkles,
 } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useWebHaptics } from "web-haptics/react";
@@ -22,6 +23,7 @@ import ConnectButton from "@/components/common/ConnectButton";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import PortfolioDrawer from "@/features/portfolio/components/PortfolioDrawer";
+import PredictionMarketsDrawer from "@/features/predict/markets/components/PredictionMarketsDrawer";
 import SwapDrawer from "@/features/swap/components/SwapDrawer";
 import PositionsOverview from "@/features/trade/components/TradingAccountPanel/Positions/PositionsOverview";
 import { useAccountBalances } from "@/features/trade/hooks/useAccountBalances";
@@ -145,6 +147,10 @@ const AccountActions = () => {
         trigger={
           <AccountActionCard icon={<ArrowRightLeft />} label="Convert" />
         }
+      />
+
+      <PredictionMarketsDrawer
+        trigger={<AccountActionCard icon={<Sparkles />} label="Predictions" />}
       />
 
       <AccountActionCard

@@ -6,6 +6,7 @@ import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import { OrderType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import OfflineBanner from "@/components/common/OfflineBanner";
+import PredictionMarketsDrawer from "@/features/predict/markets/components/PredictionMarketsDrawer";
 import SwapDrawer from "@/features/swap/components/SwapDrawer";
 import AssetsSelector from "@/features/trade/components/AssetsSelector";
 import FavoriteButton from "@/features/trade/components/FavoriteButton";
@@ -102,6 +103,13 @@ const TradeTabView = () => {
               {tab.label}
             </Link>
           ))}
+          <PredictionMarketsDrawer
+            trigger={
+              <div className="text-neutral-gray-400 font-semibold">
+                <p>Predict</p>
+              </div>
+            }
+          />
         </div>
 
         <OfflineBanner />
