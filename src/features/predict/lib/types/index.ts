@@ -35,6 +35,7 @@ export interface ParsedRecurringPayload {
 
 export interface ParsedRecurringMetadata extends ParsedRecurringPayload {
   title: string;
+  slug: string;
   description: string;
 }
 

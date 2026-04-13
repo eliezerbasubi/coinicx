@@ -170,3 +170,16 @@ export function parseRecurringMetadata(
     ...parsed,
   };
 }
+
+/**
+ * Parse the category to period and type
+ */
+export function parseCategory(category: string) {
+  if (category.includes("crypto_")) {
+    const [type, period] = category.split("_");
+
+    return { type, period };
+  }
+
+  return { type: category, period: null };
+}

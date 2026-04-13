@@ -7,7 +7,7 @@ import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
 import { ROUTES } from "@/lib/constants/routes";
 
 import PredictEventPageSkeleton from "../components/PredictEventPageSkeleton";
-import { useMarketEventsMetas } from "../hooks/useMarketEventsMetas";
+import { usePredictionsMetas } from "../hooks/usePredictionsMetas";
 import { useSpotMetas } from "../hooks/useSpotMetas";
 import MarketEventStoreProvider from "../lib/store/market-event/provider";
 import { MarketEventMeta, MarketEventMetaOutcome } from "../lib/types";
@@ -25,7 +25,7 @@ type Props = {
 const MarketEventProvider = ({ children, params }: Props) => {
   const { slug } = use(params);
 
-  const { data, isLoading } = useMarketEventsMetas();
+  const { data, isLoading } = usePredictionsMetas();
 
   const marketEventMeta = useMemo<MarketEventMeta | null>(() => {
     if (!data) return null;

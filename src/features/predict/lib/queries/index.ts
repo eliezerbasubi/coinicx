@@ -14,25 +14,31 @@ const transport = new HttpTransport({
 
 const hlInfoClient = new InfoClient({ transport });
 
-export const getMarketEventsMetas = async () => {
+export type PredictionMetas = {
+  slugToOutcomeSpec: Map<string, OutcomeMetaResponse["outcomes"][number]>;
+  slugToQuestionSpec: Map<string, OutcomeMetaResponse["questions"][number]>;
+  outcomeToQuestionMeta: Map<
+    number,
+    {
+      question: number;
+      slug: string;
+    }
+  >;
+  outcomeToSlug: Map<number, string>;
+  fallbackOutcomes: Set<number>;
+};
+
+export const getPredictionsMetas = async (): Promise<PredictionMetas> => {
   const data = await hlInfoClient.outcomeMeta();
 
-  const slugToOutcomeSpec = new Map<
-    string,
-    OutcomeMetaResponse["outcomes"][number]
-  >();
+  const slugToOutcomeSpec: PredictionMetas["slugToOutcomeSpec"] = new Map();
 
-  const outcomeToSlug = new Map<number, string>();
+  const outcomeToSlug: PredictionMetas["outcomeToSlug"] = new Map();
 
-  const slugToQuestionSpec = new Map<
-    string,
-    OutcomeMetaResponse["questions"][number]
-  >();
+  const slugToQuestionSpec: PredictionMetas["slugToQuestionSpec"] = new Map();
 
-  const outcomeToQuestionMeta = new Map<
-    number,
-    { question: number; slug: string }
-  >();
+  const outcomeToQuestionMeta: PredictionMetas["outcomeToQuestionMeta"] =
+    new Map();
 
   const fallbackOutcomes = new Set<number>();
 
