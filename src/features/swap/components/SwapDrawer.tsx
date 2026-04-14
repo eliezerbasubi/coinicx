@@ -27,10 +27,10 @@ const SwapDrawer = ({ trigger }: Props) => {
         {trigger}
       </Slot.Root>
       <Drawer open={open} onOpenChange={setOpen} direction="right">
-        <DrawerContent className="px-0 pt-4 standalone:pt-safe-top">
+        <DrawerContent className="p-0 pt-4 standalone:pt-safe-top">
           <div
             id="swap-container"
-            className="w-full max-w-116.25 mx-auto px-4 md:px-2 md:pb-4"
+            className="w-full max-w-116.25 mx-auto px-4 md:px-2 md:pb-4 overflow-y-auto overflow-x-hidden no-scrollbars"
           >
             <DrawerHeader className="sticky top-0 z-10 bg-primary-dark gap-0 p-0 mb-4">
               <DrawerTitle className="w-full flex items-center justify-between gap-2">
