@@ -7,7 +7,7 @@ import { ROUTES } from "@/lib/constants/routes";
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
-import { useIsLaptop } from "@/hooks/useIsMobile";
+import { useIsDesktop, useIsTablet } from "@/hooks/useIsMobile";
 import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ const MarketEventCard = ({ data }: Props) => {
     !!recurringPayload?.period &&
     convertPeriodToMinutes(recurringPayload.period) < 24 * 60;
 
-  const isLaptop = useIsLaptop();
+  const isDesktop = useIsDesktop();
 
   const [open, setOpen] = useState(false);
 
@@ -56,7 +56,7 @@ const MarketEventCard = ({ data }: Props) => {
           href={`${ROUTES.predict.event}/${data.slug}`}
           className="hover:underline"
           onClick={(e) => {
-            if (!isLaptop) {
+            if (!isDesktop) {
               e.preventDefault();
 
               setOpen(true);
@@ -161,7 +161,7 @@ const MarketEventCard = ({ data }: Props) => {
         </div>
       </div>
 
-      <Visibility visible={!isLaptop}>
+      <Visibility visible={!isDesktop}>
         <MarketEventDrawer
           open={open}
           onOpenChange={setOpen}

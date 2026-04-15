@@ -8,10 +8,12 @@ type Props = {
 };
 
 const BottomNavActions = ({ className }: Props) => {
-  const { marketEventMeta, marketEventCtx } = useMarketEventContext((s) => ({
-    marketEventMeta: s.marketEventMeta,
-    marketEventCtx: s.marketEventCtx,
-  }));
+  const { marketEventMeta, marketEventCtx, openTradingWidgetDrawer } =
+    useMarketEventContext((s) => ({
+      marketEventMeta: s.marketEventMeta,
+      marketEventCtx: s.marketEventCtx,
+      openTradingWidgetDrawer: s.openTradingWidgetDrawer,
+    }));
 
   return (
     <div
@@ -30,6 +32,7 @@ const BottomNavActions = ({ className }: Props) => {
           className="h-11"
           onClick={() => {
             useOrderFormStore.getState().setPredictSideIndex(index);
+            openTradingWidgetDrawer(true);
           }}
         />
       ))}
