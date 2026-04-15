@@ -41,28 +41,30 @@ const PortfolioDrawer = ({ trigger }: { trigger: React.ReactNode }) => {
         {trigger}
       </Slot.Root>
       <Drawer open={open} onOpenChange={setOpen} direction="right">
-        <DrawerContent className="w-full! border-l-0! px-0 standalone:pt-safe-top overflow-y-auto overflow-x-hidden">
-          <DrawerHeader className="sticky top-0 z-10 bg-primary-dark gap-0 p-4">
-            <DrawerTitle className="w-full flex items-center justify-center gap-2">
-              <DrawerClose asChild>
-                <ArrowLeft className="size-5" />
-              </DrawerClose>
-              <p className="flex-1 text-center text-base text-white font-semibold">
-                Portfolio
-              </p>
-            </DrawerTitle>
-            <DrawerDescription className="sr-only">
-              Showing user's portfolio
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="w-full space-y-2">
-            <div className="w-full flex flex-col md:flex-row items-stretch gap-2 px-4">
-              <PortfolioOverview />
-              <PortfolioChart />
-            </div>
+        <DrawerContent className="w-full flex flex-col border-l-0 p-0 standalone:pt-safe-top">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbars">
+            <DrawerHeader className="sticky top-0 z-10 bg-primary-dark gap-0 p-4">
+              <DrawerTitle className="w-full flex items-center justify-center gap-2">
+                <DrawerClose asChild>
+                  <ArrowLeft className="size-5" />
+                </DrawerClose>
+                <p className="flex-1 text-center text-base text-white font-semibold">
+                  Portfolio
+                </p>
+              </DrawerTitle>
+              <DrawerDescription className="sr-only">
+                Showing user's portfolio
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="w-full space-y-2 pb-4">
+              <div className="w-full flex flex-col md:flex-row items-stretch gap-2 px-4">
+                <PortfolioOverview />
+                <PortfolioChart />
+              </div>
 
-            <div className="px-4">
-              <PortfolioFees />
+              <div className="px-4">
+                <PortfolioFees />
+              </div>
             </div>
           </div>
         </DrawerContent>
