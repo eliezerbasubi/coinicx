@@ -1,11 +1,12 @@
 "use client";
 
-import React, { use, useMemo } from "react";
+import React, { useMemo } from "react";
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
 
 import { ROUTES } from "@/lib/constants/routes";
 
+import PredictError from "../components/PredictError";
 import PredictEventPageSkeleton from "../components/PredictEventPageSkeleton";
 import { usePredictionsMetas } from "../hooks/usePredictionsMetas";
 import { useSpotMetas } from "../hooks/useSpotMetas";
@@ -23,7 +24,7 @@ type Props = {
 };
 
 const MarketEventProvider = ({ children, slug }: Props) => {
-  const { data, isLoading } = usePredictionsMetas();
+  const { data, error, isLoading } = usePredictionsMetas();
 
   const marketEventMeta = useMemo<MarketEventMeta | null>(() => {
     if (!data) return null;
@@ -74,6 +75,15 @@ const MarketEventProvider = ({ children, slug }: Props) => {
   });
 
   if (isLoading) return <PredictEventPageSkeleton />;
+
+  if (error) {
+    return (
+      <PredictError
+        title="Something went wrong"
+        description="We're having trouble loading market events. Please try again later."
+      />
+    );
+  }
 
   if (!marketEventMeta) return notFound();
 
