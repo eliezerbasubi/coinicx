@@ -9,6 +9,7 @@ type SeriesChartSubsArgs = {
   interval: CandleSnapshotInterval;
   coins: string[];
   onCandleUpdate: (candle: CandleWsEvent, seriesIndex: number) => void;
+  enabled?: boolean;
 };
 
 /**
@@ -18,15 +19,18 @@ export const useSeriesChartSubs = ({
   coins,
   interval,
   onCandleUpdate,
+  enabled = true,
 }: SeriesChartSubsArgs) => {
   const subscribes = useMemo(() => {
+    if (!enabled) return [];
+
     return coins.map(
       (coin, index) => () =>
         hlSubClient.candle({ coin, interval }, (data) => {
           onCandleUpdate(data, index);
         }),
     );
-  }, [coins]);
+  }, [coins, enabled]);
 
   useSubscriptions(subscribes, [subscribes]);
 };

@@ -1,21 +1,25 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { notFound, redirect, RedirectType } from "next/navigation";
-import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
 
 import { ROUTES } from "@/lib/constants/routes";
+import PredictError from "@/features/predict/components/PredictError";
+import PredictEventPageSkeleton from "@/features/predict/components/PredictEventPageSkeleton";
+import { usePredictionsMetas } from "@/features/predict/hooks/usePredictionsMetas";
+import { useSettledOutcome } from "@/features/predict/hooks/useSettledOutcome";
+import { useSpotMetas } from "@/features/predict/hooks/useSpotMetas";
+import MarketEventStoreProvider from "@/features/predict/lib/store/market-event/provider";
+import { PredictionMetas } from "@/features/predict/lib/types";
+import {
+  mapOutcomeSpecToMarketEventMeta,
+  mapQuestionToMarketEventMeta,
+} from "@/features/predict/lib/utils/mapper";
+import {
+  parseOutcomeFromSlug,
+  timeToExpiry,
+} from "@/features/predict/lib/utils/parseMetadata";
 
-import PredictError from "../components/PredictError";
-import PredictEventPageSkeleton from "../components/PredictEventPageSkeleton";
-import { usePredictionsMetas } from "../hooks/usePredictionsMetas";
-import { useSpotMetas } from "../hooks/useSpotMetas";
-import MarketEventStoreProvider from "../lib/store/market-event/provider";
-import { MarketEventMeta, MarketEventMetaOutcome } from "../lib/types";
-import { detectCategories } from "../lib/utils/detectCategories";
-import { buildSideCoin, isRecurring } from "../lib/utils/outcomes";
-import { parseRecurringMetadata } from "../lib/utils/parseMetadata";
-import { slugify } from "../lib/utils/shared";
 import MarketEventCtxProvider from "./market-event-ctx-provider";
 
 type Props = {
@@ -26,7 +30,57 @@ type Props = {
 const MarketEventProvider = ({ children, slug }: Props) => {
   const { data, error, isLoading } = usePredictionsMetas();
 
-  const marketEventMeta = useMemo<MarketEventMeta | null>(() => {
+  const baseMarketEventMeta = mapDataToMarketEventMeta(data, slug);
+
+  // We only want to fetch settled outcome for recurring events that have expired.
+  const outcomeId =
+    baseMarketEventMeta &&
+    baseMarketEventMeta.recurringPayload &&
+    timeToExpiry(baseMarketEventMeta.recurringPayload.expiry) > 0
+      ? null
+      : parseOutcomeFromSlug(slug);
+
+  const { data: settledOutcome, isLoading: isSettledOutcomeLoading } =
+    useSettledOutcome({
+      outcome: outcomeId,
+    });
+
+  const marketEventMeta = settledOutcome ?? baseMarketEventMeta;
+
+  useSpotMetas({
+    // We only want to fetch spot meta for recurring events.
+    // TODO: Check if we could enforce the restriction to recurring events where the class property is set to priceBinary.
+    enabled: marketEventMeta?.type === "recurring",
+
+    // We are just prefetching here, we don't want the component to re-render when the spot meta is updated.
+    notifyOnChangeProps: [],
+  });
+
+  if (isLoading || isSettledOutcomeLoading) return <PredictEventPageSkeleton />;
+
+  if (error) {
+    return (
+      <PredictError
+        title="Something went wrong"
+        description="We're having trouble loading market events. Please try again later."
+      />
+    );
+  }
+
+  if (!marketEventMeta) return notFound();
+
+  return (
+    <MarketEventStoreProvider marketEventMeta={marketEventMeta}>
+      <MarketEventCtxProvider />
+      {children}
+    </MarketEventStoreProvider>
+  );
+};
+
+export default MarketEventProvider;
+
+const mapDataToMarketEventMeta = (data: PredictionMetas, slug: string) => {
+  {
     if (!data) return null;
 
     // First check if the slug is a question slug.
@@ -63,122 +117,5 @@ const MarketEventProvider = ({ children, slug }: Props) => {
       `${ROUTES.predict.event}/${questionMeta.slug}`,
       RedirectType.replace,
     );
-  }, [data, slug]);
-
-  useSpotMetas({
-    // We only want to fetch spot meta for recurring events.
-    // TODO: Check if we could enforce the restriction to recurring events where the class property is set to priceBinary.
-    enabled: marketEventMeta?.type === "recurring",
-
-    // We are just prefetching here, we don't want the component to re-render when the spot meta is updated.
-    notifyOnChangeProps: [],
-  });
-
-  if (isLoading) return <PredictEventPageSkeleton />;
-
-  if (error) {
-    return (
-      <PredictError
-        title="Something went wrong"
-        description="We're having trouble loading market events. Please try again later."
-      />
-    );
   }
-
-  if (!marketEventMeta) return notFound();
-
-  return (
-    <MarketEventStoreProvider marketEventMeta={marketEventMeta}>
-      <MarketEventCtxProvider />
-      {children}
-    </MarketEventStoreProvider>
-  );
 };
-
-/**
- * Maps an outcome spec to a market event meta.
- */
-const mapOutcomeSpecToMarketEventMeta = (
-  outcomeSpec: OutcomeMetaResponse["outcomes"][number],
-): MarketEventMeta => {
-  const isRecurringOutcome = isRecurring(outcomeSpec);
-
-  const parsedMetadata = isRecurringOutcome
-    ? parseRecurringMetadata(outcomeSpec.description, outcomeSpec.outcome)
-    : null;
-
-  return {
-    coin: buildSideCoin(outcomeSpec.outcome, 0),
-    title: parsedMetadata?.title ?? outcomeSpec.name,
-    description: parsedMetadata?.description ?? outcomeSpec.description,
-    slug: slugify(outcomeSpec.name),
-    resolution: outcomeSpec.outcome,
-    type: isRecurringOutcome ? "recurring" : "binary",
-    questionId: null,
-    categories: detectCategories(outcomeSpec.name, outcomeSpec.description),
-    outcomes: [],
-    settledOutcomes: [],
-    sides: outcomeSpec.sideSpecs.map((side, index) => ({
-      name: side.name,
-      coin: buildSideCoin(outcomeSpec.outcome, index),
-    })),
-    recurringPayload: parsedMetadata
-      ? {
-          underlying: parsedMetadata.underlying,
-          class: parsedMetadata.class,
-          expiry: parsedMetadata.expiry,
-          targetPrice: parsedMetadata.targetPrice,
-          period: parsedMetadata.period,
-        }
-      : null,
-  };
-};
-
-/**
- * Maps a question to a market event meta.
- */
-const mapQuestionToMarketEventMeta = (params: {
-  question: OutcomeMetaResponse["questions"][number];
-  outcomeToSlug: Map<number, string>;
-  slugToOutcomeSpec: Map<string, OutcomeMetaResponse["outcomes"][number]>;
-}): MarketEventMeta => {
-  const { question, outcomeToSlug, slugToOutcomeSpec } = params;
-
-  return {
-    coin: null,
-    title: question.name,
-    description: question.description,
-    slug: slugify(question.name),
-    resolution: question.fallbackOutcome,
-    type: "categorical",
-    questionId: question.question,
-    settledOutcomes: question.settledNamedOutcomes,
-    categories: detectCategories(question.name, question.description),
-    recurringPayload: null,
-    sides: [],
-    outcomes: question.namedOutcomes
-      .map((namedOutcome) => {
-        const slug = outcomeToSlug.get(namedOutcome);
-
-        if (!slug) return null;
-
-        const outcome = slugToOutcomeSpec.get(slug);
-
-        if (!outcome) return null;
-
-        return {
-          coin: buildSideCoin(outcome.outcome, 0),
-          title: outcome.name,
-          outcome: outcome.outcome,
-          description: outcome.description,
-          sides: outcome.sideSpecs.map((side, index) => ({
-            name: side.name,
-            coin: buildSideCoin(outcome.outcome, index),
-          })),
-        };
-      })
-      .filter(Boolean) as MarketEventMetaOutcome[],
-  };
-};
-
-export default MarketEventProvider;

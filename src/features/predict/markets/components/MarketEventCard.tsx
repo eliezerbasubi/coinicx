@@ -30,7 +30,7 @@ type Props = {
 const MarketEventCard = ({ data }: Props) => {
   const isRecurringEvent = data.type === "recurring";
   const recurringPayload = isRecurringEvent
-    ? parseRecurringMetadata(data.description, data.resolution)
+    ? parseRecurringMetadata(data.description, data.outcome)
     : null;
 
   // We consider a live event, an event that's less than 24 hours from now
@@ -218,7 +218,7 @@ const mapMarketEventToMeta = (data: MarketEvent) => {
   return {
     title: data.title,
     type: data.type,
-    resolution: data.resolution,
+    outcome: data.outcome,
     slug: data.slug,
     sides: data.sides,
     outcomes: data.outcomes,
@@ -228,6 +228,7 @@ const mapMarketEventToMeta = (data: MarketEvent) => {
     recurringPayload: null,
     settledOutcomes: data.settledOutcomes,
     description: data.description,
+    status: data.status,
   };
 };
 

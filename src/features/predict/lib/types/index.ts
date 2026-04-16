@@ -1,3 +1,5 @@
+import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
+
 export interface SideSpecCtx {
   /** The volume of the side spec */
   volume: number;
@@ -23,6 +25,7 @@ export interface MarketOutcome {
   title: string;
   description: string;
   sides: SideSpec[];
+  status: MarketEventStatus;
 }
 
 export interface ParsedRecurringPayload {
@@ -39,6 +42,8 @@ export interface ParsedRecurringMetadata extends ParsedRecurringPayload {
   description: string;
 }
 
+export type MarketEventStatus = "active" | "settled";
+
 export interface MarketEvent {
   title: string;
   description: string;
@@ -54,8 +59,8 @@ export interface MarketEvent {
   /** `question` property in the questions array. Position of the question in the questions array */
   questionId: number | null;
 
-  /** The outcome ID that will be settled */
-  resolution: number;
+  /** The outcome ID */
+  outcome: number;
 
   /** The type of market event.
    * `recurring` is a binary event that will be settled at a future date.
@@ -74,6 +79,9 @@ export interface MarketEvent {
 
   /** The categories of the market event. */
   categories: string[];
+
+  /** The status of the market event. */
+  status: MarketEventStatus;
 }
 
 export interface MarketEventMetaSide {
@@ -93,13 +101,16 @@ export interface MarketEventMeta {
   slug: string;
   coin: string | null;
   questionId: number | null;
-  resolution: number;
+  outcome: number;
   type: MarketEventType;
   sides: MarketEventMetaSide[];
   outcomes: MarketEventMetaOutcome[];
   settledOutcomes: number[];
   categories: string[];
   recurringPayload: ParsedRecurringPayload | null;
+  status: MarketEventStatus;
+  settledSide?: number;
+  settledDetails?: { [key: string]: string } | null;
 }
 
 export interface MarketEventCtx {
@@ -108,3 +119,17 @@ export interface MarketEventCtx {
   outcomes: { sides: SideSpecCtx[] }[];
   sides: SideSpecCtx[];
 }
+
+export type PredictionMetas = {
+  slugToOutcomeSpec: Map<string, OutcomeMetaResponse["outcomes"][number]>;
+  slugToQuestionSpec: Map<string, OutcomeMetaResponse["questions"][number]>;
+  outcomeToQuestionMeta: Map<
+    number,
+    {
+      question: number;
+      slug: string;
+    }
+  >;
+  outcomeToSlug: Map<number, string>;
+  fallbackOutcomes: Set<number>;
+};

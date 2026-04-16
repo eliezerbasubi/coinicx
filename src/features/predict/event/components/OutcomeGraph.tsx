@@ -53,6 +53,7 @@ const OutcomeGraph = ({ outcomeMeta, sidesCtxs }: Props) => {
           },
         ]}
         interval={state.interval}
+        status={outcomeMeta.status}
       />
 
       <div className="w-full flex justify-between flex-wrap-reverse md:flex-nowrap gap-4 md:gap-0 min-h-10 px-0 md:px-4">

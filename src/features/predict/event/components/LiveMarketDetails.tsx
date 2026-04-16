@@ -1,23 +1,35 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
 import { ArrowUp, ChevronRight } from "lucide-react";
 
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { ROUTES } from "@/lib/constants/routes";
 import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { getQueryClient } from "@/lib/utils/getQueryClient";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { useSpotAssetMeta } from "@/features/predict/hooks/useSpotMetas";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
-import { parseExpiry } from "@/features/predict/lib/utils/parseMetadata";
+import { ParsedRecurringPayload } from "@/features/predict/lib/types";
+import { isRecurring } from "@/features/predict/lib/utils/outcomes";
+import {
+  parseExpiry,
+  parseRecurringMetadata,
+} from "@/features/predict/lib/utils/parseMetadata";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
 
 const LiveMarketDetails = () => {
-  const marketEventMeta = useMarketEventContext(
-    (state) => state.marketEventMeta,
-  );
-
-  const recurringPayload = marketEventMeta.recurringPayload;
+  const { recurringPayload, settledPrice } = useMarketEventContext((state) => ({
+    recurringPayload: state.marketEventMeta.recurringPayload,
+    settledPrice:
+      state.marketEventMeta.settledDetails &&
+      "price" in state.marketEventMeta.settledDetails
+        ? state.marketEventMeta.settledDetails.price
+        : null,
+  }));
 
   const spotAssetCtxs = useInstrumentStore((s) => s.spotAssetCtxs);
   const spotAssetMeta = useSpotAssetMeta({
@@ -45,6 +57,16 @@ const LiveMarketDetails = () => {
 
   if (!recurringPayload) return null;
 
+  const priceChange = settledPrice
+    ? Number(settledPrice) - Number(recurringPayload.targetPrice)
+    : (activeAsset?.priceChange ?? 0);
+
+  const priceChangePercent = settledPrice
+    ? priceChange / 100
+    : (activeAsset?.priceChangePercent ?? 0);
+
+  const price = settledPrice ? Number(settledPrice) : (activeAsset?.price ?? 0);
+
   return (
     <div className="w-full flex flex-col-reverse md:flex-row md:items-center justify-between gap-4 md:gap-2 mb-6 md:my-6">
       <div className="flex-1 flex items-center divide-x divide-neutral-gray-200">
@@ -63,12 +85,14 @@ const LiveMarketDetails = () => {
         {activeAsset && (
           <div className="w-fit pl-4">
             <div className="text-sm font-medium text-primary flex items-center gap-1">
-              <p>Current Price</p>
+              <p className={cn({ "text-neutral-gray-100": !!settledPrice })}>
+                {settledPrice ? "Final Price" : "Current Price"}
+              </p>
               <div
                 className={cn(
                   "text-xs text-buy font-medium flex items-center",
                   {
-                    "text-sell": activeAsset.priceChange < 0,
+                    "text-sell": priceChange < 0,
                   },
                 )}
               >
@@ -77,14 +101,14 @@ const LiveMarketDetails = () => {
                 <p>
                   <span>
                     {formatPriceToDecimal(
-                      activeAsset.priceChange,
+                      priceChange,
                       activeAsset.pxDecimals ?? 2,
                       { style: "currency" },
                     )}
                   </span>
                   <span className="ml-1">
                     (
-                    {formatNumber(activeAsset.priceChangePercent / 100, {
+                    {formatNumber(priceChangePercent / 100, {
                       style: "percent",
                       useSign: true,
                       minimumFractionDigits: 2,
@@ -95,35 +119,42 @@ const LiveMarketDetails = () => {
                 </p>
               </div>
             </div>
-            <p className="text-xl font-bold text-primary">
-              {formatPriceToDecimal(
-                Number(activeAsset.price),
-                activeAsset.pxDecimals,
-                { style: "currency", useFallback: true },
-              )}
+            <p
+              className={cn("text-xl font-bold text-primary", {
+                "text-neutral-gray-100": !!settledPrice,
+              })}
+            >
+              {formatPriceToDecimal(price, activeAsset.pxDecimals, {
+                style: "currency",
+                useFallback: true,
+              })}
             </p>
           </div>
         )}
       </div>
-      <Countdown expiry={recurringPayload.expiry} />
+      <Countdown recurringPayload={recurringPayload} />
     </div>
   );
 };
 
-const Countdown = ({ expiry }: { expiry: string }) => {
+const Countdown = ({
+  recurringPayload,
+}: {
+  recurringPayload: ParsedRecurringPayload;
+}) => {
   const router = useRouter();
   const [timeLeft, setTimeLeft] = useState<number>(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
-      const expiryDate = parseExpiry(expiry);
+      const expiryDate = parseExpiry(recurringPayload.expiry);
       const diff = expiryDate.getTime() - now;
       setTimeLeft(diff);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [expiry]);
+  }, [recurringPayload.expiry]);
 
   const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
   const hours = Math.floor(
@@ -141,11 +172,37 @@ const Countdown = ({ expiry }: { expiry: string }) => {
         variant="secondary"
         className="size-fit flex items-center gap-1 rounded-full px-3 py-1.5"
         onClick={() => {
-          // Handle implementation here to refresh the current market
-          // Steps to consider when implementing this
-          // 1. Update state
-          // 2. Update URL if event date is different from the current date
-          router.refresh();
+          const queryClient = getQueryClient();
+
+          const predictionMarketEvents =
+            queryClient.getQueryData<OutcomeMetaResponse>([
+              QUERY_KEYS.predictionMarketEvents,
+            ]);
+
+          if (!predictionMarketEvents) return;
+
+          let metadata = null;
+          for (const outcome of predictionMarketEvents.outcomes) {
+            const parsedMetadata = isRecurring(outcome)
+              ? parseRecurringMetadata(outcome.description, outcome.outcome)
+              : null;
+
+            if (!parsedMetadata) continue;
+
+            if (
+              parsedMetadata.class === recurringPayload.class &&
+              parsedMetadata.underlying === recurringPayload.underlying &&
+              parsedMetadata.period === recurringPayload.period
+            ) {
+              metadata = parsedMetadata;
+              break;
+            }
+          }
+
+          if (metadata) {
+            router.replace(`${ROUTES.predict.event}/${metadata.slug}`);
+          }
+          // TODO: Handle the case where metadata is not found.
         }}
       >
         <p className="text-sm font-medium text-neutral-gray-100">

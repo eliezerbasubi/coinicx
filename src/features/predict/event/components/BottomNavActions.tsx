@@ -18,7 +18,7 @@ const BottomNavActions = ({ className }: Props) => {
   return (
     <div
       className={cn(
-        "fixed bottom-4 inset-x-0 z-10 w-full mx-auto grid grid-cols-2 gap-2 px-4 md:px-6",
+        "fixed bottom-4 inset-x-0 z-10 w-full mx-auto grid grid-cols-2 gap-2 px-4 md:px-6 lg:hidden",
         className,
       )}
     >

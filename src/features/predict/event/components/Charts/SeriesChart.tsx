@@ -12,6 +12,7 @@ import {
   type SeriesInfo,
 } from "@/features/predict/event/hooks/useSeriesChart";
 import { useSeriesChartSubs } from "@/features/predict/event/hooks/useSeriesChartSubs";
+import { MarketEventStatus } from "@/features/predict/lib/types";
 
 const MAX_LEGEND_HEIGHT = 62;
 
@@ -19,14 +20,21 @@ type Props = {
   seriesInfo: SeriesInfo[];
   chartView?: ChartView;
   interval: CandleSnapshotInterval;
+  status: MarketEventStatus;
 };
 
-const SeriesChart = ({ seriesInfo, interval, chartView = "line" }: Props) => {
+const SeriesChart = ({
+  seriesInfo,
+  interval,
+  status,
+  chartView = "line",
+}: Props) => {
   const minHeight =
     chartView === "line" ? CHART_HEIGHT : CHART_HEIGHT + MAX_LEGEND_HEIGHT;
 
   const { snapshots, isLoading, isError, refetch } = useFetchSnapshots({
     interval,
+    enabled: status !== "settled",
     coins: seriesInfo.map((info) => info.coin),
   });
 
@@ -43,6 +51,7 @@ const SeriesChart = ({ seriesInfo, interval, chartView = "line" }: Props) => {
   useSeriesChartSubs({
     coins: seriesInfo.map((info) => info.coin),
     interval,
+    enabled: status !== "settled",
     onCandleUpdate: updateSeries,
   });
 

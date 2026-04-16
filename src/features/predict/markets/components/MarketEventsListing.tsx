@@ -99,7 +99,7 @@ const MarketEventsListing = ({ className }: Props) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 md:gap-3 py-4 px-4 md:px-6 xl:px-0">
         {filteredMarkets.map((event) => (
-          <MarketEventCard key={event.coin} data={event} />
+          <MarketEventCard key={event.coin + event.slug} data={event} />
         ))}
       </div>
     </div>

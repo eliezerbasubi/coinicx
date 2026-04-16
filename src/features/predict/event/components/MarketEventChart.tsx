@@ -21,19 +21,24 @@ const CHART_VIEWS = [
 ] as const;
 
 const MarketEventChart = () => {
-  const { marketEventMeta, chartOutcomeSideIndex, setChartOutcomeSideIndex } =
-    useMarketEventContext((s) => ({
-      marketEventMeta: s.marketEventMeta,
+  const {
+    marketEventMeta,
+    chartOutcomeSideIndex,
+    status,
+    setChartOutcomeSideIndex,
+  } = useMarketEventContext((s) => ({
+    marketEventMeta: s.marketEventMeta,
 
-      // For categorical markets, we don't want to switch outcomes. We just want to show the yes/primary outcome.
-      chartOutcomeSideIndex:
-        s.marketEventMeta.type === "categorical" ? 0 : s.chartOutcomeSideIndex,
-      setChartOutcomeSideIndex: s.setChartOutcomeSideIndex,
-    }));
+    // For categorical markets, we don't want to switch outcomes. We just want to show the yes/primary outcome.
+    chartOutcomeSideIndex:
+      s.marketEventMeta.type === "categorical" ? 0 : s.chartOutcomeSideIndex,
+    status: s.marketEventMeta.status,
+    setChartOutcomeSideIndex: s.setChartOutcomeSideIndex,
+  }));
 
   const {
     interval: chartSettingsInterval,
-    chartView,
+    chartView: chartSettingsView,
     setSettings,
   } = useShallowChartSettingsStore((s) => ({
     interval: s.interval,
@@ -50,6 +55,11 @@ const MarketEventChart = () => {
     marketEventMeta.type === "recurring" && marketEventMeta.recurringPayload
       ? (marketEventMeta.recurringPayload.period as CandleSnapshotInterval)
       : chartSettingsInterval;
+
+  // For recurring markets, we show the settings view as it supports candlestick and line views
+  // For non-recurring markets, we always show the line view
+  const chartView =
+    marketEventMeta.type === "recurring" ? chartSettingsView : "line";
 
   // We default to the first outcome if there are multiple outcomes
   // To get the current side and opposite side
@@ -98,6 +108,7 @@ const MarketEventChart = () => {
           seriesInfo={seriesInfo}
           chartView={chartView}
           interval={interval}
+          status={status}
         />
 
         <div className="w-full flex justify-between flex-wrap-reverse md:flex-nowrap gap-4 md:gap-0 min-h-10 px-3 md:px-4">

@@ -111,11 +111,12 @@ export function formatRecurringTitle(
   const expiry = recurringPayload.expiry ?? "";
 
   if (recurringPayload.class === "priceBinary") {
+    const baseSlug = `${underlying} above ${target} on ${formatExpiryDate(expiry, { month: "short", day: "numeric" })}`;
     return {
       title: `${underlying} above $${target} on ${formatExpiryDate(expiry)}?`,
-      slug: slugify(
-        `${underlying} above ${target} on ${formatExpiryDate(expiry, { month: "short", day: "numeric" })}`,
-      ),
+
+      // We append the outcomeId to the slug to ensure uniqueness.
+      slug: `${slugify(baseSlug)}-${outcomeId}`,
     };
   }
   return {
@@ -182,4 +183,23 @@ export function parseCategory(category: string) {
   }
 
   return { type: category, period: null };
+}
+
+/** Parse "price:14.5" -> { price: 14.5 } */
+export function parseSettledOutcomeDetails(
+  details: string,
+): { [key: string]: string } | null {
+  const [key, value] = details.split(":");
+
+  if (!key || !value) return null;
+
+  return { [key]: value };
+}
+
+export function parseOutcomeFromSlug(slug: string) {
+  const lastHyphenIndex = slug.lastIndexOf("-");
+  if (lastHyphenIndex === -1) return null;
+  const outcomeId = slug.slice(lastHyphenIndex + 1);
+  const parsedOutcomeId = parseInt(outcomeId, 10);
+  return Number.isNaN(parsedOutcomeId) ? null : parsedOutcomeId;
 }

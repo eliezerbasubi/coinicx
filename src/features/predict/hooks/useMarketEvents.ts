@@ -4,6 +4,7 @@ import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import {
   MarketEvent,
   MarketEventMeta,
+  PredictionMetas,
   SideSpec,
 } from "@/features/predict/lib/types";
 import { detectCategories } from "@/features/predict/lib/utils/detectCategories";
@@ -11,13 +12,9 @@ import {
   buildSideCoin,
   isRecurring,
 } from "@/features/predict/lib/utils/outcomes";
-import {
-  parseReccuringTitle,
-  parseRecurringMetadata,
-} from "@/features/predict/lib/utils/parseMetadata";
+import { parseRecurringMetadata } from "@/features/predict/lib/utils/parseMetadata";
 import { slugify } from "@/features/predict/lib/utils/shared";
 
-import { PredictionMetas } from "../lib/queries";
 import { usePredictionsMetas } from "./usePredictionsMetas";
 
 export const useMarketEventsMetas = () => {
@@ -104,7 +101,7 @@ export const useMarketEvents = () => {
         ...marketEventMeta,
         outcomes: [],
         sides: marketEventMeta.sides.map((side, index) =>
-          mapSideSpecToSide(side.name, marketEventMeta.resolution, index),
+          mapSideSpecToSide(side.name, marketEventMeta.outcome, index),
         ),
         volume: Number(ctx?.dayNtlVlm ?? 0),
         openInterest: Number(ctx?.circulatingSupply ?? 0),
@@ -141,7 +138,7 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
       title: question.name,
       description: "",
       slug: slugify(question.name),
-      resolution: question.fallbackOutcome,
+      outcome: question.fallbackOutcome,
       type: "categorical",
       questionId: question.question,
       settledOutcomes: question.settledNamedOutcomes,
@@ -149,6 +146,7 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
       sides: [],
       outcomes: [],
       recurringPayload: null,
+      status: "active",
     });
 
     for (const outcome of question.namedOutcomes) {
@@ -178,6 +176,7 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
         title: outcome.name,
         description: "",
         sides,
+        status: "active",
       });
     } else {
       const isRecurringOutcome = isRecurring(outcome);
@@ -211,7 +210,7 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
         title: parsedMetadata.title,
         description: "",
         slug: parsedMetadata.slug,
-        resolution: outcome.outcome,
+        outcome: outcome.outcome,
         type: isRecurringOutcome ? "recurring" : "binary",
         questionId: null,
         recurringPayload: null,
@@ -219,6 +218,7 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
         settledOutcomes: [],
         categories: outcomeCategories,
         sides,
+        status: "active",
       });
     }
   }

@@ -11,4 +11,5 @@ export const QUERY_KEYS = {
   delegatorSummary: "delegatorSummary",
   userFees: "user-fees",
   predictionMarketEvents: "predictionMarketEvents",
+  settledOutcome: "settledOutcome",
 } as const;

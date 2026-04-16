@@ -5,6 +5,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
 import { getPredictionsMetas } from "@/features/predict/lib/queries";
+import MarketEventsSubscriptions from "@/features/predict/providers/market-events-subs";
 
 type Props = {
   children: React.ReactNode;
@@ -26,7 +27,7 @@ const PredictLayout = async ({ children }: Props) => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {children}
+      <MarketEventsSubscriptions>{children}</MarketEventsSubscriptions>
     </HydrationBoundary>
   );
 };

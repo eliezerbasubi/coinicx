@@ -10,11 +10,13 @@ import { getChartTimeRange } from "@/lib/utils/intervalFormatter";
 type UseFetchSnapshotsArgs = {
   coins: string[];
   interval: CandleSnapshotParameters["interval"];
+  enabled?: boolean;
 };
 
 export const useFetchSnapshots = ({
   coins,
   interval,
+  enabled = true,
 }: UseFetchSnapshotsArgs) => {
   /**
    * Fetch candle snapshots for each outcome.
@@ -43,6 +45,7 @@ export const useFetchSnapshots = ({
     },
     queries: coins.map((coin) => ({
       queryKey: ["asset-candle-snapshot", coin, interval],
+      enabled,
       queryFn: () => {
         const timeRange = getChartTimeRange(interval);
 
