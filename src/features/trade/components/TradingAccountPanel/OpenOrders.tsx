@@ -242,6 +242,7 @@ const OpenOrderCard = ({ data }: OpenOrderCardProps) => {
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
               name={data.base}
+              coin={data.coin}
               className="size-4"
               instrumentType="perps"
             />
