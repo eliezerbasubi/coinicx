@@ -50,6 +50,7 @@ const AvailableBalance = () => {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
               symbol: !isPerps ? (isBuyOrder ? quote : base) : quote,
+              roundingMode: "floor",
             })}
           </span>
         </p>

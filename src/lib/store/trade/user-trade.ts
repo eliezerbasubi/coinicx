@@ -121,7 +121,7 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
     } = get();
 
     if (args.isSpot) {
-      return args.isBuyOrder ? availableBaseToTrade : availableQuoteToTrade;
+      return args.isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
     }
     return args.isBuyOrder ? maxBaseTradeSz : maxQuoteTradeSz;
   },

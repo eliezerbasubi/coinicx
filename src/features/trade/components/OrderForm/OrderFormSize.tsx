@@ -1,7 +1,10 @@
 import React from "react";
 
 import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
+import {
+  useInstrumentStore,
+  useShallowInstrumentStore,
+} from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -18,6 +21,10 @@ const OrderFormSize = () => {
     size: s.size,
   }));
 
+  const szDecimals = useShallowInstrumentStore(
+    (s) => s.assetMeta?.szDecimals ?? 0,
+  );
+
   return (
     <React.Fragment>
       <OrderFormInput
@@ -28,37 +35,37 @@ const OrderFormSize = () => {
         trailing={
           <SizeCoinSelector
             onValueChange={(isNtl) => {
-              const assetCtx = useInstrumentStore.getState().assetCtx;
-              const assetMeta = useInstrumentStore.getState().assetMeta;
+              const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
 
-              useOrderFormStore
-                .getState()
-                .onSizeCoinChange({
-                  isNtl,
-                  midPx: assetCtx?.midPx ?? 0,
-                  szDecimals: assetMeta?.szDecimals ?? 0,
-                });
+              useOrderFormStore.getState().onSizeCoinChange({
+                isNtl,
+                midPx,
+                szDecimals,
+              });
             }}
           />
         }
-        onChange={(e) =>
-          useOrderFormStore
-            .getState()
-            .onSizeChange({ size: e.target.value, isSpot })
-        }
+        onChange={(e) => {
+          const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
+
+          useOrderFormStore.getState().onSizeChange({
+            size: e.target.value,
+            isSpot,
+            midPx,
+          });
+        }}
       />
       <FormInputSlider
         value={szPercent}
         onValueChange={(value) => {
-          const assetMeta = useInstrumentStore.getState().assetMeta;
+          const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
 
-          useOrderFormStore
-            .getState()
-            .onPercentChange({
-              percent: value,
-              isSpot,
-              szDecimals: assetMeta?.szDecimals ?? 0,
-            });
+          useOrderFormStore.getState().onPercentChange({
+            percent: value,
+            isSpot,
+            szDecimals,
+            midPx,
+          });
         }}
       />
     </React.Fragment>

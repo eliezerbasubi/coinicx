@@ -123,11 +123,17 @@ const OrderFormSides = () => {
                 "bg-buy text-white": side === orderSide && isBuyOrder,
               },
             )}
-            onClick={() =>
+            onClick={() => {
+              const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
+
               useOrderFormStore
                 .getState()
-                .onOrderSideChange(side as OrderSide, !isPerps)
-            }
+                .onOrderSideChange({
+                  orderSide: side as OrderSide,
+                  isSpot: !isPerps,
+                  midPx,
+                });
+            }}
           >
             <p className="text-xs md:text-sm font-medium">{label[labelKey]}</p>
           </button>
@@ -143,6 +149,11 @@ const OrderFormFooter = () => {
     quote: s.quote,
   }));
 
+  const { assetMeta, assetCtx } = useShallowInstrumentStore((s) => ({
+    assetMeta: s.assetMeta,
+    assetCtx: s.assetCtx,
+  }));
+
   const {
     disabled,
     isBuyOrder,
@@ -151,9 +162,10 @@ const OrderFormFooter = () => {
     orderSizeInBase,
     orderValueAndMargin,
     hasInsufficientMargin,
-  } = useOrderForm({ isSpot: !isPerps });
-
-  const assetMeta = useShallowInstrumentStore((s) => s.assetMeta);
+  } = useOrderForm({
+    isSpot: !isPerps,
+    referencePx: assetCtx?.referencePx ?? 0,
+  });
 
   const { processing, onPlaceOrder } = usePlaceOrder({
     assetId: assetMeta?.assetId ?? 0,
@@ -185,8 +197,6 @@ const OrderFormFooter = () => {
 
       return useAccountTransactStore.getState().openAccountTransact("deposit");
     }
-
-    const assetCtx = useInstrumentStore.getState().assetCtx;
 
     return onPlaceOrder({
       referencePx: assetCtx?.referencePx ?? 0,
