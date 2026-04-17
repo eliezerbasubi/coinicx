@@ -16,8 +16,8 @@ import { ORDER_FORM_SIDES } from "@/features/trade/constants";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
 import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
+import { isUSDCQuote } from "@/features/trade/utils/shared";
 
-import { isUSDCQuote } from "../../utils/shared";
 import AdjustTradeSettings from "./AdjustTradeSettings";
 import AvailableBalance from "./AvailableBalance";
 import ExecutionOrderForm from "./ExecutionOrderForm";
@@ -134,6 +134,11 @@ const OrderFormSides = () => {
 };
 
 const OrderFormFooter = () => {
+  const { isPerps, quote } = useTradeContext((s) => ({
+    isPerps: s.instrumentType === "perps",
+    quote: s.quote,
+  }));
+
   const {
     disabled,
     isBuyOrder,
@@ -142,15 +147,11 @@ const OrderFormFooter = () => {
     orderSizeInBase,
     orderValueAndMargin,
     hasInsufficientMargin,
-  } = useOrderForm();
+  } = useOrderForm({ isSpot: !isPerps });
 
   const { processing, onPlaceOrder } = usePlaceOrder();
 
-  const { isPerps, isUSDC, openSwapModal } = useTradeContext((s) => ({
-    isPerps: s.instrumentType === "perps",
-    isUSDC: isUSDCQuote(s.quote),
-    openSwapModal: s.openSwapModal,
-  }));
+  const isUSDC = isUSDCQuote(quote);
 
   const labelKey = isPerps ? "perp" : "spot";
 
@@ -168,7 +169,8 @@ const OrderFormFooter = () => {
 
   const placeOrder = () => {
     if (hasInsufficientMargin) {
-      if (!isUSDC && isPerps) return openSwapModal(true);
+      if (!isUSDC && isPerps)
+        return useAccountTransactStore.getState().openSwapModal(quote!);
 
       return useAccountTransactStore.getState().openAccountTransact("deposit");
     }

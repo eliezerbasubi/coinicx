@@ -1,7 +1,9 @@
 import { AlertTriangleIcon, PlusCircle } from "lucide-react";
 
-import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
-import { useTradeContext } from "@/lib/store/trade/hooks";
+import {
+  useAccountTransactStore,
+  useShallowAccountTransactStore,
+} from "@/lib/store/trade/account-transact";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import FormInputControl from "@/components/common/FormInputControl";
 import TradingButton from "@/components/common/TradingButton";
@@ -12,15 +14,16 @@ import {
   SummaryLabel,
   SummaryValue,
 } from "@/components/ui/summary";
-import { useTransferAndSwap } from "@/features/trade/hooks/useTransferAndSwap";
+import { useTransferAndSwap } from "@/features/trade/components/AccountTransact/hooks/useTransferAndSwap";
 import { isUSDCQuote } from "@/features/trade/utils/shared";
 
 const SwapStablecoinModal = () => {
-  const { swapModalOpen, openSwapModal, quote } = useTradeContext((s) => ({
-    swapModalOpen: s.swapModalOpen,
-    quote: s.quote,
-    openSwapModal: s.openSwapModal,
-  }));
+  const { swapModalOpen, quote, closeSwapModal } =
+    useShallowAccountTransactStore((s) => ({
+      swapModalOpen: s.swapModalOpen,
+      quote: s.swapQuoteAsset,
+      closeSwapModal: s.closeSwapModal,
+    }));
 
   if (isUSDCQuote(quote)) return null;
 
@@ -30,10 +33,14 @@ const SwapStablecoinModal = () => {
       title="Swap"
       description={
         <span className="text-neutral-gray-400 text-sm">
-          Convert USDC to {quote} instantly from your spot and perp balances.
+          Convert <span className="text-white font-medium">USDC</span> to{" "}
+          <span className="text-white font-medium">{quote}</span> instantly from
+          your spot and perp balances.
         </span>
       }
-      onOpenChange={openSwapModal}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) closeSwapModal();
+      }}
     >
       <SwapStablecoin />
     </AdaptiveDialog>

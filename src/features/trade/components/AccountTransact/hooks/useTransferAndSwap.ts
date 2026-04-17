@@ -1,19 +1,14 @@
 import { useMemo, useState } from "react";
 import { OrderParameters } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
-import { useWebHaptics } from "web-haptics/react";
 
 import { hlExchangeClient } from "@/lib/services/transport";
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/lib/store/trade/instrument";
-import {
-  useShallowUserTradeStore,
-  useUserTradeStore,
-} from "@/lib/store/trade/user-trade";
+import { useShallowAccountTransactStore } from "@/lib/store/trade/account-transact";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { useAgentClient } from "@/hooks/useAgentClient";
+import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
+import { useFeeRate } from "@/features/trade/hooks/useUserFees";
 import {
   buildSpotAssetId,
   formatSize,
@@ -23,15 +18,12 @@ import {
 } from "@/features/trade/utils";
 import { buildOrder, getBuilder } from "@/features/trade/utils/orders";
 
-import { useAssetMetas } from "./useAssetMetas";
-import { useFeeRate } from "./useUserFees";
-
 const toastId = "transfer-and-swap";
 const SWAP_MAX_SLIPPAGE = 0.01; // 1%
 
 export const useTransferAndSwap = () => {
   const { getAgentClient } = useAgentClient();
-  const quote = useTradeContext((s) => s.quote);
+  const quote = useShallowAccountTransactStore((s) => s.swapQuoteAsset);
 
   const [inputAmount, setInputAmount] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -59,7 +51,7 @@ export const useTransferAndSwap = () => {
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
 
   const quoteSpotInfo = useMemo(() => {
-    if (!spotMeta || !tokenNamesToUniverseIndex) return null;
+    if (!spotMeta || !tokenNamesToUniverseIndex || !quote) return null;
 
     const universeIndex = tokenNamesToUniverseIndex.get(quote)?.get(base);
     if (universeIndex === undefined) return null;

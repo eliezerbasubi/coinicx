@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
@@ -23,8 +22,11 @@ import {
 } from "@/features/trade/utils/orderTypes";
 import { isValidTwapMinutes } from "@/features/trade/utils/twap";
 
-export const useOrderForm = () => {
-  const isSpot = useTradeContext((s) => s.instrumentType === "spot");
+type UseOrderFormArgs = {
+  isSpot: boolean;
+};
+
+export const useOrderForm = ({ isSpot }: UseOrderFormArgs) => {
   const { size, limitPrice, orderSide, settings, scaleOrder, twapOrder } =
     useShallowOrderFormStore((s) => ({
       size: s.size,
@@ -38,7 +40,7 @@ export const useOrderForm = () => {
   const isBuyOrder = orderSide === "buy";
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
-  const availableToTrade = useAvailableToTrade(isBuyOrder, isSpot);
+  const availableToTrade = useAvailableToTrade({ isBuyOrder, isSpot });
 
   const referencePx = useShallowInstrumentStore(
     (s) => s.assetCtx?.referencePx || 0,
