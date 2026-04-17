@@ -2,7 +2,10 @@ import { useEffect, useMemo, useReducer, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import {
+  useInstrumentStore,
+  useShallowInstrumentStore,
+} from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -34,10 +37,11 @@ const ScaleOrderForm = () => {
     size: s.size,
   }));
 
-  const totalSize = useMemo(
-    () => useOrderFormStore.getState().getSizeInBase(),
-    [size],
-  );
+  // We only want to subscribe to size changes, not midPx changes
+  const totalSize = useMemo(() => {
+    const midPx = useInstrumentStore.getState().assetCtx?.midPx || 0;
+    return useOrderFormStore.getState().getSizeInBase(midPx);
+  }, [size]);
 
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),

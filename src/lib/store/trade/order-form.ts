@@ -58,12 +58,20 @@ type OrderFormActions = {
   setScaleDistribution: (value: ScaleDistribution) => void;
   setScaleOrder: (value: ScaleOrder[]) => void;
   setTwapOrder: (value: Partial<TwapOrder>) => void;
-  onSizeCoinChange: (isNtl: boolean) => void;
-  onPercentChange: (percent: number, isSpot: boolean) => void;
-  onSizeChange: (size: string, isSpot: boolean) => void;
+  onSizeCoinChange: (params: {
+    isNtl: boolean;
+    midPx: number;
+    szDecimals: number;
+  }) => void;
+  onPercentChange: (params: {
+    percent: number;
+    isSpot: boolean;
+    szDecimals: number;
+  }) => void;
+  onSizeChange: (params: { size: string; isSpot: boolean }) => void;
   onOrderSideChange: (orderSide: OrderSide, isSpot: boolean) => void;
-  onMidClick: () => void;
-  getSizeInBase: (midPx?: number) => number;
+  onMidClick: (midPx: number) => void;
+  getSizeInBase: (midPx: number) => number;
   reset: () => void;
   calculateOrderSize: (args: {
     isSpot: boolean;
@@ -115,11 +123,11 @@ export const useOrderFormStore = create<OrderFormStore>()(
       setExecutionOrder(data) {
         set((state) => ({ ...state, ...data }));
       },
-      getSizeInBase(midPx?: number) {
+      getSizeInBase(midPx) {
         const { size, settings } = get();
-        const mid = midPx ?? getInstrumentData().midPx;
         const parsedSize = parseFloat(size || "0");
-        return settings.isSzInNtl ? parsedSize / mid : parsedSize;
+
+        return settings.isSzInNtl ? parsedSize / midPx : parsedSize;
       },
       setSettings(settings) {
         set((state) => ({
@@ -145,7 +153,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
             isSpot,
           });
 
-        const maxOrderSize = calculateOrderSize({
+        const maxOrderSize = calculateMaxOrderSize({
           isBuyOrder: isBuy,
           isSpot,
           isSzInNtl: settings.isSzInNtl,
@@ -155,17 +163,18 @@ export const useOrderFormStore = create<OrderFormStore>()(
 
         return maxOrderSize;
       },
-      onSizeCoinChange(isNtl: boolean) {
+      onSizeCoinChange(params) {
         const { size, settings } = get();
-        const { midPx, szDecimals } = getInstrumentData();
 
         let currentSize = size;
 
         if (currentSize) {
           const parsedSize = parseFloat(currentSize);
-          const newSize = isNtl ? parsedSize * midPx : parsedSize / midPx;
+          const newSize = params.isNtl
+            ? parsedSize * params.midPx
+            : parsedSize / params.midPx;
 
-          const fractionDigits = isNtl ? 2 : szDecimals;
+          const fractionDigits = params.isNtl ? 2 : params.szDecimals;
 
           currentSize = roundToDecimals(
             newSize,
@@ -176,42 +185,41 @@ export const useOrderFormStore = create<OrderFormStore>()(
 
         set({
           size: currentSize,
-          settings: { ...settings, isSzInNtl: isNtl },
+          settings: { ...settings, isSzInNtl: params.isNtl },
         });
       },
-      onPercentChange(percent, isSpot) {
+      onPercentChange(params) {
         const { orderSide, settings, calculateOrderSize } = get();
-        const { szDecimals } = getInstrumentData();
 
         const maxOrderSize = calculateOrderSize({
-          isSpot,
+          isSpot: params.isSpot,
           isBuyOrder: orderSide === "buy",
         });
 
-        const size = (maxOrderSize * percent) / 100;
-        const fractionDigits = settings.isSzInNtl ? 2 : szDecimals;
+        const size = (maxOrderSize * params.percent) / 100;
+        const fractionDigits = settings.isSzInNtl ? 2 : params.szDecimals;
 
         set({
-          szPercent: percent,
+          szPercent: params.percent,
           size: roundToDecimals(size, fractionDigits, "floor").toString(),
         });
       },
 
-      onSizeChange(size, isSpot) {
+      onSizeChange(params) {
         const { orderSide, calculateOrderSize } = get();
 
         const maxOrderSize = calculateOrderSize({
-          isSpot,
+          isSpot: params.isSpot,
           isBuyOrder: orderSide === "buy",
         });
 
         const maxOrderSizeValue = maxOrderSize || 1;
 
         const percent = Math.floor(
-          (parseFloat(size || "0") / maxOrderSizeValue) * 100,
+          (parseFloat(params.size || "0") / maxOrderSizeValue) * 100,
         );
 
-        set({ size, szPercent: Math.min(percent, 100) });
+        set({ size: params.size, szPercent: Math.min(percent, 100) });
       },
 
       onOrderSideChange(orderSide: OrderSide, isSpot: boolean) {
@@ -231,8 +239,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
         set({ orderSide });
       },
 
-      onMidClick() {
-        const { midPx } = getInstrumentData();
+      onMidClick(midPx: number) {
         set({ limitPrice: midPx.toString() });
       },
       reset() {
@@ -267,7 +274,7 @@ const getInstrumentData = () => {
   };
 };
 
-const calculateOrderSize = (args: {
+const calculateMaxOrderSize = (args: {
   isSpot: boolean;
   isSzInNtl: boolean;
   isBuyOrder: boolean;

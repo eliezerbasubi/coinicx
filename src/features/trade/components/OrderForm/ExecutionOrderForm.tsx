@@ -1,6 +1,9 @@
 import React from "react";
 
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import {
+  useInstrumentStore,
+  useShallowInstrumentStore,
+} from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -57,7 +60,13 @@ const ExecutionOrderForm = () => {
                 type="button"
                 variant="ghost"
                 className="w-6 h-5 md:size-6 bg-neutral-gray-200 text-neutral-300 hover:text-primary hover:bg-primary/10 text-3xs md:text-xs font-medium md:font-semibold rounded md:rounded-md"
-                onClick={() => useOrderFormStore.getState().onMidClick()}
+                onClick={() => {
+                  const midPx = useInstrumentStore.getState().assetCtx?.midPx;
+
+                  if (midPx) {
+                    useOrderFormStore.getState().onMidClick(midPx);
+                  }
+                }}
               >
                 Mid
               </Button>

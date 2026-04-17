@@ -60,6 +60,12 @@ type UserTradeStoreActions = {
     isSpot: boolean;
   }) => number;
   applyActiveAssetData: (data: ActiveAssetDataResponse) => void;
+  applyActiveSpotAssetData: (params: {
+    base: string;
+    quote: string;
+    isSpot: boolean;
+    data: SpotStateWsEvent["spotState"];
+  }) => void;
   applySpotState: (data: SpotStateWsEvent) => void;
   applyClearinghouseState: (data: AllDexsClearinghouseStateWsEvent) => void;
   applyUserEventStates: (
@@ -132,28 +138,33 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       leverage,
     });
   },
-  applySpotState(data) {
-    const assetMeta = useInstrumentStore.getState().assetMeta;
-
+  applyActiveSpotAssetData(params) {
+    const { base, quote, isSpot, data } = params;
     let availableBaseToTrade = 0;
     let availableQuoteToTrade = 0;
 
-    if (assetMeta && assetMeta.dex === null) {
-      data.spotState.balances.forEach((balance) => {
-        if (balance.coin === assetMeta.base) {
+    if (isSpot) {
+      for (const balance of data.balances) {
+        if (balance.coin === base) {
           availableBaseToTrade = Number(balance.total);
         }
-        if (balance.coin === assetMeta.quote) {
+        if (balance.coin === quote) {
           availableQuoteToTrade = Number(balance.total);
         }
-      });
+
+        // Stop execution if base and quote are found
+        if (availableBaseToTrade > 0 && availableQuoteToTrade > 0) {
+          break;
+        }
+      }
 
       set({
         availableBaseToTrade,
         availableQuoteToTrade,
       });
     }
-
+  },
+  applySpotState(data) {
     set({
       spotBalances: data.spotState.balances,
     });
@@ -209,18 +220,21 @@ export const useMaxTradeSz = (isBuyOrder: boolean) => {
  * @param isSpot
  * @returns quote balance if isSpot and buying and base balance for perps if buying
  */
-export const useAvailableToTrade = (isBuyOrder: boolean, isSpot: boolean) => {
+export const useAvailableToTrade = (params: {
+  isBuyOrder: boolean;
+  isSpot: boolean;
+}) => {
   const { availableBaseToTrade, availableQuoteToTrade } =
     useShallowUserTradeStore((s) => ({
       availableBaseToTrade: s.availableBaseToTrade,
       availableQuoteToTrade: s.availableQuoteToTrade,
     }));
 
-  if (isSpot) {
-    return isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
+  if (params.isSpot) {
+    return params.isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
   }
 
-  return isBuyOrder ? availableBaseToTrade : availableQuoteToTrade;
+  return params.isBuyOrder ? availableBaseToTrade : availableQuoteToTrade;
 };
 
 /**

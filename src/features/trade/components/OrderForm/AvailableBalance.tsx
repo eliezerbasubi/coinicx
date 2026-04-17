@@ -10,21 +10,19 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
 import { isUSDCQuote } from "@/features/trade/utils/shared";
 
-import SwapStablecoinModal from "../SwapStablecoinModal";
-
 const AvailableBalance = () => {
   const { base, quote } = useShallowInstrumentStore((s) => ({
     base: s.assetMeta?.base,
     quote: s.assetMeta?.quote,
   }));
 
-  const { isPerps, openSwapModal } = useTradeContext((s) => ({
-    isPerps: s.instrumentType === "perps",
-    openSwapModal: s.openSwapModal,
-  }));
+  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const isBuyOrder = useShallowOrderFormStore((s) => s.orderSide === "buy");
-  const availableBalance = useAvailableToTrade(isBuyOrder, !isPerps);
+  const availableBalance = useAvailableToTrade({
+    isBuyOrder,
+    isSpot: !isPerps,
+  });
 
   const isSwapable = isPerps && !isUSDCQuote(quote);
 
@@ -40,7 +38,7 @@ const AvailableBalance = () => {
         )}
         onClick={() => {
           if (isSwapable) {
-            openSwapModal();
+            useAccountTransactStore.getState().openSwapModal(quote ?? "");
           } else {
             useAccountTransactStore.getState().openAccountTransact("deposit");
           }
@@ -62,8 +60,6 @@ const AvailableBalance = () => {
           <PlusCircle className="size-3.5 text-primary" />
         </Visibility>
       </button>
-
-      <SwapStablecoinModal />
     </div>
   );
 };

@@ -107,6 +107,23 @@ const TradingPairSubsProvider = ({ children }: Props) => {
     });
   }, [coin, instrumentType]);
 
+  useSubscription(() => {
+    if (!coin || instrumentType !== "spot") return;
+
+    const { assetMeta } = useInstrumentStore.getState();
+
+    if (!assetMeta) return;
+
+    return hlSubClient.spotState({ user }, (data) => {
+      useUserTradeStore.getState().applyActiveSpotAssetData({
+        data: data.spotState,
+        base: assetMeta.base,
+        quote: assetMeta.quote,
+        isSpot: true,
+      });
+    });
+  }, [user, coin, instrumentType]);
+
   return children;
 };
 

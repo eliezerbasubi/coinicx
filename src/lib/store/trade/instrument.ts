@@ -70,7 +70,7 @@ export const useInstrumentStore = create<InstrumentStoreState>()(
 
       if (params.isSpot) {
         const universe = spotMeta.universe[params.assetIndex];
-        const ctx = spotAssetCtxs[universe.index];
+        const ctx = spotAssetCtxs[universe.name];
 
         if (!universe || !ctx) return;
 
