@@ -4,14 +4,14 @@ import { useWebHaptics } from "web-haptics/react";
 
 import { Position } from "@/lib/types/trade";
 import { useAgentClient } from "@/hooks/useAgentClient";
-
 import {
   calculateSlippageAdjustedPrice,
   formatSize,
   getPriceDecimals,
   roundToDecimals,
-} from "../utils";
-import { buildOrder, getBuilder } from "../utils/orders";
+} from "@/features/trade/utils";
+import { getBuilder } from "@/features/trade/utils/builder";
+import { buildOrder } from "@/features/trade/utils/orders";
 
 const toastId = "close-position";
 

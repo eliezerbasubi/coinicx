@@ -5,6 +5,10 @@ import { useMemo } from "react";
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { useTradeContext } from "@/lib/store/trade/hooks";
 import {
+  useInstrumentStore,
+  useShallowInstrumentStore,
+} from "@/lib/store/trade/instrument";
+import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
@@ -149,7 +153,14 @@ const OrderFormFooter = () => {
     hasInsufficientMargin,
   } = useOrderForm({ isSpot: !isPerps });
 
-  const { processing, onPlaceOrder } = usePlaceOrder();
+  const assetMeta = useShallowInstrumentStore((s) => s.assetMeta);
+
+  const { processing, onPlaceOrder } = usePlaceOrder({
+    assetId: assetMeta?.assetId ?? 0,
+    szDecimals: assetMeta?.szDecimals ?? 0,
+    isSpot: !isPerps,
+    base: assetMeta?.base ?? "",
+  });
 
   const isUSDC = isUSDCQuote(quote);
 
@@ -174,7 +185,16 @@ const OrderFormFooter = () => {
 
       return useAccountTransactStore.getState().openAccountTransact("deposit");
     }
-    return onPlaceOrder();
+
+    const assetCtx = useInstrumentStore.getState().assetCtx;
+
+    return onPlaceOrder({
+      referencePx: assetCtx?.referencePx ?? 0,
+      midPx: assetCtx?.midPx ?? 0,
+      assetId: assetMeta?.assetId ?? 0,
+      szDecimals: assetMeta?.szDecimals ?? 0,
+      isSpot: !isPerps,
+    });
   };
 
   return (

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
 import { useAgentClient } from "@/hooks/useAgentClient";
-import { getBuilder } from "@/features/trade/utils/orders";
+import { getBuilder } from "@/features/trade/utils/builder";
 
 import { useSwapStore } from "../store";
 

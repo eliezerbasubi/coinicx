@@ -16,7 +16,8 @@ import {
   parseOrderPriceWithSlippage,
   roundToDecimals,
 } from "@/features/trade/utils";
-import { buildOrder, getBuilder } from "@/features/trade/utils/orders";
+import { getBuilder } from "@/features/trade/utils/builder";
+import { buildOrder } from "@/features/trade/utils/orders";
 
 const toastId = "transfer-and-swap";
 const SWAP_MAX_SLIPPAGE = 0.01; // 1%
