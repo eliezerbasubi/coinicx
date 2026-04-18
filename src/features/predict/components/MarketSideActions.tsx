@@ -27,8 +27,6 @@ export const MarketSideButton = ({
 }: MarketSideButtonProps) => {
   const price = side.midPx || side.markPx;
 
-  const contractShare = price * 100;
-
   return (
     <Button
       key={side.coin}
@@ -54,10 +52,10 @@ export const MarketSideButton = ({
           {label && <span>{label}</span>} <span>{side.name}</span>
         </span>
         <span>
-          {formatNumber(contractShare, {
+          {formatNumber(price, {
+            style: "cent",
             maximumFractionDigits: 1,
           })}
-          ¢
         </span>
       </p>
     </Button>

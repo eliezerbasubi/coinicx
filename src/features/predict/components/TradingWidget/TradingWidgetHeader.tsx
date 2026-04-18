@@ -30,21 +30,19 @@ const TradingWidgetHeader = ({
     orderSide: s.orderSide,
   }));
 
-  const { marketEvent, marketEventType, marketEventSidesCtx } =
-    useMarketEventContext((s) => {
-      const marketEvent =
-        s.marketEventMeta.outcomes[s.activeOutcomeIndex] ?? s.marketEventMeta;
+  const { marketEvent, marketEventSidesCtx } = useMarketEventContext((s) => {
+    const marketEvent =
+      s.marketEventMeta.outcomes[s.activeOutcomeIndex] ?? s.marketEventMeta;
 
-      const sidesCtxs =
-        s.marketEventCtx.outcomes[s.activeOutcomeIndex]?.sides ??
-        s.marketEventCtx.sides;
+    const sidesCtxs =
+      s.marketEventCtx.outcomes[s.activeOutcomeIndex]?.sides ??
+      s.marketEventCtx.sides;
 
-      return {
-        marketEvent,
-        marketEventType: s.marketEventMeta.type,
-        marketEventSidesCtx: sidesCtxs,
-      };
-    });
+    return {
+      marketEvent,
+      marketEventSidesCtx: sidesCtxs,
+    };
+  });
 
   const volume = marketEventSidesCtx[sideIndex]?.volume || 0;
 
@@ -61,9 +59,10 @@ const TradingWidgetHeader = ({
         value={orderSide}
         className="h-8 md:h-11"
         onValueChange={(value) => {
-          useOrderFormStore
-            .getState()
-            .onOrderSideChange(value as OrderSide, true);
+          useOrderFormStore.getState().onOrderSideChange({
+            orderSide: value as OrderSide,
+            isSpot: true,
+          });
         }}
       >
         <TabsList

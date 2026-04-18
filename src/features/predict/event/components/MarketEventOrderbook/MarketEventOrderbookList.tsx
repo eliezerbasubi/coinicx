@@ -161,10 +161,10 @@ const OrderBookTableRow = ({
             "text-sell": type === "asks",
           })}
         >
-          {formatNumber(price * 100, {
+          {formatNumber(price, {
+            style: "cent",
             maximumFractionDigits: 1,
           })}
-          ¢
         </p>
       </div>
       <div className="h-full flex items-center justify-center px-2">

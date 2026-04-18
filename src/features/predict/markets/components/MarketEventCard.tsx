@@ -7,16 +7,13 @@ import { ROUTES } from "@/lib/constants/routes";
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
-import { useIsDesktop, useIsTablet } from "@/hooks/useIsMobile";
+import { useIsDesktop } from "@/hooks/useIsMobile";
 import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { TradingWidgetMarketsDrawer } from "@/features/predict/components/TradingWidgetDrawer";
 import { MarketEvent, SideSpec } from "@/features/predict/lib/types";
-import {
-  convertPeriodToMinutes,
-  parseRecurringMetadata,
-} from "@/features/predict/lib/utils/parseMetadata";
+import { convertPeriodToMinutes } from "@/features/predict/lib/utils/parseMetadata";
 
 const MarketEventDrawer = dynamic(
   () => import("@/features/predict/event/components/MarketEventDrawer"),
@@ -28,17 +25,14 @@ type Props = {
 };
 
 const MarketEventCard = ({ data }: Props) => {
-  const isRecurringEvent = data.type === "recurring";
-  const recurringPayload = isRecurringEvent
-    ? parseRecurringMetadata(data.description, data.outcome)
-    : null;
+  const recurringPayload = data.recurringPayload;
 
   // We consider a live event, an event that's less than 24 hours from now
   const isLive =
     !!recurringPayload?.period &&
     convertPeriodToMinutes(recurringPayload.period) < 24 * 60;
 
-  const isDesktop = useIsDesktop();
+  const isDesktop = useIsDesktop({ initializeWithValue: false });
 
   const [open, setOpen] = useState(false);
 
@@ -47,6 +41,7 @@ const MarketEventCard = ({ data }: Props) => {
       <div className="flex items-center gap-2">
         <Visibility visible={!!recurringPayload?.underlying}>
           <TokenImage
+            key={recurringPayload?.underlying}
             name={recurringPayload?.underlying!}
             instrumentType="spot"
             className="size-9 rounded-lg"
@@ -187,30 +182,35 @@ const SideButton = ({
   outcomeIndex?: number;
   className?: string;
 }) => {
+  const [open, setOpen] = useState(false);
+
   return (
-    <TradingWidgetMarketsDrawer
-      key={side.coin}
-      marketEventMeta={mapMarketEventToMeta({ ...data, coin: side.coin })}
-      outcomeIndex={outcomeIndex}
-      trigger={
-        <Button
-          variant="default"
-          className={cn(
-            "bg-buy/10 text-buy hover:bg-buy hover:text-white",
-            {
-              "bg-sell/10 text-sell hover:bg-sell hover:text-white":
-                sideIndex === 1,
-            },
-            className,
-          )}
-          onClick={() => {
-            useOrderFormStore.getState().setPredictSideIndex(sideIndex);
-          }}
-        >
-          {side.name}
-        </Button>
-      }
-    />
+    <>
+      <Button
+        variant="default"
+        className={cn(
+          "bg-buy/10 text-buy hover:bg-buy hover:text-white",
+          {
+            "bg-sell/10 text-sell hover:bg-sell hover:text-white":
+              sideIndex === 1,
+          },
+          className,
+        )}
+        onClick={() => {
+          setOpen(true);
+          useOrderFormStore.getState().setPredictSideIndex(sideIndex);
+        }}
+      >
+        {side.name}
+      </Button>
+
+      <TradingWidgetMarketsDrawer
+        open={open}
+        onOpenChange={setOpen}
+        marketEventMeta={mapMarketEventToMeta({ ...data, coin: side.coin })}
+        outcomeIndex={outcomeIndex}
+      />
+    </>
   );
 };
 
@@ -225,7 +225,7 @@ const mapMarketEventToMeta = (data: MarketEvent) => {
     coin: data.coin,
     categories: data.categories,
     questionId: data.questionId,
-    recurringPayload: null,
+    recurringPayload: data.recurringPayload,
     settledOutcomes: data.settledOutcomes,
     description: data.description,
     status: data.status,

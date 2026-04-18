@@ -1,5 +1,6 @@
 import React from "react";
 
+import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import MarketEventStoreProvider from "@/features/predict/lib/store/market-event/provider";
@@ -7,6 +8,7 @@ import { MarketEventMeta } from "@/features/predict/lib/types";
 
 import { useMarketEventContext } from "../lib/store/market-event/hooks";
 import MarketEventCtxProvider from "../providers/market-event-ctx-provider";
+import MarketEventSubscriptionsProvider from "../providers/market-event-subs-provider";
 import TradingWidget from "./TradingWidget";
 
 type Props = {
@@ -29,10 +31,17 @@ export const TradingWidgetMarketsDrawer = ({
   open,
   onOpenChange,
 }: Props) => {
+  const handleOpenChange = (open: boolean) => {
+    // Reset order form when drawer mount or unmount
+    useOrderFormStore.getState().reset();
+
+    onOpenChange?.(open);
+  };
+
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title={
         <TradingWidgetDrawerTitle
           marketEventTitle={marketEventMeta.title}
@@ -51,13 +60,15 @@ export const TradingWidgetMarketsDrawer = ({
         marketEventMeta={marketEventMeta}
         categoricalOutcomeIndex={outcomeIndex}
       >
-        <MarketEventCtxProvider />
-        <TradingWidget
-          className={cn(className, "[&>div]:px-0")}
-          sideClassName="h-8"
-          tabsClassName="px-0"
-          showEventTitle={false}
-        />
+        <MarketEventSubscriptionsProvider>
+          <MarketEventCtxProvider />
+          <TradingWidget
+            className={cn(className, "[&>div]:px-0")}
+            sideClassName="h-8"
+            tabsClassName="px-0"
+            showEventTitle={false}
+          />
+        </MarketEventSubscriptionsProvider>
       </MarketEventStoreProvider>
     </AdaptiveDialog>
   );

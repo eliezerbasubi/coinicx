@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
 import { ArrowUp, ChevronRight } from "lucide-react";
 
@@ -14,22 +14,28 @@ import { Button } from "@/components/ui/button";
 import { useSpotAssetMeta } from "@/features/predict/hooks/useSpotMetas";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import { ParsedRecurringPayload } from "@/features/predict/lib/types";
-import { isRecurring } from "@/features/predict/lib/utils/outcomes";
 import {
+  generateRecurringSlug,
   parseExpiry,
   parseRecurringMetadata,
+  timeToExpiry,
 } from "@/features/predict/lib/utils/parseMetadata";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
 
+import { isRecurring } from "../../lib/utils/outcomes";
+
 const LiveMarketDetails = () => {
-  const { recurringPayload, settledPrice } = useMarketEventContext((state) => ({
-    recurringPayload: state.marketEventMeta.recurringPayload,
-    settledPrice:
-      state.marketEventMeta.settledDetails &&
-      "price" in state.marketEventMeta.settledDetails
-        ? state.marketEventMeta.settledDetails.price
-        : null,
-  }));
+  const { recurringPayload, settledPrice, outcomeId } = useMarketEventContext(
+    (s) => ({
+      recurringPayload: s.marketEventMeta.recurringPayload,
+      outcomeId: s.marketEventMeta.outcome,
+      settledPrice:
+        s.marketEventMeta.settledDetails &&
+        "price" in s.marketEventMeta.settledDetails
+          ? s.marketEventMeta.settledDetails.price
+          : null,
+    }),
+  );
 
   const spotAssetCtxs = useInstrumentStore((s) => s.spotAssetCtxs);
   const spotAssetMeta = useSpotAssetMeta({
@@ -37,13 +43,14 @@ const LiveMarketDetails = () => {
   });
 
   const activeAsset = useMemo(() => {
-    if (!recurringPayload || !spotAssetMeta) return null;
+    if (!recurringPayload?.targetPrice || !spotAssetMeta) return null;
 
     const ctx = spotAssetCtxs[spotAssetMeta.universe.name];
     const markPx = Number(ctx?.markPx || 0);
-    const prevDayPx = Number(ctx?.prevDayPx || 0);
-    const priceChange = markPx - prevDayPx;
     const price = Number(ctx?.midPx || markPx);
+    const priceChange = price - Number(recurringPayload.targetPrice);
+    const priceChangePercent =
+      priceChange / Number(recurringPayload.targetPrice);
 
     return {
       price,
@@ -51,9 +58,9 @@ const LiveMarketDetails = () => {
         ? getPriceDecimals(price, spotAssetMeta.meta.szDecimals, true)
         : 2,
       priceChange,
-      priceChangePercent: prevDayPx ? (priceChange / prevDayPx) * 100 : 0,
+      priceChangePercent: priceChangePercent * 100,
     };
-  }, [spotAssetCtxs, spotAssetMeta, recurringPayload]);
+  }, [spotAssetCtxs, spotAssetMeta, recurringPayload?.targetPrice]);
 
   if (!recurringPayload) return null;
 
@@ -62,7 +69,7 @@ const LiveMarketDetails = () => {
     : (activeAsset?.priceChange ?? 0);
 
   const priceChangePercent = settledPrice
-    ? priceChange / 100
+    ? priceChange / Number(recurringPayload.targetPrice)
     : (activeAsset?.priceChangePercent ?? 0);
 
   const price = settledPrice ? Number(settledPrice) : (activeAsset?.price ?? 0);
@@ -96,7 +103,11 @@ const LiveMarketDetails = () => {
                   },
                 )}
               >
-                <ArrowUp className="size-4 rotate-180" />
+                <ArrowUp
+                  className={cn("size-4", {
+                    "rotate-180": priceChange < 0,
+                  })}
+                />
 
                 <p>
                   <span>
@@ -132,18 +143,20 @@ const LiveMarketDetails = () => {
           </div>
         )}
       </div>
-      <Countdown recurringPayload={recurringPayload} />
+      <Countdown recurringPayload={recurringPayload} outcomeId={outcomeId} />
     </div>
   );
 };
 
 const Countdown = ({
   recurringPayload,
+  outcomeId,
 }: {
   recurringPayload: ParsedRecurringPayload;
+  outcomeId: number;
 }) => {
-  const router = useRouter();
   const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -166,44 +179,77 @@ const Countdown = ({
     `0${Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))}`.slice(-2);
   const seconds = `0${Math.floor((timeLeft % (1000 * 60)) / 1000)}`.slice(-2);
 
+  const getCurrentLiveOutcome = () => {
+    const queryClient = getQueryClient();
+
+    const predictionMarketEvents =
+      queryClient.getQueryData<OutcomeMetaResponse>([
+        QUERY_KEYS.predictionMarketEvents,
+      ]);
+
+    if (!predictionMarketEvents) return;
+
+    let metadata = null;
+
+    for (const outcome of predictionMarketEvents.outcomes) {
+      const parsedMetadata = isRecurring(outcome)
+        ? parseRecurringMetadata(outcome.description, outcome.outcome)
+        : null;
+
+      if (!parsedMetadata) continue;
+
+      if (
+        parsedMetadata.class === recurringPayload.class &&
+        parsedMetadata.underlying === recurringPayload.underlying &&
+        parsedMetadata.period === recurringPayload.period
+      ) {
+        metadata = parsedMetadata;
+        break;
+      }
+    }
+    return metadata;
+  };
+
+  const goToLiveOutcome = async () => {
+    const queryClient = getQueryClient();
+
+    const metadata = getCurrentLiveOutcome();
+
+    // If we found the metadata, redirect to the live outcome
+    if (metadata) {
+      // Market found but has expired, invalidate queries to get the next live outcome
+      if (timeToExpiry(metadata.period) < 0) {
+        setIsFetching(true);
+
+        await queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.predictionMarketEvents],
+          refetchType: "active",
+        });
+
+        const currentLiveOutcome = getCurrentLiveOutcome();
+
+        setIsFetching(false);
+
+        redirect(
+          `${ROUTES.predict.event}/${currentLiveOutcome?.slug}`,
+          RedirectType.replace,
+        );
+      }
+
+      redirect(
+        `${ROUTES.predict.event}/${metadata.slug}`,
+        RedirectType.replace,
+      );
+    }
+  };
+
   if (timeLeft <= 0) {
     return (
       <Button
         variant="secondary"
         className="size-fit flex items-center gap-1 rounded-full px-3 py-1.5"
-        onClick={() => {
-          const queryClient = getQueryClient();
-
-          const predictionMarketEvents =
-            queryClient.getQueryData<OutcomeMetaResponse>([
-              QUERY_KEYS.predictionMarketEvents,
-            ]);
-
-          if (!predictionMarketEvents) return;
-
-          let metadata = null;
-          for (const outcome of predictionMarketEvents.outcomes) {
-            const parsedMetadata = isRecurring(outcome)
-              ? parseRecurringMetadata(outcome.description, outcome.outcome)
-              : null;
-
-            if (!parsedMetadata) continue;
-
-            if (
-              parsedMetadata.class === recurringPayload.class &&
-              parsedMetadata.underlying === recurringPayload.underlying &&
-              parsedMetadata.period === recurringPayload.period
-            ) {
-              metadata = parsedMetadata;
-              break;
-            }
-          }
-
-          if (metadata) {
-            router.replace(`${ROUTES.predict.event}/${metadata.slug}`);
-          }
-          // TODO: Handle the case where metadata is not found.
-        }}
+        onClick={goToLiveOutcome}
+        disabled={isFetching}
       >
         <p className="text-sm font-medium text-neutral-gray-100">
           Go to live market

@@ -174,7 +174,7 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
         coin: buildSideCoin(outcome.outcome, 0),
         outcome: outcome.outcome,
         title: outcome.name,
-        description: "",
+        description: outcome.description,
         sides,
         status: "active",
       });
@@ -182,7 +182,7 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
       const isRecurringOutcome = isRecurring(outcome);
       const parsedMetadata = isRecurringOutcome
         ? parseRecurringMetadata(outcome.description, outcome.outcome)
-        : { title: outcome.name, slug: slugify(outcome.name), period: null };
+        : null;
 
       const outcomeCategories = detectCategories(
         outcome.name,
@@ -193,7 +193,7 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
       categories.push(...outcomeCategories);
 
       // For recurring outcome, push the periodic category to first positions
-      if (parsedMetadata.period) {
+      if (parsedMetadata && parsedMetadata.period) {
         const recurringCategory = `crypto_${parsedMetadata.period}`;
         outcomeCategories.push(recurringCategory);
 
@@ -207,13 +207,21 @@ const mapDataToMarketEventsMetas = (data: PredictionMetas) => {
 
       marketEvents.push({
         coin: buildSideCoin(outcome.outcome, 0),
-        title: parsedMetadata.title,
-        description: "",
-        slug: parsedMetadata.slug,
+        title: parsedMetadata?.title ?? outcome.name,
+        description: outcome.description,
+        slug: parsedMetadata?.slug ?? slugify(outcome.name),
         outcome: outcome.outcome,
         type: isRecurringOutcome ? "recurring" : "binary",
         questionId: null,
-        recurringPayload: null,
+        recurringPayload: parsedMetadata
+          ? {
+              underlying: parsedMetadata.underlying,
+              class: parsedMetadata.class,
+              expiry: parsedMetadata.expiry,
+              targetPrice: parsedMetadata.targetPrice,
+              period: parsedMetadata.period,
+            }
+          : null,
         outcomes: [],
         settledOutcomes: [],
         categories: outcomeCategories,

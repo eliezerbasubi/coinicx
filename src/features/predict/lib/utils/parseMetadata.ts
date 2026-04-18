@@ -96,6 +96,28 @@ export function parseRecurringDescription(
   return Object.keys(result).length > 0 ? result : null;
 }
 
+/** Generates a unique slug for a recurring outcome */
+export function generateRecurringSlug(
+  recurringPayload: ParsedRecurringPayload,
+  outcomeId: number,
+) {
+  let baseSlug = `${recurringPayload.underlying} up or down`;
+
+  // if the period is less than 1 day, we consider it a short term outcome
+  const isShortTermOutcome =
+    convertPeriodToMinutes(recurringPayload.period) < 1440;
+
+  if (isShortTermOutcome) {
+    // for short term outcomes, we append the period and outcomeId to the slug
+    baseSlug += `-${recurringPayload.period}-${outcomeId}`;
+  } else {
+    // for long term outcomes, we append the expiry date (month and day) to the slug
+    baseSlug += `on ${formatExpiryDate(recurringPayload.expiry, { month: "short", day: "numeric" })}`;
+  }
+
+  return slugify(baseSlug);
+}
+
 export function formatRecurringTitle(
   outcomeId: number,
   recurringPayload?: ParsedRecurringPayload | null,
@@ -111,12 +133,9 @@ export function formatRecurringTitle(
   const expiry = recurringPayload.expiry ?? "";
 
   if (recurringPayload.class === "priceBinary") {
-    const baseSlug = `${underlying} above ${target} on ${formatExpiryDate(expiry, { month: "short", day: "numeric" })}`;
     return {
       title: `${underlying} above $${target} on ${formatExpiryDate(expiry)}?`,
-
-      // We append the outcomeId to the slug to ensure uniqueness.
-      slug: `${slugify(baseSlug)}-${outcomeId}`,
+      slug: generateRecurringSlug(recurringPayload, outcomeId),
     };
   }
   return {

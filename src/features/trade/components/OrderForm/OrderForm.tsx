@@ -126,13 +126,11 @@ const OrderFormSides = () => {
             onClick={() => {
               const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
 
-              useOrderFormStore
-                .getState()
-                .onOrderSideChange({
-                  orderSide: side as OrderSide,
-                  isSpot: !isPerps,
-                  midPx,
-                });
+              useOrderFormStore.getState().onOrderSideChange({
+                orderSide: side as OrderSide,
+                isSpot: !isPerps,
+                midPx,
+              });
             }}
           >
             <p className="text-xs md:text-sm font-medium">{label[labelKey]}</p>
@@ -165,6 +163,7 @@ const OrderFormFooter = () => {
   } = useOrderForm({
     isSpot: !isPerps,
     referencePx: assetCtx?.referencePx ?? 0,
+    szDecimals: assetMeta?.szDecimals ?? 0,
   });
 
   const { processing, onPlaceOrder } = usePlaceOrder({

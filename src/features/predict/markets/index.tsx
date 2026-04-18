@@ -16,7 +16,7 @@ const PredictionMarkets = () => {
           <h1 className="text-base md:text-2xl font-semibold md:font-extrabold text-white text-center md:text-left flex-1">
             Predictions
           </h1>
-          <h2 className="text-sm md:text-base text-neutral-gray-400 text-center md:text-left mt-1 hidden lg:block">
+          <h2 className="text-sm md:text-base text-neutral-gray-400 text-center md:text-left mt-1 hidden md:block">
             Trade on the world's most exciting events
           </h2>
         </div>

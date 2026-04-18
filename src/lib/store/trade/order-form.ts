@@ -4,6 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import { OrderSide, OrderType, ScaleDistribution } from "@/lib/types/trade";
 import { roundToDecimals } from "@/features/trade/utils";
+import { calculateMaxTradeSize } from "@/features/trade/utils/shared";
 
 import { useInstrumentStore } from "./instrument";
 import { useUserTradeStore } from "./user-trade";
@@ -60,6 +61,7 @@ type OrderFormActions = {
   setTwapOrder: (value: Partial<TwapOrder>) => void;
   onSizeCoinChange: (params: {
     isNtl: boolean;
+    isSpot: boolean;
     midPx: number;
     szDecimals: number;
   }) => void;
@@ -130,7 +132,10 @@ export const useOrderFormStore = create<OrderFormStore>()(
       },
       getSizeInBase(midPx) {
         const { size, settings } = get();
-        const parsedSize = parseFloat(size || "0");
+
+        if (!size) return 0;
+
+        const parsedSize = parseFloat(size);
 
         return settings.isSzInNtl ? parsedSize / midPx : parsedSize;
       },
@@ -146,9 +151,10 @@ export const useOrderFormStore = create<OrderFormStore>()(
         }));
       },
       onSizeCoinChange(params) {
-        const { size, settings } = get();
+        const { size, orderSide, settings } = get();
 
         let currentSize = size;
+        let currentSzPercent = 0;
 
         if (currentSize) {
           const parsedSize = parseFloat(currentSize);
@@ -163,10 +169,22 @@ export const useOrderFormStore = create<OrderFormStore>()(
             fractionDigits,
             "floor",
           ).toString();
+
+          const maxOrderSize = calculateMaxOrderSize({
+            isSpot: params.isSpot,
+            isBuyOrder: orderSide === "buy",
+            isSzInNtl: params.isNtl,
+            midPx: params.midPx,
+          });
+
+          const maxOrderSizeValue = maxOrderSize || 1;
+
+          currentSzPercent = Math.floor((newSize / maxOrderSizeValue) * 100);
         }
 
         set({
           size: currentSize,
+          szPercent: currentSzPercent,
           settings: { ...settings, isSzInNtl: params.isNtl },
         });
       },
@@ -275,11 +293,11 @@ const calculateMaxOrderSize = (params: {
       isSpot,
     });
 
-  if (isSpot) {
-    if (isBuyOrder)
-      return isSzInNtl ? availableBalance : availableBalance / midPx;
-    return isSzInNtl ? availableBalance * midPx : availableBalance;
-  }
-
-  return isSzInNtl ? availableBalance * midPx : availableBalance;
+  return calculateMaxTradeSize({
+    isSpot,
+    isSzInNtl,
+    isBuyOrder,
+    midPx,
+    availableBalance,
+  });
 };

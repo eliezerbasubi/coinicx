@@ -1,41 +1,49 @@
 import { useMemo } from "react";
 
-import {
-  useOrderFormStore,
-  useShallowOrderFormStore,
-} from "@/lib/store/trade/order-form";
+import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import {
   useAvailableToTrade,
   useMaxTradeSz,
   useShallowUserTradeStore,
 } from "@/lib/store/trade/user-trade";
 import { OrderType } from "@/lib/types/trade";
-import {
-  calculateMarginRequired,
-  calculateOrderValue,
-} from "@/features/trade/utils";
+import { calculateMarginRequired } from "@/features/trade/utils";
 import {
   isLimitOrder,
   isScaleOrTwapOrder,
   isStopOrder,
 } from "@/features/trade/utils/orderTypes";
+import { calculateOrderValue } from "@/features/trade/utils/shared";
 import { isValidTwapMinutes } from "@/features/trade/utils/twap";
 
 type UseOrderFormArgs = {
   isSpot: boolean;
   referencePx: number;
+  szDecimals: number;
 };
 
-export const useOrderForm = ({ isSpot, referencePx }: UseOrderFormArgs) => {
-  const { size, limitPrice, orderSide, settings, scaleOrder, twapOrder } =
-    useShallowOrderFormStore((s) => ({
-      size: s.size,
-      limitPrice: s.limitPrice,
-      orderSide: s.orderSide,
-      settings: s.settings,
-      scaleOrder: s.scaleOrder,
-      twapOrder: s.twapOrder,
-    }));
+export const useOrderForm = ({
+  isSpot,
+  referencePx,
+  szDecimals,
+}: UseOrderFormArgs) => {
+  const {
+    size,
+    limitPrice,
+    orderSide,
+    settings,
+    scaleOrder,
+    twapOrder,
+    getSizeInBase,
+  } = useShallowOrderFormStore((s) => ({
+    size: s.size,
+    limitPrice: s.limitPrice,
+    orderSide: s.orderSide,
+    settings: s.settings,
+    scaleOrder: s.scaleOrder,
+    twapOrder: s.twapOrder,
+    getSizeInBase: s.getSizeInBase,
+  }));
 
   const isBuyOrder = orderSide === "buy";
 
@@ -46,10 +54,6 @@ export const useOrderForm = ({ isSpot, referencePx }: UseOrderFormArgs) => {
 
   const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 
-  const orderSizeInBase = useOrderFormStore
-    .getState()
-    .getSizeInBase(referencePx);
-
   const isLimitOrderType = isLimitOrder(settings.orderType);
 
   const scaleOrderValue = useMemo(() => {
@@ -59,13 +63,15 @@ export const useOrderForm = ({ isSpot, referencePx }: UseOrderFormArgs) => {
 
   const orderValueAndMargin = calculateOrderValueAndMargin({
     orderType: settings.orderType,
-    orderSize: orderSizeInBase,
+    orderSize: parseFloat(size),
     limitPx: parseFloat(limitPrice || "0"),
     referencePx,
     leverage,
     isSpot,
     reduceOnly: settings.reduceOnly,
     scaleOrderValue,
+    isSzInNtl: settings.isSzInNtl,
+    szDecimals,
   });
 
   const hasInsufficientMargin = checkInsufficientMargin({
@@ -87,7 +93,7 @@ export const useOrderForm = ({ isSpot, referencePx }: UseOrderFormArgs) => {
     disabled,
     isBuyOrder,
     orderSide,
-    orderSizeInBase,
+    orderSizeInBase: getSizeInBase(referencePx),
     orderType: settings.orderType,
     orderValueAndMargin,
     hasInsufficientMargin,
@@ -126,8 +132,10 @@ const calculateOrderValueAndMargin = (params: {
   referencePx: number;
   leverage: number;
   isSpot: boolean;
+  isSzInNtl: boolean;
   reduceOnly: boolean;
   scaleOrderValue: number;
+  szDecimals: number;
 }) => {
   if (isScaleOrTwapOrder(params.orderType) && !params.scaleOrderValue) {
     return {
@@ -143,6 +151,8 @@ const calculateOrderValueAndMargin = (params: {
       orderSize: params.orderSize,
       limitPx: params.limitPx,
       referencePx: params.referencePx,
+      szDecimals: params.szDecimals,
+      isSzInNtl: params.isSzInNtl,
     });
 
   if (params.isSpot) {

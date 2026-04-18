@@ -51,17 +51,14 @@ const Header = () => {
       <div className="w-full h-16 flex justify-between items-center px-4 md:px-6 gap-x-3 md:gap-x-6">
         <AppLogo className="w-15 md:w-20 h-5 md:h-6" />
 
-        <nav
-          role="navigation"
-          className="hidden md:flex flex-1 gap-x-2 md:gap-x-6"
-        >
+        <nav role="navigation" className="hidden md:flex flex-1">
           {LINKS.map((link) => (
             <Link
               key={link.id}
               href={link.href}
               prefetch
               className={cn(
-                "text-white hover:text-primary font-semibold text-xs md:text-base",
+                "text-white hover:text-primary font-semibold text-xs md:text-base h-full py-1 px-2 md:px-4",
                 {
                   "text-primary":
                     (link.href === "/" && pathname === "/") ||

@@ -1,11 +1,10 @@
 import { cn } from "@/lib/utils/cn";
-import TradingButton from "@/components/common/TradingButton";
 import TIFSelector from "@/features/trade/components/OrderForm/TIFSelector";
 
+import TradingWidgetFooter from "./TradingWidgetFooter";
 import TradingWidgetHeader from "./TradingWidgetHeader";
 import TradingWidgetLimitInput from "./TradingWidgetLimitInput";
 import TradingWidgetOrderSize from "./TradingWidgetOrderSize";
-import TradingWidgetReview from "./TradingWidgetReview";
 
 type Props = {
   className?: string;
@@ -34,13 +33,10 @@ const TradingWidget = ({
 
         <div className="w-full border-t border-neutral-gray-200 pt-4 mt-4">
           <TIFSelector className="w-full justify-end mb-3" />
-          <TradingWidgetReview />
         </div>
       </div>
 
-      <div className="px-4 mt-4">
-        <TradingButton label="Trade" />
-      </div>
+      <TradingWidgetFooter />
     </div>
   );
 };

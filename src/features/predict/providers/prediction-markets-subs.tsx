@@ -53,7 +53,7 @@ type SettleOutcomeSpec = {
   details: string;
 };
 
-const MarketEventsSubscriptions = ({ children }: Props) => {
+const PredictionMarketsSubsProvider = ({ children }: Props) => {
   useSubscription(() => {
     const queryClient = getQueryClient();
 
@@ -94,13 +94,16 @@ const MarketEventsSubscriptions = ({ children }: Props) => {
             if (foundOutcome) {
               outcomes = outcomes.filter((o) => o.outcome !== settledOutcome);
 
-              queryClient.prefetchQuery<SettleOutcomeSpec>({
+              // queryClient.prefetchQuery<SettleOutcomeSpec>({
+              //   queryKey: [QUERY_KEYS.settledOutcome, settledOutcome],
+              //   initialData: {
+              //     spec: foundOutcome,
+              //     settleFraction: "1",
+              //     details: "",
+              //   },
+              // });
+              queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.settledOutcome, settledOutcome],
-                initialData: {
-                  spec: foundOutcome,
-                  settleFraction: "1",
-                  details: "",
-                },
               });
             } else {
               // Invalidate the settled outcome query to update the UI.
@@ -181,4 +184,4 @@ const MarketEventsSubscriptions = ({ children }: Props) => {
   return children;
 };
 
-export default MarketEventsSubscriptions;
+export default PredictionMarketsSubsProvider;

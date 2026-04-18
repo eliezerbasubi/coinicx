@@ -21,6 +21,7 @@ import {
 } from "@/features/predict/lib/utils/parseMetadata";
 
 import MarketEventCtxProvider from "./market-event-ctx-provider";
+import MarketEventSubscriptionsProvider from "./market-event-subs-provider";
 
 type Props = {
   children: React.ReactNode;
@@ -71,8 +72,10 @@ const MarketEventProvider = ({ children, slug }: Props) => {
 
   return (
     <MarketEventStoreProvider marketEventMeta={marketEventMeta}>
-      <MarketEventCtxProvider />
-      {children}
+      <MarketEventSubscriptionsProvider>
+        <MarketEventCtxProvider />
+        {children}
+      </MarketEventSubscriptionsProvider>
     </MarketEventStoreProvider>
   );
 };

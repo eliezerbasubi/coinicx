@@ -67,9 +67,7 @@ export const normalizeDecimalSeparator = (
  * // de-DE (group: ".", decimal: ",")
  * toParseableNumber("70.000,78")  // "70000.78"
  */
-export const toParseableNumber = (
-  displayValue: string,
-): string => {
+export const toParseableNumber = (displayValue: string): string => {
   const groupSep = getLocaleGroupSeparator();
   const decimalSep = getLocaleDecimalSeparator();
 
@@ -140,6 +138,7 @@ export const stripGroupSeparators = (
 export const formatWithGrouping = (
   rawValue: string,
   locale?: string,
+  options?: Intl.NumberFormatOptions,
 ): string => {
   if (!rawValue) return "";
 
@@ -147,10 +146,8 @@ export const formatWithGrouping = (
   const resolvedLocale = locale ?? navigator.language;
 
   const dotIndex = rawValue.indexOf(".");
-  const integerStr =
-    dotIndex >= 0 ? rawValue.substring(0, dotIndex) : rawValue;
-  const decimalStr =
-    dotIndex >= 0 ? rawValue.substring(dotIndex + 1) : null;
+  const integerStr = dotIndex >= 0 ? rawValue.substring(0, dotIndex) : rawValue;
+  const decimalStr = dotIndex >= 0 ? rawValue.substring(dotIndex + 1) : null;
 
   if (integerStr === "") return rawValue;
 
@@ -158,8 +155,9 @@ export const formatWithGrouping = (
   if (isNaN(intNum)) return rawValue;
 
   const formattedInt = new Intl.NumberFormat(resolvedLocale, {
-    useGrouping: true,
     maximumFractionDigits: 0,
+    ...options,
+    useGrouping: true,
   }).format(intNum);
 
   if (decimalStr !== null) {

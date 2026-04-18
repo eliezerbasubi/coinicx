@@ -24,7 +24,7 @@ const PredictEventPageSkeleton = () => {
           <Skeleton className="w-full min-h-40 bg-neutral-gray-600" />
         </div>
 
-        <div className="w-80 shrink-0">
+        <div className="w-80 shrink-0 hidden lg:block">
           {/* Trading Form */}
           <Skeleton className="w-full min-h-96 bg-neutral-gray-600 sticky top-40" />
         </div>

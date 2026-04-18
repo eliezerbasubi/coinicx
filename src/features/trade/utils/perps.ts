@@ -7,6 +7,7 @@ import { OrderBook } from "@/lib/types/orderbook";
 import { OrderType } from "@/lib/types/trade";
 
 import { isLimitOrder } from "./orderTypes";
+import { roundToDecimals } from "./prices";
 
 export const isBuilderDeployedAsset = (asset: string) => {
   return asset.includes(":");
@@ -74,19 +75,6 @@ export const estimateSlippagePercent = (params: {
   }
 
   return null;
-};
-
-export const calculateOrderValue = (params: {
-  orderSize: number;
-  referencePx: number;
-  limitPx?: number;
-  orderType: OrderType;
-}) => {
-  if (isLimitOrder(params.orderType)) {
-    return params.orderSize * (params.limitPx ?? 0);
-  }
-
-  return params.orderSize * (params.referencePx ?? 0);
 };
 
 export const calculateMarginRequired = (params: {

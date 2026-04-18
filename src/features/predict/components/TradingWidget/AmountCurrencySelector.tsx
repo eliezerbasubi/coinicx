@@ -8,14 +8,31 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  PREDICTIONS_BASE_SZ_DECIMALS,
+  PREDICTIONS_QUOTE_SZ_DECIMALS,
+} from "@/features/predict/lib/constants/predictions";
+import { useActiveOutcomeSideCtx } from "@/features/predict/lib/store/market-event/hooks";
 
 const AmountCurrencySelector = () => {
   const isSzInNtl = useOrderFormStore((s) => s.settings.isSzInNtl);
+  const { sideCtx } = useActiveOutcomeSideCtx();
 
   const options = [
     { label: "In Shares", value: false },
     { label: "In Dollars", value: true },
   ];
+
+  const onCoinChange = (value: boolean) => {
+    useOrderFormStore.getState().onSizeCoinChange({
+      isNtl: value,
+      isSpot: true,
+      midPx: sideCtx.midPx || sideCtx.markPx,
+      szDecimals: value
+        ? PREDICTIONS_QUOTE_SZ_DECIMALS
+        : PREDICTIONS_BASE_SZ_DECIMALS,
+    });
+  };
 
   return (
     <Popover>
@@ -33,11 +50,7 @@ const AmountCurrencySelector = () => {
         {options.map((option) => (
           <PopoverClose
             key={option.label}
-            onClick={() =>
-              useOrderFormStore
-                .getState()
-                .setSettings({ isSzInNtl: option.value })
-            }
+            onClick={() => onCoinChange(option.value)}
             className={cn(
               "text-xs text-left text-neutral-gray-400 hover:bg-neutral-gray-200 hover:text-white font-medium py-2 px-3",
               {

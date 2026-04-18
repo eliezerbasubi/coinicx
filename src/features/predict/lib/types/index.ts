@@ -82,6 +82,9 @@ export interface MarketEvent {
 
   /** The status of the market event. */
   status: MarketEventStatus;
+
+  /** The recurring payload of the market event. Only applicable for recurring events. */
+  recurringPayload: ParsedRecurringPayload | null;
 }
 
 export interface MarketEventMetaSide {

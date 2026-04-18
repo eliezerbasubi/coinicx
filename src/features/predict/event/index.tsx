@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import dynamic from "next/dynamic";
 
+import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { useIsLaptop } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 
@@ -26,6 +28,12 @@ const TradingWidgetDrawer = dynamic(
 const MarketEvent = () => {
   const isLaptop = useIsLaptop();
   const marketEventType = useMarketEventContext((s) => s.marketEventMeta.type);
+
+  // Reset order form state when navigating to a different market event or coming from other page (e.g. trade page)
+  // that shares the same store
+  useEffect(() => {
+    useOrderFormStore.getState().reset();
+  }, []);
 
   return (
     <div className="size-full max-w-7xl mx-auto px-4 md:px-6 xl:px-0 flex gap-4 xl:gap-8 pb-12 lg:pb-0">

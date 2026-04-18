@@ -87,10 +87,10 @@ const OrderBookTicker = () => {
       <p className="text-sm font-medium text-neutral-gray-400">
         <span>Last:</span>
         <span className="ml-1">
-          {formatNumber(lastPrice * 100, {
+          {formatNumber(lastPrice, {
+            style: "cent",
             maximumFractionDigits: 1,
           })}
-          ¢
         </span>
       </p>
     </div>

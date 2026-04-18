@@ -41,6 +41,7 @@ const OrderFormSize = () => {
                 isNtl,
                 midPx,
                 szDecimals,
+                isSpot,
               });
             }}
           />

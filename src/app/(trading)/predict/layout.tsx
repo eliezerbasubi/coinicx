@@ -3,9 +3,9 @@ import { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { hlInfoClient } from "@/lib/services/transport";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
-import { getPredictionsMetas } from "@/features/predict/lib/queries";
-import MarketEventsSubscriptions from "@/features/predict/providers/market-events-subs";
+import PredictionMarketsSubsProvider from "@/features/predict/providers/prediction-markets-subs";
 
 type Props = {
   children: React.ReactNode;
@@ -22,12 +22,12 @@ const PredictLayout = async ({ children }: Props) => {
   await queryClient.prefetchQuery({
     staleTime: Infinity,
     queryKey: [QUERY_KEYS.predictionMarketEvents],
-    queryFn: getPredictionsMetas,
+    queryFn: () => hlInfoClient.outcomeMeta(),
   });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <MarketEventsSubscriptions>{children}</MarketEventsSubscriptions>
+      <PredictionMarketsSubsProvider>{children}</PredictionMarketsSubsProvider>
     </HydrationBoundary>
   );
 };
