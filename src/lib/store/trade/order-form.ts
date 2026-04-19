@@ -122,7 +122,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
       setScaleOrder: (scaleOrder) => set({ scaleOrder }),
       setPredictSideIndex: (index) => set({ predictSideIndex: index }),
       setTpslState(data) {
-        set((state) => ({ ...state, ...data }));
+        set((state) => ({ tpslState: { ...state.tpslState, ...data } }));
       },
       setScaleDistribution(value) {
         set((state) => ({ ...state, scaleDistribution: value }));

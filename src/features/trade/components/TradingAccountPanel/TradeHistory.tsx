@@ -198,6 +198,7 @@ const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
           <div className="flex items-center gap-x-1 mr-1">
             <TokenImage
               name={data.coin}
+              coin={data.coin}
               className="size-4"
               instrumentType={data.dex === null ? "spot" : "perps"}
             />
