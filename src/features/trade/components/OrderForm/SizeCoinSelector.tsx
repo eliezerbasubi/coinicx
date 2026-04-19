@@ -1,6 +1,5 @@
 import { ChevronDown } from "lucide-react";
 
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -9,14 +8,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 type Props = {
   onValueChange: (value: boolean) => void;
 };
 
 const SizeCoinSelector = ({ onValueChange }: Props) => {
-  const base = useInstrumentStore((s) => s.assetMeta?.base || "");
-  const quote = useInstrumentStore((s) => s.assetMeta?.quote || "");
+  const { base, quote } = useTradeContext((s) => ({
+    base: s.assetMeta.base,
+    quote: s.assetMeta.quote,
+  }));
 
   const isSzInNtl = useOrderFormStore((s) => s.settings.isSzInNtl);
 

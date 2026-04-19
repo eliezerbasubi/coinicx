@@ -1,30 +1,28 @@
 import { ArrowLeftRight, PlusCircle } from "lucide-react";
 
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import { useAvailableToTrade } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import Visibility from "@/components/common/Visibility";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { isUSDCQuote } from "@/features/trade/utils/shared";
 
 const AvailableBalance = () => {
-  const { base, quote } = useShallowInstrumentStore((s) => ({
-    base: s.assetMeta?.base,
-    quote: s.assetMeta?.quote,
+  const { isSpot, base, quote } = useTradeContext((s) => ({
+    isSpot: s.instrumentType === "spot",
+    base: s.assetMeta.base,
+    quote: s.assetMeta.quote,
   }));
-
-  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const isBuyOrder = useShallowOrderFormStore((s) => s.orderSide === "buy");
   const availableBalance = useAvailableToTrade({
     isBuyOrder,
-    isSpot: !isPerps,
+    spotAsset: isSpot ? { base, quote } : undefined,
   });
 
-  const isSwapable = isPerps && !isUSDCQuote(quote);
+  const isSwapable = !isSpot && !isUSDCQuote(quote);
 
   return (
     <div className="flex items-center justify-between">
@@ -49,7 +47,7 @@ const AvailableBalance = () => {
             {formatNumber(availableBalance, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-              symbol: !isPerps ? (isBuyOrder ? quote : base) : quote,
+              symbol: isSpot ? (isBuyOrder ? quote : base) : quote,
               roundingMode: "floor",
             })}
           </span>

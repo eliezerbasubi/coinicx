@@ -1,22 +1,23 @@
 import React from "react";
 
 import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/lib/store/trade/instrument";
-import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { isLimitOrder, isStopOrder } from "@/features/trade/utils/orderTypes";
 
 import OrderFormInput from "./OrderFormInput";
 import TrailingQuote from "./TrailingQuote";
 
 const ExecutionOrderForm = () => {
-  const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);
+  const { quote, getState } = useTradeContext((s) => ({
+    quote: s.assetMeta?.quote,
+    getState: s.getState,
+  }));
+
   const { orderType, triggerPrice, limitPrice } = useShallowOrderFormStore(
     (s) => ({
       orderType: s.settings.orderType,
@@ -61,11 +62,8 @@ const ExecutionOrderForm = () => {
                 variant="ghost"
                 className="w-6 h-5 md:size-6 bg-neutral-gray-200 text-neutral-300 hover:text-primary hover:bg-primary/10 text-3xs md:text-xs font-medium md:font-semibold rounded md:rounded-md"
                 onClick={() => {
-                  const midPx = useInstrumentStore.getState().assetCtx?.midPx;
-
-                  if (midPx) {
-                    useOrderFormStore.getState().onMidClick(midPx);
-                  }
+                  const { assetCtx } = getState();
+                  useOrderFormStore.getState().onMidClick(assetCtx.midPx);
                 }}
               >
                 Mid

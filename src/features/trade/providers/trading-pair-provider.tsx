@@ -1,19 +1,17 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { redirect } from "next/navigation";
 
 import { ROUTES } from "@/lib/constants/routes";
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
-import TradeStoreProvider from "@/lib/store/trade/provider";
 import { InstrumentType } from "@/lib/types/trade";
 import {
   DEFAULT_PERPS_ASSETS,
   DEFAULT_SPOT_ASSETS,
 } from "@/features/trade/constants";
 import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
+import TradeStoreProvider from "@/features/trade/store/provider";
 
-import { parseBuilderDeployedAsset } from "../utils";
 import TradingPairSubsProvider from "./trading-pair-subs-provider";
 
 const TradingPairProvider = ({
@@ -27,14 +25,6 @@ const TradingPairProvider = ({
   const { spotMeta, perpMetas, getTokenMeta } = useAssetMetas();
 
   const tokenMeta = getTokenMeta(props.instrumentType, props.base, props.quote);
-
-  useEffect(() => {
-    if (tokenMeta) {
-      useInstrumentStore.setState({
-        assetMeta: tokenMeta,
-      });
-    }
-  }, [tokenMeta]);
 
   if (
     (props.instrumentType === "spot" &&
@@ -53,13 +43,11 @@ const TradingPairProvider = ({
     redirect(path);
   }
 
+  // TODO: Maybe we should show a not found page instead of returning null
+  if (!tokenMeta) return null;
+
   return (
-    <TradeStoreProvider
-      {...props}
-      coin={tokenMeta?.coin ?? ""}
-      quote={tokenMeta?.quote ?? props.quote}
-      base={parseBuilderDeployedAsset(props.base).base}
-    >
+    <TradeStoreProvider {...props} assetMeta={tokenMeta}>
       <TradingPairSubsProvider>{children}</TradingPairSubsProvider>
     </TradeStoreProvider>
   );

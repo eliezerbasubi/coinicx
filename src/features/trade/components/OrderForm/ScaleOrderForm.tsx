@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -16,6 +11,7 @@ import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { formatPriceToDecimal, formatSize } from "@/features/trade/utils";
 
 import OrderFormInput from "./OrderFormInput";
@@ -32,16 +28,12 @@ type State = {
 };
 
 const ScaleOrderForm = () => {
-  const { scaleDistribution, size } = useShallowOrderFormStore((s) => ({
-    scaleDistribution: s.scaleDistribution,
-    size: s.size,
-  }));
-
-  // We only want to subscribe to size changes, not midPx changes
-  const totalSize = useMemo(() => {
-    const midPx = useInstrumentStore.getState().assetCtx?.midPx || 0;
-    return useOrderFormStore.getState().getSizeInBase(midPx);
-  }, [size]);
+  const { scaleDistribution, scaleTotalSize } = useShallowOrderFormStore(
+    (s) => ({
+      scaleDistribution: s.scaleDistribution,
+      scaleTotalSize: s.scaleTotalSize,
+    }),
+  );
 
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
@@ -72,7 +64,12 @@ const ScaleOrderForm = () => {
 
     const orderCount = parseFloat(totalOrders || "0");
 
-    if (!startPrice || !endPrice || orderCount < MIN_ORDERS || !totalSize) {
+    if (
+      !startPrice ||
+      !endPrice ||
+      orderCount < MIN_ORDERS ||
+      !scaleTotalSize
+    ) {
       return [];
     }
 
@@ -90,7 +87,7 @@ const ScaleOrderForm = () => {
       let size: number;
 
       if (scaleDistribution === "equal") {
-        size = totalSize / orderCount;
+        size = scaleTotalSize / orderCount;
       } else {
         // Linear weights scaled by skew:
         // - Increasing: weight grows with index (first order smallest, last largest)
@@ -110,11 +107,11 @@ const ScaleOrderForm = () => {
       });
     }
 
-    // Normalize sizes so they sum to totalSize
+    // Normalize sizes so they sum to scaleTotalSize
     if (scaleDistribution !== "equal") {
       const rawTotal = orders.reduce((sum, o) => sum + o.size, 0);
       for (const order of orders) {
-        order.size = (order.size / rawTotal) * totalSize;
+        order.size = (order.size / rawTotal) * scaleTotalSize;
       }
     }
     return orders;
@@ -124,7 +121,7 @@ const ScaleOrderForm = () => {
     state.totalOrders,
     state.skew,
     scaleDistribution,
-    totalSize,
+    scaleTotalSize,
   ]);
 
   useEffect(() => {
@@ -261,17 +258,16 @@ const SizeDistribution = () => {
 };
 
 const PreviewOrders = () => {
-  const { quote, base, decimals } = useTradeContext((s) => ({
-    quote: s.quote,
-    base: s.base,
-    decimals: s.decimals ?? 5,
+  const { quote, base, pxDecimals, szDecimals } = useTradeContext((s) => ({
+    quote: s.assetMeta.quote,
+    base: s.assetMeta.base,
+    pxDecimals: s.assetMeta.pxDecimals,
+    szDecimals: s.assetMeta.szDecimals,
   }));
 
-  const szDecimals = useShallowInstrumentStore(
-    (s) => s.assetMeta?.szDecimals ?? 5,
+  const leverage = useShallowUserTradeStore(
+    (s) => s.activeAssetData?.leverage?.value ?? 1,
   );
-
-  const leverage = useShallowUserTradeStore((s) => s.leverage?.value ?? 1);
 
   const { scaleOrder, isBuyOrder } = useShallowOrderFormStore((s) => ({
     scaleOrder: s.scaleOrder,
@@ -333,7 +329,7 @@ const PreviewOrders = () => {
               return (
                 <div key={index} className="grid grid-cols-3 gap-2 py-1">
                   <p className="text-xs font-medium text-white">
-                    {formatPriceToDecimal(order.price, decimals)}
+                    {formatPriceToDecimal(order.price, pxDecimals)}
                   </p>
                   <p className="text-xs font-medium text-white space-x-0.5">
                     <span>{formatSize(order.size.toString(), szDecimals)}</span>
@@ -342,7 +338,7 @@ const PreviewOrders = () => {
                     </span>
                   </p>
                   <p className="text-xs font-medium text-white">
-                    {formatPriceToDecimal(order.price * order.size, decimals)}
+                    {formatPriceToDecimal(order.price * order.size, pxDecimals)}
                   </p>
                 </div>
               );

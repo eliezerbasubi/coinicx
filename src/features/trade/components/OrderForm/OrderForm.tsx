@@ -3,11 +3,6 @@
 import { useMemo } from "react";
 
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -19,6 +14,7 @@ import Visibility from "@/components/common/Visibility";
 import { ORDER_FORM_SIDES } from "@/features/trade/constants";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
 import { isUSDCQuote } from "@/features/trade/utils/shared";
 
@@ -104,7 +100,10 @@ const OrderForm = ({ className }: Props) => {
 };
 
 const OrderFormSides = () => {
-  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
+  const { isPerps, getState } = useTradeContext((s) => ({
+    isPerps: s.instrumentType === "perps",
+    getState: s.getState,
+  }));
   const orderSide = useShallowOrderFormStore((s) => s.orderSide);
 
   const isBuyOrder = orderSide === "buy";
@@ -124,8 +123,7 @@ const OrderFormSides = () => {
               },
             )}
             onClick={() => {
-              const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
-
+              const midPx = getState().assetCtx.midPx;
               useOrderFormStore.getState().onOrderSideChange({
                 orderSide: side as OrderSide,
                 isSpot: !isPerps,
@@ -142,12 +140,9 @@ const OrderFormSides = () => {
 };
 
 const OrderFormFooter = () => {
-  const { isPerps, quote } = useTradeContext((s) => ({
+  const { isPerps, quote, assetMeta, assetCtx } = useTradeContext((s) => ({
     isPerps: s.instrumentType === "perps",
-    quote: s.quote,
-  }));
-
-  const { assetMeta, assetCtx } = useShallowInstrumentStore((s) => ({
+    quote: s.assetMeta.quote,
     assetMeta: s.assetMeta,
     assetCtx: s.assetCtx,
   }));

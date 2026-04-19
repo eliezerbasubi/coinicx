@@ -9,7 +9,7 @@ import { AssetCxt, AssetMeta, SpotMetas } from "@/lib/types/trade";
 
 import { formatSymbol } from "./formatting";
 import { getTokenDisplayName } from "./getTokenDisplayName";
-import { parseQuoteAsset } from "./perps";
+import { parseBuilderDeployedAsset, parseQuoteAsset } from "./perps";
 
 export const mapSpotDataToAssetMeta = (
   universe: SpotMetaResponse["universe"][number],
@@ -28,6 +28,7 @@ export const mapSpotDataToAssetMeta = (
     maxLeverage: 0,
     quote,
     dex: null,
+    pxDecimals: null,
     symbol: formatSymbol(token.name, quote, true),
   };
 };
@@ -62,6 +63,7 @@ export const mapPerpDataToAssetMeta = (data: {
     marginMode: universe.marginMode,
     szDecimals: universe.szDecimals,
     tokenId: null,
+    pxDecimals: null,
   };
 };
 
@@ -168,4 +170,21 @@ export const mapDataToSpotMetas = (data: SpotMetaResponse) => {
     spotNamesToTokens,
     spotMeta: data,
   };
+};
+
+export const mapDataToPerpsMetas = (data: AllPerpMetasResponse) => {
+  const metas = [];
+
+  for (let index = 0; index < data.length; index++) {
+    const meta = data[index];
+    const { dex } = parseBuilderDeployedAsset(meta.universe[0].name);
+
+    metas.push({
+      ...meta,
+      perpDexIndex: index,
+      dex,
+    });
+  }
+
+  return metas;
 };

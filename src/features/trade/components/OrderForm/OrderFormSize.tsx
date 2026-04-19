@@ -1,29 +1,26 @@
 import React from "react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
 import FormInputSlider from "@/components/common/FormInputSlider";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import OrderFormInput from "./OrderFormInput";
 import SizeCoinSelector from "./SizeCoinSelector";
 
 const OrderFormSize = () => {
-  const isSpot = useTradeContext((s) => s.instrumentType === "spot");
+  const { isSpot, szDecimals, getState } = useTradeContext((s) => ({
+    isSpot: s.instrumentType === "spot",
+    szDecimals: s.assetMeta.szDecimals,
+    getState: s.getState,
+  }));
+
   const { szPercent, size } = useShallowOrderFormStore((s) => ({
     szPercent: s.szPercent,
     size: s.size,
   }));
-
-  const szDecimals = useShallowInstrumentStore(
-    (s) => s.assetMeta?.szDecimals ?? 0,
-  );
 
   return (
     <React.Fragment>
@@ -35,7 +32,7 @@ const OrderFormSize = () => {
         trailing={
           <SizeCoinSelector
             onValueChange={(isNtl) => {
-              const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
+              const midPx = getState().assetCtx.midPx;
 
               useOrderFormStore.getState().onSizeCoinChange({
                 isNtl,
@@ -47,7 +44,7 @@ const OrderFormSize = () => {
           />
         }
         onChange={(e) => {
-          const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
+          const midPx = getState().assetCtx.midPx;
 
           useOrderFormStore.getState().onSizeChange({
             size: e.target.value,
@@ -59,7 +56,7 @@ const OrderFormSize = () => {
       <FormInputSlider
         value={szPercent}
         onValueChange={(value) => {
-          const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
+          const midPx = getState().assetCtx.midPx;
 
           useOrderFormStore.getState().onPercentChange({
             percent: value,

@@ -1,29 +1,27 @@
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 
 const TickerPrice = () => {
   const isMobile = useIsMobile();
 
-  const { decimals, isSpot } = useTradeContext((s) => ({
-    decimals: s.decimals,
-    isSpot: s.instrumentType === "spot",
-  }));
+  const { pxDecimals, isSpot, markPx, midPx, prevDayPx } = useTradeContext(
+    (s) => ({
+      pxDecimals: s.assetMeta.pxDecimals,
+      isSpot: s.instrumentType === "spot",
+      markPx: s.assetCtx.markPx,
+      midPx: s.assetCtx.midPx,
+      prevDayPx: s.assetCtx.prevDayPx,
+    }),
+  );
 
-  const tokenCtx = useShallowInstrumentStore((s) => ({
-    markPx: s.assetCtx?.markPx ?? 0,
-    midPx: s.assetCtx?.midPx ?? 0,
-    prevDayPx: s.assetCtx?.prevDayPx ?? 0,
-  }));
+  const price = midPx || markPx;
 
-  const price = tokenCtx.midPx || tokenCtx.markPx;
-
-  const change = tokenCtx.markPx - tokenCtx.prevDayPx;
-  const changeInPercentage = (change / tokenCtx.prevDayPx) * 100;
+  const change = markPx - prevDayPx;
+  const changeInPercentage = (change / prevDayPx) * 100;
 
   return (
     <div className="flex-1 md:flex-none">
@@ -35,10 +33,10 @@ const TickerPrice = () => {
         </Visibility>
         <p
           className={cn("text-xl text-buy font-bold", {
-            "text-sell": tokenCtx.markPx > tokenCtx.prevDayPx,
+            "text-sell": markPx > prevDayPx,
           })}
         >
-          {formatPriceToDecimal(price, decimals, {
+          {formatPriceToDecimal(price, pxDecimals, {
             useFallback: true,
           })}
         </p>
@@ -75,7 +73,7 @@ const TickerPrice = () => {
           <p className="text-2xs text-neutral-gray-400">Mark Price</p>
 
           <p className="text-2xs">
-            {formatPriceToDecimal(tokenCtx.markPx, decimals, {
+            {formatPriceToDecimal(markPx, pxDecimals, {
               useFallback: true,
             })}
           </p>

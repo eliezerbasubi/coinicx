@@ -6,7 +6,6 @@ import { OrderSide, OrderType, ScaleDistribution } from "@/lib/types/trade";
 import { roundToDecimals } from "@/features/trade/utils";
 import { calculateMaxTradeSize } from "@/features/trade/utils/shared";
 
-import { useInstrumentStore } from "./instrument";
 import { useUserTradeStore } from "./user-trade";
 
 type OrderFormSettings = {
@@ -47,6 +46,7 @@ type OrderFormState = {
   tpslState: TPSLState;
   scaleDistribution: ScaleDistribution;
   scaleOrder: ScaleOrder[];
+  scaleTotalSize: number;
   twapOrder: TwapOrder;
 } & ExecutionOrder;
 
@@ -59,6 +59,7 @@ type OrderFormActions = {
   setScaleDistribution: (value: ScaleDistribution) => void;
   setScaleOrder: (value: ScaleOrder[]) => void;
   setTwapOrder: (value: Partial<TwapOrder>) => void;
+  handleScaleTotalSize: (params: { midPx: number }) => void;
   onSizeCoinChange: (params: {
     isNtl: boolean;
     isSpot: boolean;
@@ -93,6 +94,7 @@ const initialState: OrderFormState = {
   predictSideIndex: 0, // 0 for yes, 1 for no
   size: "",
   szPercent: 0,
+  scaleTotalSize: 0,
   limitPrice: "",
   triggerPrice: "",
   tpslState: {
@@ -150,8 +152,17 @@ export const useOrderFormStore = create<OrderFormStore>()(
           twapOrder: { ...state.twapOrder, ...value },
         }));
       },
+      handleScaleTotalSize: (params) => {
+        const { settings, getSizeInBase } = get();
+
+        if (settings.orderType === "scale") {
+          const totalSize = getSizeInBase(params.midPx);
+
+          set({ scaleTotalSize: totalSize });
+        }
+      },
       onSizeCoinChange(params) {
-        const { size, orderSide, settings } = get();
+        const { size, orderSide, settings, handleScaleTotalSize } = get();
 
         let currentSize = size;
         let currentSzPercent = 0;
@@ -180,6 +191,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
           const maxOrderSizeValue = maxOrderSize || 1;
 
           currentSzPercent = Math.floor((newSize / maxOrderSizeValue) * 100);
+          handleScaleTotalSize({ midPx: params.midPx });
         }
 
         set({
@@ -189,7 +201,8 @@ export const useOrderFormStore = create<OrderFormStore>()(
         });
       },
       onPercentChange(params) {
-        const { orderSide, settings } = get();
+        const { orderSide, settings, handleScaleTotalSize } = get();
+        const { szDecimals, isSpot, percent, midPx } = params;
 
         const maxOrderSize = calculateMaxOrderSize({
           isSpot: params.isSpot,
@@ -201,6 +214,8 @@ export const useOrderFormStore = create<OrderFormStore>()(
         const size = (maxOrderSize * params.percent) / 100;
         const fractionDigits = settings.isSzInNtl ? 2 : params.szDecimals;
 
+        handleScaleTotalSize({ midPx });
+
         set({
           szPercent: params.percent,
           size: roundToDecimals(size, fractionDigits, "floor").toString(),
@@ -208,7 +223,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
       },
 
       onSizeChange(params) {
-        const { orderSide, settings } = get();
+        const { orderSide, settings, handleScaleTotalSize } = get();
 
         const maxOrderSize = calculateMaxOrderSize({
           isSpot: params.isSpot,
@@ -222,6 +237,8 @@ export const useOrderFormStore = create<OrderFormStore>()(
         const percent = Math.floor(
           (parseFloat(params.size || "0") / maxOrderSizeValue) * 100,
         );
+
+        handleScaleTotalSize({ midPx: params.midPx });
 
         set({ size: params.size, szPercent: Math.min(percent, 100) });
       },

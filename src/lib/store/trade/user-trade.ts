@@ -17,8 +17,6 @@ import { useShallow } from "zustand/react/shallow";
 
 import { AllDexsClearinghouseState, SpotBalance } from "@/lib/types/trade";
 
-import { useInstrumentStore } from "./instrument";
-
 type TwapStates = {
   twaps: TwapStatesWsEvent["states"];
   history: UserTwapHistoryWsEvent["history"];
@@ -36,18 +34,11 @@ type UserEventState = {
 };
 
 type UserTradeState = {
-  /** Max size in base asset. e.g. BTC for perps */
-  maxBaseTradeSz: number;
-  /** Max size in quote asset. e.g. BTC for perps */
-  maxQuoteTradeSz: number;
-  /** Available to trade in base asset. e.g. BTC for perps and HYPE for spot */
-  availableBaseToTrade: number;
-  /** Available to trade in quote asset. e.g. BTC for perps and notional for spot */
-  availableQuoteToTrade: number;
-  leverage: ActiveAssetDataResponse["leverage"] | null;
+  /** User perps data for the active asset */
+  activeAssetData: ActiveAssetDataResponse | null;
   spotBalances: SpotBalance[];
   twapStates: TwapStates;
-  clearinghouseState: AllDexsClearinghouseState | null;
+  clearinghouseStates: Map<string, AllDexsClearinghouseState>;
   allDexsClearinghouseState: AllDexsClearinghouseState | null;
 } & UserEventState;
 
@@ -58,14 +49,9 @@ type UserTradeStoreActions = {
   getOrderAvailableBalance: (args: {
     isBuyOrder: boolean;
     isSpot: boolean;
+    spotAsset?: { base: string; quote: string };
   }) => number;
   applyActiveAssetData: (data: ActiveAssetDataResponse) => void;
-  applyActiveSpotAssetData: (params: {
-    base: string;
-    quote: string;
-    isSpot: boolean;
-    data: SpotStateWsEvent["spotState"];
-  }) => void;
   applySpotState: (data: SpotStateWsEvent) => void;
   applyClearinghouseState: (data: AllDexsClearinghouseStateWsEvent) => void;
   applyUserEventStates: (
@@ -77,11 +63,7 @@ type UserTradeStoreActions = {
 interface UserTradeStore extends UserTradeState, UserTradeStoreActions {}
 
 const initialState: UserTradeState = {
-  maxBaseTradeSz: 0,
-  maxQuoteTradeSz: 0,
-  availableBaseToTrade: 0,
-  availableQuoteToTrade: 0,
-  leverage: null,
+  activeAssetData: null,
   spotBalances: [],
   webData: null,
   openOrders: [],
@@ -94,75 +76,41 @@ const initialState: UserTradeState = {
     history: [],
     sliceFills: [],
   },
-  clearinghouseState: null,
+  clearinghouseStates: new Map(),
   allDexsClearinghouseState: null,
 };
 
 export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
   ...initialState,
   updateLeverage(leverage) {
-    const { leverage: currentLeverage } = get();
+    const { activeAssetData } = get();
 
-    if (!currentLeverage) throw new Error("No leverage data to update");
+    if (!activeAssetData) throw new Error("No active asset data to update");
 
     set({
-      leverage: {
-        ...currentLeverage,
-        ...leverage,
-      } as ActiveAssetDataResponse["leverage"],
+      activeAssetData: {
+        ...activeAssetData,
+        leverage: {
+          ...activeAssetData.leverage,
+          ...leverage,
+        } as ActiveAssetDataResponse["leverage"],
+      },
     });
   },
-  getOrderAvailableBalance(args) {
-    const {
-      maxBaseTradeSz,
-      maxQuoteTradeSz,
-      availableBaseToTrade,
-      availableQuoteToTrade,
-    } = get();
+  getOrderAvailableBalance(params) {
+    const { spotBalances, activeAssetData } = get();
 
-    if (args.isSpot) {
-      return args.isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
-    }
-    return args.isBuyOrder ? maxBaseTradeSz : maxQuoteTradeSz;
+    return getAvailableToTrade({
+      isBuyOrder: params.isBuyOrder,
+      spotBalances,
+      perpsAvailableToTrade: activeAssetData?.availableToTrade ?? ["0", "0"],
+      spotAsset: params.spotAsset,
+    });
   },
   applyActiveAssetData(data) {
-    const { maxTradeSzs, availableToTrade, leverage } = data;
-    const [maxBaseTradeSz, maxQuoteTradeSz] = maxTradeSzs;
-    const [availableBaseToTrade, availableQuoteToTrade] = availableToTrade;
-
     set({
-      maxBaseTradeSz: Number(maxBaseTradeSz),
-      maxQuoteTradeSz: Number(maxQuoteTradeSz),
-      availableBaseToTrade: Number(availableBaseToTrade),
-      availableQuoteToTrade: Number(availableQuoteToTrade),
-      leverage,
+      activeAssetData: data,
     });
-  },
-  applyActiveSpotAssetData(params) {
-    const { base, quote, isSpot, data } = params;
-    let availableBaseToTrade = 0;
-    let availableQuoteToTrade = 0;
-
-    if (isSpot) {
-      for (const balance of data.balances) {
-        if (balance.coin === base) {
-          availableBaseToTrade = Number(balance.total);
-        }
-        if (balance.coin === quote) {
-          availableQuoteToTrade = Number(balance.total);
-        }
-
-        // Stop execution if base and quote are found
-        if (availableBaseToTrade > 0 && availableQuoteToTrade > 0) {
-          break;
-        }
-      }
-
-      set({
-        availableBaseToTrade,
-        availableQuoteToTrade,
-      });
-    }
   },
   applySpotState(data) {
     set({
@@ -170,22 +118,14 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
     });
   },
   applyClearinghouseState(data) {
-    const assetMeta = useInstrumentStore.getState().assetMeta;
-
     const clearinghouseStates = new Map(data.clearinghouseStates);
-
-    let clearinghouseState = null;
-
-    if (assetMeta && assetMeta.dex !== null) {
-      clearinghouseState = clearinghouseStates.get(assetMeta.dex);
-    }
 
     const allDexsClearinghouseState = aggregateClearinghouseStates(
       Array.from(clearinghouseStates.values()),
     );
 
     set({
-      clearinghouseState,
+      clearinghouseStates,
       allDexsClearinghouseState,
     });
   },
@@ -206,35 +146,72 @@ export const useShallowUserTradeStore = <T>(
 };
 
 export const useMaxTradeSz = (isBuyOrder: boolean) => {
-  const maxTradeSize = useShallowUserTradeStore((s) =>
-    isBuyOrder ? s.maxQuoteTradeSz : s.maxBaseTradeSz,
+  const maxTradeSizes = useShallowUserTradeStore(
+    (s) => s.activeAssetData?.maxTradeSzs,
   );
 
-  return maxTradeSize;
+  const [maxBaseTradeSz, maxQuoteTradeSz] = maxTradeSizes ?? ["0", "0"];
+
+  return isBuyOrder ? Number(maxQuoteTradeSz) : Number(maxBaseTradeSz);
 };
 
 /**
  * A hook to get the available balance to trade on an asset.
  *
- * @param isBuyOrder
- * @param isSpot
+ * If the asset is a perp, it will return the available balance for the active asset.
+ * If the asset is a spot, it will return the available balance for the spot asset.
+ *
+ * @param isBuyOrder Whether the order is a buy order
+ * @param spotAsset Optional spot asset to get the available balance for
  * @returns quote balance if isSpot and buying and base balance for perps if buying
  */
 export const useAvailableToTrade = (params: {
   isBuyOrder: boolean;
-  isSpot: boolean;
+  spotAsset?: { base: string; quote: string };
 }) => {
-  const { availableBaseToTrade, availableQuoteToTrade } =
-    useShallowUserTradeStore((s) => ({
-      availableBaseToTrade: s.availableBaseToTrade,
-      availableQuoteToTrade: s.availableQuoteToTrade,
-    }));
+  const { activeAssetData, spotBalances } = useShallowUserTradeStore((s) => ({
+    activeAssetData: s.activeAssetData?.availableToTrade,
+    spotBalances: s.spotBalances,
+  }));
 
-  if (params.isSpot) {
-    return params.isBuyOrder ? availableQuoteToTrade : availableBaseToTrade;
+  return getAvailableToTrade({
+    isBuyOrder: params.isBuyOrder,
+    spotBalances,
+    perpsAvailableToTrade: activeAssetData ?? ["0", "0"],
+    spotAsset: params.spotAsset,
+  });
+};
+
+const getAvailableToTrade = (params: {
+  isBuyOrder: boolean;
+  spotBalances: SpotBalance[];
+  perpsAvailableToTrade: string[];
+  spotAsset?: { base: string; quote: string };
+}) => {
+  if (params.spotAsset) {
+    let baseBalance: number | null = null;
+    let quoteBalance: number | null = null;
+
+    for (const balance of params.spotBalances) {
+      if (balance.coin === params.spotAsset.base) {
+        baseBalance = Number(balance.total);
+      }
+      if (balance.coin === params.spotAsset.quote) {
+        quoteBalance = Number(balance.total);
+      }
+
+      if (baseBalance !== null && quoteBalance !== null) break;
+    }
+
+    return params.isBuyOrder ? (quoteBalance ?? 0) : (baseBalance ?? 0);
   }
 
-  return params.isBuyOrder ? availableBaseToTrade : availableQuoteToTrade;
+  const [availableBaseToTrade, availableQuoteToTrade] =
+    params.perpsAvailableToTrade ?? ["0", "0"];
+
+  return params.isBuyOrder
+    ? Number(availableBaseToTrade)
+    : Number(availableQuoteToTrade);
 };
 
 /**

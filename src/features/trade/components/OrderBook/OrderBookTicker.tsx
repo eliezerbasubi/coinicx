@@ -1,18 +1,18 @@
 import { ArrowUp } from "lucide-react";
 
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 type Props = {
   className?: string;
 };
 
 const OrderBookTicker = ({ className }: Props) => {
-  const tokenCtx = useShallowInstrumentStore((state) => state.assetCtx);
+  const tokenCtx = useTradeContext((state) => state.assetCtx);
 
-  const close = Number(tokenCtx?.prevDayPx ?? 0);
-  const open = Number(tokenCtx?.markPx ?? 0);
+  const close = Number(tokenCtx.prevDayPx);
+  const open = Number(tokenCtx.markPx);
 
   const isBuyOrder = close > open;
 

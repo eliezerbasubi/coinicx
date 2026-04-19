@@ -17,15 +17,18 @@ import { calculateOrderValue } from "@/features/trade/utils/shared";
 import { isValidTwapMinutes } from "@/features/trade/utils/twap";
 
 type UseOrderFormArgs = {
-  isSpot: boolean;
   referencePx: number;
   szDecimals: number;
+  spotAsset?: {
+    base: string;
+    quote: string;
+  };
 };
 
 export const useOrderForm = ({
-  isSpot,
   referencePx,
   szDecimals,
+  spotAsset,
 }: UseOrderFormArgs) => {
   const {
     size,
@@ -46,11 +49,17 @@ export const useOrderForm = ({
   }));
 
   const isBuyOrder = orderSide === "buy";
+  const isSpot = !!spotAsset;
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
-  const availableToTrade = useAvailableToTrade({ isBuyOrder, isSpot });
+  const availableToTrade = useAvailableToTrade({
+    isBuyOrder,
+    spotAsset,
+  });
 
-  const leverage = useShallowUserTradeStore((s) => s.leverage?.value || 0);
+  const leverage = useShallowUserTradeStore(
+    (s) => s.activeAssetData?.leverage?.value || 0,
+  );
 
   const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 

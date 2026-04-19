@@ -2,10 +2,10 @@ import { useMemo, useReducer } from "react";
 import { Search } from "lucide-react";
 
 import { useFavouriteStore } from "@/lib/store/trade/favourites";
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { Asset } from "@/lib/types/trade";
 import { useAssetsAndContexts } from "@/features/trade/hooks/useAssetAndContexts";
 import { useSelectToken } from "@/features/trade/hooks/useSelectToken";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import AssetsSelectorDataTable from "./AssetsSelectorDataTable";
 import AssetsSelectorTabs from "./AssetsSelectorTabs";

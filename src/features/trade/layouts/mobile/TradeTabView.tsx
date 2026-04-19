@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { ROUTES } from "@/lib/constants/routes";
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import { OrderType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
@@ -19,6 +18,7 @@ import {
   DEFAULT_PERPS_ASSETS,
   DEFAULT_SPOT_ASSETS,
 } from "@/features/trade/constants";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import MarketChartDrawer from "./MarketChartDrawer";
 
@@ -66,7 +66,7 @@ const getVisibleRows = (params: {
 const TradeTabView = () => {
   const { instrumentType, coin } = useTradeContext((s) => ({
     instrumentType: s.instrumentType,
-    coin: s.coin,
+    coin: s.assetMeta.coin,
   }));
 
   const { orderType, showTpSl } = useShallowOrderFormStore((s) => ({

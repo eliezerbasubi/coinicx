@@ -1,7 +1,7 @@
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { useShallowOrderBookStore } from "@/lib/store/trade/orderbook";
 import { OrderBookOrientation } from "@/lib/types/orderbook";
 import { cn } from "@/lib/utils/cn";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 type Props = {
   className?: string;
@@ -33,8 +33,8 @@ export const OrderBookVerticalTableHeader = ({
   showTotal,
 }: HeaderProps) => {
   const { base, quote } = useTradeContext((state) => ({
-    base: state.base,
-    quote: state.quote,
+    base: state.assetMeta.base,
+    quote: state.assetMeta.quote,
   }));
 
   return (

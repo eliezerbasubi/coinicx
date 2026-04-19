@@ -7,14 +7,13 @@ import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
 import { hlSubClient } from "@/lib/services/transport";
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import {
   useOrderBookStore,
   useShallowOrderBookStore,
 } from "@/lib/store/trade/orderbook";
 import { useUserTradeStore } from "@/lib/store/trade/user-trade";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import {
   getMaxSizeDecimals,
@@ -33,14 +32,11 @@ type Props = {
 const TradingPairSubsProvider = ({ children }: Props) => {
   const { address } = useAccount();
 
-  const { coin, instrumentType, decimals, setDecimals } = useTradeContext(
-    (s) => ({
-      coin: s.coin,
-      instrumentType: s.instrumentType,
-      decimals: s.decimals,
-      setDecimals: s.setDecimals,
-    }),
-  );
+  const { coin, instrumentType, getState } = useTradeContext((s) => ({
+    coin: s.assetMeta.coin,
+    instrumentType: s.instrumentType,
+    getState: s.getState,
+  }));
 
   const tickSize = useShallowOrderBookStore((s) => s.tickSize);
 
@@ -72,7 +68,7 @@ const TradingPairSubsProvider = ({ children }: Props) => {
     data: ActiveSpotAssetCtxWsEvent["ctx"] | ActiveAssetCtxWsEvent["ctx"],
   ) => {
     const isSpot = instrumentType === "spot";
-    const { assetMeta, setAssetCtx } = useInstrumentStore.getState();
+    const { assetMeta, setAssetCtx, setAssetMeta } = getState();
 
     const price = Number(data.midPx ?? data.markPx);
     const maxSzDecimals = getMaxSizeDecimals(isSpot);
@@ -86,9 +82,10 @@ const TradingPairSubsProvider = ({ children }: Props) => {
       setTicks(price, szDecimals, isSpot);
     }
 
-    if (decimals === null) {
+    // Set price decimals if not set
+    if (assetMeta.pxDecimals === null) {
       const priceDecimals = getPriceDecimals(price, szDecimals, isSpot);
-      setDecimals(priceDecimals);
+      setAssetMeta({ pxDecimals: priceDecimals });
     }
   };
 
@@ -106,23 +103,6 @@ const TradingPairSubsProvider = ({ children }: Props) => {
       applyTokenCtxAndTicks(data.ctx);
     });
   }, [coin, instrumentType]);
-
-  useSubscription(() => {
-    if (!coin || instrumentType !== "spot") return;
-
-    const { assetMeta } = useInstrumentStore.getState();
-
-    if (!assetMeta) return;
-
-    return hlSubClient.spotState({ user }, (data) => {
-      useUserTradeStore.getState().applyActiveSpotAssetData({
-        data: data.spotState,
-        base: assetMeta.base,
-        quote: assetMeta.quote,
-        isSpot: true,
-      });
-    });
-  }, [user, coin, instrumentType]);
 
   return children;
 };

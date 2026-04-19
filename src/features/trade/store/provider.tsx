@@ -2,12 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 
-import {
-  createTradeStore,
-  TradeContext,
-  TradeStore,
-  TradeStoreProps,
-} from "./store";
+import { createTradeStore, TradeContext, TradeStore, TradeStoreProps } from ".";
 
 const TradeStoreProvider = ({
   children,
