@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -11,6 +10,7 @@ import { cn } from "@/lib/utils/cn";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 const SUPPORTED_ORDER_TYPES: Record<
   OrderType,

@@ -2,27 +2,21 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { TRANSPORT_URL } from "@/lib/services/transport";
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { cn } from "@/lib/utils/cn";
 import { formatAddress } from "@/lib/utils/formatting/formatAddress";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 const AssetInfo = () => {
-  const { tokenMeta } = useShallowInstrumentStore((state) => ({
-    tokenMeta: state.assetMeta,
-  }));
-
-  const { base, coin, instrumentType } = useTradeContext((s) => ({
-    base: s.base,
-    coin: s.coin,
+  const { tokenMeta, instrumentType } = useTradeContext((s) => ({
+    tokenMeta: s.assetMeta,
     instrumentType: s.instrumentType,
   }));
 
   const { data } = useQuery({
-    queryKey: ["perpAnnotation", coin],
+    queryKey: ["perpAnnotation", tokenMeta.coin],
     enabled: !!tokenMeta && !!tokenMeta.dex,
     staleTime: Infinity,
     queryFn: async () => {
@@ -57,9 +51,9 @@ const AssetInfo = () => {
           className="hidden md:flex items-center space-x-2 cursor-pointer"
         >
           <TokenImage
-            key={`${base}-${coin}`}
-            name={base}
-            coin={coin}
+            key={`${tokenMeta.base}-${tokenMeta.coin}`}
+            name={tokenMeta.base}
+            coin={tokenMeta.coin}
             instrumentType={instrumentType}
             className="size-5 md:size-8"
           />

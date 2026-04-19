@@ -4,11 +4,6 @@ import { toast } from "sonner";
 import { useAccount } from "wagmi";
 import { useWebHaptics } from "web-haptics/react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/lib/store/trade/instrument";
 import {
   useShallowUserTradeStore,
   useUserTradeStore,
@@ -21,6 +16,7 @@ import FormInputSlider from "@/components/common/FormInputSlider";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 import { InputNumber } from "@/components/ui/input-number";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import LeverageDiscreteSlider from "./LeverageDiscreteSlider";
 
@@ -67,7 +63,11 @@ const AdjustMarginMode = () => {
   const { getAgentClient } = useAgentClient();
   const haptic = useWebHaptics();
 
-  const marginMode = useUserTradeStore((s) => s.leverage?.type ?? "cross");
+  const { marginMode, leverage } = useShallowUserTradeStore((s) => ({
+    marginMode: s.activeAssetData?.leverage?.type ?? "cross",
+    leverage: s.activeAssetData?.leverage?.value ?? -1,
+  }));
+  const assetId = useTradeContext((s) => s.assetMeta.assetId ?? -1);
 
   const [open, setOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -79,10 +79,7 @@ const AdjustMarginMode = () => {
     }
 
     try {
-      const asset = useInstrumentStore.getState().assetMeta?.assetId ?? -1;
-      const leverage = useUserTradeStore.getState().leverage?.value ?? -1;
-
-      if (asset === -1) throw new Error("Asset is not available");
+      if (assetId === -1) throw new Error("Asset is not available");
       if (leverage === -1) throw new Error("Leverage is not available");
 
       setProcessing(true);
@@ -96,7 +93,7 @@ const AdjustMarginMode = () => {
       const type = value as "cross" | "isolated";
 
       await exchClient.updateLeverage({
-        asset,
+        asset: assetId,
         isCross: type === "cross",
         leverage,
       });
@@ -172,11 +169,12 @@ const AdjustLeverage = () => {
   const haptic = useWebHaptics();
 
   const leverage = useShallowUserTradeStore((s) =>
-    (s.leverage?.value ?? 40).toString(),
+    (s.activeAssetData?.leverage?.value ?? 40).toString(),
   );
-  const maxLeverage = useShallowInstrumentStore(
-    (s) => s.assetMeta?.maxLeverage ?? 40,
-  );
+  const { maxLeverage, assetId } = useTradeContext((s) => ({
+    maxLeverage: s.assetMeta?.maxLeverage ?? 40,
+    assetId: s.assetMeta?.assetId ?? -1,
+  }));
 
   const [open, setOpen] = useState(false);
   const [assetLeverage, setAssetLeverage] = useState(leverage);
@@ -204,9 +202,7 @@ const AdjustLeverage = () => {
     }
 
     try {
-      const asset = useInstrumentStore.getState().assetMeta?.assetId ?? -1;
-
-      if (asset === -1) throw new Error("Asset is not available");
+      if (assetId === -1) throw new Error("Asset is not available");
 
       setProcessing(true);
 
@@ -217,8 +213,10 @@ const AdjustLeverage = () => {
       });
 
       await exchClient.updateLeverage({
-        asset,
-        isCross: useUserTradeStore.getState().leverage?.type === "cross",
+        asset: assetId,
+        isCross:
+          useUserTradeStore.getState().activeAssetData?.leverage?.type ===
+          "cross",
         leverage: assetLeverage,
       });
 

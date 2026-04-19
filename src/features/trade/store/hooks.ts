@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-import { TradeContext, TradeStoreState } from "./store";
+import { TradeContext, TradeStoreState } from ".";
 
 export const useTradeContext = <T>(
   selector: (state: TradeStoreState) => T,

@@ -1,9 +1,9 @@
 import React, { memo, useMemo } from "react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { OrderBookType, PriceLevel } from "@/lib/types/orderbook";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 type Props = {
   hoveredIndex: number;
@@ -100,7 +100,7 @@ const AveragePriceTooltip = ({
 };
 
 const SumLabel = ({ type }: { type: "base" | "quote" }) => {
-  const asset = useTradeContext((s) => s[type]);
+  const asset = useTradeContext((s) => s.assetMeta[type]);
 
   return <p>Sum {asset}:</p>;
 };

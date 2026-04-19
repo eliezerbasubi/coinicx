@@ -2,7 +2,6 @@ import React, { useCallback, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { useShallowOrderBookStore } from "@/lib/store/trade/orderbook";
 import {
   CumulativePriceLevel,
@@ -12,6 +11,7 @@ import {
 } from "@/lib/types/orderbook";
 import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import AveragePriceTooltip from "./AveragePriceTooltip";
 import OrderBookTableRow from "./OrderBookTableRow";
@@ -55,7 +55,7 @@ const OrderBookList = ({
       rounding: s.settings.rounding,
     }));
 
-  const decimals = useTradeContext((state) => state.decimals);
+  const pxDecimals = useTradeContext((state) => state.assetMeta.pxDecimals);
 
   const [hoverIndex, setHoverIndex] = useState(0);
   const scrollHeight = useRef(0);
@@ -184,7 +184,7 @@ const OrderBookList = ({
             side={side}
             price={Number(price)}
             amount={Number(amount)}
-            decimals={decimals}
+            decimals={pxDecimals}
             rounding={rounding}
             progress={progress >= 1 ? 1 : progress}
             hideCumulativeTotal={hideTotal}
@@ -201,7 +201,7 @@ const OrderBookList = ({
     [
       itemCount,
       depthVisualizer,
-      decimals,
+      pxDecimals,
       rounding,
       layout,
       side,

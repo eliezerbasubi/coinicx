@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { AllPerpMetasResponse, SpotMetaResponse } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
@@ -9,62 +10,38 @@ import { useAgentClient } from "@/hooks/useAgentClient";
 import {
   buildPerpAssetId,
   buildSpotAssetId,
+  mapDataToPerpsMetas,
+  mapDataToSpotMetas,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
 
 const toastId = "terminate-twap";
-
-const resolveAssetId = (twap: ActiveTwap): number => {
-  const queryClient = getQueryClient();
-
-  if (twap.isSpot) {
-    const spotMetas = queryClient.getQueryData<SpotMetas>([
-      QUERY_KEYS.spotMeta,
-    ]);
-    const tokens = spotMetas?.spotNamesToTokens?.get(twap.coin);
-
-    if (!tokens) throw new Error("No data found for coin " + twap.coin);
-
-    const spotId = spotMetas?.tokensToSpotId
-      ?.get(tokens.baseToken)
-      ?.get(tokens.quoteToken);
-
-    if (!spotId) throw new Error("No asset ID matched for coin " + twap.coin);
-
-    return buildSpotAssetId(spotId);
-  }
-
-  const allPerpMetas = queryClient.getQueryData<AllPerpMetas>([
-    QUERY_KEYS.allPerpMetas,
-  ]);
-
-  if (allPerpMetas?.length) {
-    const { dex } = parseBuilderDeployedAsset(twap.coin);
-
-    for (const perpMeta of allPerpMetas) {
-      if (perpMeta.dex !== dex) continue;
-
-      const universeIndex = perpMeta.universe.findIndex(
-        (u) => u.name.toLowerCase() === twap.coin.toLowerCase(),
-      );
-
-      if (universeIndex !== -1) {
-        return buildPerpAssetId({
-          perpDexIndex: perpMeta.perpDexIndex,
-          universeIndex,
-        });
-      }
-    }
-  }
-
-  return -1;
-};
 
 export const useTerminateTwap = () => {
   const haptic = useWebHaptics();
   const { getAgentClient } = useAgentClient();
 
   const [processing, setProcessing] = useState(false);
+
+  const getAssetMetas = useCallback(() => {
+    const queryClient = getQueryClient();
+
+    const allPerpMetas = queryClient.getQueryData<AllPerpMetasResponse>([
+      QUERY_KEYS.allPerpMetas,
+    ]);
+    const spotMetasResponse = queryClient.getQueryData<SpotMetaResponse>([
+      QUERY_KEYS.spotMeta,
+    ]);
+
+    if (!spotMetasResponse || !allPerpMetas) {
+      throw new Error("No meta found for terminating TWAPs");
+    }
+
+    return {
+      spotMetas: mapDataToSpotMetas(spotMetasResponse),
+      allPerpMetas: mapDataToPerpsMetas(allPerpMetas),
+    };
+  }, []);
 
   const terminateTwap = async (twaps: ActiveTwap[]) => {
     if (!twaps.length) return;
@@ -81,8 +58,10 @@ export const useTerminateTwap = () => {
 
       const exchClient = await getAgentClient();
 
+      const { spotMetas, allPerpMetas } = getAssetMetas();
+
       for (const twap of twaps) {
-        const assetId = resolveAssetId(twap);
+        const assetId = resolveAssetId(twap, spotMetas, allPerpMetas);
         await exchClient.twapCancel({ a: assetId, t: twap.twapId });
       }
 
@@ -105,4 +84,45 @@ export const useTerminateTwap = () => {
   };
 
   return { processing, terminateTwap };
+};
+
+const resolveAssetId = (
+  twap: ActiveTwap,
+  spotMetas: SpotMetas,
+  allPerpMetas: AllPerpMetas,
+): number => {
+  if (twap.isSpot) {
+    const tokens = spotMetas?.spotNamesToTokens?.get(twap.coin);
+
+    if (!tokens) throw new Error("No data found for coin " + twap.coin);
+
+    const spotId = spotMetas?.tokensToSpotId
+      ?.get(tokens.baseToken)
+      ?.get(tokens.quoteToken);
+
+    if (!spotId) throw new Error("No asset ID matched for coin " + twap.coin);
+
+    return buildSpotAssetId(spotId);
+  }
+
+  if (allPerpMetas.length) {
+    const { dex } = parseBuilderDeployedAsset(twap.coin);
+
+    for (const perpMeta of allPerpMetas) {
+      if (perpMeta.dex !== dex) continue;
+
+      const universeIndex = perpMeta.universe.findIndex(
+        (u) => u.name.toLowerCase() === twap.coin.toLowerCase(),
+      );
+
+      if (universeIndex !== -1) {
+        return buildPerpAssetId({
+          perpDexIndex: perpMeta.perpDexIndex,
+          universeIndex,
+        });
+      }
+    }
+  }
+
+  return -1;
 };

@@ -1,11 +1,9 @@
-import React from "react";
-
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import TradingViewWidget from "./TradingViewWidget";
 
 const TradingViewChart = () => {
-  const coin = useInstrumentStore((s) => s.assetMeta?.coin);
+  const coin = useTradeContext((s) => s.assetMeta.coin);
 
   const ticker = coin ? `${coin}USD` : "BTCUSD";
   const symbol = `HYPERLIQUID:${ticker}`;

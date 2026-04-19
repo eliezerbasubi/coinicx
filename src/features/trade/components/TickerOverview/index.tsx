@@ -2,9 +2,8 @@
 
 import { useDocumentTitle } from "usehooks-ts";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { cn } from "@/lib/utils/cn";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 
 import AssetsSelector from "../AssetsSelector";
@@ -16,19 +15,17 @@ type Props = {
 };
 
 const TickerOverview = ({ className }: Props) => {
-  const { base, quote, decimals } = useTradeContext((state) => ({
-    base: state.base,
-    quote: state.quote,
-    decimals: state.decimals,
-  }));
-
-  const { assetPrice, assetFullName } = useShallowInstrumentStore((s) => ({
-    assetPrice: s.assetCtx?.midPx || s.assetCtx?.markPx || 0,
-    assetFullName: s.assetMeta?.fullName,
-  }));
+  const { base, quote, pxDecimals, assetPrice, assetFullName } =
+    useTradeContext((s) => ({
+      base: s.assetMeta.base,
+      quote: s.assetMeta.quote,
+      pxDecimals: s.assetMeta.pxDecimals,
+      assetPrice: s.assetCtx.midPx || s.assetCtx.markPx || 1,
+      assetFullName: s.assetMeta.fullName,
+    }));
 
   useDocumentTitle(
-    `${formatPriceToDecimal(assetPrice, decimals)} | ${base} ${quote || ""} ${assetFullName ? `| ${assetFullName} to ${quote}` : ""} - CoinicX`,
+    `${formatPriceToDecimal(assetPrice, pxDecimals)} | ${base} ${quote || ""} ${assetFullName ? `| ${assetFullName} to ${quote}` : ""} - CoinicX`,
   );
 
   return (

@@ -1,7 +1,5 @@
 import { useMemo } from "react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -12,6 +10,7 @@ import {
   useShallowUserTradeStore,
 } from "@/lib/store/trade/user-trade";
 import { OrderType } from "@/lib/types/trade";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import {
   calculateMarginRequired,
   calculateOrderValue,
@@ -24,7 +23,13 @@ import {
 import { isValidTwapMinutes } from "@/features/trade/utils/twap";
 
 export const useOrderForm = () => {
-  const isSpot = useTradeContext((s) => s.instrumentType === "spot");
+  const { isSpot, referencePx, base, quote } = useTradeContext((s) => ({
+    isSpot: s.instrumentType === "spot",
+    referencePx: s.assetCtx.referencePx,
+    base: s.assetMeta.base,
+    quote: s.assetMeta.quote,
+  }));
+
   const { size, limitPrice, orderSide, settings, scaleOrder, twapOrder } =
     useShallowOrderFormStore((s) => ({
       size: s.size,
@@ -38,12 +43,14 @@ export const useOrderForm = () => {
   const isBuyOrder = orderSide === "buy";
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
-  const availableToTrade = useAvailableToTrade(isBuyOrder, isSpot);
+  const availableToTrade = useAvailableToTrade({
+    isBuyOrder,
+    spotAsset: isSpot ? { base, quote } : undefined,
+  });
 
-  const referencePx = useShallowInstrumentStore(
-    (s) => s.assetCtx?.referencePx || 0,
+  const leverage = useShallowUserTradeStore(
+    (s) => s.activeAssetData?.leverage?.value || 0,
   );
-  const leverage = useShallowUserTradeStore((s) => s.leverage?.value || 0);
 
   const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 

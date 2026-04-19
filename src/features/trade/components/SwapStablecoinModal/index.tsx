@@ -1,7 +1,6 @@
 import { AlertTriangleIcon, PlusCircle } from "lucide-react";
 
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import FormInputControl from "@/components/common/FormInputControl";
 import TradingButton from "@/components/common/TradingButton";
@@ -13,12 +12,13 @@ import {
   SummaryValue,
 } from "@/components/ui/summary";
 import { useTransferAndSwap } from "@/features/trade/hooks/useTransferAndSwap";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { isUSDCQuote } from "@/features/trade/utils/shared";
 
 const SwapStablecoinModal = () => {
   const { swapModalOpen, openSwapModal, quote } = useTradeContext((s) => ({
     swapModalOpen: s.swapModalOpen,
-    quote: s.quote,
+    quote: s.assetMeta.quote,
     openSwapModal: s.openSwapModal,
   }));
 

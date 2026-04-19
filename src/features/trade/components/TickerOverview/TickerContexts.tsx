@@ -1,31 +1,27 @@
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import FundingCountdown from "./FundingCountdown";
 
 const TickerContexts = () => {
   const isMobile = useIsMobile();
 
-  const { base, quote, instrumentType, decimals } = useTradeContext(
+  const { base, quote, instrumentType, pxDecimals, assetCtx } = useTradeContext(
     (state) => ({
-      base: state.base,
-      quote: state.quote,
+      base: state.assetMeta.base,
+      quote: state.assetMeta.quote,
       instrumentType: state.instrumentType,
-      decimals: state.decimals,
+      pxDecimals: state.assetMeta.pxDecimals,
+      assetCtx: state.assetCtx,
     }),
   );
 
-  const { tokenCtx } = useShallowInstrumentStore((state) => ({
-    tokenCtx: state.assetCtx,
-  }));
-
-  const prevDayPx = tokenCtx?.prevDayPx ?? 0;
-  const markPx = tokenCtx?.markPx ?? 0;
+  const prevDayPx = assetCtx.prevDayPx;
+  const markPx = assetCtx.markPx;
 
   const change = markPx - prevDayPx;
   const changeInPercentage = (change / prevDayPx) * 100;
@@ -39,8 +35,8 @@ const TickerContexts = () => {
     return formatNumber(Number(value), {
       useFallback: true,
       notation: isMobile && Number(value) >= 1e6 ? "compact" : undefined,
-      minimumFractionDigits: decimals ?? 0,
-      maximumFractionDigits: decimals ?? 10,
+      minimumFractionDigits: pxDecimals ?? 0,
+      maximumFractionDigits: pxDecimals ?? 10,
       ...options,
     });
   };
@@ -50,7 +46,7 @@ const TickerContexts = () => {
       <Visibility visible={!isMobile && !isSpot}>
         <TickerItem
           label="Oracle Price"
-          value={formatBigValue(tokenCtx?.oraclePx ?? 0)}
+          value={formatBigValue(assetCtx?.oraclePx ?? 0)}
         />
       </Visibility>
       <Visibility visible={!isMobile}>
@@ -78,7 +74,7 @@ const TickerContexts = () => {
       <Visibility visible={!isMobile || isSpot}>
         <TickerItem
           label={isMobile ? `24H Vol(${base})` : `24H Volume(${base})`}
-          value={formatBigValue(tokenCtx?.dayBaseVlm, {
+          value={formatBigValue(assetCtx?.dayBaseVlm, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}
@@ -86,7 +82,7 @@ const TickerContexts = () => {
       </Visibility>
       <TickerItem
         label={isMobile ? `24H Vol(${quote})` : `24H Volume(${quote})`}
-        value={formatBigValue(tokenCtx?.dayNtlVlm, {
+        value={formatBigValue(assetCtx?.dayNtlVlm, {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}
@@ -95,7 +91,7 @@ const TickerContexts = () => {
       <Visibility visible={!isSpot}>
         <TickerItem
           label="Open Interest"
-          value={formatBigValue((tokenCtx?.openInterest ?? 0) * markPx, {
+          value={formatBigValue((assetCtx?.openInterest ?? 0) * markPx, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}
@@ -124,10 +120,10 @@ const TickerContexts = () => {
             <span className="flex items-center gap-1">
               <span
                 className={cn("text-buy", {
-                  "text-sell": Number(tokenCtx?.funding ?? 0) < 0,
+                  "text-sell": Number(assetCtx?.funding ?? 0) < 0,
                 })}
               >
-                {formatNumber(tokenCtx?.funding ?? 0, {
+                {formatNumber(assetCtx?.funding ?? 0, {
                   style: "percent",
                   useFallback: true,
                   minimumFractionDigits: 4,
@@ -143,7 +139,7 @@ const TickerContexts = () => {
       <Visibility visible={instrumentType === "spot"}>
         <TickerItem
           label="Market Cap"
-          value={formatBigValue(Number(tokenCtx?.marketCap ?? 0), {
+          value={formatBigValue(Number(assetCtx?.marketCap ?? 0), {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}

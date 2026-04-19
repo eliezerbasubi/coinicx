@@ -1,7 +1,5 @@
 import { useMemo } from "react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import { useOrderBookStore } from "@/lib/store/trade/orderbook";
 import { useMaxTradeSz, useUserTradeStore } from "@/lib/store/trade/user-trade";
@@ -12,9 +10,11 @@ import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { DEFAULT_ORDER_MAX_SLIPPAGE } from "@/features/trade/constants";
 import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 import { useUserFees } from "@/features/trade/hooks/useUserFees";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import {
   estimateLiquidationPrice,
   estimateSlippagePercent,
+  formatPriceToDecimal,
 } from "@/features/trade/utils";
 import {
   calculateNumberOfOrders,
@@ -22,18 +22,13 @@ import {
 } from "@/features/trade/utils/twap";
 
 export const LiquidationPrice = ({ size }: { size: number }) => {
-  const { isPerps, coin, decimals } = useTradeContext((s) => ({
+  const { isPerps, assetMeta, assetCtx } = useTradeContext((s) => ({
     isPerps: s.instrumentType === "perps",
-    coin: s.coin,
-    decimals: s.decimals ?? 10,
-  }));
-
-  const { perpMetas } = useAssetMetas();
-
-  const { assetMeta, assetCtx } = useShallowInstrumentStore((s) => ({
     assetMeta: s.assetMeta,
     assetCtx: s.assetCtx,
   }));
+
+  const { perpMetas } = useAssetMetas();
 
   const { limitPrice, isBuyOrder, maxSlippage, reduceOnly, orderType } =
     useShallowOrderFormStore((s) => ({
@@ -45,7 +40,7 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
     }));
 
   const liquidationPrice = useMemo(() => {
-    const leverage = useUserTradeStore.getState().leverage;
+    const leverage = useUserTradeStore.getState().activeAssetData?.leverage;
 
     if (
       !isPerps ||
@@ -59,23 +54,31 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
     const perpDexState = perpMetas[assetMeta.perpDexIndex];
     const perpAssetMeta = perpDexState.universe[assetMeta.index];
 
+    if (!assetMeta.dex) return 0;
+
+    const clearinghouseState = useUserTradeStore
+      .getState()
+      .clearinghouseStates.get(assetMeta.dex);
+
+    if (!clearinghouseState) return 0;
+
     return estimateLiquidationPrice({
       leverage,
-      assetName: coin,
+      assetName: assetMeta.coin,
       entryPrice: limitPrice ? parseFloat(limitPrice) : assetCtx?.markPx || 0,
       midPx: assetCtx?.midPx || 0,
       maxLeverage: perpAssetMeta.maxLeverage,
       orderSize: size,
-      clearinghouseState: useUserTradeStore.getState().clearinghouseState,
+      clearinghouseState,
       isBuyOrder,
     });
   }, [
     size,
     limitPrice,
-    assetCtx?.markPx,
+    assetCtx.markPx,
     isPerps,
-    coin,
-    assetMeta?.perpDexIndex,
+    assetMeta.coin,
+    assetMeta.perpDexIndex,
     perpMetas,
     reduceOnly,
     maxSlippage,
@@ -99,11 +102,9 @@ export const LiquidationPrice = ({ size }: { size: number }) => {
       </AdaptiveTooltip>
 
       <DetailsValue>
-        {formatNumber(liquidationPrice || 0, {
+        {formatPriceToDecimal(liquidationPrice || 0, assetMeta.pxDecimals, {
           style: "currency",
           useFallback: true,
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals,
         })}
       </DetailsValue>
     </div>
@@ -115,8 +116,10 @@ export const OrderValueAndMarginRequired = ({
 }: {
   data: { orderValue: number; marginRequired: number };
 }) => {
-  const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);
-  const isPerp = useTradeContext((s) => s.instrumentType === "perps");
+  const { isPerp, quote } = useTradeContext((s) => ({
+    isPerp: s.instrumentType === "perps",
+    quote: s.assetMeta.quote,
+  }));
   const orderType = useShallowOrderFormStore((s) => s.settings.orderType);
 
   if (orderType === "twap") return null;
@@ -148,13 +151,15 @@ export const OrderValueAndMarginRequired = ({
 };
 
 export const MaxOrderSize = () => {
-  const base = useShallowInstrumentStore((s) => s.assetMeta?.base);
+  const { isPerp, base } = useTradeContext((s) => ({
+    isPerp: s.instrumentType === "perps",
+    base: s.assetMeta.base,
+  }));
   const isBuyOrder = useShallowOrderFormStore((s) => s.orderSide === "buy");
-  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
 
   const maxTradeSz = useMaxTradeSz(isBuyOrder);
 
-  if (!isPerps) return null;
+  if (!isPerp) return null;
 
   return (
     <DetailsTile
@@ -214,7 +219,7 @@ export const OrderSlippage = ({ size }: { size: number }) => {
       maxSlippage: s.settings.maxSlippage || DEFAULT_ORDER_MAX_SLIPPAGE,
     }),
   );
-  const midPx = useShallowInstrumentStore((s) => s.assetCtx?.midPx || 0);
+  const midPx = useTradeContext((s) => s.assetCtx.midPx);
 
   const slippage = useMemo(() => {
     if (orderType !== "market") return 0;
@@ -255,7 +260,7 @@ export const OrderSlippage = ({ size }: { size: number }) => {
 };
 
 export const TwapDetails = ({ size }: { size: number }) => {
-  const base = useTradeContext((s) => s.base);
+  const base = useTradeContext((s) => s.assetMeta.base);
 
   const minutes = useShallowOrderFormStore((s) => s.twapOrder.minutes);
 
