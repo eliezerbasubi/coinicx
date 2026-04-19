@@ -23,7 +23,8 @@ export const useMarketEventContext = <T>(
 export const useActiveOutcomeMeta = () => {
   const data = useMarketEventContext((s) => ({
     activeOutcomeIndex: s.activeOutcomeIndex,
-    marketEventMeta: s.marketEventMeta,
+    marketEventMeta:
+      s.marketEventMeta.outcomes[s.activeOutcomeIndex] ?? s.marketEventMeta,
   }));
 
   return data;

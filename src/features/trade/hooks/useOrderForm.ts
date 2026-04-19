@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { OrderType } from "@/lib/types/trade";
 import {
   useAvailableToTrade,
   useMaxTradeSz,
-  useShallowUserTradeStore,
-} from "@/lib/store/trade/user-trade";
-import { OrderType } from "@/lib/types/trade";
+} from "@/hooks/useAvailableToTrade";
 import { calculateMarginRequired } from "@/features/trade/utils";
 import {
   isLimitOrder,

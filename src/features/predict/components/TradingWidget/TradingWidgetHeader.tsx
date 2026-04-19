@@ -85,8 +85,9 @@ const TradingWidgetHeader = ({
 
       <MarketSideActions
         sides={marketEvent.sides.map((side, index) => ({
-          ...side,
-          ...marketEventSidesCtx[index],
+          name: side.name,
+          midPx: marketEventSidesCtx[index]?.midPx,
+          markPx: marketEventSidesCtx[index]?.markPx || 1,
         }))}
         currentSideIndex={sideIndex}
         className={cn(

@@ -3,10 +3,10 @@ import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
-import { useAvailableToTrade } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
 import { formatWithGrouping } from "@/lib/utils/formatting/normalize-input-number";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { useAvailableToTrade } from "@/hooks/useAvailableToTrade";
 import FormInputControl from "@/components/common/FormInputControl";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,10 @@ import {
   PREDICTIONS_QUOTE_ASSET,
   PREDICTIONS_QUOTE_SZ_DECIMALS,
 } from "@/features/predict/lib/constants/predictions";
-import { useActiveOutcomeSideCtx } from "@/features/predict/lib/store/market-event/hooks";
+import {
+  useActiveOutcomeMeta,
+  useActiveOutcomeSideCtx,
+} from "@/features/predict/lib/store/market-event/hooks";
 import { roundToDecimals } from "@/features/trade/utils";
 import { calculateMaxTradeSize } from "@/features/trade/utils/shared";
 
@@ -26,7 +29,14 @@ const TradingWidgetOrderSize = () => {
     isBuyOrder: s.orderSide === "buy",
     isSzNtl: s.settings.isSzInNtl,
   }));
-  const availableBalance = useAvailableToTrade({ isBuyOrder, isSpot: true });
+
+  const { marketEventMeta } = useActiveOutcomeMeta();
+
+  const availableBalance = useAvailableToTrade({
+    isBuyOrder,
+    spotAsset: { base: marketEventMeta?.coin, quote: PREDICTIONS_QUOTE_ASSET },
+  });
+
   const { sideCtx } = useActiveOutcomeSideCtx();
 
   // If buy order and size in ntl, format as currency and show "Amount", else show "Shares"

@@ -2,9 +2,10 @@ import { useMemo } from "react";
 
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import { useOrderBookStore } from "@/lib/store/trade/orderbook";
-import { useMaxTradeSz, useUserTradeStore } from "@/lib/store/trade/user-trade";
+import { useUserTradeStore } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { useMaxTradeSz } from "@/hooks/useAvailableToTrade";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
 import { DEFAULT_ORDER_MAX_SLIPPAGE } from "@/features/trade/constants";

@@ -2,9 +2,9 @@ import { ArrowLeftRight, PlusCircle } from "lucide-react";
 
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
-import { useAvailableToTrade } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import { useAvailableToTrade } from "@/hooks/useAvailableToTrade";
 import Visibility from "@/components/common/Visibility";
 import { useTradeContext } from "@/features/trade/store/hooks";
 import { isUSDCQuote } from "@/features/trade/utils/shared";

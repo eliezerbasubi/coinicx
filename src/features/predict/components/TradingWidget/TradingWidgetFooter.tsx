@@ -46,7 +46,7 @@ const TradingWidgetFooter = () => {
     orderValueAndMargin,
     orderSizeInBase,
   } = useOrderForm({
-    isSpot: true,
+    spotAsset: { base: marketEvent.coin, quote: PREDICTIONS_QUOTE_ASSET },
     referencePx: mid,
     szDecimals: PREDICTIONS_QUOTE_SZ_DECIMALS,
   });

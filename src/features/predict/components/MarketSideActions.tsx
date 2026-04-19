@@ -1,10 +1,12 @@
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { Button } from "@/components/ui/button";
-import { MarketEvent, SideSpec } from "@/features/predict/lib/types";
+import { MarketEvent } from "@/features/predict/lib/types";
+
+type Side = { name: string; midPx?: number; markPx: number };
 
 type MarketSideButtonProps = {
-  side: SideSpec;
+  side: Side;
   index: number;
   asChild?: boolean;
   isCurrent?: boolean;
@@ -29,7 +31,6 @@ export const MarketSideButton = ({
 
   return (
     <Button
-      key={side.coin}
       asChild={asChild}
       type="button"
       variant="ghost"
@@ -64,7 +65,7 @@ export const MarketSideButton = ({
 
 type MarketSideActionsProps = {
   currentSideIndex?: number;
-  sides: MarketEvent["sides"];
+  sides: Side[];
   className?: string;
   wrapperClassName?: string;
 } & Pick<MarketSideButtonProps, "asChild" | "label" | "onClick">;
@@ -82,7 +83,7 @@ export const MarketSideActions = ({
     <div className={wrapperClassName}>
       {sides.map((side, index) => (
         <MarketSideButton
-          key={side.coin}
+          key={side.name}
           side={side}
           index={index}
           asChild={asChild}

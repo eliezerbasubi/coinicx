@@ -119,8 +119,9 @@ const MarketEventTile = ({
       <MarketSideActions
         asChild
         sides={outcome.sides.map((side, index) => ({
-          ...side,
-          ...sidesContexts[index],
+          name: side.name,
+          midPx: sidesContexts[index]?.midPx,
+          markPx: sidesContexts[index]?.markPx || 1,
         }))}
         label="Buy"
         wrapperClassName="flex-1 grid grid-cols-2 col-span-2 md:flex items-center justify-end gap-2"

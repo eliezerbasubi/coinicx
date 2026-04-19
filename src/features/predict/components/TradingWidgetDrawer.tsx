@@ -8,7 +8,6 @@ import { MarketEventMeta } from "@/features/predict/lib/types";
 
 import { useMarketEventContext } from "../lib/store/market-event/hooks";
 import MarketEventCtxProvider from "../providers/market-event-ctx-provider";
-import MarketEventSubscriptionsProvider from "../providers/market-event-subs-provider";
 import TradingWidget from "./TradingWidget";
 
 type Props = {
@@ -60,15 +59,13 @@ export const TradingWidgetMarketsDrawer = ({
         marketEventMeta={marketEventMeta}
         categoricalOutcomeIndex={outcomeIndex}
       >
-        <MarketEventSubscriptionsProvider>
-          <MarketEventCtxProvider />
-          <TradingWidget
-            className={cn(className, "[&>div]:px-0")}
-            sideClassName="h-8"
-            tabsClassName="px-0"
-            showEventTitle={false}
-          />
-        </MarketEventSubscriptionsProvider>
+        <MarketEventCtxProvider />
+        <TradingWidget
+          className={cn(className, "[&>div]:px-0")}
+          sideClassName="h-8"
+          tabsClassName="px-0"
+          showEventTitle={false}
+        />
       </MarketEventStoreProvider>
     </AdaptiveDialog>
   );

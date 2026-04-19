@@ -156,7 +156,9 @@ const OrderFormFooter = () => {
     orderValueAndMargin,
     hasInsufficientMargin,
   } = useOrderForm({
-    isSpot: !isPerps,
+    spotAsset: !isPerps
+      ? { base: assetMeta.base, quote: assetMeta.quote }
+      : undefined,
     referencePx: assetCtx?.referencePx ?? 0,
     szDecimals: assetMeta?.szDecimals ?? 0,
   });
