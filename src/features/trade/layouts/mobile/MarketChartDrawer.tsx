@@ -88,7 +88,10 @@ const MarketChartDrawer = () => {
                   onClick={() =>
                     useOrderFormStore
                       .getState()
-                      .onOrderSideChange(side as OrderSide, !isPerps)
+                      .onOrderSideChange({
+                        orderSide: side as OrderSide,
+                        isSpot: !isPerps,
+                      })
                   }
                 >
                   <p className="text-sm font-semibold">
