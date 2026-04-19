@@ -1,19 +1,12 @@
 import { useMemo, useState } from "react";
 import { OrderParameters } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
-import { useWebHaptics } from "web-haptics/react";
 
 import { hlExchangeClient } from "@/lib/services/transport";
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import {
-  useInstrumentStore,
-  useShallowInstrumentStore,
-} from "@/lib/store/trade/instrument";
-import {
-  useShallowUserTradeStore,
-  useUserTradeStore,
-} from "@/lib/store/trade/user-trade";
+import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { useAgentClient } from "@/hooks/useAgentClient";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import {
   buildSpotAssetId,
   formatSize,
@@ -31,7 +24,7 @@ const SWAP_MAX_SLIPPAGE = 0.01; // 1%
 
 export const useTransferAndSwap = () => {
   const { getAgentClient } = useAgentClient();
-  const quote = useTradeContext((s) => s.quote);
+  const quote = useTradeContext((s) => s.assetMeta.quote);
 
   const [inputAmount, setInputAmount] = useState("");
   const [processing, setProcessing] = useState(false);

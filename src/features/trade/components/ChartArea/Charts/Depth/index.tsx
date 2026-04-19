@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Layer, Rect, Stage } from "react-konva";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 import { DEPTH_CHART_COLORS, DEPTH_CHART_LAYOUT } from "./constants";
 import { useContainerSize } from "./hooks/useContainerSize";
@@ -19,7 +19,7 @@ import Tooltip from "./layers/Tooltip";
 const DepthChart = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { width, height } = useContainerSize(containerRef);
-  const decimals = useTradeContext((s) => s.decimals);
+  const pxDecimals = useTradeContext((s) => s.assetMeta.pxDecimals);
 
   const [zoom, setZoom] = useState(0.5); // 50%
 
@@ -73,13 +73,13 @@ const DepthChart = () => {
             fill={DEPTH_CHART_COLORS.background}
             listening={false}
           />
-          <AxisLabels scale={scale} data={data} decimals={decimals} />
+          <AxisLabels scale={scale} data={data} decimals={pxDecimals} />
           <DepthArea bids={data.bids} asks={data.asks} scale={scale} />
           <MidPriceDivider midX={scale.midX} plotArea={scale.plotArea} />
           <CrosshairLine tooltip={tooltip} scale={scale} />
           <Tooltip
             tooltip={tooltip}
-            decimals={decimals}
+            decimals={pxDecimals}
             plotArea={scale.plotArea}
           />
         </Layer>

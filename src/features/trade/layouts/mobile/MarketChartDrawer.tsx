@@ -2,7 +2,6 @@ import { Fragment, useState } from "react";
 import { AlignHorizontalDistributeCenter, ArrowLeft } from "lucide-react";
 import { useWebHaptics } from "web-haptics/react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { OrderSide } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
@@ -21,14 +20,16 @@ import MarketArea from "@/features/trade/components/MarketArea";
 import TickerContexts from "@/features/trade/components/TickerOverview/TickerContexts";
 import TickerPrice from "@/features/trade/components/TickerOverview/TickerPrice";
 import { ORDER_FORM_SIDES } from "@/features/trade/constants";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 const MarketChartDrawer = () => {
   const haptic = useWebHaptics();
   const [open, setOpen] = useState(false);
 
-  const { coin, isPerps } = useTradeContext((s) => ({
-    coin: s.coin,
+  const { coin, isPerps, getState } = useTradeContext((s) => ({
+    coin: s.assetMeta.coin,
     isPerps: s.instrumentType === "perps",
+    getState: s.getState,
   }));
 
   return (
@@ -85,11 +86,14 @@ const MarketChartDrawer = () => {
                       "bg-buy text-white": side === "buy",
                     },
                   )}
-                  onClick={() =>
-                    useOrderFormStore
-                      .getState()
-                      .onOrderSideChange(side as OrderSide, !isPerps)
-                  }
+                  onClick={() => {
+                    const midPx = getState().assetCtx.midPx;
+                    useOrderFormStore.getState().onOrderSideChange({
+                      orderSide: side as OrderSide,
+                      isSpot: !isPerps,
+                      midPx,
+                    });
+                  }}
                 >
                   <p className="text-sm font-semibold">
                     {label[isPerps ? "perp" : "spot"]}

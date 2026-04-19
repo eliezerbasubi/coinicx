@@ -1,10 +1,11 @@
 import { useCallback } from "react";
-import { useQueries } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { hlInfoClient } from "@/lib/services/transport";
-import { AssetMeta, InstrumentType, SpotMetas } from "@/lib/types/trade";
+import { AssetMeta, InstrumentType } from "@/lib/types/trade";
 import {
+  mapDataToPerpsMetas,
   mapDataToSpotMetas,
   mapPerpDataToAssetMeta,
   mapSpotDataToAssetMeta,
@@ -12,7 +13,7 @@ import {
 } from "@/features/trade/utils";
 
 export const useAssetMetas = () => {
-  const { data, error, loading } = useQueries({
+  const { data, error, loading } = useSuspenseQueries({
     combine(result) {
       return {
         data: {
@@ -27,32 +28,14 @@ export const useAssetMetas = () => {
       {
         queryKey: [QUERY_KEYS.allPerpMetas],
         staleTime: Infinity,
-        queryFn: async () => {
-          const data = await hlInfoClient.allPerpMetas();
-
-          const metas = [];
-
-          for (let index = 0; index < data.length; index++) {
-            const meta = data[index];
-            const { dex } = parseBuilderDeployedAsset(meta.universe[0].name);
-
-            metas.push({
-              ...meta,
-              perpDexIndex: index,
-              dex,
-            });
-          }
-          return metas;
-        },
+        queryFn: () => hlInfoClient.allPerpMetas(),
+        select: mapDataToPerpsMetas,
       },
       {
         queryKey: [QUERY_KEYS.spotMeta],
         staleTime: Infinity,
-        queryFn: async (): Promise<SpotMetas> => {
-          const spotMeta = await hlInfoClient.spotMeta();
-
-          return mapDataToSpotMetas(spotMeta);
-        },
+        queryFn: () => hlInfoClient.spotMeta(),
+        select: mapDataToSpotMetas,
       },
     ],
   });

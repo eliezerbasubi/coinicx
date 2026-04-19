@@ -4,9 +4,9 @@ import { Chart, dispose, init, KLineData } from "klinecharts";
 
 import { hlInfoClient, hlSubClient } from "@/lib/services/transport";
 import { useChartSettingsStore } from "@/lib/store/trade/chart-settings";
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { getChartTimeRange } from "@/features/trade/utils";
 
 import KlineTooltipTitle from "./KlineTooltipTitle";
@@ -29,9 +29,9 @@ const KlineChart = () => {
   const volIndicatorWrapperRef = useRef<HTMLDivElement>(null);
   const candleTooltipRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
-  const { decimals, coin } = useTradeContext((s) => ({
-    decimals: s.decimals,
-    coin: s.coin,
+  const { pxDecimals, coin } = useTradeContext((s) => ({
+    pxDecimals: s.assetMeta.pxDecimals,
+    coin: s.assetMeta.coin,
   }));
 
   const handleCandleTooltip = useCallback((klineData: KLineData) => {
@@ -116,8 +116,8 @@ const KlineChart = () => {
 
     chart.setSymbol({
       ticker: coin,
-      pricePrecision: decimals ?? 2,
-      volumePrecision: decimals ?? 2,
+      pricePrecision: pxDecimals ?? 2,
+      volumePrecision: pxDecimals ?? 2,
     });
 
     const period = getKlinePeriod(interval);

@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { AllPerpMetasResponse, SpotMetaResponse } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import { AllPerpMetas, OpenOrder, SpotMetas } from "@/lib/types/trade";
+import { OpenOrder } from "@/lib/types/trade";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
 import { useAgentClient } from "@/hooks/useAgentClient";
 import {
   buildPerpAssetId,
   buildSpotAssetId,
+  mapDataToPerpsMetas,
+  mapDataToSpotMetas,
   parseBuilderDeployedAsset,
 } from "@/features/trade/utils";
 
@@ -24,17 +27,30 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
 
   const [processing, setProcessing] = useState(false);
 
+  const getAssetMetas = useCallback(() => {
+    const queryClient = getQueryClient();
+
+    const allPerpMetas = queryClient.getQueryData<AllPerpMetasResponse>([
+      QUERY_KEYS.allPerpMetas,
+    ]);
+    const spotMetasResponse = queryClient.getQueryData<SpotMetaResponse>([
+      QUERY_KEYS.spotMeta,
+    ]);
+
+    if (!spotMetasResponse || !allPerpMetas) {
+      throw new Error("No meta found for canceling open orders");
+    }
+
+    return {
+      spotMetas: mapDataToSpotMetas(spotMetasResponse),
+      allPerpMetas: mapDataToPerpsMetas(allPerpMetas),
+    };
+  }, []);
+
   const buildCancels = (openOrders: OpenOrder[]) => {
     if (!openOrders.length) throw new Error("No open orders to cancel");
 
-    const queryClient = getQueryClient();
-
-    const allPerpMetas = queryClient.getQueryData<AllPerpMetas>([
-      QUERY_KEYS.allPerpMetas,
-    ]);
-    const spotMetas = queryClient.getQueryData<SpotMetas>([
-      QUERY_KEYS.spotMeta,
-    ]);
+    const { spotMetas, allPerpMetas } = getAssetMetas();
 
     return openOrders.map((order) => {
       if (order.isSpot) {

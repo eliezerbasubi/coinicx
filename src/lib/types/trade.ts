@@ -56,6 +56,7 @@ export type AssetMeta = {
   fullName?: string | null;
   assetId: number;
   szDecimals: number;
+  pxDecimals: number | null;
   maxLeverage: number;
   tokenId: `0x${string}` | null;
   /** Position of the asset in the tokens array for spot and universe for perps */

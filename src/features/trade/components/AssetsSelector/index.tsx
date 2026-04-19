@@ -1,8 +1,6 @@
 import { useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -10,6 +8,7 @@ import TokenImage from "@/components/common/TokenImage";
 import Visibility from "@/components/common/Visibility";
 import AdaptivePopover from "@/components/ui/adaptive-popover";
 import Tag from "@/components/ui/tag";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { formatSymbol } from "@/features/trade/utils";
 
 import AssetsSelectorContent from "./AssetsSelectorContent";
@@ -33,18 +32,15 @@ const AssetsSelector = ({
 
   const isMobile = useIsMobile();
 
-  const tokenMeta = useShallowInstrumentStore((s) => ({
-    dex: s.assetMeta?.dex,
-    maxLeverage: s.assetMeta?.maxLeverage,
-    coin: s.assetMeta?.coin,
-  }));
-
-  const { base, quote, coin, instrumentType } = useTradeContext((s) => ({
-    base: s.base,
-    quote: s.quote,
-    coin: s.coin,
-    instrumentType: s.instrumentType,
-  }));
+  const { base, quote, coin, instrumentType, dex, maxLeverage } =
+    useTradeContext((s) => ({
+      base: s.assetMeta.base,
+      quote: s.assetMeta.quote,
+      coin: s.assetMeta.coin,
+      dex: s.assetMeta.dex,
+      maxLeverage: s.assetMeta.maxLeverage,
+      instrumentType: s.instrumentType,
+    }));
 
   const triggerRef = useRef(null);
 
@@ -88,10 +84,8 @@ const AssetsSelector = ({
           <Visibility visible={showTags}>
             <div className="flex items-center space-x-1">
               <Tag value={instrumentType} className="capitalize" />
-              {!!tokenMeta?.maxLeverage && (
-                <Tag value={`${tokenMeta?.maxLeverage}x`} />
-              )}
-              {tokenMeta.dex && <Tag value={tokenMeta?.dex} />}
+              {!!maxLeverage && <Tag value={`${maxLeverage}x`} />}
+              {dex && <Tag value={dex} />}
             </div>
           </Visibility>
           <Visibility visible={isMobile && !!showPriceChangePercentage}>
@@ -114,9 +108,9 @@ const AssetsSelector = ({
 };
 
 const PriceChangePercentageTag = () => {
-  const { markPx, prevDayPx } = useShallowInstrumentStore((s) => ({
-    markPx: s.assetCtx?.markPx ?? 0,
-    prevDayPx: s.assetCtx?.prevDayPx ?? 0,
+  const { markPx, prevDayPx } = useTradeContext((s) => ({
+    markPx: s.assetCtx.markPx,
+    prevDayPx: s.assetCtx.prevDayPx,
   }));
 
   const change = markPx - prevDayPx;

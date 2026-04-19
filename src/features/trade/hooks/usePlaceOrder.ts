@@ -3,14 +3,13 @@ import { OrderParameters } from "@nktkas/hyperliquid";
 import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
-import { useTradeContext } from "@/lib/store/trade/hooks";
-import { useInstrumentStore } from "@/lib/store/trade/instrument";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
 import { Order, OrderSide } from "@/lib/types/trade";
 import { useAgentClient } from "@/hooks/useAgentClient";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import {
   calculateSlippageAdjustedPrice,
   formatPriceToDecimal,
@@ -33,7 +32,7 @@ export const usePlaceOrder = () => {
     orderSide: s.orderSide,
   }));
 
-  const decimals = useTradeContext((s) => s.decimals);
+  const getState = useTradeContext((s) => s.getState);
 
   const isBuyOrder = orderSide === "buy";
 
@@ -49,7 +48,7 @@ export const usePlaceOrder = () => {
     triggerPrice?: string;
     orderSide?: OrderSide;
   }) => {
-    const { assetMeta, assetCtx } = useInstrumentStore.getState();
+    const { assetMeta, assetCtx } = getState();
 
     if (!assetMeta || !assetCtx) {
       throw new Error("Asset metadata is not available");
@@ -70,7 +69,11 @@ export const usePlaceOrder = () => {
       assetId: assetMeta.assetId,
       side: params.orderSide ?? orderSide,
       type: params.type,
-      price: roundToDecimals(price, Number(decimals), "floor").toString(),
+      price: roundToDecimals(
+        price,
+        Number(assetMeta.pxDecimals),
+        "floor",
+      ).toString(),
       size: formatSize(sizeInBase, assetMeta.szDecimals),
       reduceOnly: params.reduceOnly ?? settings.reduceOnly,
       timeInForce:
@@ -141,8 +144,7 @@ export const usePlaceOrder = () => {
 
   const buildMarketOrder = () => {
     const formValues = useOrderFormStore.getState();
-    const referencePx =
-      useInstrumentStore.getState().assetCtx?.referencePx ?? 0;
+    const referencePx = getState().assetCtx.referencePx;
 
     const entryPrice = calculateSlippageAdjustedPrice({
       entryPrice: referencePx,
@@ -192,7 +194,7 @@ export const usePlaceOrder = () => {
 
   const buildStopOrders = () => {
     const formValues = useOrderFormStore.getState();
-    const midPx = useInstrumentStore.getState().assetCtx?.midPx ?? 0;
+    const midPx = getState().assetCtx.midPx;
 
     const triggerPrice = formValues.triggerPrice;
     const trigger = parseFloat(triggerPrice);
@@ -261,7 +263,7 @@ export const usePlaceOrder = () => {
     try {
       const { twapOrder, size, settings } = useOrderFormStore.getState();
 
-      const { assetCtx, assetMeta } = useInstrumentStore.getState();
+      const { assetCtx, assetMeta } = getState();
 
       if (!assetCtx || !assetMeta) {
         throw new Error("Asset metadata is not available");
@@ -376,7 +378,7 @@ export const usePlaceOrder = () => {
         builder: getBuilder(Number(orderPayload.orders[0].a)),
       });
 
-      const base = useInstrumentStore.getState().assetMeta?.base;
+      const { pxDecimals, base } = getState().assetMeta;
 
       let message = "Order submitted successfully";
 
@@ -384,7 +386,7 @@ export const usePlaceOrder = () => {
         if (typeof status === "object") {
           if ("filled" in status) {
             const filled = status.filled;
-            message = `${filled.totalSz} ${base} ${isBuyOrder ? "bought" : "sold"} at ${formatPriceToDecimal(Number(filled.avgPx), decimals, { style: "currency" })} avg. price`;
+            message = `${filled.totalSz} ${base} ${isBuyOrder ? "bought" : "sold"} at ${formatPriceToDecimal(Number(filled.avgPx), pxDecimals, { style: "currency" })} avg. price`;
 
             break;
           }

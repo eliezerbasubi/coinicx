@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 
 import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
-import { useTradeContext } from "@/lib/store/trade/hooks";
 import {
   useOrderFormStore,
   useShallowOrderFormStore,
@@ -15,6 +14,7 @@ import Visibility from "@/components/common/Visibility";
 import { ORDER_FORM_SIDES } from "@/features/trade/constants";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
+import { useTradeContext } from "@/features/trade/store/hooks";
 import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
 
 import { isUSDCQuote } from "../../utils/shared";
@@ -100,7 +100,10 @@ const OrderForm = ({ className }: Props) => {
 };
 
 const OrderFormSides = () => {
-  const isPerps = useTradeContext((s) => s.instrumentType === "perps");
+  const { isPerps, getState } = useTradeContext((s) => ({
+    isPerps: s.instrumentType === "perps",
+    getState: s.getState,
+  }));
   const orderSide = useShallowOrderFormStore((s) => s.orderSide);
 
   const isBuyOrder = orderSide === "buy";
@@ -119,11 +122,14 @@ const OrderFormSides = () => {
                 "bg-buy text-white": side === orderSide && isBuyOrder,
               },
             )}
-            onClick={() =>
-              useOrderFormStore
-                .getState()
-                .onOrderSideChange(side as OrderSide, !isPerps)
-            }
+            onClick={() => {
+              const { assetCtx } = getState();
+              useOrderFormStore.getState().onOrderSideChange({
+                orderSide: side as OrderSide,
+                isSpot: !isPerps,
+                midPx: assetCtx.midPx ?? 0,
+              });
+            }}
           >
             <p className="text-xs md:text-sm font-medium">{label[labelKey]}</p>
           </button>
@@ -148,7 +154,7 @@ const OrderFormFooter = () => {
 
   const { isPerps, isUSDC, openSwapModal } = useTradeContext((s) => ({
     isPerps: s.instrumentType === "perps",
-    isUSDC: isUSDCQuote(s.quote),
+    isUSDC: isUSDCQuote(s.assetMeta.quote),
     openSwapModal: s.openSwapModal,
   }));
 

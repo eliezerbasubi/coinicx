@@ -1,7 +1,7 @@
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import { useTradeContext } from "@/features/trade/store/hooks";
 
 const TrailingQuote = () => {
-  const quote = useShallowInstrumentStore((s) => s.assetMeta?.quote);
+  const quote = useTradeContext((s) => s.assetMeta.quote);
 
   return (
     <div className="flex items-center gap-x-2">
