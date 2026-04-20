@@ -7,6 +7,7 @@ import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TradingButton from "@/components/common/TradingButton";
 import Visibility from "@/components/common/Visibility";
 import {
+  PREDICTIONS_BASE_SZ_DECIMALS,
   PREDICTIONS_QUOTE_ASSET,
   PREDICTIONS_QUOTE_SZ_DECIMALS,
 } from "@/features/predict/lib/constants/predictions";
@@ -48,14 +49,14 @@ const TradingWidgetFooter = () => {
   } = useOrderForm({
     spotAsset: { base: marketEvent.coin, quote: PREDICTIONS_QUOTE_ASSET },
     referencePx: mid,
-    szDecimals: PREDICTIONS_QUOTE_SZ_DECIMALS,
+    szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
   });
 
   const { processing, onPlaceOrder } = usePlaceOrder({
     assetId: buildOutcomeAssetId(marketEvent.outcome, predictSideIndex),
-    szDecimals: PREDICTIONS_QUOTE_SZ_DECIMALS,
+    szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
     isSpot: true,
-    base: "",
+    base: "Shares",
   });
 
   const payout = isSzNtl ? orderSizeInBase : Number(size || "0");

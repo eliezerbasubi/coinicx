@@ -24,16 +24,16 @@ const LINKS = [
     icon: <Coins />,
   },
   {
-    href: ROUTES.swap.index,
-    label: "Swap",
-    id: "swap",
-    icon: <RefreshCw />,
-  },
-  {
     href: ROUTES.predict.index,
     label: "Predict",
     id: "predict",
     icon: <TrendingUpDown />,
+  },
+  {
+    href: ROUTES.swap.index,
+    label: "Swap",
+    id: "swap",
+    icon: <RefreshCw />,
   },
   {
     href: ROUTES.portfolio.index,

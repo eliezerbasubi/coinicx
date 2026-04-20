@@ -202,7 +202,6 @@ export const useOrderFormStore = create<OrderFormStore>()(
       },
       onPercentChange(params) {
         const { orderSide, settings, handleScaleTotalSize } = get();
-        const { szDecimals, isSpot, percent, midPx } = params;
 
         const maxOrderSize = calculateMaxOrderSize({
           isSpot: params.isSpot,
@@ -214,7 +213,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
         const size = (maxOrderSize * params.percent) / 100;
         const fractionDigits = settings.isSzInNtl ? 2 : params.szDecimals;
 
-        handleScaleTotalSize({ midPx });
+        handleScaleTotalSize({ midPx: params.midPx });
 
         set({
           szPercent: params.percent,

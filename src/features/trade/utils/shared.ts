@@ -31,8 +31,8 @@ export const calculateMaxTradeSize = (params: {
 
 /**
  * Calculates the order value in USD.
- * If isSzInNtl is true, multiply the orderSize times the price or limit price (in NTL).
- * Otherwise, divide the orderSize by the price or limit price (in NTL) and then multiply by mid price to get the notional value.
+ * If isSzInNtl is true, multiply the orderSize times the price or limit price (in notional).
+ * Otherwise, divide the orderSize by the price or limit price (in notional) and then multiply by mid price to get the notional value.
  *
  * @param params - The parameters for calculating the order value.
  * @param params.orderSize - The size of the order.
@@ -40,7 +40,7 @@ export const calculateMaxTradeSize = (params: {
  * @param params.referencePx - The reference price of the asset.
  * @param params.limitPx - The limit price of the order.
  * @param params.orderType - The type of the order.
- * @param params.isSzInNtl - Whether the order size is in NTL.
+ * @param params.isSzInNtl - Whether the order size is in notional.
  * @returns The order value in USD.
  */
 export const calculateOrderValue = (params: {
@@ -56,7 +56,8 @@ export const calculateOrderValue = (params: {
 
   if (params.isSzInNtl) {
     return (
-      roundToDecimals(params.orderSize / price, 0, "floor") * params.referencePx
+      roundToDecimals(params.orderSize / price, params.szDecimals, "floor") *
+      params.referencePx
     );
   }
 
