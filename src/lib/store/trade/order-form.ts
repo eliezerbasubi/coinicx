@@ -59,31 +59,31 @@ type OrderFormActions = {
   handleScaleTotalSize: (params: { midPx: number }) => void;
   onSizeCoinChange: (params: {
     isNtl: boolean;
-    isSpot: boolean;
+    spotAsset?: { base: string; quote: string };
     midPx: number;
     szDecimals: number;
   }) => void;
   onPercentChange: (params: {
     percent: number;
-    isSpot: boolean;
+    spotAsset?: { base: string; quote: string };
     szDecimals: number;
     midPx: number;
   }) => void;
   onSizeChange: (params: {
     size: string;
-    isSpot: boolean;
+    spotAsset?: { base: string; quote: string };
     midPx: number;
   }) => void;
   onOrderSideChange: (params: {
     orderSide: OrderSide;
-    isSpot: boolean;
+    spotAsset?: { base: string; quote: string };
     midPx?: number;
   }) => void;
   onMidClick: (midPx: number) => void;
   getSizeInBase: (midPx: number) => number;
   reset: () => void;
   calculateOrderSize: (args: {
-    isSpot: boolean;
+    spotAsset?: { base: string; quote: string };
     isBuyOrder?: boolean;
     midPx: number;
   }) => number;
@@ -162,18 +162,16 @@ export const useOrderFormStore = create<OrderFormStore>()(
 
         const isBuy = params.isBuyOrder ?? orderSide === "buy";
 
-        const availableBalance = useUserTradeStore
-          .getState()
-          .getOrderAvailableBalance({
-            isBuyOrder: isBuy,
-            isSpot: params.isSpot,
-          });
+        const maxTradeSz = useUserTradeStore.getState().getMaxTradeSize({
+          isBuyOrder: isBuy,
+          spotAsset: params.spotAsset,
+        });
 
         const maxOrderSize = calculateOrderSize({
           isBuyOrder: isBuy,
-          isSpot: params.isSpot,
+          isSpot: !!params.spotAsset,
           isSzInNtl: settings.isSzInNtl,
-          availableBalance,
+          maxTradeSz,
           midPx: params.midPx,
         });
 
@@ -212,10 +210,10 @@ export const useOrderFormStore = create<OrderFormStore>()(
           calculateOrderSize,
           handleScaleTotalSize,
         } = get();
-        const { szDecimals, isSpot, percent, midPx } = params;
+        const { szDecimals, spotAsset, percent, midPx } = params;
 
         const maxOrderSize = calculateOrderSize({
-          isSpot,
+          spotAsset,
           isBuyOrder: orderSide === "buy",
           midPx,
         });
@@ -235,7 +233,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
         const { orderSide, calculateOrderSize, handleScaleTotalSize } = get();
 
         const maxOrderSize = calculateOrderSize({
-          isSpot: params.isSpot,
+          spotAsset: params.spotAsset,
           isBuyOrder: orderSide === "buy",
           midPx: params.midPx,
         });
@@ -258,7 +256,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
 
         if (parseFloat(size) && params.midPx) {
           const maxOrderSize = calculateOrderSize({
-            isSpot: params.isSpot,
+            spotAsset: params.spotAsset,
             isBuyOrder,
             midPx: params.midPx,
           });
@@ -304,14 +302,13 @@ const calculateOrderSize = (args: {
   isSzInNtl: boolean;
   isBuyOrder: boolean;
   midPx: number;
-  availableBalance: number;
+  maxTradeSz: number;
 }) => {
-  const { isBuyOrder, isSpot, isSzInNtl, availableBalance, midPx } = args;
+  const { isBuyOrder, isSpot, isSzInNtl, maxTradeSz, midPx } = args;
   if (isSpot) {
-    if (isBuyOrder)
-      return isSzInNtl ? availableBalance : availableBalance / midPx;
-    return isSzInNtl ? availableBalance * midPx : availableBalance;
+    if (isBuyOrder) return isSzInNtl ? maxTradeSz : maxTradeSz / midPx;
+    return isSzInNtl ? maxTradeSz * midPx : maxTradeSz;
   }
 
-  return isSzInNtl ? availableBalance * midPx : availableBalance;
+  return isSzInNtl ? maxTradeSz * midPx : maxTradeSz;
 };

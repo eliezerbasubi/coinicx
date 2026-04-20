@@ -26,8 +26,10 @@ const MarketChartDrawer = () => {
   const haptic = useWebHaptics();
   const [open, setOpen] = useState(false);
 
-  const { coin, isPerps, getState } = useTradeContext((s) => ({
+  const { coin, isPerps, base, quote, getState } = useTradeContext((s) => ({
     coin: s.assetMeta.coin,
+    base: s.assetMeta.base,
+    quote: s.assetMeta.quote,
     isPerps: s.instrumentType === "perps",
     getState: s.getState,
   }));
@@ -90,7 +92,7 @@ const MarketChartDrawer = () => {
                     const midPx = getState().assetCtx.midPx;
                     useOrderFormStore.getState().onOrderSideChange({
                       orderSide: side as OrderSide,
-                      isSpot: !isPerps,
+                      spotAsset: !isPerps ? { base, quote } : undefined,
                       midPx,
                     });
                   }}

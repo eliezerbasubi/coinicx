@@ -14,6 +14,7 @@ import { useTradeContext } from "@/features/trade/store/hooks";
 import {
   calculateMarginRequired,
   calculateOrderValue,
+  roundToDecimals,
 } from "@/features/trade/utils";
 import {
   isLimitOrder,
@@ -23,12 +24,15 @@ import {
 import { isValidTwapMinutes } from "@/features/trade/utils/twap";
 
 export const useOrderForm = () => {
-  const { isSpot, referencePx, base, quote } = useTradeContext((s) => ({
-    isSpot: s.instrumentType === "spot",
-    referencePx: s.assetCtx.referencePx,
-    base: s.assetMeta.base,
-    quote: s.assetMeta.quote,
-  }));
+  const { isSpot, referencePx, base, quote, szDecimals } = useTradeContext(
+    (s) => ({
+      isSpot: s.instrumentType === "spot",
+      referencePx: s.assetCtx.referencePx,
+      base: s.assetMeta.base,
+      quote: s.assetMeta.quote,
+      szDecimals: s.assetMeta.szDecimals,
+    }),
+  );
 
   const { size, limitPrice, orderSide, settings, scaleOrder, twapOrder } =
     useShallowOrderFormStore((s) => ({
@@ -67,7 +71,7 @@ export const useOrderForm = () => {
 
   const orderValueAndMargin = calculateOrderValueAndMargin({
     orderType: settings.orderType,
-    orderSize: orderSizeInBase,
+    orderSize: roundToDecimals(orderSizeInBase, szDecimals, "floor"),
     limitPx: parseFloat(limitPrice || "0"),
     referencePx,
     leverage,

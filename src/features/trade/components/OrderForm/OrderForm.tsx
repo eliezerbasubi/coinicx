@@ -102,6 +102,8 @@ const OrderForm = ({ className }: Props) => {
 const OrderFormSides = () => {
   const { isPerps, getState } = useTradeContext((s) => ({
     isPerps: s.instrumentType === "perps",
+    base: s.assetMeta.base,
+    quote: s.assetMeta.quote,
     getState: s.getState,
   }));
   const orderSide = useShallowOrderFormStore((s) => s.orderSide);
@@ -123,10 +125,12 @@ const OrderFormSides = () => {
               },
             )}
             onClick={() => {
-              const { assetCtx } = getState();
+              const { assetCtx, assetMeta } = getState();
               useOrderFormStore.getState().onOrderSideChange({
                 orderSide: side as OrderSide,
-                isSpot: !isPerps,
+                spotAsset: !isPerps
+                  ? { base: assetMeta.base, quote: assetMeta.quote }
+                  : undefined,
                 midPx: assetCtx.midPx ?? 0,
               });
             }}

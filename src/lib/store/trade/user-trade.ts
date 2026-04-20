@@ -48,7 +48,10 @@ type UserTradeStoreActions = {
   ) => void;
   getOrderAvailableBalance: (args: {
     isBuyOrder: boolean;
-    isSpot: boolean;
+    spotAsset?: { base: string; quote: string };
+  }) => number;
+  getMaxTradeSize: (args: {
+    isBuyOrder: boolean;
     spotAsset?: { base: string; quote: string };
   }) => number;
   applyActiveAssetData: (data: ActiveAssetDataResponse) => void;
@@ -104,6 +107,16 @@ export const useUserTradeStore = create<UserTradeStore>((set, get) => ({
       isBuyOrder: params.isBuyOrder,
       spotBalances,
       perpsAvailableToTrade: activeAssetData?.availableToTrade ?? ["0", "0"],
+      spotAsset: params.spotAsset,
+    });
+  },
+  getMaxTradeSize(params) {
+    const { spotBalances, activeAssetData } = get();
+
+    return getMaxTradeSize({
+      isBuyOrder: params.isBuyOrder,
+      spotBalances,
+      maxTradeSzs: activeAssetData?.maxTradeSzs ?? ["0", "0"],
       spotAsset: params.spotAsset,
     });
   },
@@ -182,6 +195,47 @@ export const useAvailableToTrade = (params: {
   });
 };
 
+const getMaxTradeSize = (params: {
+  isBuyOrder: boolean;
+  spotBalances: SpotBalance[];
+  maxTradeSzs: string[];
+  spotAsset?: { base: string; quote: string };
+}) => {
+  if (params.spotAsset) {
+    return getSpotMaxTradeSize({
+      isBuyOrder: params.isBuyOrder,
+      spotBalances: params.spotBalances,
+      spotAsset: params.spotAsset,
+    });
+  }
+
+  const [maxBaseTradeSz, maxQuoteTradeSz] = params.maxTradeSzs ?? ["0", "0"];
+
+  return params.isBuyOrder ? Number(maxBaseTradeSz) : Number(maxQuoteTradeSz);
+};
+
+const getSpotMaxTradeSize = (params: {
+  isBuyOrder: boolean;
+  spotBalances: SpotBalance[];
+  spotAsset: { base: string; quote: string };
+}) => {
+  let baseBalance: number | null = null;
+  let quoteBalance: number | null = null;
+
+  for (const balance of params.spotBalances) {
+    if (balance.coin === params.spotAsset.base) {
+      baseBalance = Number(balance.total);
+    }
+    if (balance.coin === params.spotAsset.quote) {
+      quoteBalance = Number(balance.total);
+    }
+
+    if (baseBalance !== null && quoteBalance !== null) break;
+  }
+
+  return params.isBuyOrder ? (quoteBalance ?? 0) : (baseBalance ?? 0);
+};
+
 const getAvailableToTrade = (params: {
   isBuyOrder: boolean;
   spotBalances: SpotBalance[];
@@ -189,21 +243,11 @@ const getAvailableToTrade = (params: {
   spotAsset?: { base: string; quote: string };
 }) => {
   if (params.spotAsset) {
-    let baseBalance: number | null = null;
-    let quoteBalance: number | null = null;
-
-    for (const balance of params.spotBalances) {
-      if (balance.coin === params.spotAsset.base) {
-        baseBalance = Number(balance.total);
-      }
-      if (balance.coin === params.spotAsset.quote) {
-        quoteBalance = Number(balance.total);
-      }
-
-      if (baseBalance !== null && quoteBalance !== null) break;
-    }
-
-    return params.isBuyOrder ? (quoteBalance ?? 0) : (baseBalance ?? 0);
+    return getSpotMaxTradeSize({
+      isBuyOrder: params.isBuyOrder,
+      spotBalances: params.spotBalances,
+      spotAsset: params.spotAsset,
+    });
   }
 
   const [availableBaseToTrade, availableQuoteToTrade] =
