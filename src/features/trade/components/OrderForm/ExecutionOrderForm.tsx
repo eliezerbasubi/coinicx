@@ -7,6 +7,7 @@ import {
 import Visibility from "@/components/common/Visibility";
 import { Button } from "@/components/ui/button";
 import { useTradeContext } from "@/features/trade/store/hooks";
+import { roundToDecimals } from "@/features/trade/utils";
 import { isLimitOrder, isStopOrder } from "@/features/trade/utils/orderTypes";
 
 import OrderFormInput from "./OrderFormInput";
@@ -62,8 +63,17 @@ const ExecutionOrderForm = () => {
                 variant="ghost"
                 className="w-6 h-5 md:size-6 bg-neutral-gray-200 text-neutral-300 hover:text-primary hover:bg-primary/10 text-3xs md:text-xs font-medium md:font-semibold rounded md:rounded-md"
                 onClick={() => {
-                  const { assetCtx } = getState();
-                  useOrderFormStore.getState().onMidClick(assetCtx.midPx);
+                  const { assetCtx, assetMeta } = getState();
+
+                  useOrderFormStore
+                    .getState()
+                    .onMidClick(
+                      roundToDecimals(
+                        assetCtx.midPx,
+                        assetMeta.pxDecimals ?? 2,
+                        "floor",
+                      ),
+                    );
                 }}
               >
                 Mid

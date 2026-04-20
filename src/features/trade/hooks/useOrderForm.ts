@@ -51,8 +51,7 @@ export const useOrderForm = ({
   const isBuyOrder = orderSide === "buy";
   const isSpot = !!spotAsset;
 
-  const maxTradeSz = useMaxTradeSz(isBuyOrder);
-  const availableToTrade = useAvailableToTrade({
+  const maxTradeSz = useMaxTradeSz({
     isBuyOrder,
     spotAsset,
   });
@@ -60,8 +59,6 @@ export const useOrderForm = ({
   const leverage = useShallowUserTradeStore(
     (s) => s.activeAssetData?.leverage?.value || 0,
   );
-
-  const availableBalance = isSpot ? availableToTrade : maxTradeSz;
 
   const isLimitOrderType = isLimitOrder(settings.orderType);
 
@@ -85,7 +82,7 @@ export const useOrderForm = ({
 
   const hasInsufficientMargin = checkInsufficientMargin({
     ...orderValueAndMargin,
-    balance: availableBalance,
+    balance: maxTradeSz,
     isBuyOrder,
     isSpot,
     referencePx,
@@ -94,7 +91,7 @@ export const useOrderForm = ({
 
   const disabled =
     !parseFloat(size) ||
-    !availableBalance ||
+    !maxTradeSz ||
     (isLimitOrderType && !parseFloat(limitPrice)) ||
     (settings.orderType === "twap" && !isValidTwapMinutes(twapOrder.minutes));
 

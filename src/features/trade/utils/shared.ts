@@ -15,18 +15,18 @@ export const calculateMaxTradeSize = (params: {
   isSzInNtl: boolean;
   isBuyOrder: boolean;
   midPx: number;
-  availableBalance: number;
+  maxTradeSz: number;
 }) => {
-  const { isBuyOrder, isSpot, isSzInNtl, midPx, availableBalance } = params;
+  const { isBuyOrder, isSpot, isSzInNtl, midPx, maxTradeSz } = params;
 
   if (isSpot) {
     if (isBuyOrder) {
-      return isSzInNtl ? availableBalance : availableBalance / midPx;
+      return isSzInNtl ? maxTradeSz : maxTradeSz / midPx;
     }
-    return isSzInNtl ? availableBalance * midPx : availableBalance;
+    return isSzInNtl ? maxTradeSz * midPx : maxTradeSz;
   }
 
-  return isSzInNtl ? availableBalance * midPx : availableBalance;
+  return isSzInNtl ? maxTradeSz * midPx : maxTradeSz;
 };
 
 /**

@@ -2,17 +2,31 @@ import { useMemo } from "react";
 
 import {
   getAvailableToTrade,
+  getMaxTradeSize,
   useShallowUserTradeStore,
 } from "@/lib/store/trade/user-trade";
 
-export const useMaxTradeSz = (isBuyOrder: boolean) => {
-  const maxTradeSizes = useShallowUserTradeStore(
-    (s) => s.activeAssetData?.maxTradeSzs,
+type UseAvailableToTradeParams = {
+  isBuyOrder: boolean;
+  spotAsset?: { base: string; quote: string };
+};
+
+export const useMaxTradeSz = (params: UseAvailableToTradeParams) => {
+  const { maxTradeSzs, spotBalances } = useShallowUserTradeStore((s) => ({
+    maxTradeSzs: s.activeAssetData?.maxTradeSzs,
+    spotBalances: s.spotBalances,
+  }));
+
+  return useMemo(
+    () =>
+      getMaxTradeSize({
+        isBuyOrder: params.isBuyOrder,
+        spotBalances,
+        maxTradeSzs: maxTradeSzs ?? ["0", "0"],
+        spotAsset: params.spotAsset,
+      }),
+    [params.isBuyOrder, spotBalances, maxTradeSzs, params.spotAsset],
   );
-
-  const [maxBaseTradeSz, maxQuoteTradeSz] = maxTradeSizes ?? ["0", "0"];
-
-  return isBuyOrder ? Number(maxQuoteTradeSz) : Number(maxBaseTradeSz);
 };
 
 /**
@@ -25,10 +39,7 @@ export const useMaxTradeSz = (isBuyOrder: boolean) => {
  * @param spotAsset Optional spot asset to get the available balance for
  * @returns quote balance if isSpot and buying and base balance for perps if buying
  */
-export const useAvailableToTrade = (params: {
-  isBuyOrder: boolean;
-  spotAsset?: { base: string; quote: string };
-}) => {
+export const useAvailableToTrade = (params: UseAvailableToTradeParams) => {
   const { activeAssetData, spotBalances } = useShallowUserTradeStore((s) => ({
     activeAssetData: s.activeAssetData?.availableToTrade,
     spotBalances: s.spotBalances,

@@ -11,16 +11,22 @@ import OrderFormInput from "./OrderFormInput";
 import SizeCoinSelector from "./SizeCoinSelector";
 
 const OrderFormSize = () => {
-  const { isSpot, szDecimals, getState } = useTradeContext((s) => ({
-    isSpot: s.instrumentType === "spot",
-    szDecimals: s.assetMeta.szDecimals,
-    getState: s.getState,
-  }));
+  const { isSpot, base, quote, szDecimals, getState } = useTradeContext(
+    (s) => ({
+      isSpot: s.instrumentType === "spot",
+      base: s.assetMeta.base,
+      quote: s.assetMeta.quote,
+      szDecimals: s.assetMeta.szDecimals,
+      getState: s.getState,
+    }),
+  );
 
   const { szPercent, size } = useShallowOrderFormStore((s) => ({
     szPercent: s.szPercent,
     size: s.size,
   }));
+
+  const spotAsset = isSpot ? { base, quote } : undefined;
 
   return (
     <React.Fragment>
@@ -38,7 +44,7 @@ const OrderFormSize = () => {
                 isNtl,
                 midPx,
                 szDecimals,
-                isSpot,
+                spotAsset,
               });
             }}
           />
@@ -48,7 +54,7 @@ const OrderFormSize = () => {
 
           useOrderFormStore.getState().onSizeChange({
             size: e.target.value,
-            isSpot,
+            spotAsset,
             midPx,
           });
         }}
@@ -60,7 +66,7 @@ const OrderFormSize = () => {
 
           useOrderFormStore.getState().onPercentChange({
             percent: value,
-            isSpot,
+            spotAsset,
             szDecimals,
             midPx,
           });
