@@ -6,7 +6,7 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { formatWithGrouping } from "@/lib/utils/formatting/normalize-input-number";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
-import { useAvailableToTrade } from "@/hooks/useAvailableToTrade";
+import { useMaxTradeSz } from "@/hooks/useAvailableToTrade";
 import FormInputControl from "@/components/common/FormInputControl";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,9 +32,14 @@ const TradingWidgetOrderSize = () => {
 
   const { marketEventMeta } = useActiveOutcomeMeta();
 
-  const availableBalance = useAvailableToTrade({
+  const spotAsset = {
+    base: marketEventMeta?.coin,
+    quote: PREDICTIONS_QUOTE_ASSET,
+  };
+
+  const maxTradeSz = useMaxTradeSz({
     isBuyOrder,
-    spotAsset: { base: marketEventMeta?.coin, quote: PREDICTIONS_QUOTE_ASSET },
+    spotAsset,
   });
 
   const { sideCtx } = useActiveOutcomeSideCtx();
@@ -47,7 +52,7 @@ const TradingWidgetOrderSize = () => {
     : PREDICTIONS_BASE_SZ_DECIMALS;
 
   const maxTradeSize = calculateMaxTradeSize({
-    availableBalance,
+    maxTradeSz,
     isBuyOrder,
     isSpot: true,
     isSzInNtl: isSzNtl,
@@ -102,8 +107,8 @@ const TradingWidgetOrderSize = () => {
         onValueChange={(value) => {
           useOrderFormStore.getState().onSizeChange({
             size: value,
-            isSpot: true,
             midPx: sideCtx.midPx || sideCtx.markPx,
+            spotAsset,
           });
         }}
         onPercentValueChange={(value) =>
