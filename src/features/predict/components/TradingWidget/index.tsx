@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+
+import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import TIFSelector from "@/features/trade/components/OrderForm/TIFSelector";
 
@@ -19,6 +22,11 @@ const TradingWidget = ({
   tabsClassName,
   showEventTitle,
 }: Props) => {
+  // Reset the form once the component mounts to avoid showing data from trade page or another market event
+  useEffect(() => {
+    useOrderFormStore.getState().reset();
+  }, []);
+
   return (
     <div className={cn("w-full", className)}>
       <TradingWidgetHeader

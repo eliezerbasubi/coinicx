@@ -41,6 +41,7 @@ export const calculateMaxTradeSize = (params: {
  * @param params.limitPx - The limit price of the order.
  * @param params.orderType - The type of the order.
  * @param params.isSzInNtl - Whether the order size is in notional.
+ * @param params.isStableCoin - Whether the asset is pegged to USD.
  * @returns The order value in USD.
  */
 export const calculateOrderValue = (params: {
@@ -50,11 +51,14 @@ export const calculateOrderValue = (params: {
   limitPx?: number;
   orderType: OrderType;
   isSzInNtl: boolean;
+  isStableCoin?: boolean;
 }) => {
   const price =
     (isLimitOrder(params.orderType) ? params.limitPx : params.referencePx) ?? 1;
 
-  if (params.isSzInNtl) {
+  if (!params.orderSize) return 0;
+
+  if (params.isSzInNtl && !params.isStableCoin) {
     return (
       roundToDecimals(params.orderSize / price, params.szDecimals, "floor") *
       params.referencePx

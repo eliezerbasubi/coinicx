@@ -15,6 +15,9 @@ type OrderParams = {
   szDecimals: number;
   isSpot: boolean;
   assetId: number;
+
+  /** Whether the size is in notional and hence should be converted to base size */
+  isSzInNtl?: boolean;
 };
 
 export function buildOrder(order: Order): HLOrder {
@@ -73,7 +76,6 @@ const buildExchangeOrder = (
     type: Order["type"];
     isMarket?: boolean;
     reduceOnly?: boolean;
-    isSzInNtl?: boolean;
     triggerPrice?: string;
     orderSide?: OrderSide;
   } & OrderParams,
@@ -84,6 +86,16 @@ const buildExchangeOrder = (
 
   const isNtl = params.isSzInNtl ?? settings.isSzInNtl;
   const sizeInBase = isNtl ? size / params.referencePx : size;
+
+  // Convert size to notional if it's in base
+  const minOrderValue = roundToDecimals(
+    isNtl ? size : size * params.referencePx,
+    params.szDecimals,
+    "floor",
+  );
+  if (minOrderValue < 10) {
+    throw new Error("Order must have a minimum value of 10 USD");
+  }
 
   const price = params.entryPrice
     ? parseFloat(params.entryPrice)
@@ -198,6 +210,7 @@ export const buildMarketOrder = (params: OrderParams) => {
     szDecimals: params.szDecimals,
     isSpot: params.isSpot,
     assetId: params.assetId,
+    isSzInNtl: params.isSzInNtl,
     type: "market",
     isMarket: true,
   });
@@ -229,6 +242,7 @@ export const buildLimitOrder = (params: OrderParams) => {
     szDecimals: params.szDecimals,
     isSpot: params.isSpot,
     assetId: params.assetId,
+    isSzInNtl: params.isSzInNtl,
     type: "limit",
     isMarket: false,
   });
@@ -279,6 +293,7 @@ export const buildStopOrders = (params: OrderParams & { midPx: number }) => {
     szDecimals: params.szDecimals,
     isSpot: params.isSpot,
     assetId: params.assetId,
+    isSzInNtl: params.isSzInNtl,
     entryPrice: entryPrice.toString(),
     type: settings.orderType,
     isMarket,
@@ -319,6 +334,7 @@ export const buildScaleOrders = (params: OrderParams) => {
       szDecimals: params.szDecimals,
       isSpot: params.isSpot,
       assetId: params.assetId,
+      isSzInNtl: params.isSzInNtl,
       entryPrice: order.price.toString(),
       type: "limit",
       isMarket: false,

@@ -9,10 +9,9 @@ import Visibility from "@/components/common/Visibility";
 import {
   PREDICTIONS_BASE_SZ_DECIMALS,
   PREDICTIONS_QUOTE_ASSET,
-  PREDICTIONS_QUOTE_SZ_DECIMALS,
 } from "@/features/predict/lib/constants/predictions";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
-import { buildOutcomeAssetId } from "@/features/predict/lib/utils/outcomes";
+import { buildSideAssetId } from "@/features/predict/lib/utils/outcomes";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
 
@@ -31,7 +30,7 @@ const TradingWidgetFooter = () => {
     };
   });
 
-  const { predictSideIndex, size, isSzNtl } = useShallowOrderFormStore((s) => ({
+  const { predictSideIndex, size } = useShallowOrderFormStore((s) => ({
     predictSideIndex: s.predictSideIndex,
     size: s.size,
     isSzNtl: s.settings.isSzInNtl,
@@ -40,26 +39,18 @@ const TradingWidgetFooter = () => {
   const sideCtx = marketEventSidesCtx[predictSideIndex];
   const mid = sideCtx?.midPx || sideCtx?.markPx || 0;
 
-  const {
-    disabled,
-    isBuyOrder,
-    hasInsufficientMargin,
-    orderValueAndMargin,
-    orderSizeInBase,
-  } = useOrderForm({
-    spotAsset: { base: marketEvent.coin, quote: PREDICTIONS_QUOTE_ASSET },
-    referencePx: mid,
-    szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
-  });
+  const { disabled, isBuyOrder, hasInsufficientMargin, orderValueAndMargin } =
+    useOrderForm({
+      spotAsset: { base: marketEvent.coin, quote: PREDICTIONS_QUOTE_ASSET },
+      referencePx: mid,
+      szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
+      isStableCoin: true,
+    });
 
-  const { processing, onPlaceOrder } = usePlaceOrder({
-    assetId: buildOutcomeAssetId(marketEvent.outcome, predictSideIndex),
-    szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
-    isSpot: true,
-    base: "Shares",
-  });
+  const { processing, onPlaceOrder } = usePlaceOrder();
 
-  const payout = isSzNtl ? orderSizeInBase : Number(size || "0");
+  // TODO: This is not correct, we need to calculate the payout based on the side
+  const payout = Number(size || "0");
 
   const label = useMemo(() => {
     if (hasInsufficientMargin) {
@@ -85,9 +76,11 @@ const TradingWidgetFooter = () => {
     return onPlaceOrder({
       referencePx: (sideCtx?.midPx || sideCtx?.markPx) ?? 0,
       midPx: sideCtx?.midPx ?? 0,
-      assetId: buildOutcomeAssetId(marketEvent.outcome, predictSideIndex),
-      szDecimals: PREDICTIONS_QUOTE_SZ_DECIMALS,
+      assetId: buildSideAssetId(marketEvent.outcome, predictSideIndex),
+      szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
       isSpot: true,
+      isSzInNtl: false, // Size should not be converted to base size
+      base: "Shares",
     });
   };
 

@@ -2,6 +2,10 @@ import { useMemo } from "react";
 
 import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import {
+  convertCoinToSpotName,
+  isOutcomeCoin,
+} from "@/features/predict/lib/utils/outcomes";
 
 import { getTokenDisplayName } from "../utils/getTokenDisplayName";
 import { useAssetMetas } from "./useAssetMetas";
@@ -53,72 +57,91 @@ export const useAccountBalances = () => {
     let totalUnrealizedPnl = 0;
     let totalReturnOnEquity = 0;
     let spotEquity = 0;
+    let totalShares = 0;
+    let totalSharesUsdValue = 0;
+    const balances = [];
 
-    const balances = accountSpotBalances
-      .filter((balance) => Number(balance.total) > 0)
-      .map((balance) => {
-        const coin = getTokenDisplayName(balance.coin);
+    for (const balance of accountSpotBalances) {
+      // Skip if balance is zero
+      if (Number(balance.total) <= 0) continue;
 
-        if (balance.token === 0) {
-          spotEquity += Number(balance.total);
+      const coin = getTokenDisplayName(balance.coin);
 
-          return {
-            totalBalance: Number(balance.total),
-            availableBalance: Number(balance.total) - Number(balance.hold),
-            coin,
-            usdValue: Number(balance.total),
-            isSpot: true,
-            unrealizedPnl: 0,
-            returnOnEquity: 0,
-            withdrawable: 0,
-          };
-        }
+      if (balance.token === 0) {
+        spotEquity += Number(balance.total);
 
-        // Prefer USDC-quoted pairs (token 0) for accurate USD conversion.
-        const spot = tokenIndicesToSpot?.get(balance.token)?.get(0);
+        balances.push({
+          totalBalance: Number(balance.total),
+          availableBalance: Number(balance.total) - Number(balance.hold),
+          coin,
+          usdValue: Number(balance.total),
+          isSpot: true,
+          unrealizedPnl: 0,
+          returnOnEquity: 0,
+          withdrawable: 0,
+        });
 
-        if (spot === undefined) {
-          return {
-            totalBalance: Number(balance.total),
-            availableBalance: Number(balance.total) - Number(balance.hold),
-            coin,
-            usdValue: 0,
-            isSpot: true,
-            unrealizedPnl: 0,
-            returnOnEquity: 0,
-            withdrawable: 0,
-          };
-        }
+        continue;
+      }
 
-        const ctx = spotAssetCtxs[spot.spotName];
+      // Check if balance is an outcome coin
+      // Add to spot equity, total shares and total shares usd value
+      // Skip adding to balances array
+      if (isOutcomeCoin(balance.coin)) {
+        const spotName = convertCoinToSpotName(balance.coin);
+
+        if (!spotName) continue;
+
+        const ctx = spotAssetCtxs[spotName];
+
+        if (!ctx) continue;
 
         const markPx = Number(ctx?.markPx || "1");
-        const entryNtl = Number(balance.entryNtl);
         const totalBalance = Number(balance.total);
-        const totalBalanceNtl = totalBalance * markPx;
 
-        const unrealizedPnl = totalBalanceNtl - entryNtl;
-        const returnOnEquity = entryNtl === 0 ? 0 : unrealizedPnl / entryNtl;
-
-        const availableBalance = totalBalance - Number(balance.hold);
-        const usdValue = availableBalance * markPx;
-
-        // Sum equity, unrealized pnl and return on equity
-        totalUnrealizedPnl += unrealizedPnl;
-        totalReturnOnEquity += returnOnEquity;
         spotEquity += totalBalance * markPx;
+        totalShares += totalBalance;
+        totalSharesUsdValue += totalBalance * markPx;
 
-        return {
-          totalBalance,
-          availableBalance,
-          coin,
-          isSpot: true,
-          usdValue,
-          unrealizedPnl,
-          returnOnEquity,
-          withdrawable: availableBalance,
-        };
+        continue;
+      }
+
+      // Prefer USDC-quoted pairs (token 0) for accurate USD conversion.
+      const spot = tokenIndicesToSpot?.get(balance.token)?.get(0);
+
+      if (spot === undefined) {
+        continue;
+      }
+
+      const ctx = spotAssetCtxs[spot.spotName];
+
+      const markPx = Number(ctx?.markPx || "1");
+      const entryNtl = Number(balance.entryNtl);
+      const totalBalance = Number(balance.total);
+      const totalBalanceNtl = totalBalance * markPx;
+
+      const unrealizedPnl = totalBalanceNtl - entryNtl;
+      const returnOnEquity = entryNtl === 0 ? 0 : unrealizedPnl / entryNtl;
+
+      const availableBalance = totalBalance - Number(balance.hold);
+      const usdValue = availableBalance * markPx;
+
+      // Sum equity, unrealized pnl and return on equity
+      totalUnrealizedPnl += unrealizedPnl;
+      totalReturnOnEquity += returnOnEquity;
+      spotEquity += totalBalanceNtl;
+
+      balances.push({
+        totalBalance,
+        availableBalance,
+        coin,
+        isSpot: true,
+        usdValue,
+        unrealizedPnl,
+        returnOnEquity,
+        withdrawable: availableBalance,
       });
+    }
 
     return { balances, spotEquity, totalReturnOnEquity, totalUnrealizedPnl };
   }, [accountSpotBalances, tokenIndicesToSpot, spotAssetCtxs]);

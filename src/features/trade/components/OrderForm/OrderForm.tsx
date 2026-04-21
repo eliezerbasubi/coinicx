@@ -167,12 +167,7 @@ const OrderFormFooter = () => {
     szDecimals: assetMeta?.szDecimals ?? 0,
   });
 
-  const { processing, onPlaceOrder } = usePlaceOrder({
-    assetId: assetMeta?.assetId ?? 0,
-    szDecimals: assetMeta?.szDecimals ?? 0,
-    isSpot: !isPerps,
-    base: assetMeta?.base ?? "",
-  });
+  const { processing, onPlaceOrder } = usePlaceOrder();
 
   const isUSDC = isUSDCQuote(quote);
 
@@ -199,11 +194,12 @@ const OrderFormFooter = () => {
     }
 
     return onPlaceOrder({
-      referencePx: assetCtx?.referencePx ?? 0,
-      midPx: assetCtx?.midPx ?? 0,
-      assetId: assetMeta?.assetId ?? 0,
-      szDecimals: assetMeta?.szDecimals ?? 0,
+      referencePx: assetCtx.referencePx,
+      midPx: assetCtx.midPx,
+      assetId: assetMeta.assetId,
+      szDecimals: assetMeta.szDecimals,
       isSpot: !isPerps,
+      base: assetMeta.base,
     });
   };
 

@@ -27,26 +27,6 @@ export function buildOutcomeAssetId(
   return 10 * outcomeId + sideIndex;
 }
 
-/** Parse a side coin like "#5160" or "+5160" into {outcomeId, sideIndex} */
-export function parseSideCoin(coin: string): {
-  outcomeId: number;
-  sideIndex: number;
-} | null {
-  // HIP-4 uses # prefix, testnet may use + as an alternative
-  if (
-    !coin.startsWith(SIDE_COIN_PREFIX) &&
-    !coin.startsWith(SIDE_COIN_PREFIX_PLUS)
-  )
-    return null;
-  const num = coin.slice(1);
-  if (num.length < 2) return null;
-  const sideIndex = parseInt(num.slice(-1), 10);
-  const outcomeId = parseInt(num.slice(0, -1), 10);
-  if (isNaN(sideIndex) || isNaN(outcomeId)) return null;
-  if (sideIndex > 1) return null;
-  return { outcomeId, sideIndex };
-}
-
 /** Parse an outcome-level coin like "@1338" into {outcomeId} */
 export function parseOutcomeCoin(coin: string): { outcomeId: number } | null {
   if (!coin.startsWith(OUTCOME_COIN_PREFIX)) return null;
@@ -61,7 +41,7 @@ export function coinOutcomeId(coin: string): number | null {
     coin.startsWith(SIDE_COIN_PREFIX) ||
     coin.startsWith(SIDE_COIN_PREFIX_PLUS)
   ) {
-    const parsed = parseSideCoin(coin);
+    const parsed = parseSideCoinFromCoin(coin);
     return parsed ? parsed.outcomeId : null;
   }
   if (coin.startsWith(OUTCOME_COIN_PREFIX)) {
@@ -97,6 +77,16 @@ export function parseSideCoinFromCoin(e: string) {
     outcomeId: Math.floor(n / 10),
     sideIndex: n % 10,
   };
+}
+
+/** Convert +5160 to #5160
+ * Plus is used for balances, # is spot context
+ */
+export function convertCoinToSpotName(coin: string) {
+  if (coin.startsWith(SIDE_COIN_PREFIX_PLUS)) {
+    return `${SIDE_COIN_PREFIX}${coin.slice(SIDE_COIN_PREFIX_PLUS.length)}`;
+  }
+  return null;
 }
 
 export function isRecurring(

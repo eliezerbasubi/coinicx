@@ -3,10 +3,7 @@ import { useMemo } from "react";
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { OrderType } from "@/lib/types/trade";
-import {
-  useAvailableToTrade,
-  useMaxTradeSz,
-} from "@/hooks/useAvailableToTrade";
+import { useMaxTradeSz } from "@/hooks/useAvailableToTrade";
 import { calculateMarginRequired } from "@/features/trade/utils";
 import {
   isLimitOrder,
@@ -19,6 +16,7 @@ import { isValidTwapMinutes } from "@/features/trade/utils/twap";
 type UseOrderFormArgs = {
   referencePx: number;
   szDecimals: number;
+  isStableCoin?: boolean;
   spotAsset?: {
     base: string;
     quote: string;
@@ -29,6 +27,7 @@ export const useOrderForm = ({
   referencePx,
   szDecimals,
   spotAsset,
+  isStableCoin,
 }: UseOrderFormArgs) => {
   const {
     size,
@@ -78,6 +77,7 @@ export const useOrderForm = ({
     scaleOrderValue,
     isSzInNtl: settings.isSzInNtl,
     szDecimals,
+    isStableCoin,
   });
 
   const hasInsufficientMargin = checkInsufficientMargin({
@@ -142,6 +142,7 @@ const calculateOrderValueAndMargin = (params: {
   reduceOnly: boolean;
   scaleOrderValue: number;
   szDecimals: number;
+  isStableCoin?: boolean;
 }) => {
   if (isScaleOrTwapOrder(params.orderType) && !params.scaleOrderValue) {
     return {
@@ -159,6 +160,7 @@ const calculateOrderValueAndMargin = (params: {
       referencePx: params.referencePx,
       szDecimals: params.szDecimals,
       isSzInNtl: params.isSzInNtl,
+      isStableCoin: params.isStableCoin,
     });
 
   if (params.isSpot) {

@@ -5,10 +5,7 @@ import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
-import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
-import { Button } from "@/components/ui/button";
-import Tag from "@/components/ui/tag";
 import {
   Tooltip,
   TooltipContent,
@@ -114,7 +111,10 @@ const columns: ColumnDef<UserBalance>[] = [
     cell({ row: { original } }) {
       return (
         <span>
-          {formatNumber(Number(original.usdValue), { style: "currency" })}
+          {formatNumber(Number(original.usdValue), {
+            style: "currency",
+            roundingMode: "floor",
+          })}
         </span>
       );
     },
@@ -240,6 +240,7 @@ const BalanceCard = ({ data }: BalanceCardProps) => {
           {formatNumber(data.usdValue, {
             minimumFractionDigits: 2,
             style: "currency",
+            roundingMode: "floor",
           })}
         </p>
         <p

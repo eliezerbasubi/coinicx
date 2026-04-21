@@ -1,6 +1,5 @@
 import React from "react";
 
-import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { cn } from "@/lib/utils/cn";
 import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import MarketEventStoreProvider from "@/features/predict/lib/store/market-event/provider";
@@ -30,17 +29,10 @@ export const TradingWidgetMarketsDrawer = ({
   open,
   onOpenChange,
 }: Props) => {
-  const handleOpenChange = (open: boolean) => {
-    // Reset order form when drawer mount or unmount
-    useOrderFormStore.getState().reset();
-
-    onOpenChange?.(open);
-  };
-
   return (
     <AdaptiveDialog
       open={open}
-      onOpenChange={handleOpenChange}
+      onOpenChange={onOpenChange}
       title={
         <TradingWidgetDrawerTitle
           marketEventTitle={marketEventMeta.title}

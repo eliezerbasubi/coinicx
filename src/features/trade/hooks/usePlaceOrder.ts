@@ -26,13 +26,6 @@ import { calculateSubOrderSize, MAX_MINUTES, MIN_MINUTES } from "../utils/twap";
 
 const toastId = "place-order";
 
-type UsePlaceOrderArgs = {
-  assetId: number;
-  szDecimals: number;
-  isSpot: boolean;
-  base: string;
-};
-
 type ExchangeOrderParams = {
   /** markPx for perps and midPx for spot */
   referencePx: number;
@@ -42,14 +35,11 @@ type ExchangeOrderParams = {
   assetId: number;
   szDecimals: number;
   isSpot: boolean;
+  isSzInNtl?: boolean;
+  base: string;
 };
 
-export const usePlaceOrder = ({
-  assetId,
-  szDecimals,
-  isSpot,
-  base,
-}: UsePlaceOrderArgs) => {
+export const usePlaceOrder = () => {
   const haptic = useWebHaptics();
   const { getAgentClient } = useAgentClient();
 
@@ -62,7 +52,11 @@ export const usePlaceOrder = ({
 
   const [processing, setProcessing] = useState(false);
 
-  const placeTwapOrder = async (midPx: number) => {
+  const placeTwapOrder = async (params: {
+    midPx: number;
+    szDecimals: number;
+    assetId: number;
+  }) => {
     try {
       const { twapOrder, size, settings } = useOrderFormStore.getState();
 
@@ -73,7 +67,7 @@ export const usePlaceOrder = ({
         minutes: twapOrder.minutes,
       });
 
-      const subOrderValue = subOrderSize * midPx;
+      const subOrderValue = subOrderSize * params.midPx;
 
       if (subOrderValue < 10) {
         throw new Error(
@@ -101,10 +95,10 @@ export const usePlaceOrder = ({
 
       await exchClient.twapOrder({
         twap: {
-          a: assetId,
+          a: params.assetId,
           b: isBuyOrder,
           m: twapOrder.minutes,
-          s: formatSize(parsedSize, szDecimals),
+          s: formatSize(parsedSize, params.szDecimals),
           r: settings.reduceOnly,
           t: twapOrder.randomize,
         },
@@ -183,10 +177,10 @@ export const usePlaceOrder = ({
             const filled = status.filled;
             const decimals = getPriceDecimals(
               Number(filled.avgPx),
-              szDecimals,
-              isSpot,
+              params.szDecimals,
+              params.isSpot,
             );
-            message = `${filled.totalSz} ${base} ${isBuyOrder ? "bought" : "sold"} at ${formatPriceToDecimal(Number(filled.avgPx), decimals, { style: "currency" })} avg. price`;
+            message = `${filled.totalSz} ${params.base} ${isBuyOrder ? "bought" : "sold"} at ${formatPriceToDecimal(Number(filled.avgPx), decimals, { style: "currency" })} avg. price`;
 
             break;
           }
@@ -219,7 +213,7 @@ export const usePlaceOrder = ({
   const onPlaceOrder = async (params: ExchangeOrderParams) => {
     try {
       if (settings.orderType === "twap") {
-        return await placeTwapOrder(params.midPx);
+        return await placeTwapOrder(params);
       }
       await placeOrder(params);
     } catch (error) {
