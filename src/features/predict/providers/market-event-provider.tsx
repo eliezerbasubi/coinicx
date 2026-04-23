@@ -33,10 +33,14 @@ const MarketEventProvider = ({ children, slug }: Props) => {
   const baseMarketEventMeta = mapDataToMarketEventMeta(data, slug);
 
   // We only want to fetch settled outcome for recurring events that have expired.
+  const hasExpired =
+    !!baseMarketEventMeta &&
+    !!baseMarketEventMeta.recurringPayload &&
+    timeToExpiry(baseMarketEventMeta.recurringPayload.expiry) > 0;
+
   const outcomeId =
-    baseMarketEventMeta &&
-    baseMarketEventMeta.recurringPayload &&
-    timeToExpiry(baseMarketEventMeta.recurringPayload.expiry) > 0
+    hasExpired ||
+    (!!baseMarketEventMeta && baseMarketEventMeta?.type !== "recurring")
       ? null
       : parseOutcomeFromSlug(slug);
 
@@ -58,7 +62,9 @@ const MarketEventProvider = ({ children, slug }: Props) => {
 
   if (isLoading || isSettledOutcomeLoading) return <PredictEventPageSkeleton />;
 
-  if (error) {
+  // If the settled outcome is not found, it means the event is not settled or it doesn't exist.
+  // If we have an error, we should show the error page.
+  if (error && !settledOutcome) {
     return (
       <PredictError
         title="Something went wrong"

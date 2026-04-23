@@ -24,7 +24,7 @@ const TradingWidgetDrawer = dynamic(
 );
 
 const MarketEvent = () => {
-  const isLaptop = useIsLaptop();
+  const isLaptop = useIsLaptop({ initializeWithValue: false });
   const marketEventType = useMarketEventContext((s) => s.marketEventMeta.type);
 
   return (

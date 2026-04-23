@@ -21,7 +21,7 @@ const MarketEventDrawer = dynamic(() => import("../MarketEventOutcomeDrawer"), {
 });
 
 const CategoricalOutcomes = () => {
-  const isLaptop = useIsLaptop();
+  const isLaptop = useIsLaptop({ initializeWithValue: false });
 
   const { marketEventMeta, marketEventCtx, setActiveOutcomeIndex } =
     useMarketEventContext((s) => ({

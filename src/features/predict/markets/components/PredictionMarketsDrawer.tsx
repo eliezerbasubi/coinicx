@@ -11,8 +11,8 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
+import MarketEventListingSkeleton from "@/features/predict/components/MarketEventListingSkeleton";
 
-import MarketEventListingSkeleton from "../../components/MarketEventListingSkeleton";
 import MarketEventsListing from "./MarketEventsListing";
 
 type Props = { trigger: React.ReactNode };
