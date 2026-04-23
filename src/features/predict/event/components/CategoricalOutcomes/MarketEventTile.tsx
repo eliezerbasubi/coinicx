@@ -39,10 +39,7 @@ const MarketEventTile = ({
     openTradingWidgetDrawer: s.openTradingWidgetDrawer,
   }));
 
-  const { predictSideIndex, orderSide } = useShallowOrderFormStore((s) => ({
-    predictSideIndex: s.predictSideIndex,
-    orderSide: s.orderSide,
-  }));
+  const sideIndex = useShallowOrderFormStore((s) => s.predictSideIndex);
 
   const isLaptop = useIsLaptop();
 
@@ -126,13 +123,11 @@ const MarketEventTile = ({
           midPx: sidesContexts[index]?.midPx,
           markPx: sidesContexts[index]?.markPx || 1,
         }))}
-        label={orderSide}
+        label="Buy"
         wrapperClassName="flex-1 grid grid-cols-2 col-span-2 md:flex items-center justify-end gap-2"
-        className="w-full md:w-[136px] capitalize"
+        className="w-full md:w-[136px]"
         currentSideIndex={
-          activeMarketOutcome?.coin === outcome.coin
-            ? predictSideIndex
-            : undefined
+          activeMarketOutcome?.coin === outcome.coin ? sideIndex : undefined
         }
         onClick={(sideIndex, e) => {
           e?.stopPropagation();
