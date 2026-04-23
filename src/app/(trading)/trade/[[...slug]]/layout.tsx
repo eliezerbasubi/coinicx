@@ -59,5 +59,11 @@ const prefetchQueries = () => {
     staleTime: Infinity,
   });
 
+  queryClient.prefetchQuery({
+    queryKey: [QUERY_KEYS.predictionMarketEvents],
+    queryFn: () => hlInfoClient.outcomeMeta(),
+    staleTime: Infinity,
+  });
+
   return queryClient;
 };

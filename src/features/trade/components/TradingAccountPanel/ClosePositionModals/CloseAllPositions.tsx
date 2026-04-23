@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 
-import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TradingButton from "@/components/common/TradingButton";
@@ -8,14 +7,18 @@ import AdaptiveDialog from "@/components/ui/adaptive-dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Summary, SummaryItem } from "@/components/ui/summary";
-import { useClosePosition } from "@/features/trade/hooks/useClosePosition";
+import {
+  useClosePosition,
+  type ClosingPosition,
+} from "@/features/trade/hooks/useClosePosition";
 import { useFeeRate } from "@/features/trade/hooks/useUserFees";
 
 type Props = {
-  positions: Position[];
+  variant?: "perps" | "predictions";
+  positions: ClosingPosition[];
 };
 
-const CloseAllPositions = ({ positions }: Props) => {
+const CloseAllPositions = ({ positions, variant = "perps" }: Props) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -25,7 +28,7 @@ const CloseAllPositions = ({ positions }: Props) => {
         if (!positions.length) return;
         setOpen(open);
       }}
-      title={"Close all positions"}
+      title="Close all positions"
       description={
         <span className="text-xs text-neutral-gray-400">
           This will close all your positions and cancel their associated TP/SL
@@ -43,26 +46,32 @@ const CloseAllPositions = ({ positions }: Props) => {
       }
       className="gap-1"
     >
-      <CloseAllPositionContent
+      <CloseAllPositionsContent
         positions={positions}
+        variant={variant}
         onSuccess={() => setOpen(false)}
       />
     </AdaptiveDialog>
   );
 };
 
-type CloseAllPositionContentProps = {
-  positions: Position[];
+type CloseAllPositionsContentProps = {
+  positions: ClosingPosition[];
+  variant: "perps" | "predictions";
   onSuccess?: () => void;
 };
 
-const CloseAllPositionContent = ({
+const CloseAllPositionsContent = ({
   positions,
+  variant,
   onSuccess,
-}: CloseAllPositionContentProps) => {
+}: CloseAllPositionsContentProps) => {
   const [closeBy, setCloseBy] = useState<"market" | "limit">("market");
 
-  const { processing, closePosition } = useClosePosition({ onSuccess });
+  const { processing, closePosition } = useClosePosition({
+    variant,
+    onSuccess,
+  });
 
   const isMarket = closeBy === "market";
   const feeRate = useFeeRate({ isMarket });
@@ -109,7 +118,7 @@ const CloseAllPositionContent = ({
             >
               <p className="text-sm">Market</p>
               <p className="text-xs text-neutral-gray-400 font-normal">
-                Each position will close at its current market price
+                Each order will close at its current market price
               </p>
             </Label>
           </div>
@@ -146,7 +155,7 @@ const CloseAllPositionContent = ({
       </Summary>
 
       <TradingButton
-        label={"Confirm"}
+        label="Confirm"
         disabled={processing}
         loading={processing}
         onClick={() =>

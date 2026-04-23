@@ -35,7 +35,7 @@ export const AdaptiveTableCard = <TData,>({
       ))}
 
       {!Boolean(rows.length) && !loading && (
-        <div className="h-24 flex items-center justify-center">
+        <div className="min-h-24 flex items-center justify-center">
           {noData || "No results"}
         </div>
       )}

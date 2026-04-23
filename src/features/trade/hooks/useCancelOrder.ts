@@ -8,6 +8,10 @@ import { OpenOrder } from "@/lib/types/trade";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
 import { useAgentClient } from "@/hooks/useAgentClient";
 import {
+  buildSideAssetId,
+  parseSideCoinFromCoin,
+} from "@/features/predict/lib/utils/outcomes";
+import {
   buildPerpAssetId,
   buildSpotAssetId,
   mapDataToPerpsMetas,
@@ -53,7 +57,18 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
     const { spotMetas, allPerpMetas } = getAssetMetas();
 
     return openOrders.map((order) => {
-      if (order.isSpot) {
+      if (order.type === "outcome") {
+        const parsedData = parseSideCoinFromCoin(order.coin);
+
+        if (!parsedData) throw new Error("No data found for coin" + order.coin);
+
+        return {
+          a: buildSideAssetId(parsedData.outcomeId, parsedData.sideIndex),
+          o: order.oid,
+        };
+      }
+
+      if (order.type === "spot") {
         const tokens = spotMetas?.spotNamesToTokens?.get(order.coin);
 
         if (!tokens) throw new Error("No data found for coin" + order.coin);
@@ -62,8 +77,7 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
           ?.get(tokens.baseToken)
           ?.get(tokens.quoteToken);
 
-        if (!spot)
-          throw new Error("No asset ID mateched for coin" + order.coin);
+        if (!spot) throw new Error("No asset ID matched for coin" + order.coin);
 
         return { a: buildSpotAssetId(spot.spotId), o: order.oid };
       }

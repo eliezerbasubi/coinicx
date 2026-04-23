@@ -3,11 +3,12 @@ import React from "react";
 import { cn } from "@/lib/utils/cn";
 
 type Props = {
-  value: React.ReactNode;
+  value?: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 };
 
-const Tag = ({ value, className }: Props) => {
+const Tag = ({ value, children, className }: Props) => {
   return (
     <div
       className={cn(
@@ -15,7 +16,7 @@ const Tag = ({ value, className }: Props) => {
         className,
       )}
     >
-      {value}
+      {children ?? value}
     </div>
   );
 };

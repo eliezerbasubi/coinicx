@@ -63,12 +63,13 @@ export function isOutcomeCoin(coin: string): boolean {
 /** Parse a side coin like "#5160" or "+5160" into {outcomeId, sideIndex} */
 export function parseSideCoinFromCoin(e: string) {
   let t;
-  if (e.startsWith(OUTCOME_COIN_PREFIX)) {
-    t = e.slice(OUTCOME_COIN_PREFIX.length);
+  if (e.startsWith(SIDE_COIN_PREFIX)) {
+    t = e.slice(SIDE_COIN_PREFIX.length);
   } else {
     if (!e.startsWith(SIDE_COIN_PREFIX_PLUS)) return null;
     t = e.slice(SIDE_COIN_PREFIX_PLUS.length);
   }
+
   const n = parseInt(t, 10);
 
   if (isNaN(n) || n < 0) return null;

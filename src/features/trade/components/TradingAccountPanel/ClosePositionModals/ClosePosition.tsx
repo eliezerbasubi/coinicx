@@ -1,6 +1,5 @@
-import { useMemo, useReducer, useState } from "react";
+import React, { useMemo, useReducer, useState } from "react";
 
-import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import FormInputSlider from "@/components/common/FormInputSlider";
@@ -11,17 +10,21 @@ import { Button } from "@/components/ui/button";
 import { InputNumberControl } from "@/components/ui/input-number";
 import { Summary, SummaryItem } from "@/components/ui/summary";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useClosePosition } from "@/features/trade/hooks/useClosePosition";
+import {
+  useClosePosition,
+  type ClosingPosition,
+} from "@/features/trade/hooks/useClosePosition";
 import { useFeeRate } from "@/features/trade/hooks/useUserFees";
 import {
   formatPriceToDecimal,
   formatSize,
-  parseBuilderDeployedAsset,
   roundToDecimals,
 } from "@/features/trade/utils";
 
 type Props = {
-  position: Position;
+  variant?: "perps" | "predictions";
+  position: ClosingPosition;
+  title?: React.ReactNode;
   trigger: React.ReactNode;
 };
 
@@ -38,24 +41,28 @@ const TABS = [
 ] as const;
 
 const getMidPrice = (midPx: string, pxDecimals: number) => {
-  const mid = Number(midPx);
-
-  return roundToDecimals(mid, pxDecimals, "floor").toString();
+  return roundToDecimals(Number(midPx), pxDecimals, "floor").toString();
 };
 
-const ClosePosition = ({ position, trigger }: Props) => {
+const ClosePosition = ({
+  position,
+  title,
+  trigger,
+  variant = "perps",
+}: Props) => {
   const [open, setOpen] = useState(false);
 
   return (
     <AdaptiveDialog
       open={open}
       onOpenChange={setOpen}
-      title={`Close Position (${position.base})`}
+      title={title ?? `Close Position ${position.base && `(${position.base})`}`}
       trigger={trigger}
       className="gap-1"
     >
       <ClosePositionContent
         position={position}
+        variant={variant}
         onSuccess={() => setOpen(false)}
       />
     </AdaptiveDialog>
@@ -63,12 +70,14 @@ const ClosePosition = ({ position, trigger }: Props) => {
 };
 
 type ClosePositionContent = {
-  position: Position;
+  variant: "perps" | "predictions";
+  position: ClosingPosition;
   onSuccess?: () => void;
 };
 
 const ClosePositionContent = ({
   position,
+  variant,
   onSuccess,
 }: ClosePositionContent) => {
   const [state, dispatch] = useReducer(
@@ -82,6 +91,7 @@ const ClosePositionContent = ({
   );
 
   const { processing, closePosition } = useClosePosition({
+    variant,
     onSuccess,
   });
 
@@ -164,7 +174,8 @@ const ClosePositionContent = ({
             <p className="text-xs text-white font-medium">
               {formatPriceToDecimal(
                 Number(position.entryPx),
-                position.pxDecimals,
+                variant === "predictions" ? 1 : position.pxDecimals,
+                { style: variant === "predictions" ? "cent" : undefined },
               )}
             </p>
           </div>
@@ -175,7 +186,8 @@ const ClosePositionContent = ({
             <p className="text-xs text-white font-medium">
               {formatPriceToDecimal(
                 Number(position.markPx),
-                position.pxDecimals,
+                variant === "predictions" ? 1 : position.pxDecimals,
+                { style: variant === "predictions" ? "cent" : undefined },
               )}
             </p>
           </div>
@@ -207,16 +219,25 @@ const ClosePositionContent = ({
           </Visibility>
 
           <InputNumberControl
-            label="Size"
+            label={variant === "predictions" ? "Shares" : "Size"}
             trailing={<p className="font-medium text-sm">{position.base}</p>}
             value={state.size}
-            onValueChange={(value) => dispatch({ size: value })}
+            onValueChange={(value) => {
+              const percent = value
+                ? (Number(value) / Number(position.szi)) * 100
+                : 0;
+
+              dispatch({
+                size: value,
+                szPercent: Math.min(Math.floor(percent), 100),
+              });
+            }}
             max={position.szi}
             labelClassName="text-sm"
             className="text-sm"
           />
           <FormInputSlider
-            showLimiters
+            // showLimiters
             value={state.szPercent}
             onValueChange={(percent) => {
               const size = Math.abs(Number(position.szi)) * (percent / 100);

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
+import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
 
@@ -29,6 +30,7 @@ type TwapHistoryFills = {
   fee: number;
   closedPnl: number;
   feeToken: string;
+  type: string;
 };
 
 const columns: ColumnDef<TwapHistoryFills>[] = [
@@ -152,7 +154,7 @@ const columns: ColumnDef<TwapHistoryFills>[] = [
 ];
 
 const FillsTWAPs = () => {
-  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
+  const { isLoading, mapSpotNameToTokenDetails } = useSpotToTokenDetails();
 
   const twapSliceFills = useShallowUserTradeStore(
     (s) => s.twapStates.sliceFills,
@@ -174,7 +176,11 @@ const FillsTWAPs = () => {
         base: tokenDetails.base,
         coin: tokenDetails.coin,
         symbol: tokenDetails.symbol,
-        feeToken: fill.feeToken,
+        type: tokenDetails.type,
+        feeToken:
+          tokenDetails.type === "outcome" && tokenDetails.quote
+            ? tokenDetails.quote
+            : fill.feeToken,
         direction: fill.dir,
         fee: Number(fill.fee),
         sz: Number(fill.sz),
@@ -190,7 +196,7 @@ const FillsTWAPs = () => {
     <AdaptiveDataTable
       columns={columns}
       data={data.sort((a, b) => b.timestamp - a.timestamp)}
-      loading={false}
+      loading={isLoading}
       initialState={{
         pagination: {
           pageIndex: 0,
@@ -217,11 +223,14 @@ const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <TokenImage
-              name={data.coin}
-              className="size-4"
-              instrumentType="perps"
-            />
+            <Visibility visible={data.type !== "outcome"}>
+              <TokenImage
+                name={data.coin}
+                coin={data.coin}
+                className="size-4"
+                instrumentType={data.type === "spot" ? "spot" : "perps"}
+              />
+            </Visibility>
             <Link
               href={data.href}
               className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
@@ -267,10 +276,11 @@ const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
         />
         <CardItem
           label="Size"
-          value={`${formatNumber(data.sz, {
+          value={formatNumber(data.sz, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 5,
-          })} ${data.base}`}
+            symbol: data.base,
+          })}
         />
         <CardItem
           label={`Value (${data.feeToken})`}
@@ -280,10 +290,11 @@ const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
         />
         <CardItem
           label="Fee"
-          value={`${formatNumber(data.fee, {
+          value={formatNumber(data.fee, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-          })} ${data.feeToken}`}
+            symbol: data.feeToken,
+          })}
         />
       </div>
     </div>

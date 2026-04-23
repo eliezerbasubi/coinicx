@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
@@ -7,6 +6,7 @@ import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
+import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
 import { orderTypeLabels } from "@/features/trade/utils/orderTypes";
@@ -32,6 +32,7 @@ type HistoricalOrder = {
   triggerCondition: string;
   status: string;
   symbol: string;
+  type: string;
 };
 
 const columns: ColumnDef<HistoricalOrder>[] = [
@@ -60,6 +61,9 @@ const columns: ColumnDef<HistoricalOrder>[] = [
           symbol={original.symbol}
           dex={original.dex}
           href={original.href}
+          className={cn("text-buy/85 hover:text-buy max-w-80", {
+            "text-sell/85 hover:text-sell": original.side === "A",
+          })}
         />
       );
     },
@@ -155,7 +159,7 @@ const columns: ColumnDef<HistoricalOrder>[] = [
 ];
 
 const OrderHistory = () => {
-  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
+  const { mapSpotNameToTokenDetails, isLoading } = useSpotToTokenDetails();
 
   const historicalOrders = useShallowUserTradeStore((s) => s.historicalOrders);
 
@@ -180,6 +184,10 @@ const OrderHistory = () => {
         // Spot state
         if (tokenDetails.isSpot) {
           direction = order.side === "B" ? "Buy" : "Sell";
+
+          if (tokenDetails.type === "outcome") {
+            direction += ` ${tokenDetails.base}`;
+          }
         }
 
         // Liquidation state
@@ -219,7 +227,7 @@ const OrderHistory = () => {
     <AdaptiveDataTable
       columns={columns}
       data={data.sort((a, b) => b.timestamp - a.timestamp)}
-      loading={false}
+      loading={isLoading}
       initialState={{
         pagination: {
           pageIndex: 0,
@@ -241,21 +249,23 @@ const OrderHistory = () => {
 const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
   return (
     <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
-      <div className="flex items-center justify-between gap-x-4 mb-1">
+      <div className="flex items-center justify-between gap-x-2 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <TokenImage
-              key={data.base + data.coin}
-              name={data.base}
-              coin={data.coin}
-              className="size-4"
-              instrumentType={data.dex === null ? "spot" : "perps"}
-            />
+            <Visibility visible={data.type !== "outcome"}>
+              <TokenImage
+                key={data.base + data.coin}
+                name={data.base}
+                coin={data.coin}
+                className="size-4"
+                instrumentType={data.dex === null ? "spot" : "perps"}
+              />
+            </Visibility>
             <CoinLink symbol={data.symbol} dex={data.dex} href={data.href} />
           </div>
           <Tag
             value={data.direction}
-            className={cn("text-buy bg-buy/10", {
+            className={cn("text-buy bg-buy/10 whitespace-nowrap", {
               "text-sell bg-sell/10": data.side === "A",
             })}
           />
@@ -264,7 +274,7 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
             className="text-neutral-gray-400 bg-neutral-gray-200 capitalize"
           />
         </div>
-        <span className="text-3xs md:text-sm text-neutral-gray-400 font-medium">
+        <span className="text-3xs md:text-sm text-neutral-gray-400 font-medium text-right">
           {new Date(data.timestamp).toLocaleDateString("en-US", {
             day: "2-digit",
             month: "short",

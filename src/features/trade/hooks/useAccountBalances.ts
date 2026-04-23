@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 
-import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
+import {
+  SpotAssetCtx,
+  useShallowInstrumentStore,
+} from "@/lib/store/trade/instrument";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { SpotBalance } from "@/lib/types/trade";
 import {
   convertCoinToSpotName,
   isOutcomeCoin,
@@ -11,13 +15,9 @@ import { getTokenDisplayName } from "../utils/getTokenDisplayName";
 import { useAssetMetas } from "./useAssetMetas";
 
 export const useAccountBalances = () => {
-  const { tokenIndicesToSpot } = useAssetMetas();
-  const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
-  const { spotBalances: accountSpotBalances, allDexsClearinghouseState } =
-    useShallowUserTradeStore((s) => ({
-      spotBalances: s.spotBalances,
-      allDexsClearinghouseState: s.allDexsClearinghouseState,
-    }));
+  const { allDexsClearinghouseState } = useShallowUserTradeStore((s) => ({
+    allDexsClearinghouseState: s.allDexsClearinghouseState,
+  }));
 
   const perpsBalance = useMemo(() => {
     const data = allDexsClearinghouseState?.assetPositions.reduce(
@@ -53,6 +53,37 @@ export const useAccountBalances = () => {
     };
   }, [allDexsClearinghouseState]);
 
+  const spotAccount = useAccountSpotBalances();
+
+  return {
+    balances: [perpsBalance, ...spotAccount.balances],
+    perpsEquity: perpsBalance.totalBalance,
+    perpsUnrealizedPnl: perpsBalance.unrealizedPnl,
+    perpsReturnOnEquity: perpsBalance.returnOnEquity,
+    spotEquity: spotAccount.spotEquity,
+    spotUnrealizedPnl: spotAccount.totalUnrealizedPnl,
+    spotReturnOnEquity: spotAccount.totalReturnOnEquity,
+  };
+};
+
+interface UseAccountSpotBalancesParams {
+  /**
+   * The variant of the account balances to return.
+   * "balances" - returns only balances
+   * "predictions" - returns only prediction balances
+   */
+  variant?: "balances" | "predictions";
+}
+
+export const useAccountSpotBalances = (
+  params?: UseAccountSpotBalancesParams,
+) => {
+  const variant = params?.variant || "balances";
+
+  const { tokenIndicesToSpot } = useAssetMetas();
+  const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
+  const accountSpotBalances = useShallowUserTradeStore((s) => s.spotBalances);
+
   const spotAccount = useMemo(() => {
     let totalUnrealizedPnl = 0;
     let totalReturnOnEquity = 0;
@@ -60,10 +91,15 @@ export const useAccountBalances = () => {
     let totalShares = 0;
     let totalSharesUsdValue = 0;
     const balances = [];
+    const predictions = [];
 
     for (const balance of accountSpotBalances) {
       // Skip if balance is zero
       if (Number(balance.total) <= 0) continue;
+
+      if (variant === "predictions" && !isOutcomeCoin(balance.coin)) {
+        continue;
+      }
 
       const coin = getTokenDisplayName(balance.coin);
 
@@ -97,11 +133,30 @@ export const useAccountBalances = () => {
         if (!ctx) continue;
 
         const markPx = Number(ctx?.markPx || "1");
-        const totalBalance = Number(balance.total);
+        const shares = Number(balance.total);
 
-        spotEquity += totalBalance * markPx;
-        totalShares += totalBalance;
-        totalSharesUsdValue += totalBalance * markPx;
+        spotEquity += shares * markPx;
+        totalShares += shares;
+        totalSharesUsdValue += shares * markPx;
+
+        const positionValue = Number(balance.total) * markPx;
+
+        const hasEntryPx = Number(balance.entryNtl) > 0;
+        const pnl = hasEntryPx ? positionValue - Number(balance.entryNtl) : 0;
+        const roe = hasEntryPx ? pnl / Number(balance.entryNtl) : 0;
+        const entryPx = hasEntryPx ? Number(balance.entryNtl) / shares : 0;
+
+        predictions.push({
+          shares,
+          coin,
+          positionValue,
+          isSpot: true,
+          unrealizedPnl: pnl,
+          returnOnEquity: roe,
+          entryPx,
+          markPx,
+          midPx: ctx.midPx ?? "0",
+        });
 
         continue;
       }
@@ -113,46 +168,63 @@ export const useAccountBalances = () => {
         continue;
       }
 
-      const ctx = spotAssetCtxs[spot.spotName];
-
-      const markPx = Number(ctx?.markPx || "1");
-      const entryNtl = Number(balance.entryNtl);
-      const totalBalance = Number(balance.total);
-      const totalBalanceNtl = totalBalance * markPx;
-
-      const unrealizedPnl = totalBalanceNtl - entryNtl;
-      const returnOnEquity = entryNtl === 0 ? 0 : unrealizedPnl / entryNtl;
-
-      const availableBalance = totalBalance - Number(balance.hold);
-      const usdValue = availableBalance * markPx;
+      const spotBalance = mapDataToSpotBalance({
+        balance,
+        spotAssetCtxs,
+        spotName: spot.spotName,
+      });
 
       // Sum equity, unrealized pnl and return on equity
-      totalUnrealizedPnl += unrealizedPnl;
-      totalReturnOnEquity += returnOnEquity;
-      spotEquity += totalBalanceNtl;
+      totalUnrealizedPnl += spotBalance.unrealizedPnl;
+      totalReturnOnEquity += spotBalance.returnOnEquity;
+      spotEquity += spotBalance.usdValue;
 
       balances.push({
-        totalBalance,
-        availableBalance,
         coin,
-        isSpot: true,
-        usdValue,
-        unrealizedPnl,
-        returnOnEquity,
-        withdrawable: availableBalance,
+        ...spotBalance,
       });
     }
 
-    return { balances, spotEquity, totalReturnOnEquity, totalUnrealizedPnl };
+    return {
+      balances,
+      predictions,
+      spotEquity,
+      totalReturnOnEquity,
+      totalUnrealizedPnl,
+      totalShares,
+      totalSharesUsdValue,
+    };
   }, [accountSpotBalances, tokenIndicesToSpot, spotAssetCtxs]);
 
+  return spotAccount;
+};
+
+const mapDataToSpotBalance = (params: {
+  balance: SpotBalance;
+  spotAssetCtxs: SpotAssetCtx;
+  spotName: string;
+}) => {
+  const { balance, spotAssetCtxs, spotName } = params;
+  const ctx = spotAssetCtxs[spotName];
+
+  const markPx = Number(ctx?.markPx || "1");
+  const entryNtl = Number(balance.entryNtl);
+  const totalBalance = Number(balance.total);
+  const totalBalanceNtl = totalBalance * markPx;
+
+  const unrealizedPnl = totalBalanceNtl - entryNtl;
+  const returnOnEquity = entryNtl === 0 ? 0 : unrealizedPnl / entryNtl;
+
+  const availableBalance = totalBalance - Number(balance.hold);
+  const usdValue = availableBalance * markPx;
+
   return {
-    balances: [perpsBalance, ...spotAccount.balances],
-    perpsEquity: perpsBalance.totalBalance,
-    perpsUnrealizedPnl: perpsBalance.unrealizedPnl,
-    perpsReturnOnEquity: perpsBalance.returnOnEquity,
-    spotEquity: spotAccount.spotEquity,
-    spotUnrealizedPnl: spotAccount.totalUnrealizedPnl,
-    spotReturnOnEquity: spotAccount.totalReturnOnEquity,
+    totalBalance,
+    availableBalance,
+    usdValue,
+    isSpot: true,
+    unrealizedPnl,
+    returnOnEquity,
+    withdrawable: availableBalance,
   };
 };

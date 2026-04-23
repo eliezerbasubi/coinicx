@@ -4,15 +4,15 @@ import { ChevronRight, Pen } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
 import { usePreferencesStore } from "@/lib/store/trade/user-preferences";
-import { Position, PositionAction } from "@/lib/types/trade";
+import { Position } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 
+import CloseAllPositions from "../ClosePositionModals/CloseAllPositions";
+import ClosePosition from "../ClosePositionModals/ClosePosition";
 import CoinLink from "../CoinLink";
 import AdjustIsolatedMargin from "./AdjustIsolatedMargin";
-import CloseAllPositions from "./CloseAllPositions";
-import ClosePosition from "./ClosePosition";
 import ReversePosition from "./ReversePosition";
 import TriggerPrice from "./TriggerPrice";
 

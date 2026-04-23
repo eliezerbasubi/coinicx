@@ -11,8 +11,8 @@ import Tag from "@/components/ui/tag";
 import { formatPriceToDecimal } from "@/features/trade/utils";
 
 import CardItem from "../CardItem";
+import ClosePosition from "../ClosePositionModals/ClosePosition";
 import AdjustIsolatedMargin from "./AdjustIsolatedMargin";
-import ClosePosition from "./ClosePosition";
 import ReversePosition from "./ReversePosition";
 import TriggerPrice from "./TriggerPrice";
 

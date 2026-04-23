@@ -273,6 +273,7 @@ export const useOrderFormStore = create<OrderFormStore>()(
       reset() {
         set((state) => ({
           ...initialState,
+          predictSideIndex: state.predictSideIndex,
           orderSide: state.orderSide,
           settings: state.settings,
         }));

@@ -45,8 +45,10 @@ const TradingWidgetLimitInput = () => {
             variant="ghost"
             className="w-6 h-5 md:size-6 bg-neutral-gray-200 text-neutral-300 hover:text-primary hover:bg-primary/10 text-3xs md:text-xs font-medium md:font-semibold rounded md:rounded-md"
             onClick={() => {
-              const midPx = marketEventCtxSides[predictSideIndex].midPx;
-              useOrderFormStore.getState().onMidClick(midPx);
+              const ctx = marketEventCtxSides[predictSideIndex];
+              const mid = ctx.midPx || ctx.markPx;
+
+              useOrderFormStore.getState().onMidClick(mid);
             }}
           >
             Mid

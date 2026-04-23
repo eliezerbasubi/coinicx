@@ -11,7 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useAccountBalances } from "@/features/trade/hooks/useAccountBalances";
+import { useAccountSpotBalances } from "@/features/trade/hooks/useAccountBalances";
 
 interface UserBalance {
   coin: string;
@@ -175,7 +175,7 @@ const columns: ColumnDef<UserBalance>[] = [
 ];
 
 const Balances = () => {
-  const data = useAccountBalances();
+  const data = useAccountSpotBalances();
 
   return (
     <AdaptiveDataTable

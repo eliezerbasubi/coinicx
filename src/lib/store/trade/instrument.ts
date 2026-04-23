@@ -5,7 +5,7 @@ import {
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-type SpotAssetCtx = Record<string, SpotAssetCtxsWsEvent[number]>;
+export type SpotAssetCtx = Record<string, SpotAssetCtxsWsEvent[number]>;
 
 interface InstrumentStoreState {
   spotAssetCtxs: SpotAssetCtx;

@@ -1,7 +1,7 @@
 import { OrderParameters } from "@nktkas/hyperliquid";
 
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
-import { HLOrder, Order, OrderSide } from "@/lib/types/trade";
+import { HLOrder, OrderSide, OrderType, TimeInForce } from "@/lib/types/trade";
 
 import { formatSize } from "./formatting";
 import {
@@ -20,7 +20,20 @@ type OrderParams = {
   isSzInNtl?: boolean;
 };
 
-export function buildOrder(order: Order): HLOrder {
+type BuildOrderParams = {
+  assetId: number;
+  side: OrderSide;
+  type: OrderType | "stopLoss" | "takeProfit";
+  price: string | number;
+  size: string;
+  reduceOnly?: boolean;
+  timeInForce?: TimeInForce;
+  triggerPrice?: string;
+  isMarket?: boolean;
+  clientOrderId?: string;
+};
+
+export function buildOrder(order: BuildOrderParams): HLOrder {
   let orderTypePayload: HLOrder["t"] = { limit: { tif: "Gtc" } };
 
   const isStopOrder =
@@ -73,7 +86,7 @@ const buildExchangeOrder = (
   params: {
     size: string;
     entryPrice?: string;
-    type: Order["type"];
+    type: BuildOrderParams["type"];
     isMarket?: boolean;
     reduceOnly?: boolean;
     triggerPrice?: string;
@@ -85,21 +98,23 @@ const buildExchangeOrder = (
   const size = parseFloat(params.size);
 
   const isNtl = params.isSzInNtl ?? settings.isSzInNtl;
-  const sizeInBase = isNtl ? size / params.referencePx : size;
-
-  // Convert size to notional if it's in base
-  const minOrderValue = roundToDecimals(
-    isNtl ? size : size * params.referencePx,
-    params.szDecimals,
-    "floor",
-  );
-  if (minOrderValue < 10) {
-    throw new Error("Order must have a minimum value of 10 USD");
-  }
 
   const price = params.entryPrice
     ? parseFloat(params.entryPrice)
     : params.referencePx;
+
+  const sizeInBase = isNtl ? size / price : size;
+
+  // Convert size to notional if it's in base
+  const minOrderValue = roundToDecimals(
+    isNtl ? size : size * price,
+    params.szDecimals,
+    "floor",
+  );
+
+  if (minOrderValue < 10) {
+    throw new Error("Order must have a minimum value of 10 USD");
+  }
 
   const decimals = getPriceDecimals(price, params.szDecimals, params.isSpot);
 
@@ -112,7 +127,7 @@ const buildExchangeOrder = (
     reduceOnly: params.reduceOnly ?? settings.reduceOnly,
     timeInForce:
       settings.orderType === "limit"
-        ? (settings.timeInForce as Order["timeInForce"])
+        ? (settings.timeInForce as BuildOrderParams["timeInForce"])
         : undefined,
     isMarket: params.isMarket,
     triggerPrice: params.triggerPrice,

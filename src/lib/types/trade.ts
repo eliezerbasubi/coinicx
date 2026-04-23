@@ -124,19 +124,6 @@ export type Asset = {
   marketCap: number | null;
 };
 
-export type Order = {
-  assetId: number;
-  side: OrderSide;
-  type: OrderType | "stopLoss" | "takeProfit";
-  price: string | number;
-  size: string;
-  reduceOnly?: boolean;
-  timeInForce?: TimeInForce;
-  triggerPrice?: string;
-  isMarket?: boolean;
-  clientOrderId?: string;
-};
-
 export type MarginTier = {
   lowerBound: number;
   upperBound?: number;
@@ -187,6 +174,7 @@ export type OpenOrder = {
   isSpot: boolean;
   triggerCondition: string;
   triggerPx: string;
+  type: string;
   oid: number;
   cloid: `0x${string}` | null;
 };
@@ -207,6 +195,7 @@ export type ActiveTwap = {
   sz: number;
   timestamp: number;
   isSpot: boolean;
+  type: string;
 };
 
 export type SpotMetas = {

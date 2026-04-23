@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
+import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
 import { formatTotalRuntime } from "@/features/trade/utils/twap";
@@ -28,6 +29,7 @@ type TwapHistory = {
   reduceOnly: boolean;
   randomize: boolean;
   status: string;
+  type: string;
 };
 
 const columns: ColumnDef<TwapHistory>[] = [
@@ -122,7 +124,7 @@ const columns: ColumnDef<TwapHistory>[] = [
 ];
 
 const HistoryTWAPs = () => {
-  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
+  const { isLoading, mapSpotNameToTokenDetails } = useSpotToTokenDetails();
   const twapHistory = useShallowUserTradeStore((s) => s.twapStates.history);
 
   const data = useMemo(() => {
@@ -140,6 +142,7 @@ const HistoryTWAPs = () => {
         coin: tokenDetails.coin,
         base: tokenDetails.base,
         dex: tokenDetails.dex,
+        type: tokenDetails.type,
         sz: Number(history.state.sz),
         executedSz: Number(history.state.executedSz),
         averagePx: avgPx,
@@ -155,7 +158,7 @@ const HistoryTWAPs = () => {
     <AdaptiveDataTable
       columns={columns}
       data={data.sort((a, b) => b.timestamp - a.timestamp)}
-      loading={false}
+      loading={isLoading}
       initialState={{
         pagination: {
           pageIndex: 0,
@@ -183,11 +186,15 @@ const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <TokenImage
-              name={data.coin}
-              className="size-4"
-              instrumentType={data.dex === null ? "spot" : "perps"}
-            />
+            <Visibility visible={data.type !== "outcome"}>
+              <TokenImage
+                key={data.base + data.coin}
+                name={data.base}
+                coin={data.coin}
+                className="size-4"
+                instrumentType={data.dex === null ? "spot" : "perps"}
+              />
+            </Visibility>
             <Link
               href={data.href}
               className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
