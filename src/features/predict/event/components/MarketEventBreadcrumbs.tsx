@@ -2,8 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
-
-import { useMarketEventContext } from "../../lib/store/market-event/hooks";
+import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
 const MarketEventBreadcrumbs = () => {
   const title = useMarketEventContext((state) => state.marketEventMeta.title);

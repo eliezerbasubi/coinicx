@@ -287,14 +287,18 @@ const PredictionCard = ({ data }: PredictionCardProps) => {
                 instrumentType="spot"
               />
             </Visibility>
-            <p className="text-sm text-neutral-gray-100 font-medium line-clamp-2">
+            <Link
+              prefetch
+              href={`${ROUTES.predict.event}/${data.slug}`}
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-2"
+            >
               {data.questionTitle && (
                 <span className="text-xs text-neutral-gray-400 line-clamp-1">
                   {data.questionTitle}
                 </span>
               )}
               <span>{data.title}</span>
-            </p>
+            </Link>
           </div>
           <div className="flex items-center gap-1 mt-1">
             <Tag

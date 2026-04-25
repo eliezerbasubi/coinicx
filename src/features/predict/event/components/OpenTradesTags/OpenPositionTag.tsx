@@ -7,6 +7,7 @@ import { useIsLaptop } from "@/hooks/useIsMobile";
 import { Button } from "@/components/ui/button";
 import Tag from "@/components/ui/tag";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
+import { parsePriceToFormat } from "@/features/trade/utils";
 
 type Props = {
   position: {
@@ -57,10 +58,6 @@ const OpenPositionTag = ({ position, activeOutcomeIndex }: Props) => {
         const orderFormState = useOrderFormStore.getState();
 
         orderFormState.setOrderSide("sell");
-        orderFormState.setExecutionOrder({
-          size: position.shares.toString(),
-          limitPrice: (mid * 100).toString(),
-        });
         orderFormState.setPredictSideIndex(position.sideIndex);
 
         // Set isSzInNtl to false because we are setting size to shares which is not in notional
@@ -68,6 +65,11 @@ const OpenPositionTag = ({ position, activeOutcomeIndex }: Props) => {
 
         if (typeof activeOutcomeIndex === "number") {
           setActiveOutcomeIndex(activeOutcomeIndex);
+        } else {
+          orderFormState.setExecutionOrder({
+            size: position.shares.toString(),
+            limitPrice: parsePriceToFormat(mid, "toCents").toFixed(1),
+          });
         }
 
         // open trading widget drawer only on mobile
@@ -79,7 +81,7 @@ const OpenPositionTag = ({ position, activeOutcomeIndex }: Props) => {
       <div className="flex-1 space-x-1">
         <span>{formatNumber(position.shares)}</span>
         <span>{position.sideName}</span>
-        <span>@ {formatNumber(position.entryPx, { style: "cent" })}</span>
+        <span>• {formatNumber(position.entryPx, { style: "cent" })}</span>
       </div>
 
       <Button

@@ -101,7 +101,7 @@ export function generateRecurringSlug(
   recurringPayload: ParsedRecurringPayload,
   outcomeId: number,
 ) {
-  let baseSlug = `${recurringPayload.underlying} up or down`;
+  let baseSlug = `${recurringPayload.underlying} up or down `;
 
   // if the period is less than 1 day, we consider it a short term outcome
   const isShortTermOutcome =
@@ -109,7 +109,7 @@ export function generateRecurringSlug(
 
   if (isShortTermOutcome) {
     // for short term outcomes, we append the period and outcomeId to the slug
-    baseSlug += `-${recurringPayload.period}-${outcomeId}`;
+    baseSlug += `${recurringPayload.period}-${outcomeId}`;
   } else {
     // for long term outcomes, we append the expiry date (month and day) to the slug
     baseSlug += `on ${formatExpiryDate(recurringPayload.expiry, { month: "short", day: "numeric" })}`;

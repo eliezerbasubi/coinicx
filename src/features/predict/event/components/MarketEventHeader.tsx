@@ -2,13 +2,12 @@ import React from "react";
 
 import { cn } from "@/lib/utils/cn";
 import TokenImage from "@/components/common/TokenImage";
+import { MarketEventStats } from "@/features/predict/components/MarketEventStats";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import {
   formatDateFromPeriod,
   parseExpiry,
 } from "@/features/predict/lib/utils/parseMetadata";
-
-import { MarketEventStats } from "../../components/MarketEventStats";
 
 type Props = {
   className?: string;

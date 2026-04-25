@@ -3,6 +3,7 @@ import { create } from "zustand";
 
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { MarketEventCtx, MarketEventMeta } from "@/features/predict/lib/types";
+import { parsePriceToFormat, roundToDecimals } from "@/features/trade/utils";
 
 type MarketEventState = {
   marketEventMeta: MarketEventMeta;
@@ -81,7 +82,11 @@ export const createMarketEventStore = (initialProps: MarketEventStoreProps) => {
       const sideCtx = marketEventCtx.outcomes[index].sides[sideIndex];
       const mid = sideCtx?.midPx || sideCtx.markPx;
 
-      useOrderFormStore.getState().onMidClick(Number(mid) * 100);
+      useOrderFormStore
+        .getState()
+        .onMidClick(
+          roundToDecimals(parsePriceToFormat(mid, "toCents"), 1, "floor"),
+        );
     },
     setOutcomeSideIndex: (sideIndex) => {
       const { marketEventCtx, activeOutcomeIndex } = get();
@@ -96,7 +101,11 @@ export const createMarketEventStore = (initialProps: MarketEventStoreProps) => {
       const sideCtx = sidesCtxs[sideIndex];
       const mid = sideCtx?.midPx || sideCtx.markPx;
 
-      useOrderFormStore.getState().onMidClick(Number(mid) * 100);
+      useOrderFormStore
+        .getState()
+        .onMidClick(
+          roundToDecimals(parsePriceToFormat(mid, "toCents"), 1, "floor"),
+        );
     },
     setChartOutcomeSideIndex: (sideIndex: number) =>
       set({ chartOutcomeSideIndex: sideIndex }),

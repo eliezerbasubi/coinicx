@@ -131,7 +131,8 @@ export const mapDataToPredictionsMetas = (
       slugToOutcomeSpec.set(slug, outcome);
       outcomeToSlug.set(outcome.outcome, slug);
     } else {
-      const slug = slugify(outcome.name);
+      // Append the outcome id to the slug to ensure uniqueness
+      const slug = slugify(outcome.name + "-" + outcome.outcome);
       slugToOutcomeSpec.set(slug, outcome);
       outcomeToSlug.set(outcome.outcome, slug);
     }

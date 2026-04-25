@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { InputNumberControl } from "@/components/ui/input-number";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
+import { parsePriceToFormat, roundToDecimals } from "@/features/trade/utils";
 
 const TradingWidgetLimitInput = () => {
   const { orderType, limitPrice, predictSideIndex } = useShallowOrderFormStore(
@@ -76,7 +77,15 @@ const TradingWidgetLimitInput = () => {
                 const ctx = marketEventCtxSides[predictSideIndex];
                 const mid = ctx.midPx || ctx.markPx;
 
-                useOrderFormStore.getState().onMidClick(mid * 100);
+                useOrderFormStore
+                  .getState()
+                  .onMidClick(
+                    roundToDecimals(
+                      parsePriceToFormat(mid, "toCents"),
+                      1,
+                      "floor",
+                    ),
+                  );
               }}
             >
               Mid
