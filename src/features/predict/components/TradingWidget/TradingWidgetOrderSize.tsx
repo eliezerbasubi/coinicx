@@ -18,6 +18,7 @@ import {
   useActiveOutcomeMeta,
   useActiveOutcomeSideCtx,
 } from "@/features/predict/lib/store/market-event/hooks";
+import { convertSpotNameToBalanceCoin } from "@/features/predict/lib/utils/outcomes";
 import { roundToDecimals } from "@/features/trade/utils";
 import { calculateMaxTradeSize } from "@/features/trade/utils/shared";
 
@@ -30,10 +31,12 @@ const TradingWidgetOrderSize = () => {
     isSzNtl: s.settings.isSzInNtl,
   }));
 
+  const { sideCtx, sideIndex } = useActiveOutcomeSideCtx();
+
   const { marketEventMeta } = useActiveOutcomeMeta();
 
   const spotAsset = {
-    base: marketEventMeta?.coin,
+    base: convertSpotNameToBalanceCoin(marketEventMeta.sides[sideIndex].coin),
     quote: PREDICTIONS_QUOTE_ASSET,
   };
 
@@ -41,8 +44,6 @@ const TradingWidgetOrderSize = () => {
     isBuyOrder,
     spotAsset,
   });
-
-  const { sideCtx } = useActiveOutcomeSideCtx();
 
   // If buy order and size in ntl, format as currency and show "Amount", else show "Shares"
   const isAmountInUsd = isBuyOrder && isSzNtl;

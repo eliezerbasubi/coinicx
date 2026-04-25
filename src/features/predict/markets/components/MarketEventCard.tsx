@@ -74,7 +74,19 @@ const MarketEventCard = ({ data }: Props) => {
                 className="w-full flex justify-between items-center gap-2"
               >
                 <div className="flex-1 flex items-center justify-between">
-                  <p className="text-sm">{outcome.title}</p>
+                  <p
+                    className="text-sm"
+                    onClick={(e) => {
+                      if (!isDesktop) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        setOpen(true);
+                      }
+                    }}
+                  >
+                    {outcome.title}
+                  </p>
                   <p className="text-xs font-medium">
                     {/* Yes side is always the same as the outcome. So, we pick only the first side which is yes */}
                     {formatNumber(
@@ -156,6 +168,7 @@ const MarketEventCard = ({ data }: Props) => {
         </div>
       </div>
 
+      {/* Show the full market event drawer on mobile */}
       <Visibility visible={!isDesktop}>
         <MarketEventDrawer
           open={open}

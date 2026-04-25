@@ -19,6 +19,7 @@ export const formatNumber = (value: number, options?: FormatOptions) => {
   }
 
   const formatted = formattedValue.toLocaleString(locale ?? "en-US", {
+    maximumFractionDigits: style === "cent" ? 1 : undefined,
     ...rest,
     style: style === "cent" ? undefined : style,
     currency: rest.currency ?? "USD",

@@ -118,6 +118,14 @@ export const mapDataToSpotMetas = (data: SpotMetaResponse) => {
   const spotNamesToTokens = new Map() as SpotMetas["spotNamesToTokens"];
   const tokenIndicesToSpot = new Map() as SpotMetas["tokenIndicesToSpot"];
 
+  if (!data) {
+    return {
+      tokenNamesToUniverseIndex,
+      tokenIndicesToSpot,
+      spotNamesToTokens,
+      spotMeta: data,
+    };
+  }
   for (let index = 0; index < data.universe.length; index++) {
     const universe = data.universe[index];
     const [baseIndex, quoteIndex] = universe.tokens;

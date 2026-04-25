@@ -8,7 +8,9 @@ import { OrderSide } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import Visibility from "@/components/common/Visibility";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PREDICTIONS_QUOTE_ASSET } from "@/features/predict/lib/constants/predictions";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
+import { convertSpotNameToBalanceCoin } from "@/features/predict/lib/utils/outcomes";
 
 import { VolumeStat } from "../MarketEventStats";
 import { MarketSideActions } from "../MarketSideActions";
@@ -30,19 +32,21 @@ const TradingWidgetHeader = ({
     orderSide: s.orderSide,
   }));
 
-  const { marketEvent, marketEventSidesCtx } = useMarketEventContext((s) => {
-    const marketEvent =
-      s.marketEventMeta.outcomes[s.activeOutcomeIndex] ?? s.marketEventMeta;
+  const { marketEvent, marketEventSidesCtx, setOutcomeSideIndex } =
+    useMarketEventContext((s) => {
+      const marketEvent =
+        s.marketEventMeta.outcomes[s.activeOutcomeIndex] ?? s.marketEventMeta;
 
-    const sidesCtxs =
-      s.marketEventCtx.outcomes[s.activeOutcomeIndex]?.sides ??
-      s.marketEventCtx.sides;
+      const sidesCtxs =
+        s.marketEventCtx.outcomes[s.activeOutcomeIndex]?.sides ??
+        s.marketEventCtx.sides;
 
-    return {
-      marketEvent,
-      marketEventSidesCtx: sidesCtxs,
-    };
-  });
+      return {
+        marketEvent,
+        marketEventSidesCtx: sidesCtxs,
+        setOutcomeSideIndex: s.setOutcomeSideIndex,
+      };
+    });
 
   const volume = marketEventSidesCtx[sideIndex]?.volume || 0;
 
@@ -61,7 +65,12 @@ const TradingWidgetHeader = ({
         onValueChange={(value) => {
           useOrderFormStore.getState().onOrderSideChange({
             orderSide: value as OrderSide,
-            isSpot: true,
+            spotAsset: {
+              quote: PREDICTIONS_QUOTE_ASSET,
+              base: convertSpotNameToBalanceCoin(
+                marketEvent.sides[sideIndex].coin,
+              ),
+            },
           });
         }}
       >
@@ -95,9 +104,7 @@ const TradingWidgetHeader = ({
           sideClassName,
         )}
         wrapperClassName="grid grid-cols-2 gap-2 p-2 md:p-4"
-        onClick={(sideIndex) =>
-          useOrderFormStore.getState().setPredictSideIndex(sideIndex)
-        }
+        onClick={setOutcomeSideIndex}
       />
     </React.Fragment>
   );

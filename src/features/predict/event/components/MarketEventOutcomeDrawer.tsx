@@ -12,6 +12,8 @@ import {
 import { MarketSideButton } from "@/features/predict/components/MarketSideActions";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 
+import MarketEventOpenOrders from "./MarketEventOpenOrders";
+import MarketEventPositions from "./MarketEventPositions";
 import MarketRules from "./MarketRules";
 import OrderbookAccordion from "./OrderbookAccordion";
 import OutcomeGraph from "./OutcomeGraph";
@@ -43,43 +45,49 @@ const MarketEventOutcomeDrawer = ({ open, onOpenChange }: Props) => {
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="w-full! border-l-0! px-0 standalone:pt-safe-top overflow-y-auto overflow-x-hidden">
-        <DrawerHeader className="sticky top-0 z-10 bg-primary-dark gap-0 p-4">
-          <DrawerTitle className="w-full flex items-center justify-center gap-2">
-            <DrawerClose asChild>
-              <ArrowLeft className="size-5" />
-            </DrawerClose>
-            <p className="flex-1 text-center text-base text-white font-semibold">
-              {outcome.title}
-            </p>
-          </DrawerTitle>
-          <DrawerDescription className="sr-only">
-            Showing details of the currently selected outcome
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="w-full space-y-2 px-4">
-          <OutcomeGraph outcomeMeta={outcome} sidesCtxs={sidesCtxs ?? []} />
+      <DrawerContent className="w-full flex flex-col border-l-0 p-0 standalone:pt-safe-top">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbars pb-12">
+          <DrawerHeader className="sticky top-0 z-10 bg-primary-dark gap-0 p-4">
+            <DrawerTitle className="w-full flex items-center justify-center gap-2">
+              <DrawerClose asChild>
+                <ArrowLeft className="size-5" />
+              </DrawerClose>
+              <p className="flex-1 text-center text-base text-white font-semibold">
+                {outcome.title}
+              </p>
+            </DrawerTitle>
+            <DrawerDescription className="sr-only">
+              Showing details of the currently selected outcome
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="w-full space-y-2 px-4">
+            <OutcomeGraph outcomeMeta={outcome} sidesCtxs={sidesCtxs ?? []} />
 
-          <OrderbookAccordion />
+            <MarketEventPositions className="mt-4" />
 
-          <MarketRules />
-        </div>
+            <MarketEventOpenOrders />
 
-        <div className="fixed bottom-4 inset-x-0 z-10 w-full mx-auto grid grid-cols-2 gap-2 px-4 md:px-6">
-          {outcome.sides.map((side, index) => (
-            <MarketSideButton
-              key={side.coin}
-              isCurrent
-              side={{ ...side, ...sidesCtxs?.[index] }}
-              index={index}
-              label="Buy"
-              className="h-11"
-              onClick={() => {
-                useOrderFormStore.getState().setPredictSideIndex(index);
-                openTradingWidgetDrawer(true);
-              }}
-            />
-          ))}
+            <OrderbookAccordion />
+
+            <MarketRules />
+          </div>
+
+          <div className="fixed bottom-4 inset-x-0 z-10 w-full mx-auto grid grid-cols-2 gap-2 px-4 md:px-6">
+            {outcome.sides.map((side, index) => (
+              <MarketSideButton
+                key={side.coin}
+                isCurrent
+                side={{ ...side, ...sidesCtxs?.[index] }}
+                index={index}
+                label="Buy"
+                className="h-11"
+                onClick={() => {
+                  useOrderFormStore.getState().setPredictSideIndex(index);
+                  openTradingWidgetDrawer(true);
+                }}
+              />
+            ))}
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

@@ -177,6 +177,13 @@ export const mapCoinToMarketEventSpec = (
 
   if (!outcomeSpec) return null;
 
+  // Check if the outcome is part of a question.
+  const questionMeta = metas.outcomeToQuestionMeta.get(outcomeSpec.outcome);
+
+  const question = questionMeta
+    ? metas.slugToQuestionSpec.get(questionMeta.slug)
+    : null;
+
   const parsedMetadata = isRecurring(outcomeSpec)
     ? parseRecurringMetadata(outcomeSpec.description, outcomeSpec.outcome)
     : null;
@@ -184,13 +191,15 @@ export const mapCoinToMarketEventSpec = (
   return {
     assetId: buildSideAssetId(parsedData.outcomeId, parsedData.sideIndex),
     title: parsedMetadata?.title ?? outcomeSpec.name,
-    slug: parsedMetadata?.slug ?? slugify(outcomeSpec.name),
+    slug:
+      questionMeta?.slug ?? parsedMetadata?.slug ?? slugify(outcomeSpec.name),
     outcome: parsedData.outcomeId,
     sideIndex: parsedData.sideIndex,
     sideName: outcomeSpec.sideSpecs[parsedData.sideIndex].name,
     quote: PREDICTIONS_QUOTE_ASSET,
     pxDecimals: PREDICTIONS_QUOTE_SZ_DECIMALS,
     szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
+    question,
     recurringPayload: parsedMetadata
       ? {
           underlying: parsedMetadata.underlying,

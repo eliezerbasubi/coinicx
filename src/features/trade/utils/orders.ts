@@ -1,19 +1,26 @@
 import { OrderParameters } from "@nktkas/hyperliquid";
 
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
-import { HLOrder, OrderSide, OrderType, TimeInForce } from "@/lib/types/trade";
+import {
+  HLOrder,
+  InstrumentType,
+  OrderSide,
+  OrderType,
+  TimeInForce,
+} from "@/lib/types/trade";
 
 import { formatSize } from "./formatting";
 import {
   calculateSlippageAdjustedPrice,
   getPriceDecimals,
+  parsePriceToFormat,
   roundToDecimals,
 } from "./prices";
 
 type OrderParams = {
   referencePx: number;
   szDecimals: number;
-  isSpot: boolean;
+  instrumentType: InstrumentType;
   assetId: number;
 
   /** Whether the size is in notional and hence should be converted to base size */
@@ -116,7 +123,11 @@ const buildExchangeOrder = (
     throw new Error("Order must have a minimum value of 10 USD");
   }
 
-  const decimals = getPriceDecimals(price, params.szDecimals, params.isSpot);
+  const decimals = getPriceDecimals(
+    price,
+    params.szDecimals,
+    params.instrumentType !== "perps",
+  );
 
   return buildOrder({
     assetId: params.assetId,
@@ -166,7 +177,7 @@ export const buildTpSlOrders = (
         reduceOnly: true,
         referencePx: params.referencePx,
         szDecimals: params.szDecimals,
-        isSpot: params.isSpot,
+        instrumentType: params.instrumentType,
         assetId: params.assetId,
         orderSide: tpslOrderSide,
         size: params.size,
@@ -193,7 +204,7 @@ export const buildTpSlOrders = (
         reduceOnly: true,
         referencePx: params.referencePx,
         szDecimals: params.szDecimals,
-        isSpot: params.isSpot,
+        instrumentType: params.instrumentType,
         assetId: params.assetId,
         orderSide: tpslOrderSide,
         size: params.size,
@@ -223,7 +234,7 @@ export const buildMarketOrder = (params: OrderParams) => {
     entryPrice: entryPrice.toString(),
     referencePx: params.referencePx,
     szDecimals: params.szDecimals,
-    isSpot: params.isSpot,
+    instrumentType: params.instrumentType,
     assetId: params.assetId,
     isSzInNtl: params.isSzInNtl,
     type: "market",
@@ -234,7 +245,7 @@ export const buildMarketOrder = (params: OrderParams) => {
     size: formValues.size,
     referencePx: params.referencePx,
     szDecimals: params.szDecimals,
-    isSpot: params.isSpot,
+    instrumentType: params.instrumentType,
     assetId: params.assetId,
   });
 
@@ -250,12 +261,18 @@ export const buildMarketOrder = (params: OrderParams) => {
 export const buildLimitOrder = (params: OrderParams) => {
   const formValues = useOrderFormStore.getState();
 
+  // Prediction market prices are in cents
+  const limitPx = parsePriceToFormat(
+    formValues.limitPrice,
+    params.instrumentType === "prediction" ? "toHundredths" : undefined,
+  );
+
   const order = buildExchangeOrder({
     size: formValues.size,
-    entryPrice: formValues.limitPrice,
+    entryPrice: limitPx.toString(),
     referencePx: params.referencePx,
     szDecimals: params.szDecimals,
-    isSpot: params.isSpot,
+    instrumentType: params.instrumentType,
     assetId: params.assetId,
     isSzInNtl: params.isSzInNtl,
     type: "limit",
@@ -266,7 +283,7 @@ export const buildLimitOrder = (params: OrderParams) => {
     size: formValues.size,
     referencePx: params.referencePx,
     szDecimals: params.szDecimals,
-    isSpot: params.isSpot,
+    instrumentType: params.instrumentType,
     assetId: params.assetId,
   });
 
@@ -306,7 +323,7 @@ export const buildStopOrders = (params: OrderParams & { midPx: number }) => {
     size: formValues.size,
     referencePx: params.referencePx,
     szDecimals: params.szDecimals,
-    isSpot: params.isSpot,
+    instrumentType: params.instrumentType,
     assetId: params.assetId,
     isSzInNtl: params.isSzInNtl,
     entryPrice: entryPrice.toString(),
@@ -347,7 +364,7 @@ export const buildScaleOrders = (params: OrderParams) => {
       size: order.size.toString(),
       referencePx: params.referencePx,
       szDecimals: params.szDecimals,
-      isSpot: params.isSpot,
+      instrumentType: params.instrumentType,
       assetId: params.assetId,
       isSzInNtl: params.isSzInNtl,
       entryPrice: order.price.toString(),

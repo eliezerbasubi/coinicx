@@ -20,6 +20,8 @@ import BottomNavActions from "./BottomNavActions";
 import CategoricalOutcomes from "./CategoricalOutcomes";
 import MarketEventChart from "./MarketEventChart";
 import MarketEventHeader from "./MarketEventHeader";
+import MarketEventOpenOrders from "./MarketEventOpenOrders";
+import MarketEventPositions from "./MarketEventPositions";
 import MarketRules from "./MarketRules";
 import OrderbookAccordion from "./OrderbookAccordion";
 
@@ -90,6 +92,8 @@ const MarketEventDrawer = ({
 
               {/* Orderbook */}
               <Visibility visible={type !== "categorical"}>
+                <MarketEventPositions className="mt-4" />
+                <MarketEventOpenOrders className="mt-4" />
                 <OrderbookAccordion />
               </Visibility>
 

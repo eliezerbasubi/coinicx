@@ -80,14 +80,22 @@ export function parseSideCoinFromCoin(e: string) {
   };
 }
 
-/** Convert +5160 to #5160
- * Plus is used for balances, # is spot context
+/** Convert +5160 to #5160 - Plus is used for balances, # is spot name
  */
-export function convertCoinToSpotName(coin: string) {
+export function convertBalanceCoinToSpotName(coin: string) {
   if (coin.startsWith(SIDE_COIN_PREFIX_PLUS)) {
     return `${SIDE_COIN_PREFIX}${coin.slice(SIDE_COIN_PREFIX_PLUS.length)}`;
   }
-  return null;
+  return coin;
+}
+
+/** Convert #5160 to +5160 - Plus is used for balances, # is spot name
+ */
+export function convertSpotNameToBalanceCoin(coin: string) {
+  if (coin.startsWith(SIDE_COIN_PREFIX)) {
+    return `${SIDE_COIN_PREFIX_PLUS}${coin.slice(SIDE_COIN_PREFIX.length)}`;
+  }
+  return coin;
 }
 
 export function isRecurring(

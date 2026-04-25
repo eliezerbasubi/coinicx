@@ -45,7 +45,7 @@ export type OrderSide = "buy" | "sell";
 
 export type OrderFormLimitOffsetType = "offset" | "pnl";
 
-export type InstrumentType = "spot" | "perps";
+export type InstrumentType = "spot" | "perps" | "prediction";
 
 export type ScaleDistribution = "equal" | "increasing" | "decreasing";
 
@@ -174,7 +174,7 @@ export type OpenOrder = {
   isSpot: boolean;
   triggerCondition: string;
   triggerPx: string;
-  type: string;
+  type: InstrumentType;
   oid: number;
   cloid: `0x${string}` | null;
 };

@@ -4,26 +4,49 @@ import {
   useOrderBookStore,
   useShallowOrderBookStore,
 } from "@/lib/store/trade/orderbook";
+import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import { MarketEventMetaSide } from "@/features/predict/lib/types";
+import { parseSideCoinFromCoin } from "@/features/predict/lib/utils/outcomes";
 
 import MarketEventOrderBookList from "./MarketEventOrderbookList";
 
 type Props = {
+  outcomeCoin: string;
   outcomeSides: MarketEventMetaSide[];
 };
 
 const ORDERBOOK_COLUMNS = ["Price", "Shares", "Total"];
 
-const MarketEventOrderbook = ({ outcomeSides }: Props) => {
+const MarketEventOrderbook = ({ outcomeSides, outcomeCoin }: Props) => {
   const predictSideIndex = useShallowOrderFormStore((s) => s.predictSideIndex);
 
   const { bids, asks } = useShallowOrderBookStore((s) => ({
     bids: s.bids,
     asks: s.asks,
   }));
+
+  const openOrder = useShallowUserTradeStore((s) => {
+    const order = s.openOrders.find((order) => order.coin === outcomeCoin);
+
+    let openOrder = null;
+
+    if (order) {
+      const parsedData = parseSideCoinFromCoin(order.coin);
+
+      if (parsedData) {
+        openOrder = {
+          sideIndex: parsedData.sideIndex,
+          shares: Number(order.sz),
+          avgEntryPx: Number(order.limitPx || order.triggerPx),
+        };
+      }
+    }
+
+    return openOrder;
+  });
 
   const currentSide = outcomeSides[predictSideIndex];
   const coin = currentSide.coin;
@@ -60,11 +83,27 @@ const MarketEventOrderbook = ({ outcomeSides }: Props) => {
       </div>
 
       <div className="w-full">
-        <MarketEventOrderBookList items={asks} type="asks" />
+        <MarketEventOrderBookList
+          items={asks}
+          type="asks"
+          openOrder={
+            openOrder?.sideIndex === 1
+              ? { shares: openOrder?.shares, avgEntryPx: openOrder?.avgEntryPx }
+              : undefined
+          }
+        />
 
         <OrderBookTicker />
 
-        <MarketEventOrderBookList items={bids} type="bids" />
+        <MarketEventOrderBookList
+          items={bids}
+          type="bids"
+          openOrder={
+            openOrder?.sideIndex === 0
+              ? { shares: openOrder?.shares, avgEntryPx: openOrder?.avgEntryPx }
+              : undefined
+          }
+        />
       </div>
     </div>
   );

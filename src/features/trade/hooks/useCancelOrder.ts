@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import { OpenOrder } from "@/lib/types/trade";
+import { InstrumentType } from "@/lib/types/trade";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
 import { useAgentClient } from "@/hooks/useAgentClient";
 import {
@@ -25,6 +25,12 @@ type UseCancelOrderArgs = {
   onSuccess?: () => void;
 };
 
+type CancelOrder = {
+  oid: number;
+  coin: string;
+  type: InstrumentType;
+};
+
 export const useCancelOrder = (args?: UseCancelOrderArgs) => {
   const haptic = useWebHaptics();
   const { getAgentClient } = useAgentClient();
@@ -42,7 +48,10 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
     ]);
 
     if (!spotMetasResponse || !allPerpMetas) {
-      throw new Error("No meta found for canceling open orders");
+      return {
+        spotMetas: null,
+        allPerpMetas: null,
+      };
     }
 
     return {
@@ -51,13 +60,13 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
     };
   }, []);
 
-  const buildCancels = (openOrders: OpenOrder[]) => {
+  const buildCancels = (openOrders: CancelOrder[]) => {
     if (!openOrders.length) throw new Error("No open orders to cancel");
 
     const { spotMetas, allPerpMetas } = getAssetMetas();
 
-    return openOrders.map((order) => {
-      if (order.type === "outcome") {
+    const cancels = openOrders.map((order) => {
+      if (order.type === "prediction") {
         const parsedData = parseSideCoinFromCoin(order.coin);
 
         if (!parsedData) throw new Error("No data found for coin" + order.coin);
@@ -68,7 +77,7 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
         };
       }
 
-      if (order.type === "spot") {
+      if (order.type === "spot" && spotMetas) {
         const tokens = spotMetas?.spotNamesToTokens?.get(order.coin);
 
         if (!tokens) throw new Error("No data found for coin" + order.coin);
@@ -82,34 +91,41 @@ export const useCancelOrder = (args?: UseCancelOrderArgs) => {
         return { a: buildSpotAssetId(spot.spotId), o: order.oid };
       }
 
-      // Resolve perp asset ID at cancel time
-      let assetId = 0;
+      if (order.type === "perps" && allPerpMetas) {
+        // Resolve perp asset ID at cancel time
+        let assetId = 0;
 
-      if (allPerpMetas?.length) {
-        const { dex } = parseBuilderDeployedAsset(order.coin);
+        if (allPerpMetas?.length) {
+          const { dex } = parseBuilderDeployedAsset(order.coin);
 
-        for (const perpMeta of allPerpMetas) {
-          if (perpMeta.dex !== dex) continue;
+          for (const perpMeta of allPerpMetas) {
+            if (perpMeta.dex !== dex) continue;
 
-          const universeIndex = perpMeta.universe.findIndex(
-            (u) => u.name.toLowerCase() === order.coin.toLowerCase(),
-          );
+            const universeIndex = perpMeta.universe.findIndex(
+              (u) => u.name.toLowerCase() === order.coin.toLowerCase(),
+            );
 
-          if (universeIndex !== -1) {
-            assetId = buildPerpAssetId({
-              perpDexIndex: perpMeta.perpDexIndex,
-              universeIndex,
-            });
-            break;
+            if (universeIndex !== -1) {
+              assetId = buildPerpAssetId({
+                perpDexIndex: perpMeta.perpDexIndex,
+                universeIndex,
+              });
+              break;
+            }
           }
         }
+
+        return { a: assetId, o: order.oid };
       }
 
-      return { a: assetId, o: order.oid };
+      // throw error if order type is unknown
+      throw new Error("Unknown order type: " + order.type);
     });
+
+    return cancels;
   };
 
-  const cancelOrder = async (openOrders: OpenOrder[]) => {
+  const cancelOrder = async (openOrders: CancelOrder[]) => {
     try {
       const cancels = buildCancels(openOrders);
 

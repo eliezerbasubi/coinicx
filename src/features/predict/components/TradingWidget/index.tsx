@@ -14,6 +14,7 @@ type Props = {
   sideClassName?: string;
   tabsClassName?: string;
   showEventTitle?: boolean;
+  resetOnMount?: boolean;
 };
 
 const TradingWidget = ({
@@ -21,10 +22,13 @@ const TradingWidget = ({
   sideClassName,
   tabsClassName,
   showEventTitle,
+  resetOnMount = true,
 }: Props) => {
   // Reset the form once the component mounts to avoid showing data from trade page or another market event
   useEffect(() => {
-    useOrderFormStore.getState().reset();
+    if (resetOnMount) {
+      useOrderFormStore.getState().reset();
+    }
   }, []);
 
   return (

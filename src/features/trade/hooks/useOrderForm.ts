@@ -2,9 +2,12 @@ import { useMemo } from "react";
 
 import { useShallowOrderFormStore } from "@/lib/store/trade/order-form";
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
-import { OrderType } from "@/lib/types/trade";
+import { InstrumentType, OrderType } from "@/lib/types/trade";
 import { useMaxTradeSz } from "@/hooks/useAvailableToTrade";
-import { calculateMarginRequired } from "@/features/trade/utils";
+import {
+  calculateMarginRequired,
+  parsePriceToFormat,
+} from "@/features/trade/utils";
 import {
   isLimitOrder,
   isScaleOrTwapOrder,
@@ -16,7 +19,7 @@ import { isValidTwapMinutes } from "@/features/trade/utils/twap";
 type UseOrderFormArgs = {
   referencePx: number;
   szDecimals: number;
-  isStableCoin?: boolean;
+  instrumentType: InstrumentType;
   spotAsset?: {
     base: string;
     quote: string;
@@ -27,7 +30,7 @@ export const useOrderForm = ({
   referencePx,
   szDecimals,
   spotAsset,
-  isStableCoin,
+  instrumentType,
 }: UseOrderFormArgs) => {
   const {
     size,
@@ -50,6 +53,12 @@ export const useOrderForm = ({
   const isBuyOrder = orderSide === "buy";
   const isSpot = !!spotAsset;
 
+  // Prediction prices are in cents
+  const limitPx = parsePriceToFormat(
+    limitPrice,
+    instrumentType === "prediction" ? "toHundredths" : undefined,
+  );
+
   const maxTradeSz = useMaxTradeSz({
     isBuyOrder,
     spotAsset,
@@ -69,15 +78,14 @@ export const useOrderForm = ({
   const orderValueAndMargin = calculateOrderValueAndMargin({
     orderType: settings.orderType,
     orderSize: parseFloat(size),
-    limitPx: parseFloat(limitPrice || "0"),
+    limitPx,
     referencePx,
     leverage,
-    isSpot,
     reduceOnly: settings.reduceOnly,
     scaleOrderValue,
     isSzInNtl: settings.isSzInNtl,
     szDecimals,
-    isStableCoin,
+    instrumentType,
   });
 
   const hasInsufficientMargin = checkInsufficientMargin({
@@ -137,12 +145,11 @@ const calculateOrderValueAndMargin = (params: {
   limitPx: number;
   referencePx: number;
   leverage: number;
-  isSpot: boolean;
+  instrumentType: InstrumentType;
   isSzInNtl: boolean;
   reduceOnly: boolean;
   scaleOrderValue: number;
   szDecimals: number;
-  isStableCoin?: boolean;
 }) => {
   if (isScaleOrTwapOrder(params.orderType) && !params.scaleOrderValue) {
     return {
@@ -160,10 +167,10 @@ const calculateOrderValueAndMargin = (params: {
       referencePx: params.referencePx,
       szDecimals: params.szDecimals,
       isSzInNtl: params.isSzInNtl,
-      isStableCoin: params.isStableCoin,
+      isStableCoin: params.instrumentType === "prediction",
     });
 
-  if (params.isSpot) {
+  if (params.instrumentType !== "perps") {
     return {
       orderValue,
       marginRequired: 0,

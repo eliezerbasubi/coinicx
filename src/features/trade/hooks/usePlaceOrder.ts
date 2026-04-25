@@ -7,6 +7,7 @@ import {
   useOrderFormStore,
   useShallowOrderFormStore,
 } from "@/lib/store/trade/order-form";
+import { InstrumentType } from "@/lib/types/trade";
 import { useAgentClient } from "@/hooks/useAgentClient";
 import {
   formatPriceToDecimal,
@@ -34,8 +35,8 @@ type ExchangeOrderParams = {
   midPx: number;
   assetId: number;
   szDecimals: number;
-  isSpot: boolean;
   isSzInNtl?: boolean;
+  instrumentType: InstrumentType;
   base: string;
 };
 
@@ -178,7 +179,7 @@ export const usePlaceOrder = () => {
             const decimals = getPriceDecimals(
               Number(filled.avgPx),
               params.szDecimals,
-              params.isSpot,
+              params.instrumentType !== "perps",
             );
             message = `${filled.totalSz} ${params.base} ${isBuyOrder ? "bought" : "sold"} at ${formatPriceToDecimal(Number(filled.avgPx), decimals, { style: "currency" })} avg. price`;
 
@@ -203,6 +204,9 @@ export const usePlaceOrder = () => {
 
       toast.success(message, { id: toastId });
       haptic.trigger("success");
+
+      // Reset order form
+      useOrderFormStore.getState().reset();
     } catch (error) {
       throw error;
     } finally {

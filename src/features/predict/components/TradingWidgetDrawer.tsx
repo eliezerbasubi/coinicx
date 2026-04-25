@@ -64,11 +64,12 @@ export const TradingWidgetMarketsDrawer = ({
 };
 
 export const TradingWidgetDrawer = () => {
-  const { marketEventTitle, outcomeTitle, open, onOpenChange } =
+  const { marketEventTitle, outcomeTitle, open, resetOnMount, onOpenChange } =
     useMarketEventContext((s) => ({
       marketEventTitle: s.marketEventMeta.title,
       outcomeTitle: s.marketEventMeta.outcomes[s.activeOutcomeIndex]?.title,
       open: s.tradingWidgetDrawerOpen,
+      resetOnMount: s.resetTradingWidgetOnMount,
       onOpenChange: s.openTradingWidgetDrawer,
     }));
 
@@ -89,6 +90,7 @@ export const TradingWidgetDrawer = () => {
         sideClassName="h-8"
         tabsClassName="px-0"
         showEventTitle={false}
+        resetOnMount={resetOnMount}
       />
     </AdaptiveDialog>
   );

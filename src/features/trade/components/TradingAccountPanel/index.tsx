@@ -64,7 +64,7 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
     positionsCount: s.allDexsClearinghouseState?.assetPositions.length || 0,
     twapsCount: s.twapStates.twaps.length,
     predictionsCount: s.spotBalances.filter(
-      (b) => isOutcomeCoin(b.coin) && Number(b.token) > 0,
+      (b) => isOutcomeCoin(b.coin) && Number(b.total) > 0,
     ).length,
   }));
 

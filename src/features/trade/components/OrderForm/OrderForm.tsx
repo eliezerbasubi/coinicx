@@ -144,12 +144,16 @@ const OrderFormSides = () => {
 };
 
 const OrderFormFooter = () => {
-  const { isPerps, quote, assetMeta, assetCtx } = useTradeContext((s) => ({
-    isPerps: s.instrumentType === "perps",
-    quote: s.assetMeta.quote,
-    assetMeta: s.assetMeta,
-    assetCtx: s.assetCtx,
-  }));
+  const { instrumentType, quote, assetMeta, assetCtx } = useTradeContext(
+    (s) => ({
+      instrumentType: s.instrumentType,
+      quote: s.assetMeta.quote,
+      assetMeta: s.assetMeta,
+      assetCtx: s.assetCtx,
+    }),
+  );
+
+  const isPerps = instrumentType === "perps";
 
   const {
     disabled,
@@ -165,6 +169,7 @@ const OrderFormFooter = () => {
       : undefined,
     referencePx: assetCtx?.referencePx ?? 0,
     szDecimals: assetMeta?.szDecimals ?? 0,
+    instrumentType,
   });
 
   const { processing, onPlaceOrder } = usePlaceOrder();
@@ -198,7 +203,7 @@ const OrderFormFooter = () => {
       midPx: assetCtx.midPx,
       assetId: assetMeta.assetId,
       szDecimals: assetMeta.szDecimals,
-      isSpot: !isPerps,
+      instrumentType,
       base: assetMeta.base,
     });
   };

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { InstrumentType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
@@ -30,7 +31,7 @@ interface TradeHistoryEntry {
   fee: number;
   closedPnl: number;
   href: string;
-  type: string;
+  type: InstrumentType;
 }
 
 const columns: ColumnDef<TradeHistoryEntry>[] = [
@@ -167,7 +168,7 @@ const TradeHistory = () => {
         coin: tokenDetails.coin,
         direction,
         feeToken:
-          tokenDetails.type === "outcome" && tokenDetails.quote
+          tokenDetails.type === "prediction" && tokenDetails.quote
             ? tokenDetails.quote
             : fill.feeToken,
         base: tokenDetails.base,
@@ -218,13 +219,13 @@ const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <Visibility visible={data.type !== "outcome"}>
+            <Visibility visible={data.type !== "prediction"}>
               <TokenImage
                 key={data.base + data.coin}
                 name={data.base}
                 coin={data.coin}
                 className="size-4"
-                instrumentType={data.dex === null ? "spot" : "perps"}
+                instrumentType={data.type}
               />
             </Visibility>
             <Link

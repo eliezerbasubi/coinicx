@@ -87,3 +87,17 @@ export const parseOrderPriceWithSlippage = (params: {
 
   return roundToDecimals(priceWithSlippage, params.decimals, "floor");
 };
+
+export const parsePriceToFormat = (
+  amount: string | number,
+  format?: "toCents" | "toHundredths",
+) => {
+  switch (format) {
+    case "toCents":
+      return Number(amount) * 100;
+    case "toHundredths":
+      return Number(amount) / 100;
+    default:
+      return Number(amount);
+  }
+};

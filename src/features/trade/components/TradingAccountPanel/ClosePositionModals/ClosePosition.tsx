@@ -18,6 +18,7 @@ import { useFeeRate } from "@/features/trade/hooks/useUserFees";
 import {
   formatPriceToDecimal,
   formatSize,
+  parsePriceToFormat,
   roundToDecimals,
 } from "@/features/trade/utils";
 
@@ -39,10 +40,6 @@ const TABS = [
   { label: "Market", value: "market" },
   { label: "Limit", value: "limit" },
 ] as const;
-
-const getMidPrice = (midPx: string, pxDecimals: number) => {
-  return roundToDecimals(Number(midPx), pxDecimals, "floor").toString();
-};
 
 const ClosePosition = ({
   position,
@@ -80,12 +77,15 @@ const ClosePositionContent = ({
   variant,
   onSuccess,
 }: ClosePositionContent) => {
+  const isPrediction = variant === "predictions";
+  const midPx = (Number(position.midPx) || Number(position.markPx)).toString();
+
   const [state, dispatch] = useReducer(
     (prev: State, next: Partial<State>) => ({ ...prev, ...next }),
     {
       size: Math.abs(Number(position.szi)).toString(),
       szPercent: 100,
-      limitPrice: getMidPrice(position.midPx, position.pxDecimals),
+      limitPrice: getMidPrice(midPx, position.pxDecimals, isPrediction),
       currentTab: "market",
     },
   );
@@ -101,8 +101,13 @@ const ClosePositionContent = ({
   const entryPrice = Number(position.entryPx);
   const markPrice = Number(position.markPx);
   const closeSize = Math.abs(Number(state.size));
-  const closePrice =
-    state.currentTab === "market" ? markPrice : Number(state.limitPrice);
+
+  const limitPx = parsePriceToFormat(
+    state.limitPrice,
+    isPrediction ? "toHundredths" : undefined,
+  );
+
+  const closePrice = state.currentTab === "market" ? markPrice : limitPx;
 
   // Estimated values
   const closeValue = closeSize * closePrice;
@@ -117,30 +122,40 @@ const ClosePositionContent = ({
   // Limit price validation: prevent closing at a price >10% unfavorable vs mark
   const limitPriceWarning = useMemo(() => {
     if (state.currentTab !== "limit") return null;
-    const limitPrice = Number(state.limitPrice);
-    if (!limitPrice || !markPrice) return null;
+    if (!limitPx || !markPrice) return null;
 
     // Limit price is more than 10% below the mark price
-    if (position.isLong && limitPrice < markPrice * 0.9) {
+    if (position.isLong && limitPx < markPrice * 0.9) {
       return "Price 10% below current price";
     }
     // Limit price is more than 10% above the mark price
-    if (!position.isLong && limitPrice > markPrice * 1.1) {
+    if (!position.isLong && limitPx > markPrice * 1.1) {
       return "Price 10% above current price";
     }
     return null;
-  }, [state.currentTab, state.limitPrice, position.isLong, markPrice]);
+  }, [state.currentTab, limitPx, position.isLong, markPrice]);
 
   const disabled =
     !parseFloat(state.size) ||
-    (state.currentTab === "limit" && !parseFloat(state.limitPrice)) ||
+    (state.currentTab === "limit" && !limitPx) ||
     !!limitPriceWarning ||
     processing;
 
   const onMidClick = () => {
     dispatch({
-      limitPrice: getMidPrice(position.midPx, position.pxDecimals),
+      limitPrice: getMidPrice(midPx, position.pxDecimals, isPrediction),
     });
+  };
+
+  const onLimitPriceChange = (value: string) => {
+    if (isPrediction) {
+      const floatVal = parseFloat(value);
+      if (floatVal > 99.9 || floatVal < 0) return;
+
+      dispatch({ limitPrice: value });
+    } else {
+      dispatch({ limitPrice: value });
+    }
   };
 
   return (
@@ -174,8 +189,11 @@ const ClosePositionContent = ({
             <p className="text-xs text-white font-medium">
               {formatPriceToDecimal(
                 Number(position.entryPx),
-                variant === "predictions" ? 1 : position.pxDecimals,
-                { style: variant === "predictions" ? "cent" : undefined },
+                isPrediction ? 1 : position.pxDecimals,
+                {
+                  style: isPrediction ? "cent" : undefined,
+                  roundingMode: "floor",
+                },
               )}
             </p>
           </div>
@@ -186,8 +204,11 @@ const ClosePositionContent = ({
             <p className="text-xs text-white font-medium">
               {formatPriceToDecimal(
                 Number(position.markPx),
-                variant === "predictions" ? 1 : position.pxDecimals,
-                { style: variant === "predictions" ? "cent" : undefined },
+                isPrediction ? 1 : position.pxDecimals,
+                {
+                  style: isPrediction ? "cent" : undefined,
+                  roundingMode: "floor",
+                },
               )}
             </p>
           </div>
@@ -201,7 +222,7 @@ const ClosePositionContent = ({
               trailing={
                 <div className="flex items-center gap-x-2">
                   <span className="text-neutral-300 text-sm font-medium">
-                    {position.quote}
+                    {isPrediction ? "¢" : position.quote}
                   </span>
 
                   <Button
@@ -214,17 +235,39 @@ const ClosePositionContent = ({
                   </Button>
                 </div>
               }
-              onValueChange={(value) => dispatch({ limitPrice: value })}
+              onValueChange={onLimitPriceChange}
+              onKeyDown={(e) => {
+                if (!isPrediction) return;
+
+                let currentPrice = Number(state.limitPrice) || 0;
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  if (currentPrice < 99.9) {
+                    currentPrice += 0.1;
+                    onLimitPriceChange(currentPrice.toFixed(1));
+                  }
+                }
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  if (currentPrice > 0) {
+                    currentPrice -= 0.1;
+                    onLimitPriceChange(currentPrice.toFixed(1));
+                  }
+                }
+              }}
             />
           </Visibility>
 
           <InputNumberControl
-            label={variant === "predictions" ? "Shares" : "Size"}
+            label={isPrediction ? "Shares" : "Size"}
             trailing={<p className="font-medium text-sm">{position.base}</p>}
             value={state.size}
+            max={Math.abs(Number(position.szi))}
+            labelClassName="text-sm"
+            className="text-sm"
             onValueChange={(value) => {
               const percent = value
-                ? (Number(value) / Number(position.szi)) * 100
+                ? (Number(value) / Math.abs(Number(position.szi))) * 100
                 : 0;
 
               dispatch({
@@ -232,9 +275,6 @@ const ClosePositionContent = ({
                 szPercent: Math.min(Math.floor(percent), 100),
               });
             }}
-            max={position.szi}
-            labelClassName="text-sm"
-            className="text-sm"
           />
           <FormInputSlider
             // showLimiters
@@ -275,7 +315,7 @@ const ClosePositionContent = ({
             closePosition({
               positions: [position],
               closeBy: state.currentTab,
-              limitPrice: state.limitPrice,
+              limitPrice: limitPx.toString(),
               size: state.size,
             })
           }
@@ -286,3 +326,15 @@ const ClosePositionContent = ({
 };
 
 export default ClosePosition;
+
+const getMidPrice = (
+  midPx: string,
+  pxDecimals: number,
+  isPrediction: boolean,
+) => {
+  const mid = parsePriceToFormat(midPx, isPrediction ? "toCents" : undefined);
+
+  const decimals = isPrediction ? 1 : pxDecimals;
+
+  return roundToDecimals(mid, decimals, "floor").toString();
+};

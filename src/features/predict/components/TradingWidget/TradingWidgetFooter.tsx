@@ -11,7 +11,10 @@ import {
   PREDICTIONS_QUOTE_ASSET,
 } from "@/features/predict/lib/constants/predictions";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
-import { buildSideAssetId } from "@/features/predict/lib/utils/outcomes";
+import {
+  buildSideAssetId,
+  convertSpotNameToBalanceCoin,
+} from "@/features/predict/lib/utils/outcomes";
 import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
 
@@ -41,10 +44,15 @@ const TradingWidgetFooter = () => {
 
   const { disabled, isBuyOrder, hasInsufficientMargin, orderValueAndMargin } =
     useOrderForm({
-      spotAsset: { base: marketEvent.coin, quote: PREDICTIONS_QUOTE_ASSET },
+      spotAsset: {
+        base: convertSpotNameToBalanceCoin(
+          marketEvent.sides[predictSideIndex].coin,
+        ),
+        quote: PREDICTIONS_QUOTE_ASSET,
+      },
       referencePx: mid,
       szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
-      isStableCoin: true,
+      instrumentType: "prediction",
     });
 
   const { processing, onPlaceOrder } = usePlaceOrder();
@@ -78,7 +86,7 @@ const TradingWidgetFooter = () => {
       midPx: sideCtx?.midPx ?? 0,
       assetId: buildSideAssetId(marketEvent.outcome, predictSideIndex),
       szDecimals: PREDICTIONS_BASE_SZ_DECIMALS,
-      isSpot: true,
+      instrumentType: "prediction",
       isSzInNtl: false, // Size should not be converted to base size
       base: "Shares",
     });

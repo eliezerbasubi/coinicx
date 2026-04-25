@@ -12,6 +12,8 @@ import CategoricalOutcomes from "./components/CategoricalOutcomes";
 import MarketEventBreadcrumbs from "./components/MarketEventBreadcrumbs";
 import MarketEventChart from "./components/MarketEventChart";
 import MarketEventHeader from "./components/MarketEventHeader";
+import MarketEventOpenOrders from "./components/MarketEventOpenOrders";
+import MarketEventPositions from "./components/MarketEventPositions";
 import MarketRules from "./components/MarketRules";
 import OrderbookAccordion from "./components/OrderbookAccordion";
 
@@ -43,6 +45,8 @@ const MarketEvent = () => {
 
         {/* Orderbook */}
         <Visibility visible={marketEventType !== "categorical"}>
+          <MarketEventPositions className="mt-4" />
+          <MarketEventOpenOrders className="mt-4" />
           <OrderbookAccordion />
         </Visibility>
 

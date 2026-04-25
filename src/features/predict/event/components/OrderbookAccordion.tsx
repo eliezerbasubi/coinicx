@@ -7,12 +7,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
+import { useActiveOutcomeMeta } from "@/features/predict/lib/store/market-event/hooks";
 
 import MarketEventOrderbook from "./MarketEventOrderbook";
 
 const OrderbookAccordion = () => {
-  const marketEventMeta = useMarketEventContext((s) => s.marketEventMeta);
+  const { marketEventMeta } = useActiveOutcomeMeta();
 
   const { predictSideIndex, setPredictSideIndex } = useShallowOrderFormStore(
     (s) => ({
@@ -29,7 +29,7 @@ const OrderbookAccordion = () => {
     >
       <AccordionItem value="orderbook" className="isolate">
         <AccordionTrigger className="p-4 text-white border-0 hover:no-underline [&>svg]:stroke-3 items-center">
-          <p className="text-base font-semibold">Order Book</p>
+          <h3 className="text-base font-semibold">Order Book</h3>
         </AccordionTrigger>
         <AccordionContent className="bg-primary-dark m-px">
           <div className="flex items-center gap-3 px-4">
@@ -49,7 +49,10 @@ const OrderbookAccordion = () => {
               </Button>
             ))}
           </div>
-          <MarketEventOrderbook outcomeSides={marketEventMeta.sides} />
+          <MarketEventOrderbook
+            outcomeCoin={marketEventMeta.coin}
+            outcomeSides={marketEventMeta.sides}
+          />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

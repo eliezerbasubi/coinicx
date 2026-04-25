@@ -168,7 +168,7 @@ const OpenOrders = () => {
       if (tokenDetails.isSpot) {
         direction = order.side === "B" ? "Buy" : "Sell";
 
-        if (tokenDetails.type === "outcome") {
+        if (tokenDetails.type === "prediction") {
           direction += ` ${tokenDetails.base}`;
         }
       }
@@ -246,12 +246,12 @@ const OpenOrderCard = ({ data }: OpenOrderCardProps) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <Visibility visible={data.type !== "outcome"}>
+            <Visibility visible={data.type !== "prediction"}>
               <TokenImage
                 name={data.base}
                 coin={data.coin}
                 className="size-4"
-                instrumentType={data.isSpot ? "spot" : "perps"}
+                instrumentType={data.type}
               />
             </Visibility>
             <Link

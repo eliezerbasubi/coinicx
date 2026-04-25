@@ -31,6 +31,7 @@ type Prediction = {
   midPx: string;
   entryPx: string;
   markPx: string;
+  questionTitle?: string;
   positionValue: number;
   returnOnEquity: number;
   unrealizedPnl: number;
@@ -49,9 +50,14 @@ const columns: ColumnDef<Prediction>[] = [
         <div className="flex flex-col">
           <Link
             href={`${ROUTES.predict.event}/${original.slug}`}
-            className="font-medium hover:underline"
+            className="font-medium hover:underline space-x-1"
           >
-            {original.title}
+            {original.questionTitle && (
+              <span className="text-xs text-neutral-gray-400 line-clamp-1">
+                {original.questionTitle}
+              </span>
+            )}
+            <span>{original.title}</span>
           </Link>
           <div className="flex items-center gap-1 mt-1">
             <Tag
@@ -63,7 +69,6 @@ const columns: ColumnDef<Prediction>[] = [
               <span>
                 {formatNumber(Number(original.entryPx), {
                   style: "cent",
-                  maximumFractionDigits: 1,
                 })}
               </span>
             </Tag>
@@ -99,7 +104,6 @@ const columns: ColumnDef<Prediction>[] = [
         <span>
           {formatNumber(Number(original.entryPx), {
             style: "cent",
-            maximumFractionDigits: 1,
           })}
         </span>
       );
@@ -113,7 +117,6 @@ const columns: ColumnDef<Prediction>[] = [
         <span>
           {formatNumber(Number(original.markPx), {
             style: "cent",
-            maximumFractionDigits: 1,
           })}
         </span>
       );
@@ -198,6 +201,7 @@ const Predictions = () => {
         assetId: buildSideAssetId(outcomeMeta.outcome, outcomeMeta.sideIndex),
         title: outcomeMeta.title,
         underlying: outcomeMeta.recurringPayload?.underlying,
+        questionTitle: outcomeMeta.question?.name,
         slug: outcomeMeta.slug,
         outcome: outcomeMeta.outcome,
         sideIndex: outcomeMeta.sideIndex,
@@ -273,7 +277,7 @@ type PredictionCardProps = {
 const PredictionCard = ({ data }: PredictionCardProps) => {
   return (
     <div className="w-full p-3 bg-neutral-gray-600 rounded-lg">
-      <div className="flex items-center justify-between gap-x-4 mb-1">
+      <div className="flex items-center justify-between gap-x-4 mb-1.5">
         <div className="flex flex-col">
           <div className="flex items-center gap-x-1 mr-1">
             <Visibility visible={!!data.underlying}>
@@ -284,7 +288,12 @@ const PredictionCard = ({ data }: PredictionCardProps) => {
               />
             </Visibility>
             <p className="text-sm text-neutral-gray-100 font-medium line-clamp-2">
-              {data.title}
+              {data.questionTitle && (
+                <span className="text-xs text-neutral-gray-400 line-clamp-1">
+                  {data.questionTitle}
+                </span>
+              )}
+              <span>{data.title}</span>
             </p>
           </div>
           <div className="flex items-center gap-1 mt-1">
@@ -301,7 +310,7 @@ const PredictionCard = ({ data }: PredictionCardProps) => {
                 })}
               </span>
             </Tag>
-            <p className="text-xs space-x-1 text-neutral-gray-400">
+            <p className="text-xs space-x-1 text-neutral-gray-400 font-medium">
               <span>{formatNumber(Number(data.szi))}</span>
               <span>shares</span>
             </p>
@@ -365,7 +374,17 @@ const ClosePositionButton = ({
       title={
         <div className="flex flex-col">
           <p className="text-white font-medium text-sm">Close Position</p>
-          <p className="text-sm text-neutral-gray-400 line-clamp-2 mt-1 font-normal">
+          {data.questionTitle && (
+            <p className="text-xs text-neutral-gray-400 line-clamp-1 mt-1 font-medium">
+              {data.questionTitle}
+            </p>
+          )}
+          <p
+            className={cn(
+              "text-sm text-neutral-gray-400 line-clamp-2 mt-1 font-normal",
+              { "text-white": !!data.questionTitle },
+            )}
+          >
             {data.title}
           </p>
         </div>

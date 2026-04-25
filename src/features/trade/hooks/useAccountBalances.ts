@@ -7,7 +7,7 @@ import {
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { SpotBalance } from "@/lib/types/trade";
 import {
-  convertCoinToSpotName,
+  convertBalanceCoinToSpotName,
   isOutcomeCoin,
 } from "@/features/predict/lib/utils/outcomes";
 
@@ -124,7 +124,7 @@ export const useAccountSpotBalances = (
       // Add to spot equity, total shares and total shares usd value
       // Skip adding to balances array
       if (isOutcomeCoin(balance.coin)) {
-        const spotName = convertCoinToSpotName(balance.coin);
+        const spotName = convertBalanceCoinToSpotName(balance.coin);
 
         if (!spotName) continue;
 
@@ -134,17 +134,18 @@ export const useAccountSpotBalances = (
 
         const markPx = Number(ctx?.markPx || "1");
         const shares = Number(balance.total);
+        const entryNtl = Number(balance.entryNtl);
 
         spotEquity += shares * markPx;
         totalShares += shares;
         totalSharesUsdValue += shares * markPx;
 
-        const positionValue = Number(balance.total) * markPx;
+        const positionValue = shares * markPx;
 
-        const hasEntryPx = Number(balance.entryNtl) > 0;
-        const pnl = hasEntryPx ? positionValue - Number(balance.entryNtl) : 0;
-        const roe = hasEntryPx ? pnl / Number(balance.entryNtl) : 0;
-        const entryPx = hasEntryPx ? Number(balance.entryNtl) / shares : 0;
+        const hasEntryPx = entryNtl > 0;
+        const pnl = hasEntryPx ? positionValue - entryNtl : 0;
+        const roe = hasEntryPx ? pnl / entryNtl : 0;
+        const entryPx = hasEntryPx ? entryNtl / shares : 0;
 
         predictions.push({
           shares,

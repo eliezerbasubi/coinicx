@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
+import { useAccount } from "wagmi";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { hlSubClient } from "@/lib/services/transport";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription, useSubscriptions } from "@/hooks/useSubscription";
+
+import { useUserPredictionStore } from "../lib/store/user-prediction";
 
 type Props = {
   children: React.ReactNode;
@@ -54,6 +57,9 @@ type SettleOutcomeSpec = {
 };
 
 const PredictionMarketsSubsProvider = ({ children }: Props) => {
+  const { address } = useAccount();
+
+  // Subscribe to outcome meta updates
   useSubscription(() => {
     const queryClient = getQueryClient();
 

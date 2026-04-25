@@ -1,6 +1,7 @@
 import { createContext } from "react";
 import { create } from "zustand";
 
+import { useOrderFormStore } from "@/lib/store/trade/order-form";
 import { MarketEventCtx, MarketEventMeta } from "@/features/predict/lib/types";
 
 type MarketEventState = {
@@ -14,6 +15,9 @@ type MarketEventState = {
   chartOutcomeSideIndex: number;
 
   tradingWidgetDrawerOpen: boolean;
+
+  /** Controls whether the trading widget should be reset when the market event is mounted. @default true */
+  resetTradingWidgetOnMount?: boolean;
 };
 
 export type MarketEventStoreProps = {
@@ -23,10 +27,14 @@ export type MarketEventStoreProps = {
 type MarketEventActions = {
   /** Returns the current state of the store */
   getState: () => MarketEventState;
-  openTradingWidgetDrawer: (open: boolean) => void;
+  openTradingWidgetDrawer: (
+    open: boolean,
+    opts?: { resetOnMount?: boolean },
+  ) => void;
   setActiveOutcomeIndex: (outcomeIndex: number) => void;
   setMarketEventCtx: (marketEventCtx: MarketEventCtx) => void;
   setChartOutcomeSideIndex: (sideIndex: number) => void;
+  setOutcomeSideIndex: (sideIndex: number) => void;
 };
 
 export type MarketEventStoreState = MarketEventState & MarketEventActions;
@@ -46,6 +54,7 @@ export const createMarketEventStore = (initialProps: MarketEventStoreProps) => {
     activeOutcomeIndex: initialProps.categoricalOutcomeIndex ?? 0,
     chartOutcomeSideIndex: 0,
     tradingWidgetDrawerOpen: false,
+    resetTradingWidgetOnMount: true,
     marketEventCtx: {
       openInterest: 0,
       volume: 0,
@@ -53,12 +62,42 @@ export const createMarketEventStore = (initialProps: MarketEventStoreProps) => {
       outcomes: [],
     },
     getState: () => get(),
-    openTradingWidgetDrawer: (open: boolean) =>
-      set({ tradingWidgetDrawerOpen: open }),
+    openTradingWidgetDrawer: (open, opts) => {
+      set({
+        tradingWidgetDrawerOpen: open,
+        resetTradingWidgetOnMount: opts?.resetOnMount ?? true,
+      });
+    },
     setMarketEventCtx: (marketEventCtx: MarketEventCtx) =>
       set({ marketEventCtx }),
-    setActiveOutcomeIndex: (index: number) =>
-      set({ activeOutcomeIndex: index }),
+    setActiveOutcomeIndex: (index) => {
+      const { marketEventCtx } = get();
+
+      set({ activeOutcomeIndex: index });
+
+      // Set limit price of the current outcome
+      const sideIndex = useOrderFormStore.getState().predictSideIndex;
+
+      const sideCtx = marketEventCtx.outcomes[index].sides[sideIndex];
+      const mid = sideCtx?.midPx || sideCtx.markPx;
+
+      useOrderFormStore.getState().onMidClick(Number(mid) * 100);
+    },
+    setOutcomeSideIndex: (sideIndex) => {
+      const { marketEventCtx, activeOutcomeIndex } = get();
+
+      useOrderFormStore.getState().setPredictSideIndex(sideIndex);
+
+      // Set limit price of the current outcome
+      const sidesCtxs =
+        marketEventCtx.outcomes[activeOutcomeIndex]?.sides ??
+        marketEventCtx.sides;
+
+      const sideCtx = sidesCtxs[sideIndex];
+      const mid = sideCtx?.midPx || sideCtx.markPx;
+
+      useOrderFormStore.getState().onMidClick(Number(mid) * 100);
+    },
     setChartOutcomeSideIndex: (sideIndex: number) =>
       set({ chartOutcomeSideIndex: sideIndex }),
   }));

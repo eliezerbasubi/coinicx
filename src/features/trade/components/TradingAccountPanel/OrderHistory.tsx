@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { InstrumentType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
@@ -32,7 +33,7 @@ type HistoricalOrder = {
   triggerCondition: string;
   status: string;
   symbol: string;
-  type: string;
+  type: InstrumentType;
 };
 
 const columns: ColumnDef<HistoricalOrder>[] = [
@@ -185,7 +186,7 @@ const OrderHistory = () => {
         if (tokenDetails.isSpot) {
           direction = order.side === "B" ? "Buy" : "Sell";
 
-          if (tokenDetails.type === "outcome") {
+          if (tokenDetails.type === "prediction") {
             direction += ` ${tokenDetails.base}`;
           }
         }
@@ -252,13 +253,13 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
       <div className="flex items-center justify-between gap-x-2 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <Visibility visible={data.type !== "outcome"}>
+            <Visibility visible={data.type !== "prediction"}>
               <TokenImage
                 key={data.base + data.coin}
                 name={data.base}
                 coin={data.coin}
                 className="size-4"
-                instrumentType={data.dex === null ? "spot" : "perps"}
+                instrumentType={data.type}
               />
             </Visibility>
             <CoinLink symbol={data.symbol} dex={data.dex} href={data.href} />

@@ -5,6 +5,7 @@ import { FixedSizeList } from "react-window";
 import { OrderBookType, PriceLevel } from "@/lib/types/orderbook";
 import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
+import Tag from "@/components/ui/tag";
 
 const ROW_HEIGHT = 36;
 const VISIBLE_ROWS = 8;
@@ -12,9 +13,14 @@ const VISIBLE_ROWS = 8;
 const MarketEventOrderBookList = ({
   items,
   type,
+  openOrder,
 }: {
   items: PriceLevel[];
   type: OrderBookType;
+  openOrder?: {
+    shares: number | null;
+    avgEntryPx: number | null;
+  };
 }) => {
   const containerHeight = VISIBLE_ROWS * ROW_HEIGHT;
 
@@ -61,6 +67,7 @@ const MarketEventOrderBookList = ({
             progress={progress}
             style={style}
             type={type}
+            openOrder={openOrder}
             showLabelType={
               type === "bids" ? index === 0 : index === data.length - 1
             }
@@ -72,7 +79,7 @@ const MarketEventOrderBookList = ({
       // React-window will consider these fragments as items but they won't be rendered as elements on the DOM
       return <React.Fragment key={index} />;
     },
-    [],
+    [openOrder],
   );
 
   const List = useCallback(
@@ -118,6 +125,7 @@ const OrderBookTableRow = ({
   progress,
   style,
   showLabelType,
+  openOrder,
 }: {
   price: number;
   amount: number;
@@ -125,6 +133,10 @@ const OrderBookTableRow = ({
   type: OrderBookType;
   style?: React.CSSProperties;
   showLabelType?: boolean;
+  openOrder?: {
+    shares: number | null;
+    avgEntryPx: number | null;
+  };
 }) => {
   const cappedProgress = Math.min(progress, 1);
   const xPos = Math.round(-100 + cappedProgress * 100);
@@ -155,7 +167,19 @@ const OrderBookTableRow = ({
           )}
         />
       </div>
-      <div className="h-full flex items-center justify-center px-2">
+      <div className="h-full flex items-center justify-center px-2 relative">
+        {(openOrder?.avgEntryPx === price && (
+          <Tag
+            className={cn(
+              "text-buy bg-buy/10 space-x-0.5 font-semibold text-xs size-fit absolute left-2",
+              {
+                "text-sell bg-sell/10": type === "asks",
+              },
+            )}
+          >
+            {formatNumber(openOrder.shares || 0)} shares
+          </Tag>
+        )) || <span />}
         <p
           className={cn("text-sm font-medium text-buy", {
             "text-sell": type === "asks",

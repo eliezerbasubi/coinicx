@@ -5,9 +5,9 @@ import { useShallowInstrumentStore } from "@/lib/store/trade/instrument";
 import { useMarketEventContext } from "../lib/store/market-event/hooks";
 import { MarketEventMetaSide } from "../lib/types";
 
-// We separate context from meta to avoid unnecessary renders
 const MarketEventCtxProvider = () => {
   const spotAssetCtxs = useShallowInstrumentStore((s) => s.spotAssetCtxs);
+
   const { marketEventMeta, setMarketEventCtx } = useMarketEventContext((s) => ({
     marketEventMeta: s.marketEventMeta,
     setMarketEventCtx: s.setMarketEventCtx,
