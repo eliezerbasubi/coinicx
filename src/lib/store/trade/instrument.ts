@@ -5,18 +5,28 @@ import {
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
+export type SpotAssetCtx = Record<string, SpotAssetCtxsWsEvent[number]>;
+
 interface InstrumentStoreState {
-  spotAssetCtxs: SpotAssetCtxsWsEvent;
+  spotAssetCtxs: SpotAssetCtx;
   allDexsAssetCtxs: AllDexsAssetCtxsWsEvent["ctxs"];
   applySpotAssetCtxs: (data: SpotAssetCtxsWsEvent) => void;
   applyAllDexsAssetCtxs: (data: AllDexsAssetCtxsWsEvent["ctxs"]) => void;
 }
 
 export const useInstrumentStore = create<InstrumentStoreState>()((set) => ({
-  spotAssetCtxs: [],
+  spotAssetCtxs: {},
   allDexsAssetCtxs: [],
   applySpotAssetCtxs(data) {
-    set({ spotAssetCtxs: data });
+    const spotAssetCtxs = data.reduce(
+      (acc, curr) => {
+        acc[curr.coin] = curr;
+        return acc;
+      },
+      {} as Record<string, SpotAssetCtxsWsEvent[number]>,
+    );
+
+    set({ spotAssetCtxs });
   },
   applyAllDexsAssetCtxs(data) {
     set({ allDexsAssetCtxs: data });

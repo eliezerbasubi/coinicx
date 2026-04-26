@@ -6,8 +6,8 @@ import { hlInfoClient, hlSubClient } from "@/lib/services/transport";
 import { useChartSettingsStore } from "@/lib/store/trade/chart-settings";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
+import { getChartTimeRange } from "@/lib/utils/intervalFormatter";
 import { useTradeContext } from "@/features/trade/store/hooks";
-import { getChartTimeRange } from "@/features/trade/utils";
 
 import KlineTooltipTitle from "./KlineTooltipTitle";
 import KlineVolIndicatorTitle from "./KlineVolIndicatorTitle";

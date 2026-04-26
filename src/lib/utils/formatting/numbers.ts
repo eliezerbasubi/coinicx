@@ -4,18 +4,32 @@ export type FormatOptions = {
   useFallback?: boolean;
   fallback?: string;
   symbol?: string | null;
-} & Intl.NumberFormatOptions;
+} & Omit<Intl.NumberFormatOptions, "style"> & {
+    style?: Intl.NumberFormatOptions["style"] | "cent";
+  };
 
 export const formatNumber = (value: number, options?: FormatOptions) => {
-  const { locale, useSign, useFallback, fallback, symbol, ...rest } =
+  const { locale, useSign, useFallback, fallback, symbol, style, ...rest } =
     options ?? {};
 
-  const formatted = value.toLocaleString(locale ?? "en-US", {
+  let formattedValue = value;
+
+  if (style === "cent") {
+    formattedValue = value * 100;
+  }
+
+  const formatted = formattedValue.toLocaleString(locale ?? "en-US", {
+    maximumFractionDigits: style === "cent" ? 1 : undefined,
     ...rest,
+    style: style === "cent" ? undefined : style,
     currency: rest.currency ?? "USD",
   });
 
-  const suffix = symbol ? ` ${symbol}` : "";
+  let suffix = symbol ? ` ${symbol}` : "";
+
+  if (style && style === "cent") {
+    suffix = "¢";
+  }
 
   if (useFallback && (!value || !Number.isFinite(value))) {
     return (fallback ?? "--") + suffix;

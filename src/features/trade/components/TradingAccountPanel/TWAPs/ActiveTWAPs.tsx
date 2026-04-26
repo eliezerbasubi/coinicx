@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
@@ -39,7 +40,7 @@ const columns: ColumnDef<ActiveTwap>[] = [
     cell({ row: { original } }) {
       return (
         <span>
-          {formatNumber(Number(original.sz))} {original.coin}
+          {formatNumber(Number(original.sz))} {original.base}
         </span>
       );
     },
@@ -50,7 +51,7 @@ const columns: ColumnDef<ActiveTwap>[] = [
     cell({ row: { original } }) {
       return (
         <span className="text-buy">
-          {formatNumber(Number(original.executedSz))} {original.coin}
+          {formatNumber(Number(original.executedSz))} {original.base}
         </span>
       );
     },
@@ -128,7 +129,7 @@ const columns: ColumnDef<ActiveTwap>[] = [
 
 const ActiveTWAPs = () => {
   const isMobile = useIsMobile();
-  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
+  const { isLoading, mapSpotNameToTokenDetails } = useSpotToTokenDetails();
 
   const twaps = useShallowUserTradeStore((s) => s.twapStates.twaps);
 
@@ -147,6 +148,7 @@ const ActiveTWAPs = () => {
         coin: tokenDetails.coin,
         href: tokenDetails.href,
         isSpot: tokenDetails.isSpot,
+        type: tokenDetails.type,
         averagePx: avgPx,
         side: twap.side,
         executedSz,
@@ -180,7 +182,7 @@ const ActiveTWAPs = () => {
       <AdaptiveDataTable
         columns={columns}
         data={sortedData}
-        loading={false}
+        loading={isLoading}
         initialState={{
           pagination: {
             pageIndex: 0,
@@ -211,14 +213,21 @@ const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <TokenImage
-              name={data.base}
-              className="size-4"
-              instrumentType="perps"
-            />
-            <span className="text-sm text-neutral-gray-100 font-medium line-clamp-1">
-              {data.base}
-            </span>
+            <Visibility visible={data.type !== "outcome"}>
+              <TokenImage
+                key={data.base + data.coin}
+                name={data.base}
+                coin={data.coin}
+                className="size-4"
+                instrumentType={data.type === "spot" ? "spot" : "perps"}
+              />
+            </Visibility>
+            <Link
+              href={data.href}
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-1 hover:text-primary"
+            >
+              {data.symbol}
+            </Link>
           </div>
           {data.dex && <Tag value={data.dex} />}
           <Tag
@@ -242,11 +251,11 @@ const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
       <div className="w-full grid grid-cols-4 gap-2 text-sm">
         <CardItem
           label="Size"
-          value={formatNumber(Number(data.sz), { symbol: data.coin })}
+          value={formatNumber(Number(data.sz), { symbol: data.base })}
         />
         <CardItem
           label="Executed Size"
-          value={formatNumber(data.executedSz, { symbol: data.coin })}
+          value={formatNumber(data.executedSz, { symbol: data.base })}
         />
         <CardItem
           label="Average Price"

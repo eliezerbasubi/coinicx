@@ -55,7 +55,7 @@ const TradingPairSubsProvider = ({ children }: Props) => {
     if (!coin) return;
 
     const { nSigFigs, mantissa } = getNSigFigsAndMantissa(tickSize);
-
+    // Issue introduced in @nktkas/hyperliquid v0.32.2
     // @ts-expect-error
     return hlSubClient.l2Book({ coin, nSigFigs, mantissa }, (data) => {
       useOrderBookStore

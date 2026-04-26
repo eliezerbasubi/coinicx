@@ -9,9 +9,13 @@ import {
 
 export type ChartType = "standard" | "tradingView" | "depth";
 
+export type ChartView = "line" | "candlestick";
+
 export type MobileViewTab = "home" | "markets" | "trade" | "account";
 
 export type MarketAreaTabValue = "chart" | "orderbook" | "info";
+
+export type CandleSnapshotInterval = CandleSnapshotParameters["interval"];
 
 export type ChartIntervalType =
   | "second"
@@ -26,7 +30,7 @@ export interface ChartInterval {
   type: ChartIntervalType;
   span: number;
   listed?: boolean;
-  value: CandleSnapshotParameters["interval"];
+  value: CandleSnapshotInterval;
 }
 
 export type OrderType =
@@ -41,9 +45,7 @@ export type OrderSide = "buy" | "sell";
 
 export type OrderFormLimitOffsetType = "offset" | "pnl";
 
-export type TradeType = "spot" | "isolated" | "cross" | "grid";
-
-export type InstrumentType = "spot" | "perps";
+export type InstrumentType = "spot" | "perps" | "prediction";
 
 export type ScaleDistribution = "equal" | "increasing" | "decreasing";
 
@@ -122,19 +124,6 @@ export type Asset = {
   marketCap: number | null;
 };
 
-export type Order = {
-  assetId: number;
-  side: OrderSide;
-  type: OrderType | "stopLoss" | "takeProfit";
-  price: string | number;
-  size: string;
-  reduceOnly?: boolean;
-  timeInForce?: TimeInForce;
-  triggerPrice?: string;
-  isMarket?: boolean;
-  clientOrderId?: string;
-};
-
 export type MarginTier = {
   lowerBound: number;
   upperBound?: number;
@@ -185,6 +174,7 @@ export type OpenOrder = {
   isSpot: boolean;
   triggerCondition: string;
   triggerPx: string;
+  type: InstrumentType;
   oid: number;
   cloid: `0x${string}` | null;
 };
@@ -205,13 +195,24 @@ export type ActiveTwap = {
   sz: number;
   timestamp: number;
   isSpot: boolean;
+  type: string;
 };
 
 export type SpotMetas = {
   spotMeta: SpotMetaResponse;
+  /** Map of token name to universe index */
   tokenNamesToUniverseIndex: Map<string, Map<string, number>>;
+
+  /** Map of spot name to token indices */
   spotNamesToTokens: Map<string, { baseToken: number; quoteToken: number }>;
-  tokensToSpotId: Map<number, Map<number, number>>;
+
+  /** Map of token indices to spot id and spot name.
+   *  The first map key is the base token index, the second map key is the quote token index.
+   */
+  tokenIndicesToSpot: Map<
+    number,
+    Map<number, { spotId: number; spotName: string }>
+  >;
 };
 
 export type AccountActivity = {

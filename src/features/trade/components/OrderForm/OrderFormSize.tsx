@@ -11,12 +11,16 @@ import OrderFormInput from "./OrderFormInput";
 import SizeCoinSelector from "./SizeCoinSelector";
 
 const OrderFormSize = () => {
-  const { isSpot, base, quote, getState } = useTradeContext((s) => ({
-    isSpot: s.instrumentType === "spot",
-    base: s.assetMeta.base,
-    quote: s.assetMeta.quote,
-    getState: s.getState,
-  }));
+  const { isSpot, base, quote, szDecimals, getState } = useTradeContext(
+    (s) => ({
+      isSpot: s.instrumentType === "spot",
+      base: s.assetMeta.base,
+      quote: s.assetMeta.quote,
+      szDecimals: s.assetMeta.szDecimals,
+      getState: s.getState,
+    }),
+  );
+
   const { szPercent, size } = useShallowOrderFormStore((s) => ({
     szPercent: s.szPercent,
     size: s.size,
@@ -34,34 +38,37 @@ const OrderFormSize = () => {
         trailing={
           <SizeCoinSelector
             onValueChange={(isNtl) => {
-              const { assetCtx, assetMeta } = getState();
+              const midPx = getState().assetCtx.midPx;
+
               useOrderFormStore.getState().onSizeCoinChange({
                 isNtl,
-                midPx: assetCtx.midPx,
-                szDecimals: assetMeta.szDecimals,
+                midPx,
+                szDecimals,
                 spotAsset,
               });
             }}
           />
         }
         onChange={(e) => {
-          const { assetCtx } = getState();
+          const midPx = getState().assetCtx.midPx;
+
           useOrderFormStore.getState().onSizeChange({
             size: e.target.value,
             spotAsset,
-            midPx: assetCtx.midPx,
+            midPx,
           });
         }}
       />
       <FormInputSlider
         value={szPercent}
         onValueChange={(value) => {
-          const { assetCtx, assetMeta } = getState();
+          const midPx = getState().assetCtx.midPx;
+
           useOrderFormStore.getState().onPercentChange({
             percent: value,
             spotAsset,
-            szDecimals: assetMeta.szDecimals,
-            midPx: assetCtx.midPx,
+            szDecimals,
+            midPx,
           });
         }}
       />

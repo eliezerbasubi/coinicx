@@ -14,7 +14,7 @@ import {
 } from "@/features/trade/utils";
 import { isStopLoss, isTakeProfit } from "@/features/trade/utils/orderTypes";
 
-import CloseAllPositions from "./CloseAllPositions";
+import CloseAllPositions from "../ClosePositionModals/CloseAllPositions";
 import { POSITION_COLUMNS } from "./Columns";
 import PositionCard from "./PositionCard";
 

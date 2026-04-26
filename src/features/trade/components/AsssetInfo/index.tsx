@@ -1,7 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { TRANSPORT_URL } from "@/lib/services/transport";
+import { hlInfoClient } from "@/lib/services/transport";
 import { cn } from "@/lib/utils/cn";
 import { formatAddress } from "@/lib/utils/formatting/formatAddress";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
@@ -16,26 +16,10 @@ const AssetInfo = () => {
   }));
 
   const { data } = useQuery({
+    enabled: !!tokenMeta && !!tokenMeta.dex && !!tokenMeta.coin,
     queryKey: ["perpAnnotation", tokenMeta.coin],
-    enabled: !!tokenMeta && !!tokenMeta.dex,
     staleTime: Infinity,
-    queryFn: async () => {
-      // Temporary implementation until the SDK adds the perpAnnotation method
-      const response = await fetch(TRANSPORT_URL, {
-        body: JSON.stringify({
-          type: "perpAnnotation",
-          coin: tokenMeta?.coin ?? "",
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-      });
-      return response.json() as Promise<{
-        category: string;
-        description: string;
-      }>;
-    },
+    queryFn: () => hlInfoClient.perpAnnotation({ coin: tokenMeta?.coin ?? "" }),
   });
 
   if (!tokenMeta) return null;

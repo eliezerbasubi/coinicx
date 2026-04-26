@@ -10,19 +10,8 @@ import { cn } from "@/lib/utils/cn";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Visibility from "@/components/common/Visibility";
 import AdaptiveTooltip from "@/components/ui/adaptive-tooltip";
+import { SUPPORTED_ORDER_TYPES } from "@/features/trade/constants";
 import { useTradeContext } from "@/features/trade/store/hooks";
-
-const SUPPORTED_ORDER_TYPES: Record<
-  OrderType,
-  { label: string; value: OrderType; perpsOnly?: boolean; featured?: boolean }
-> = {
-  market: { label: "Market", value: "market", featured: true },
-  limit: { label: "Limit", value: "limit", featured: true },
-  stopLimit: { label: "Stop Limit", value: "stopLimit", perpsOnly: true },
-  stopMarket: { label: "Stop Market", value: "stopMarket", perpsOnly: true },
-  scale: { label: "Scale", value: "scale" },
-  twap: { label: "TWAP", value: "twap" },
-};
 
 const FEATURED_ORDER_TYPES = [
   SUPPORTED_ORDER_TYPES.market,

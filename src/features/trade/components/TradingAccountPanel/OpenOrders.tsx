@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
@@ -166,6 +167,10 @@ const OpenOrders = () => {
       // Spot state
       if (tokenDetails.isSpot) {
         direction = order.side === "B" ? "Buy" : "Sell";
+
+        if (tokenDetails.type === "prediction") {
+          direction += ` ${tokenDetails.base}`;
+        }
       }
 
       const sz = Number(order.sz);
@@ -181,6 +186,7 @@ const OpenOrders = () => {
         symbol: tokenDetails.symbol,
         coin: tokenDetails.coin,
         isSpot: tokenDetails.isSpot,
+        type: tokenDetails.type,
         side: order.side,
         sz,
         price,
@@ -240,15 +246,20 @@ const OpenOrderCard = ({ data }: OpenOrderCardProps) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <TokenImage
-              name={data.base}
-              coin={data.coin}
-              className="size-4"
-              instrumentType="perps"
-            />
-            <span className="text-sm text-neutral-gray-100 font-medium line-clamp-1">
-              {data.base}
-            </span>
+            <Visibility visible={data.type !== "prediction"}>
+              <TokenImage
+                name={data.base}
+                coin={data.coin}
+                className="size-4"
+                instrumentType={data.type}
+              />
+            </Visibility>
+            <Link
+              href={data.href}
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-1 hover:text-primary"
+            >
+              {data.symbol}
+            </Link>
           </div>
           {data.dex && <Tag value={data.dex} />}
           <Tag

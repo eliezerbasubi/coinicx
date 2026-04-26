@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+import { isTestnet } from "@/lib/services/transport";
 import {
   usePreferencesStore,
   useShallowPreferencesStore,
@@ -8,6 +9,7 @@ import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
 import { cn } from "@/lib/utils/cn";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { isOutcomeCoin } from "@/features/predict/lib/utils/outcomes";
 import AuthenticatedContent from "@/features/trade/components/AuthenticatedContent";
 
 import Balances from "./Balances";
@@ -16,12 +18,14 @@ import FundingHistory from "./FundingHistory";
 import OpenOrders from "./OpenOrders";
 import OrderHistory from "./OrderHistory";
 import Positions from "./Positions";
+import Predictions from "./Predictions";
 import TradeHistory from "./TradeHistory";
 import Twaps from "./TWAPs";
 
 type TabValue =
   | "balances"
   | "positions"
+  | "predictions"
   | "openOrders"
   | "twap"
   | "orderHistory"
@@ -34,6 +38,7 @@ type Tab = { label: string; value: TabValue; counter?: string };
 const TABS: Tab[] = [
   { label: "Balances", value: "balances" },
   { label: "Positions", value: "positions", counter: "positionsCount" },
+  { label: "Predictions", value: "predictions", counter: "predictionsCount" },
   { label: "Open Orders", value: "openOrders", counter: "openOrdersCount" },
   { label: "TWAP", value: "twap", counter: "twapsCount" },
   { label: "Order History", value: "orderHistory" },
@@ -59,6 +64,9 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
     openOrdersCount: s.openOrders.length,
     positionsCount: s.allDexsClearinghouseState?.assetPositions.length || 0,
     twapsCount: s.twapStates.twaps.length,
+    predictionsCount: s.spotBalances.filter(
+      (b) => isOutcomeCoin(b.coin) && Number(b.total) > 0,
+    ).length,
   }));
 
   const scrollTabIntoView = (element: Element | null) => {
@@ -120,6 +128,8 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
           )}
         >
           {TABS.map((tab) => {
+            // TODO: REMOVE THIS LINE ONCE PREDICTIONS ARE ON MAINNET
+            if (tab.value === "predictions" && !isTestnet) return null;
             if (excludeTabs && excludeTabs.includes(tab.value)) return null;
 
             return (
@@ -160,6 +170,12 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
             className="overflow-auto [&::-webkit-scrollbar]:h-1"
           >
             <Positions />
+          </TabsContent>
+          <TabsContent
+            value="predictions"
+            className="overflow-auto [&::-webkit-scrollbar]:h-1"
+          >
+            <Predictions />
           </TabsContent>
           <TabsContent
             value="openOrders"

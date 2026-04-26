@@ -116,8 +116,16 @@ export const buildSpotAssetId = (spotId: number) => {
 export const mapDataToSpotMetas = (data: SpotMetaResponse) => {
   const tokenNamesToUniverseIndex = new Map<string, Map<string, number>>();
   const spotNamesToTokens = new Map() as SpotMetas["spotNamesToTokens"];
-  const tokensToSpotId = new Map<number, Map<number, number>>();
+  const tokenIndicesToSpot = new Map() as SpotMetas["tokenIndicesToSpot"];
 
+  if (!data) {
+    return {
+      tokenNamesToUniverseIndex,
+      tokenIndicesToSpot,
+      spotNamesToTokens,
+      spotMeta: data,
+    };
+  }
   for (let index = 0; index < data.universe.length; index++) {
     const universe = data.universe[index];
     const [baseIndex, quoteIndex] = universe.tokens;
@@ -151,17 +159,22 @@ export const mapDataToSpotMetas = (data: SpotMetaResponse) => {
       .get(baseTokenMeta.name)
       ?.set(quoteTokenMeta.name, index);
 
-    /** Map token indexes to spot index */
-    if (!tokensToSpotId.has(baseIndex)) {
-      tokensToSpotId.set(baseIndex, new Map<number, number>());
+    /** Map token indices to spot index */
+    if (!tokenIndicesToSpot.has(baseIndex)) {
+      tokenIndicesToSpot.set(
+        baseIndex,
+        new Map<number, { spotId: number; spotName: string }>(),
+      );
     }
 
-    tokensToSpotId.get(baseIndex)?.set(quoteIndex, universe.index);
+    tokenIndicesToSpot
+      .get(baseIndex)
+      ?.set(quoteIndex, { spotId: universe.index, spotName: universe.name });
   }
 
   return {
     tokenNamesToUniverseIndex,
-    tokensToSpotId,
+    tokenIndicesToSpot,
     spotNamesToTokens,
     spotMeta: data,
   };

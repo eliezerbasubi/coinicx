@@ -2,27 +2,40 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useWebHaptics } from "web-haptics/react";
 
-import { Position } from "@/lib/types/trade";
 import { useAgentClient } from "@/hooks/useAgentClient";
-
 import {
   calculateSlippageAdjustedPrice,
   formatSize,
   getPriceDecimals,
   roundToDecimals,
-} from "../utils";
-import { buildOrder, getBuilder } from "../utils/orders";
+} from "@/features/trade/utils";
+import { getBuilder } from "@/features/trade/utils/builder";
+import { buildOrder } from "@/features/trade/utils/orders";
 
 const toastId = "close-position";
 
+export type ClosingPosition = {
+  assetId: number;
+  midPx: string;
+  markPx: string;
+  entryPx: string;
+  szi: string;
+  isLong: boolean;
+  base?: string;
+  quote?: string;
+  pxDecimals: number;
+  szDecimals: number;
+};
+
 type ClosePositionParams = {
-  positions: Position[];
+  positions: ClosingPosition[];
   limitPrice?: string;
   size?: string;
   closeBy: "market" | "limit";
 };
 
 type UseClosePositionArgs = {
+  variant?: "perps" | "predictions";
   onSuccess?: () => void;
 };
 
@@ -43,7 +56,7 @@ export const useClosePosition = (args?: UseClosePositionArgs) => {
 
     const orders = positions.map((position) => {
       const limitPrice = userLimitPx || position.midPx;
-      const size = userOrderSize || position.szi;
+      const rawSize = userOrderSize || position.szi;
 
       const entryPrice = isMarket
         ? calculateSlippageAdjustedPrice({
@@ -54,18 +67,22 @@ export const useClosePosition = (args?: UseClosePositionArgs) => {
 
       const decimals = getPriceDecimals(entryPrice, position.szDecimals, false);
 
-      const parsedSize = Math.abs(parseFloat(size));
-      const orderValue = parsedSize * Number(position.markPx);
+      const absSize = Math.abs(Number(position.szi));
+      const size = Number(rawSize) > absSize ? absSize : Number(rawSize);
+
+      const orderValue = size * Number(position.markPx);
 
       if (orderValue < 10) {
         throw new Error("Order must have a minimum value of 10 USD");
       }
 
+      const variant = args?.variant ?? "perps";
+
       return buildOrder({
         assetId: position.assetId,
         price: roundToDecimals(entryPrice, decimals, "floor").toString(),
-        size: formatSize(parsedSize, position.szDecimals),
-        reduceOnly: true,
+        size: formatSize(size, position.szDecimals),
+        reduceOnly: variant === "perps",
         side: position.isLong ? "sell" : "buy",
         type: closeBy,
       });

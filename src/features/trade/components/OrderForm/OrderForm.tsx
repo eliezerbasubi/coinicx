@@ -16,8 +16,8 @@ import { useOrderForm } from "@/features/trade/hooks/useOrderForm";
 import { usePlaceOrder } from "@/features/trade/hooks/usePlaceOrder";
 import { useTradeContext } from "@/features/trade/store/hooks";
 import { isExecutionOrder } from "@/features/trade/utils/orderTypes";
+import { isUSDCQuote } from "@/features/trade/utils/shared";
 
-import { isUSDCQuote } from "../../utils/shared";
 import AdjustTradeSettings from "./AdjustTradeSettings";
 import AvailableBalance from "./AvailableBalance";
 import ExecutionOrderForm from "./ExecutionOrderForm";
@@ -144,6 +144,17 @@ const OrderFormSides = () => {
 };
 
 const OrderFormFooter = () => {
+  const { instrumentType, quote, assetMeta, assetCtx } = useTradeContext(
+    (s) => ({
+      instrumentType: s.instrumentType,
+      quote: s.assetMeta.quote,
+      assetMeta: s.assetMeta,
+      assetCtx: s.assetCtx,
+    }),
+  );
+
+  const isPerps = instrumentType === "perps";
+
   const {
     disabled,
     isBuyOrder,
@@ -152,15 +163,18 @@ const OrderFormFooter = () => {
     orderSizeInBase,
     orderValueAndMargin,
     hasInsufficientMargin,
-  } = useOrderForm();
+  } = useOrderForm({
+    spotAsset: !isPerps
+      ? { base: assetMeta.base, quote: assetMeta.quote }
+      : undefined,
+    referencePx: assetCtx?.referencePx ?? 0,
+    szDecimals: assetMeta?.szDecimals ?? 0,
+    instrumentType,
+  });
 
   const { processing, onPlaceOrder } = usePlaceOrder();
 
-  const { isPerps, isUSDC, openSwapModal } = useTradeContext((s) => ({
-    isPerps: s.instrumentType === "perps",
-    isUSDC: isUSDCQuote(s.assetMeta.quote),
-    openSwapModal: s.openSwapModal,
-  }));
+  const isUSDC = isUSDCQuote(quote);
 
   const labelKey = isPerps ? "perp" : "spot";
 
@@ -178,11 +192,20 @@ const OrderFormFooter = () => {
 
   const placeOrder = () => {
     if (hasInsufficientMargin) {
-      if (!isUSDC && isPerps) return openSwapModal(true);
+      if (!isUSDC && isPerps)
+        return useAccountTransactStore.getState().openSwapModal(quote!);
 
       return useAccountTransactStore.getState().openAccountTransact("deposit");
     }
-    return onPlaceOrder();
+
+    return onPlaceOrder({
+      referencePx: assetCtx.referencePx,
+      midPx: assetCtx.midPx,
+      assetId: assetMeta.assetId,
+      szDecimals: assetMeta.szDecimals,
+      instrumentType,
+      base: assetMeta.base,
+    });
   };
 
   return (

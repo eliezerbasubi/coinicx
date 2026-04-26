@@ -2,6 +2,7 @@ import { useAccountModal } from "@rainbow-me/rainbowkit";
 import { ChevronDown } from "lucide-react";
 import { useAccount } from "wagmi";
 
+import { useAccountTransactStore } from "@/lib/store/trade/account-transact";
 import { formatAddress } from "@/lib/utils/formatting/formatAddress";
 import { Button } from "@/components/ui/button";
 
@@ -23,14 +24,23 @@ const AccountButton = () => {
   }
 
   return (
-    <Button
-      variant="outline"
-      onClick={openAccountModal}
-      className="w-24 md:w-fit gap-x-1 h-7 md:h-8"
-    >
-      <p className="text-xs md:text-sm">{formatAddress(address, 4)}</p>
-      <ChevronDown />
-    </Button>
+    <div className="flex items-center gap-x-4">
+      <Button
+        label="Deposit"
+        className="w-24 md:w-fit gap-x-1 h-7 md:h-8"
+        onClick={() =>
+          useAccountTransactStore.getState().openAccountTransact("deposit")
+        }
+      />
+      <Button
+        variant="outline"
+        onClick={openAccountModal}
+        className="w-24 md:w-fit gap-x-1 h-7 md:h-8"
+      >
+        <p className="text-xs md:text-sm">{formatAddress(address, 4)}</p>
+        <ChevronDown />
+      </Button>
+    </div>
   );
 };
 

@@ -1,6 +1,6 @@
 export type OrderBookType = "bids" | "asks";
 
-export type AmountPriceLevel = { px: string; sz: string };
+export type AmountPriceLevel = { px: string; sz: string; n: number };
 export type CumulativePriceLevel = AmountPriceLevel & { total: number };
 export type PriceLevel = AmountPriceLevel | CumulativePriceLevel;
 export type OrderBookLayout = "orderBook" | "buyOrder" | "sellOrder";

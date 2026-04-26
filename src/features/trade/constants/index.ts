@@ -1,4 +1,4 @@
-import { ChartInterval, TradeType } from "@/lib/types/trade";
+import { ChartInterval, OrderType } from "@/lib/types/trade";
 
 export const DEFAULT_SPOT_ASSETS = {
   base: "HYPE",
@@ -42,13 +42,6 @@ export const DEFAULT_CHART_INTERVAL: ChartInterval = {
   span: 1,
 };
 
-export const TRADE_TYPES: Array<{ label: string; value: TradeType }> = [
-  { label: "Spot", value: "spot" },
-  { label: "Cross", value: "cross" },
-  { label: "Isolated", value: "isolated" },
-  { label: "Grid", value: "grid" },
-];
-
 export const ORDER_FORM_SIDES = {
   buy: {
     spot: "Buy",
@@ -59,3 +52,15 @@ export const ORDER_FORM_SIDES = {
     perp: "Short",
   },
 } as const;
+
+export const SUPPORTED_ORDER_TYPES: Record<
+  OrderType,
+  { label: string; value: OrderType; perpsOnly?: boolean; featured?: boolean }
+> = {
+  market: { label: "Market", value: "market", featured: true },
+  limit: { label: "Limit", value: "limit", featured: true },
+  stopLimit: { label: "Stop Limit", value: "stopLimit", perpsOnly: true },
+  stopMarket: { label: "Stop Market", value: "stopMarket", perpsOnly: true },
+  scale: { label: "Scale", value: "scale" },
+  twap: { label: "TWAP", value: "twap" },
+};

@@ -3,10 +3,12 @@ import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { InstrumentType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import TokenImage from "@/components/common/TokenImage";
+import Visibility from "@/components/common/Visibility";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import Tag from "@/components/ui/tag";
 
@@ -29,6 +31,7 @@ interface TradeHistoryEntry {
   fee: number;
   closedPnl: number;
   href: string;
+  type: InstrumentType;
 }
 
 const columns: ColumnDef<TradeHistoryEntry>[] = [
@@ -48,6 +51,9 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
           symbol={original.symbol}
           dex={original.dex}
           href={original.href}
+          className={cn("text-buy/85 hover:text-buy max-w-80", {
+            "text-sell/85 hover:text-sell": original.side === "A",
+          })}
         />
       );
     },
@@ -102,7 +108,10 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
       return (
         <span className="space-x-1">
           <span>
-            {formatNumber(original.fee, { maximumFractionDigits: 6 })}
+            {formatNumber(original.fee, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 6,
+            })}
           </span>
           <span>{original.feeToken}</span>
         </span>
@@ -138,17 +147,30 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
 const TradeHistory = () => {
   const userFills = useShallowUserTradeStore((s) => s.fills);
 
-  const { mapSpotNameToTokenDetails } = useSpotToTokenDetails();
+  const { isLoading, mapSpotNameToTokenDetails } = useSpotToTokenDetails();
 
   const data = useMemo(() => {
     return userFills.map((fill) => {
       const tokenDetails = mapSpotNameToTokenDetails(fill.coin);
 
+      let direction = fill.dir;
+
+      if (fill.liquidation) {
+        direction = "Liquidation";
+
+        if (fill.liquidation.method === "backstop") {
+          direction = "Backstop Liquidation";
+        }
+      }
+
       return {
         timestamp: fill.time,
         coin: tokenDetails.coin,
-        direction: fill.dir,
-        feeToken: fill.feeToken,
+        direction,
+        feeToken:
+          tokenDetails.type === "prediction" && tokenDetails.quote
+            ? tokenDetails.quote
+            : fill.feeToken,
         base: tokenDetails.base,
         side: fill.side,
         size: Number(fill.sz),
@@ -163,6 +185,7 @@ const TradeHistory = () => {
         symbol: tokenDetails.symbol,
         dex: tokenDetails.dex,
         href: tokenDetails.href,
+        type: tokenDetails.type,
       };
     });
   }, [mapSpotNameToTokenDetails, userFills]);
@@ -171,7 +194,7 @@ const TradeHistory = () => {
     <AdaptiveDataTable
       columns={columns}
       data={data.sort((a, b) => b.timestamp - a.timestamp)}
-      loading={false}
+      loading={isLoading}
       initialState={{
         pagination: {
           pageIndex: 0,
@@ -196,15 +219,18 @@ const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <TokenImage
-              name={data.coin}
-              coin={data.coin}
-              className="size-4"
-              instrumentType={data.dex === null ? "spot" : "perps"}
-            />
+            <Visibility visible={data.type !== "prediction"}>
+              <TokenImage
+                key={data.base + data.coin}
+                name={data.base}
+                coin={data.coin}
+                className="size-4"
+                instrumentType={data.type}
+              />
+            </Visibility>
             <Link
               href={data.href}
-              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
+              className="text-sm text-neutral-gray-100 font-medium line-clamp-2"
             >
               {data.symbol}
             </Link>
@@ -212,7 +238,7 @@ const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
           {data.dex && <Tag value={data.dex} />}
           <Tag
             value={data.direction}
-            className={cn("text-buy bg-buy/10", {
+            className={cn("text-buy bg-buy/10 line-clamp-1", {
               "text-sell bg-sell/10": data.side === "A",
             })}
           />
@@ -228,7 +254,7 @@ const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
             })}
           />
         </div>
-        <span className="text-[11px] md:text-sm text-neutral-gray-400 font-medium">
+        <span className="text-[11px] md:text-sm text-neutral-gray-400 font-medium text-right">
           {new Date(data.timestamp).toLocaleDateString("en-US", {
             day: "2-digit",
             month: "short",

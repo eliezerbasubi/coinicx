@@ -6,6 +6,7 @@ import { InputNumberControl } from "@/components/ui/input-number";
 
 type Props = {
   max: string | number;
+  percentClassName?: string;
   onValueChange?: (value: string) => void;
 
   /**
@@ -23,6 +24,7 @@ const PERCENTAGES = [10, 25, 50, 75, 100];
 const FormInputControl = ({
   value,
   max,
+  percentClassName,
   onValueChange,
   onPercentValueChange,
   ...props
@@ -49,6 +51,7 @@ const FormInputControl = ({
             variant="secondary"
             className={cn(
               "h-6 w-fit text-xs font-semibold bg-neutral-gray-600 hover:bg-primary/10 hover:text-primary",
+              percentClassName,
               {
                 "bg-primary/10 text-primary":
                   value && currentPercentage === percentage,

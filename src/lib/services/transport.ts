@@ -39,14 +39,6 @@ export const hlExchangeClient = async (args?: {
 
 const ws = new WebSocketTransport({ isTestnet });
 
-// TODO: Remove this implementation once the perpAnnotation method is added to the SDK
-const TRANSPORT_URLS = {
-  testnet: "https://api.hyperliquid-testnet.xyz",
-  mainnet: "https://api.hyperliquid.xyz",
-};
-
-export const TRANSPORT_URL = TRANSPORT_URLS[isTestnet ? "testnet" : "mainnet"];
-
 export const UNIT_API_BASE_URL = isTestnet
   ? "https://api.hyperunit-testnet.xyz"
   : "https://api.hyperunit.xyz";
