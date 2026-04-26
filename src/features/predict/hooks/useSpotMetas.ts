@@ -13,7 +13,7 @@ type UseSpotMetasArgs = {
 
 export const useSpotMetas = (args?: UseSpotMetasArgs) => {
   const { data: spotMetas } = useQuery({
-    queryKey: [QUERY_KEYS.spotMeta],
+    queryKey: QUERY_KEYS.spotMeta,
     staleTime: Infinity,
     notifyOnChangeProps: args?.notifyOnChangeProps,
     enabled: args?.enabled,

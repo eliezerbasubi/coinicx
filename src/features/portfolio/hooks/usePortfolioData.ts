@@ -42,19 +42,19 @@ export const usePortfolioData = () => {
     },
     queries: [
       {
-        queryKey: [QUERY_KEYS.portfolio, user],
+        queryKey: QUERY_KEYS.portfolio(user),
         enabled: !!address,
         staleTime: 5 * 60 * 1000,
         queryFn: () => hlInfoClient.portfolio({ user }),
       },
       {
-        queryKey: [QUERY_KEYS.delegatorSummary, user],
+        queryKey: QUERY_KEYS.delegatorSummary(user),
         enabled: !!address,
         staleTime: 5 * 60 * 1000,
         queryFn: () => hlInfoClient.delegatorSummary({ user }),
       },
       {
-        queryKey: [QUERY_KEYS.userFees, user],
+        queryKey: QUERY_KEYS.userFees(user),
         enabled: !!address,
         staleTime: Infinity,
         queryFn: () => hlInfoClient.userFees({ user }),

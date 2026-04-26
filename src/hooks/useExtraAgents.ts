@@ -14,7 +14,7 @@ export const useExtraAgents = () => {
   const queryClient = useQueryClient();
 
   const { data, status } = useQuery({
-    queryKey: [QUERY_KEYS.extraAgents, user],
+    queryKey: QUERY_KEYS.extraAgents(user),
     staleTime: Infinity,
     queryFn: async () => {
       const agents = await hlInfoClient.extraAgents({ user });
@@ -37,7 +37,7 @@ export const useExtraAgents = () => {
     data: Omit<ExtraAgentsResponse[number], "validUntil">,
   ) => {
     const validUntil = Math.floor(Date.now() / 1000) + 180 * 24 * 60 * 60;
-    queryClient.setQueryData([QUERY_KEYS.extraAgents, user], {
+    queryClient.setQueryData(QUERY_KEYS.extraAgents(user), {
       ...data,
       validUntil,
     });

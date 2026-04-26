@@ -48,13 +48,13 @@ const prefetchQueries = () => {
   const queryClient = getQueryClient();
 
   queryClient.prefetchQuery({
-    queryKey: [QUERY_KEYS.allPerpMetas],
+    queryKey: QUERY_KEYS.allPerpMetas,
     queryFn: () => hlInfoClient.allPerpMetas(),
     staleTime: Infinity,
   });
 
   queryClient.prefetchQuery({
-    queryKey: [QUERY_KEYS.spotMeta],
+    queryKey: QUERY_KEYS.spotMeta,
     queryFn: () => hlInfoClient.spotMeta(),
     staleTime: Infinity,
   });
@@ -62,7 +62,7 @@ const prefetchQueries = () => {
   // TODO: REMOVE THIS LINE ONCE PREDICTIONS ARE ON MAINNET
   if (isTestnet) {
     queryClient.prefetchQuery({
-      queryKey: [QUERY_KEYS.predictionMarketEvents],
+      queryKey: QUERY_KEYS.predictionMarketEvents,
       queryFn: () => hlInfoClient.outcomeMeta(),
       staleTime: Infinity,
     });

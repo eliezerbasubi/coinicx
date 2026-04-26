@@ -26,12 +26,12 @@ export const useTerminateTwap = () => {
   const getAssetMetas = useCallback(() => {
     const queryClient = getQueryClient();
 
-    const allPerpMetas = queryClient.getQueryData<AllPerpMetasResponse>([
+    const allPerpMetas = queryClient.getQueryData<AllPerpMetasResponse>(
       QUERY_KEYS.allPerpMetas,
-    ]);
-    const spotMetasResponse = queryClient.getQueryData<SpotMetaResponse>([
+    );
+    const spotMetasResponse = queryClient.getQueryData<SpotMetaResponse>(
       QUERY_KEYS.spotMeta,
-    ]);
+    );
 
     if (!spotMetasResponse || !allPerpMetas) {
       throw new Error("No meta found for terminating TWAPs");

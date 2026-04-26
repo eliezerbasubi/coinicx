@@ -26,13 +26,13 @@ export const useAssetMetas = () => {
     },
     queries: [
       {
-        queryKey: [QUERY_KEYS.allPerpMetas],
+        queryKey: QUERY_KEYS.allPerpMetas,
         staleTime: Infinity,
         queryFn: () => hlInfoClient.allPerpMetas(),
         select: mapDataToPerpsMetas,
       },
       {
-        queryKey: [QUERY_KEYS.spotMeta],
+        queryKey: QUERY_KEYS.spotMeta,
         staleTime: Infinity,
         queryFn: () => hlInfoClient.spotMeta(),
         select: mapDataToSpotMetas,

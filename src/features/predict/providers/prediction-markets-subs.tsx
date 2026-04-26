@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
-import { useAccount } from "wagmi";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { hlSubClient } from "@/lib/services/transport";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
-import { useSubscription, useSubscriptions } from "@/hooks/useSubscription";
-
-import { useUserPredictionStore } from "../lib/store/user-prediction";
+import { useSubscription } from "@/hooks/useSubscription";
 
 type Props = {
   children: React.ReactNode;
@@ -45,20 +42,7 @@ type OutcomeMetaUpdate = (
   | QuestionSettled
 )[];
 
-type SettleOutcomeSpec = {
-  spec: {
-    outcome: number;
-    name: string;
-    description: string;
-    sideSpecs: { name: string }[];
-  };
-  settleFraction: string;
-  details: string;
-};
-
 const PredictionMarketsSubsProvider = ({ children }: Props) => {
-  const { address } = useAccount();
-
   // Subscribe to outcome meta updates
   useSubscription(() => {
     const queryClient = getQueryClient();
@@ -68,9 +52,9 @@ const PredictionMarketsSubsProvider = ({ children }: Props) => {
       payload,
       (data) => {
         const predictionMarketEvents =
-          queryClient.getQueryData<OutcomeMetaResponse>([
+          queryClient.getQueryData<OutcomeMetaResponse>(
             QUERY_KEYS.predictionMarketEvents,
-          ]);
+          );
 
         if (!predictionMarketEvents) return;
 
@@ -93,30 +77,8 @@ const PredictionMarketsSubsProvider = ({ children }: Props) => {
           else if ("outcomeSettled" in update) {
             const settledOutcome = update.outcomeSettled;
 
-            const foundOutcome = outcomes.find(
-              (o) => o.outcome === settledOutcome,
-            );
-
-            if (foundOutcome) {
-              outcomes = outcomes.filter((o) => o.outcome !== settledOutcome);
-
-              // queryClient.prefetchQuery<SettleOutcomeSpec>({
-              //   queryKey: [QUERY_KEYS.settledOutcome, settledOutcome],
-              //   initialData: {
-              //     spec: foundOutcome,
-              //     settleFraction: "1",
-              //     details: "",
-              //   },
-              // });
-              queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.settledOutcome, settledOutcome],
-              });
-            } else {
-              // Invalidate the settled outcome query to update the UI.
-              queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.settledOutcome, settledOutcome],
-              });
-            }
+            // Remove the settled outcome from the list of outcomes.
+            outcomes = outcomes.filter((o) => o.outcome !== settledOutcome);
           }
           // If updated, update the question in the list of questions.
           else if ("questionUpdated" in update) {
@@ -159,7 +121,7 @@ const PredictionMarketsSubsProvider = ({ children }: Props) => {
           }
 
           queryClient.setQueryData<OutcomeMetaResponse>(
-            [QUERY_KEYS.predictionMarketEvents],
+            QUERY_KEYS.predictionMarketEvents,
             (prev) => {
               if (!prev) return;
               return {
@@ -181,7 +143,7 @@ const PredictionMarketsSubsProvider = ({ children }: Props) => {
 
     hlSubClient.config_.transport.ready().then(() => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.predictionMarketEvents],
+        queryKey: QUERY_KEYS.predictionMarketEvents,
         refetchType: "inactive",
       });
     });

@@ -47,7 +47,7 @@ const MarketEventProvider = ({ children, slug }: Props) => {
 
   const { data: settledOutcome, isLoading: isSettledOutcomeLoading } =
     useSettledOutcome({
-      outcome: outcomeId,
+      outcomeId,
     });
 
   const marketEventMeta = settledOutcome ?? baseMarketEventMeta;
@@ -87,42 +87,40 @@ const MarketEventProvider = ({ children, slug }: Props) => {
 export default MarketEventProvider;
 
 const mapDataToMarketEventMeta = (data: PredictionMetas, slug: string) => {
-  {
-    if (!data) return null;
+  if (!data) return null;
 
-    // First check if the slug is a question slug.
-    const question = data.slugToQuestionSpec.get(slug);
+  // First check if the slug is a question slug.
+  const question = data.slugToQuestionSpec.get(slug);
 
-    if (question) {
-      return mapQuestionToMarketEventMeta({
-        question,
-        outcomeToSlug: data.outcomeToSlug,
-        slugToOutcomeSpec: data.slugToOutcomeSpec,
-      });
-    }
-
-    // If the slug is not a question, check if it's an outcome slug.
-    const outcomeSpec = data.slugToOutcomeSpec.get(slug);
-
-    if (!outcomeSpec) return null;
-
-    // Check if the outcome is part of a question.
-    const questionMeta = data.outcomeToQuestionMeta.get(outcomeSpec.outcome);
-
-    // If the outcome is not part of a question, return the market event meta for the outcome.
-    if (!questionMeta) {
-      return mapOutcomeSpecToMarketEventMeta(outcomeSpec);
-    }
-
-    // Proceed to check if the question meta is a question.
-    const outcomeBasedQuestion = data.slugToQuestionSpec.get(questionMeta.slug);
-
-    if (!outcomeBasedQuestion) return null;
-
-    // If the outcome is a question, redirect to the categorical event page.
-    redirect(
-      `${ROUTES.predict.event}/${questionMeta.slug}`,
-      RedirectType.replace,
-    );
+  if (question) {
+    return mapQuestionToMarketEventMeta({
+      question,
+      outcomeToSlug: data.outcomeToSlug,
+      slugToOutcomeSpec: data.slugToOutcomeSpec,
+    });
   }
+
+  // If the slug is not a question, check if it's an outcome slug.
+  const outcomeSpec = data.slugToOutcomeSpec.get(slug);
+
+  if (!outcomeSpec) return null;
+
+  // Check if the outcome is part of a question.
+  const questionMeta = data.outcomeToQuestionMeta.get(outcomeSpec.outcome);
+
+  // If the outcome is not part of a question, return the market event meta for the outcome.
+  if (!questionMeta) {
+    return mapOutcomeSpecToMarketEventMeta(outcomeSpec);
+  }
+
+  // Proceed to check if the question meta is a question.
+  const outcomeBasedQuestion = data.slugToQuestionSpec.get(questionMeta.slug);
+
+  if (!outcomeBasedQuestion) return null;
+
+  // If the outcome is a question, redirect to the categorical event page.
+  redirect(
+    `${ROUTES.predict.event}/${questionMeta.slug}`,
+    RedirectType.replace,
+  );
 };

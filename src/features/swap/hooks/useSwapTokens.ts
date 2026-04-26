@@ -13,7 +13,7 @@ import { useSwapStore } from "../store";
 
 export const useSwapSpotMetas = () => {
   const { data, status } = useQuery({
-    queryKey: [QUERY_KEYS.spotMeta],
+    queryKey: QUERY_KEYS.spotMeta,
     staleTime: Infinity,
     queryFn: async () => {
       const spotMeta = await hlInfoClient.spotMeta();

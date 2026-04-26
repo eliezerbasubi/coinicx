@@ -48,6 +48,7 @@ const MarketEventCard = ({ data }: Props) => {
           />
         </Visibility>
         <Link
+          suppressHydrationWarning
           href={`${ROUTES.predict.event}/${data.slug}`}
           className="hover:underline"
           onClick={(e) => {
@@ -58,7 +59,10 @@ const MarketEventCard = ({ data }: Props) => {
             }
           }}
         >
-          <p className="flex-1 text-sm font-medium line-clamp-2">
+          <p
+            suppressHydrationWarning
+            className="flex-1 text-sm font-medium line-clamp-2"
+          >
             {data.title}
           </p>
         </Link>

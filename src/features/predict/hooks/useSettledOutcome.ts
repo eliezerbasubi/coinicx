@@ -8,7 +8,7 @@ import { mapOutcomeSpecToMarketEventMeta } from "../lib/utils/mapper";
 import { parseSettledOutcomeDetails } from "../lib/utils/parseMetadata";
 
 type UseSettledOutcomeArgs = {
-  outcome: number | null;
+  outcomeId: number | null;
   enabled?: boolean;
 };
 
@@ -26,17 +26,17 @@ type SettleOutcomeSpec = {
 export const useSettledOutcome = (args: UseSettledOutcomeArgs) => {
   const enabled = args.enabled ?? true;
 
-  const query = useQuery({
-    queryKey: [QUERY_KEYS.settledOutcome, args.outcome],
-    enabled: !!args.outcome && enabled,
-    select: mapDataSettledOutcome,
+  const { data, isLoading, error } = useQuery({
+    queryKey: QUERY_KEYS.settledOutcome(args.outcomeId),
+    enabled: !!args.outcomeId && enabled,
+    select: mapDataToSettledOutcome,
     queryFn: async () => {
       const settledOutcome =
         await hlInfoClient.config_.transport.request<SettleOutcomeSpec>(
           "info",
           {
             type: "settledOutcome",
-            outcome: args.outcome,
+            outcome: args.outcomeId,
           },
         );
 
@@ -44,10 +44,10 @@ export const useSettledOutcome = (args: UseSettledOutcomeArgs) => {
     },
   });
 
-  return query;
+  return { data, isLoading, error };
 };
 
-const mapDataSettledOutcome = (data: SettleOutcomeSpec): MarketEventMeta => {
+const mapDataToSettledOutcome = (data: SettleOutcomeSpec): MarketEventMeta => {
   const marketEvent = mapOutcomeSpecToMarketEventMeta(data.spec);
   const settledDetails = parseSettledOutcomeDetails(data.details);
 

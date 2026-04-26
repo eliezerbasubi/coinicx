@@ -7,7 +7,7 @@ import { mapDataToPredictionsMetas } from "../lib/utils/mapper";
 
 export const usePredictionsMetas = () => {
   const { data, isLoading, error } = useSuspenseQuery({
-    queryKey: [QUERY_KEYS.predictionMarketEvents],
+    queryKey: QUERY_KEYS.predictionMarketEvents,
     staleTime: Infinity,
     select: mapDataToPredictionsMetas,
     queryFn: () => hlInfoClient.outcomeMeta(),

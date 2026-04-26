@@ -183,9 +183,9 @@ const Countdown = ({
     const queryClient = getQueryClient();
 
     const predictionMarketEvents =
-      queryClient.getQueryData<OutcomeMetaResponse>([
+      queryClient.getQueryData<OutcomeMetaResponse>(
         QUERY_KEYS.predictionMarketEvents,
-      ]);
+      );
 
     if (!predictionMarketEvents) return;
 
@@ -222,7 +222,7 @@ const Countdown = ({
         setIsFetching(true);
 
         await queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.predictionMarketEvents],
+          queryKey: QUERY_KEYS.predictionMarketEvents,
           refetchType: "active",
         });
 

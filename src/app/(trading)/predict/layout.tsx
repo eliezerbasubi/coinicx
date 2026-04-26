@@ -27,7 +27,7 @@ const PredictLayout = async ({ children }: Props) => {
 
   await queryClient.prefetchQuery({
     staleTime: Infinity,
-    queryKey: [QUERY_KEYS.predictionMarketEvents],
+    queryKey: QUERY_KEYS.predictionMarketEvents,
     queryFn: () => hlInfoClient.outcomeMeta(),
   });
 

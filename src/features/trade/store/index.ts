@@ -133,12 +133,12 @@ const getTokenMetaAndAssetCtx = (params: {
   const { allDexsAssetCtxs, spotAssetCtxs } = useInstrumentStore.getState();
   const queryClient = getQueryClient();
 
-  const allPerpMetas = queryClient.getQueryData<AllPerpMetasResponse>([
+  const allPerpMetas = queryClient.getQueryData<AllPerpMetasResponse>(
     QUERY_KEYS.allPerpMetas,
-  ]);
-  const spotMeta = queryClient.getQueryData<SpotMetaResponse>([
+  );
+  const spotMeta = queryClient.getQueryData<SpotMetaResponse>(
     QUERY_KEYS.spotMeta,
-  ]);
+  );
 
   if (!allPerpMetas || !spotMeta) return;
 

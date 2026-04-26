@@ -18,7 +18,7 @@ export const useApproveBuilderFee = () => {
   const queryClient = useQueryClient();
 
   const { data: maxBuilderFee, status: maxBuilderFeeStatus } = useQuery({
-    queryKey: [QUERY_KEYS.maxBuilderFee, address],
+    queryKey: QUERY_KEYS.maxBuilderFee(address),
     enabled: !!address,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
@@ -36,16 +36,15 @@ export const useApproveBuilderFee = () => {
     if (hasApprovedBuilderFee) return true;
 
     try {
+      if (!address) throw new Error("No address found");
+
       const exchClient = await hlExchangeClient();
       await exchClient.approveBuilderFee({
         builder: builderAddress,
         maxFeeRate: toMaxFeeRate(MAX_FEE_RATE), // Let the user approve the max fee rate
       });
 
-      queryClient.setQueryData(
-        [QUERY_KEYS.maxBuilderFee, address],
-        MAX_FEE_RATE,
-      );
+      queryClient.setQueryData(QUERY_KEYS.maxBuilderFee(address), MAX_FEE_RATE);
 
       return true;
     } catch (error) {
