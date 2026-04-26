@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+import { isTestnet } from "@/lib/services/transport";
 import {
   usePreferencesStore,
   useShallowPreferencesStore,
@@ -127,6 +128,8 @@ const TradingAccountPanel = ({ defaultTab, className, excludeTabs }: Props) => {
           )}
         >
           {TABS.map((tab) => {
+            // TODO: REMOVE THIS LINE ONCE PREDICTIONS ARE ON MAINNET
+            if (tab.value === "predictions" && !isTestnet) return null;
             if (excludeTabs && excludeTabs.includes(tab.value)) return null;
 
             return (

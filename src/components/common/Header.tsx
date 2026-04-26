@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants/routes";
+import { isTestnet } from "@/lib/services/transport";
 import { cn } from "@/lib/utils/cn";
 
 import AppLogo from "../vectors/app-logo";
@@ -52,24 +53,31 @@ const Header = () => {
         <AppLogo className="w-15 md:w-20 h-5 md:h-6" />
 
         <nav role="navigation" className="hidden md:flex flex-1">
-          {LINKS.map((link) => (
-            <Link
-              key={link.id}
-              href={link.href}
-              prefetch
-              className={cn(
-                "text-white hover:text-primary font-semibold text-xs md:text-base h-full py-1 px-2 md:px-4",
-                {
-                  "text-primary":
-                    (link.href === "/" && pathname === "/") ||
-                    link.subPaths?.some((path) => pathname.startsWith(path)) ||
-                    pathname.startsWith(link.href),
-                },
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {LINKS.map((link) => {
+            // TODO: REMOVE THIS LINE ONCE PREDICTIONS ARE ON MAINNET
+            if (link.id === "predict" && !isTestnet) return null;
+
+            return (
+              <Link
+                key={link.id}
+                href={link.href}
+                prefetch
+                className={cn(
+                  "text-white hover:text-primary font-semibold text-xs md:text-base h-full py-1 px-2 md:px-4",
+                  {
+                    "text-primary":
+                      (link.href === "/" && pathname === "/") ||
+                      link.subPaths?.some((path) =>
+                        pathname.startsWith(path),
+                      ) ||
+                      pathname.startsWith(link.href),
+                  },
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <AccountButton />

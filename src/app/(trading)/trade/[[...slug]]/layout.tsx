@@ -4,7 +4,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { ROUTES } from "@/lib/constants/routes";
-import { hlInfoClient } from "@/lib/services/transport";
+import { hlInfoClient, isTestnet } from "@/lib/services/transport";
 import { getQueryClient } from "@/lib/utils/getQueryClient";
 import { DEFAULT_SPOT_ASSETS } from "@/features/trade/constants";
 import TradingPairProvider from "@/features/trade/providers/trading-pair-provider";
@@ -59,11 +59,14 @@ const prefetchQueries = () => {
     staleTime: Infinity,
   });
 
-  queryClient.prefetchQuery({
-    queryKey: [QUERY_KEYS.predictionMarketEvents],
-    queryFn: () => hlInfoClient.outcomeMeta(),
-    staleTime: Infinity,
-  });
+  // TODO: REMOVE THIS LINE ONCE PREDICTIONS ARE ON MAINNET
+  if (isTestnet) {
+    queryClient.prefetchQuery({
+      queryKey: [QUERY_KEYS.predictionMarketEvents],
+      queryFn: () => hlInfoClient.outcomeMeta(),
+      staleTime: Infinity,
+    });
+  }
 
   return queryClient;
 };
