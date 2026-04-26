@@ -10,12 +10,19 @@ import {
 } from "@/components/ui/popover";
 import {
   PREDICTIONS_BASE_SZ_DECIMALS,
+  PREDICTIONS_QUOTE_ASSET,
   PREDICTIONS_QUOTE_SZ_DECIMALS,
 } from "@/features/predict/lib/constants/predictions";
-import { useActiveOutcomeSideCtx } from "@/features/predict/lib/store/market-event/hooks";
+import {
+  useActiveOutcomeMeta,
+  useActiveOutcomeSideCtx,
+} from "@/features/predict/lib/store/market-event/hooks";
+
+import { convertSpotNameToBalanceCoin } from "../../lib/utils/outcomes";
 
 const AmountCurrencySelector = () => {
   const isSzInNtl = useOrderFormStore((s) => s.settings.isSzInNtl);
+  const { marketEventMeta } = useActiveOutcomeMeta();
   const { sideCtx } = useActiveOutcomeSideCtx();
 
   const options = [
@@ -26,7 +33,10 @@ const AmountCurrencySelector = () => {
   const onCoinChange = (value: boolean) => {
     useOrderFormStore.getState().onSizeCoinChange({
       isNtl: value,
-      isSpot: true,
+      spotAsset: {
+        base: convertSpotNameToBalanceCoin(marketEventMeta.coin),
+        quote: PREDICTIONS_QUOTE_ASSET,
+      },
       midPx: sideCtx.midPx || sideCtx.markPx,
       szDecimals: value
         ? PREDICTIONS_QUOTE_SZ_DECIMALS

@@ -152,13 +152,20 @@ export const OrderValueAndMarginRequired = ({
 };
 
 export const MaxOrderSize = () => {
-  const { isPerp, base } = useTradeContext((s) => ({
+  const { isPerp, base, quote } = useTradeContext((s) => ({
     isPerp: s.instrumentType === "perps",
     base: s.assetMeta.base,
+    quote: s.assetMeta.quote,
   }));
   const isBuyOrder = useShallowOrderFormStore((s) => s.orderSide === "buy");
 
-  const maxTradeSz = useMaxTradeSz(isBuyOrder);
+  const maxTradeSz = useMaxTradeSz({
+    isBuyOrder,
+    spotAsset: {
+      base,
+      quote,
+    },
+  });
 
   if (!isPerp) return null;
 

@@ -178,7 +178,7 @@ const FillsTWAPs = () => {
         symbol: tokenDetails.symbol,
         type: tokenDetails.type,
         feeToken:
-          tokenDetails.type === "outcome" && tokenDetails.quote
+          tokenDetails.type === "prediction" && tokenDetails.quote
             ? tokenDetails.quote
             : fill.feeToken,
         direction: fill.dir,
