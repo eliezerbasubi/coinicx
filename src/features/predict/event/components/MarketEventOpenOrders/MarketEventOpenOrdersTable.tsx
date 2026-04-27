@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils/cn";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
 import AdaptiveDataTable from "@/components/ui/adaptive-datatable";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/datatable";
 import Tag from "@/components/ui/tag";
 import { useShallowUserPredictionStore } from "@/features/predict/lib/store/user-prediction";
 import { MarketEventMetaOutcome } from "@/features/predict/lib/types";
@@ -73,7 +72,7 @@ const columns: ColumnDef<OpenOrder>[] = [
       return (
         <span>
           {formatNumber(Number(original.size) * Number(original.limitPx), {
-            style: "cent",
+            style: "currency",
           })}
         </span>
       );
@@ -97,7 +96,9 @@ const columns: ColumnDef<OpenOrder>[] = [
       return (
         <CancelOrderButton
           variant="secondary"
-          className="text-white text-sm"
+          size="sm"
+          className="hover:text-white text-sm"
+          label="Cancel"
           openOrders={openOrders}
         />
       );

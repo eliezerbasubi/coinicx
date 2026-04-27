@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { InstrumentType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
@@ -23,6 +24,7 @@ type TwapHistoryFills = {
   symbol: string;
   href: string;
   side: string;
+  questionTitle?: string;
   direction: string;
   price: number;
   sz: number;
@@ -30,7 +32,7 @@ type TwapHistoryFills = {
   fee: number;
   closedPnl: number;
   feeToken: string;
-  type: string;
+  type: InstrumentType;
 };
 
 const columns: ColumnDef<TwapHistoryFills>[] = [
@@ -50,6 +52,7 @@ const columns: ColumnDef<TwapHistoryFills>[] = [
           symbol={original.symbol}
           dex={original.dex}
           href={original.href}
+          questionTitle={original.questionTitle}
         />
       );
     },
@@ -177,6 +180,7 @@ const FillsTWAPs = () => {
         coin: tokenDetails.coin,
         symbol: tokenDetails.symbol,
         type: tokenDetails.type,
+        questionTitle: tokenDetails.questionTitle,
         feeToken:
           tokenDetails.type === "prediction" && tokenDetails.quote
             ? tokenDetails.quote
@@ -223,7 +227,7 @@ const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <Visibility visible={data.type !== "outcome"}>
+            <Visibility visible={data.type !== "prediction"}>
               <TokenImage
                 name={data.coin}
                 coin={data.coin}
@@ -231,12 +235,12 @@ const FillTWAPHistoryCard = ({ data }: { data: TwapHistoryFills }) => {
                 instrumentType={data.type === "spot" ? "spot" : "perps"}
               />
             </Visibility>
-            <Link
+            <CoinLink
+              symbol={data.symbol}
+              dex={null}
               href={data.href}
-              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
-            >
-              {data.symbol}
-            </Link>
+              questionTitle={data.questionTitle}
+            />
           </div>
           {data.dex && <Tag value={data.dex} />}
           <Tag

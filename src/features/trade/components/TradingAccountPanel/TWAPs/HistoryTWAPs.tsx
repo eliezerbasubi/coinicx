@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { useShallowUserTradeStore } from "@/lib/store/trade/user-trade";
+import { InstrumentType } from "@/lib/types/trade";
 import { cn } from "@/lib/utils/cn";
 import { formatDateTime } from "@/lib/utils/formatting/dates";
 import { formatNumber } from "@/lib/utils/formatting/numbers";
@@ -13,6 +13,7 @@ import Tag from "@/components/ui/tag";
 import { formatTotalRuntime } from "@/features/trade/utils/twap";
 
 import CardItem from "../CardItem";
+import CoinLink from "../CoinLink";
 import { useSpotToTokenDetails } from "../hooks/useSpotToTokenDetails";
 
 type TwapHistory = {
@@ -22,6 +23,7 @@ type TwapHistory = {
   dex: string | null;
   symbol: string;
   href: string;
+  questionTitle?: string;
   sz: number;
   executedSz: number;
   averagePx: number;
@@ -29,7 +31,7 @@ type TwapHistory = {
   reduceOnly: boolean;
   randomize: boolean;
   status: string;
-  type: string;
+  type: InstrumentType;
 };
 
 const columns: ColumnDef<TwapHistory>[] = [
@@ -45,12 +47,12 @@ const columns: ColumnDef<TwapHistory>[] = [
     header: "Coin",
     cell({ row: { original } }) {
       return (
-        <Link
+        <CoinLink
+          symbol={original.symbol}
+          dex={original.dex}
           href={original.href}
-          className="font-medium hover:text-primary transition-colors"
-        >
-          {original.symbol}
-        </Link>
+          questionTitle={original.questionTitle}
+        />
       );
     },
   },
@@ -142,6 +144,7 @@ const HistoryTWAPs = () => {
         coin: tokenDetails.coin,
         base: tokenDetails.base,
         dex: tokenDetails.dex,
+        questionTitle: tokenDetails.questionTitle,
         type: tokenDetails.type,
         sz: Number(history.state.sz),
         executedSz: Number(history.state.executedSz),
@@ -186,7 +189,7 @@ const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
       <div className="flex items-center justify-between gap-x-4 mb-1">
         <div className="flex items-center gap-x-1">
           <div className="flex items-center gap-x-1 mr-1">
-            <Visibility visible={data.type !== "outcome"}>
+            <Visibility visible={data.type !== "prediction"}>
               <TokenImage
                 key={data.base + data.coin}
                 name={data.base}
@@ -195,12 +198,12 @@ const TwapHistoryCard = ({ data }: { data: TwapHistory }) => {
                 instrumentType={data.dex === null ? "spot" : "perps"}
               />
             </Visibility>
-            <Link
+            <CoinLink
+              symbol={data.symbol}
+              dex={null}
               href={data.href}
-              className="text-sm text-neutral-gray-100 font-medium line-clamp-1"
-            >
-              {data.symbol}
-            </Link>
+              questionTitle={data.questionTitle}
+            />
           </div>
           {data.dex && <Tag value={data.dex} />}
           {data.randomize && <Tag value="Randomize" />}

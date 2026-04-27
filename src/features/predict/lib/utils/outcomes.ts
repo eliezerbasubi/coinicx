@@ -56,9 +56,7 @@ export function coinOutcomeId(coin: string): number | null {
 /** Check if a coin is an outcome-level or side-level instrument */
 export function isOutcomeCoin(coin: string): boolean {
   return (
-    coin.startsWith(OUTCOME_COIN_PREFIX) ||
-    coin.startsWith(SIDE_COIN_PREFIX) ||
-    coin.startsWith(SIDE_COIN_PREFIX_PLUS)
+    coin.startsWith(SIDE_COIN_PREFIX) || coin.startsWith(SIDE_COIN_PREFIX_PLUS)
   );
 }
 

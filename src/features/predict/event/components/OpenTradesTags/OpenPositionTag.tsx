@@ -65,6 +65,9 @@ const OpenPositionTag = ({ position, activeOutcomeIndex }: Props) => {
 
         if (typeof activeOutcomeIndex === "number") {
           setActiveOutcomeIndex(activeOutcomeIndex);
+          orderFormState.setExecutionOrder({
+            size: position.shares.toString(),
+          });
         } else {
           orderFormState.setExecutionOrder({
             size: position.shares.toString(),

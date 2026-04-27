@@ -22,6 +22,7 @@ interface TradeHistoryEntry {
   base: string;
   coin: string;
   dex: string | null;
+  questionTitle?: string;
   direction: string;
   feeToken: string;
   price: string;
@@ -51,6 +52,7 @@ const columns: ColumnDef<TradeHistoryEntry>[] = [
           symbol={original.symbol}
           dex={original.dex}
           href={original.href}
+          questionTitle={original.questionTitle}
           className={cn("text-buy/85 hover:text-buy max-w-80", {
             "text-sell/85 hover:text-sell": original.side === "A",
           })}
@@ -166,6 +168,7 @@ const TradeHistory = () => {
       return {
         timestamp: fill.time,
         coin: tokenDetails.coin,
+        questionTitle: tokenDetails.questionTitle,
         direction,
         feeToken:
           tokenDetails.type === "prediction" && tokenDetails.quote
@@ -228,12 +231,12 @@ const TradeHistoryCard = ({ data }: { data: TradeHistoryEntry }) => {
                 instrumentType={data.type}
               />
             </Visibility>
-            <Link
+            <CoinLink
+              symbol={data.symbol}
+              dex={null}
               href={data.href}
-              className="text-sm text-neutral-gray-100 font-medium line-clamp-2"
-            >
-              {data.symbol}
-            </Link>
+              questionTitle={data.questionTitle}
+            />
           </div>
           {data.dex && <Tag value={data.dex} />}
           <Tag

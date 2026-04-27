@@ -4,6 +4,7 @@ import { ROUTES } from "@/lib/constants/routes";
 import { InstrumentType } from "@/lib/types/trade";
 import { usePredictionsMetas } from "@/features/predict/hooks/usePredictionsMetas";
 import { mapCoinToMarketEventSpec } from "@/features/predict/lib/utils/mapper";
+import { isOutcomeCoin } from "@/features/predict/lib/utils/outcomes";
 import { useAssetMetas } from "@/features/trade/hooks/useAssetMetas";
 import {
   formatSymbol,
@@ -15,6 +16,7 @@ type TokenDetails = {
   coin: string;
   base: string;
   quote: string | null;
+  questionTitle?: string;
   symbol: string;
   href: string;
   isSpot: boolean;
@@ -34,13 +36,27 @@ export const useSpotToTokenDetails = () => {
     (coin: string): TokenDetails => {
       const outcomeMeta = mapCoinToMarketEventSpec(coin, predictionsMetas);
 
-      if (outcomeMeta) {
+      if (outcomeMeta || isOutcomeCoin(coin)) {
+        if (!outcomeMeta) {
+          return {
+            href: ROUTES.predict.index,
+            base: "",
+            dex: null,
+            quote: "",
+            coin,
+            symbol: coin,
+            isSpot: true,
+            type: "prediction",
+          };
+        }
+
         return {
           href: `${ROUTES.predict.event}/${outcomeMeta.slug}`,
           quote: outcomeMeta.quote,
           base: outcomeMeta.sideName,
           dex: null,
           coin,
+          questionTitle: outcomeMeta.question?.name,
           symbol: outcomeMeta.title,
           isSpot: true,
           type: "prediction",

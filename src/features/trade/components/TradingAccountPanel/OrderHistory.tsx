@@ -24,6 +24,7 @@ type HistoricalOrder = {
   base: string;
   coin: string;
   direction: string;
+  questionTitle?: string;
   side: string;
   sz: number;
   filledSz: number;
@@ -62,6 +63,7 @@ const columns: ColumnDef<HistoricalOrder>[] = [
           symbol={original.symbol}
           dex={original.dex}
           href={original.href}
+          questionTitle={original.questionTitle}
           className={cn("text-buy/85 hover:text-buy max-w-80", {
             "text-sell/85 hover:text-sell": original.side === "A",
           })}
@@ -262,7 +264,12 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
                 instrumentType={data.type}
               />
             </Visibility>
-            <CoinLink symbol={data.symbol} dex={data.dex} href={data.href} />
+            <CoinLink
+              symbol={data.symbol}
+              dex={data.dex}
+              href={data.href}
+              questionTitle={data.questionTitle}
+            />
           </div>
           <Tag
             value={data.direction}
@@ -311,18 +318,6 @@ const OrderHistoryCard = ({ data }: { data: HistoricalOrder }) => {
             maximumFractionDigits: 8,
           })}
         />
-        {/* <CardItem
-          label="Order Value"
-          value={formatNumber(data.orderValue, {
-            useFallback: true,
-            maximumFractionDigits: 6,
-          })}
-        /> */}
-        {/* <CardItem
-          label="Status"
-          value={data.status}
-          className="last:items-start capitalize"
-        /> */}
       </div>
     </div>
   );

@@ -1,11 +1,24 @@
 import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
 
-import { PredictionMetas } from "../lib/types";
+import { MarketEventMeta, PredictionMetas } from "../lib/types";
+import { mapOutcomeSpecToMarketEventMeta } from "../lib/utils/mapper";
 import { parseSideCoinFromCoin } from "../lib/utils/outcomes";
 import { usePredictionsMetas } from "./usePredictionsMetas";
 import { useSettledOutcome } from "./useSettledOutcome";
 
-export const useSettledOutcomeByCoin = (coin: string) => {
+type UseSettledOutcomeByCoinResult =
+  | {
+      status: "loading";
+    }
+  | {
+      status: "active" | "settled";
+      outcome: MarketEventMeta;
+    }
+  | null;
+
+export const useSettledOutcomeByCoin = (
+  coin: string,
+): UseSettledOutcomeByCoinResult => {
   const { data } = usePredictionsMetas();
 
   // Check if the outcome is settled or not
@@ -18,7 +31,7 @@ export const useSettledOutcomeByCoin = (coin: string) => {
   // Fetch settled outcome
   const {
     data: settledOutcome,
-    isLoading,
+    status,
     error,
   } = useSettledOutcome({
     outcomeId: settledOutcomeId,
@@ -34,12 +47,12 @@ export const useSettledOutcomeByCoin = (coin: string) => {
   if (resolvedOutcome.status === "active") {
     return {
       status: "active",
-      outcome: resolvedOutcome.outcomeSpec,
+      outcome: mapOutcomeSpecToMarketEventMeta(resolvedOutcome.outcomeSpec),
     };
   }
 
   // If there is no settled outcome, return loading
-  if (isLoading) {
+  if (status === "pending") {
     return {
       status: "loading",
     };
@@ -48,7 +61,7 @@ export const useSettledOutcomeByCoin = (coin: string) => {
   // If there is a settled outcome, return it
   return {
     status: "settled",
-    outcome: settledOutcome,
+    outcome: settledOutcome!,
   };
 };
 
@@ -84,12 +97,10 @@ const resolveSettledOutcomeByCoin = (
   // Check if the coin is an active outcome
   const outcomeSlug = predictionsMetas.outcomeToSlug.get(parsedCoin.outcomeId);
 
-  if (!outcomeSlug) {
-    return { status: "none" };
-  }
-
   // We have the active outcome slug, get the outcome spec
-  const outcomeSpec = predictionsMetas.slugToOutcomeSpec.get(outcomeSlug);
+  const outcomeSpec = outcomeSlug
+    ? predictionsMetas.slugToOutcomeSpec.get(outcomeSlug)
+    : undefined;
 
   // If we have the outcome spec, then it is an active outcome
   if (outcomeSpec) {

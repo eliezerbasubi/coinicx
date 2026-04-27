@@ -20,7 +20,11 @@ import CardItem from "../CardItem";
 import CoinLink from "../CoinLink";
 import { useSpotToTokenDetails } from "../hooks/useSpotToTokenDetails";
 
-const columns: ColumnDef<ActiveTwap>[] = [
+type TWAP = ActiveTwap & {
+  questionTitle?: string;
+};
+
+const columns: ColumnDef<TWAP>[] = [
   {
     header: "Coin",
     accessorFn: (row) => row.coin,
@@ -30,6 +34,7 @@ const columns: ColumnDef<ActiveTwap>[] = [
           symbol={original.symbol}
           dex={original.dex}
           href={original.href}
+          questionTitle={original.questionTitle}
         />
       );
     },
@@ -149,6 +154,7 @@ const ActiveTWAPs = () => {
         href: tokenDetails.href,
         isSpot: tokenDetails.isSpot,
         type: tokenDetails.type,
+        questionTitle: tokenDetails.questionTitle,
         averagePx: avgPx,
         side: twap.side,
         executedSz,
@@ -205,7 +211,7 @@ const ActiveTWAPs = () => {
   );
 };
 
-const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
+const ActiveTwapCard = ({ data }: { data: TWAP }) => {
   const isSell = data.side === "A";
 
   return (
@@ -222,12 +228,12 @@ const ActiveTwapCard = ({ data }: { data: ActiveTwap }) => {
                 instrumentType={data.type === "spot" ? "spot" : "perps"}
               />
             </Visibility>
-            <Link
+            <CoinLink
+              symbol={data.symbol}
+              dex={null}
               href={data.href}
-              className="text-sm text-neutral-gray-100 font-medium line-clamp-1 hover:text-primary"
-            >
-              {data.symbol}
-            </Link>
+              questionTitle={data.questionTitle}
+            />
           </div>
           {data.dex && <Tag value={data.dex} />}
           <Tag

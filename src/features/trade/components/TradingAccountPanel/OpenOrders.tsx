@@ -20,7 +20,11 @@ import CardItem from "./CardItem";
 import CoinLink from "./CoinLink";
 import { useSpotToTokenDetails } from "./hooks/useSpotToTokenDetails";
 
-const columns: ColumnDef<OpenOrder>[] = [
+type OpenOrderDetails = OpenOrder & {
+  questionTitle?: string;
+};
+
+const columns: ColumnDef<OpenOrderDetails>[] = [
   {
     header: "Time",
     accessorFn: (row) => row.timestamp,
@@ -54,6 +58,7 @@ const columns: ColumnDef<OpenOrder>[] = [
           dex={original.dex}
           symbol={original.symbol}
           href={original.href}
+          questionTitle={original.questionTitle}
         />
       );
     },
@@ -125,7 +130,7 @@ const columns: ColumnDef<OpenOrder>[] = [
           variant="ghost"
           openOrders={openOrders}
           label="Cancel All"
-          className={cn("text-primary text-xs font-medium h-fit p-0", {
+          className={cn("text-primary text-xs font-medium size-fit p-0", {
             "text-neutral-gray-400": !openOrders.length,
           })}
         />
@@ -137,7 +142,7 @@ const columns: ColumnDef<OpenOrder>[] = [
           variant="ghost"
           openOrders={[original]}
           label="Cancel"
-          className="text-primary text-xs font-medium h-fit p-0"
+          className="text-primary text-xs font-medium size-fit p-0"
         />
       );
     },
@@ -187,6 +192,7 @@ const OpenOrders = () => {
         coin: tokenDetails.coin,
         isSpot: tokenDetails.isSpot,
         type: tokenDetails.type,
+        questionTitle: tokenDetails.questionTitle,
         side: order.side,
         sz,
         price,
@@ -235,7 +241,7 @@ const OpenOrders = () => {
 };
 
 type OpenOrderCardProps = {
-  data: OpenOrder;
+  data: OpenOrderDetails;
 };
 
 const OpenOrderCard = ({ data }: OpenOrderCardProps) => {
@@ -254,12 +260,12 @@ const OpenOrderCard = ({ data }: OpenOrderCardProps) => {
                 instrumentType={data.type}
               />
             </Visibility>
-            <Link
+            <CoinLink
+              symbol={data.symbol}
+              dex={null}
               href={data.href}
-              className="text-sm text-neutral-gray-100 font-medium line-clamp-1 hover:text-primary"
-            >
-              {data.symbol}
-            </Link>
+              questionTitle={data.questionTitle}
+            />
           </div>
           {data.dex && <Tag value={data.dex} />}
           <Tag
