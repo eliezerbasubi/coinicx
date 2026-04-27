@@ -64,7 +64,7 @@ const MarketEventOrderbook = ({ outcomeSides, outcomeCoin }: Props) => {
 
   return (
     <div className="w-full max-h-90 overflow-y-auto no-scrollbars">
-      <div className="grid grid-cols-[40%_20%_20%_20%] items-center border-b border-neutral-gray-200 h-9 sticky top-0 z-10 bg-primary-dark">
+      <div className="grid grid-cols-[40%_20%_20%_20%] items-center border-b border-neutral-gray-200 h-9 sticky top-0 z-2 bg-primary-dark">
         <div className="h-full flex items-center px-2">
           <p className="text-xs font-medium text-neutral-gray-400 uppercase">
             Trade {currentSide.name}
@@ -122,7 +122,7 @@ const OrderBookTicker = () => {
   const lastPrice = sideCtx?.midPx || sideCtx.markPx;
 
   return (
-    <div className="w-full h-9 flex items-center justify-center sticky bottom-0 top-9 z-10 bg-primary-dark border-y border-neutral-gray-200">
+    <div className="w-full h-9 flex items-center justify-center sticky bottom-0 top-9 z-1 bg-primary-dark border-y border-neutral-gray-200">
       <p className="text-sm font-medium text-neutral-gray-400">
         <span>Last:</span>
         <span className="ml-1">

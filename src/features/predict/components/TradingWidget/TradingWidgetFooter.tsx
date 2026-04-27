@@ -117,32 +117,34 @@ const TradingWidgetFooter = () => {
                 })}
               </p>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="block">
-                <p className="text-sm text-neutral-gray-100 font-medium leading-5">
-                  To Win
-                </p>
-
-                <Visibility visible={!!Number(size)}>
-                  <p className="text-xs text-neutral-gray-400 font-medium space-x-1">
-                    <span>Avg. Price</span>
-                    <span>
-                      {formatNumber(mid, {
-                        style: "cent",
-                        roundingMode: "floor",
-                        maximumFractionDigits: 0,
-                      })}
-                    </span>
+            <Visibility visible={isBuyOrder}>
+              <div className="flex items-center justify-between">
+                <div className="block">
+                  <p className="text-sm text-neutral-gray-100 font-medium leading-5">
+                    To Win
                   </p>
-                </Visibility>
+
+                  <Visibility visible={!!Number(size)}>
+                    <p className="text-xs text-neutral-gray-400 font-medium space-x-1">
+                      <span>Avg. Price</span>
+                      <span>
+                        {formatNumber(mid, {
+                          style: "cent",
+                          roundingMode: "floor",
+                          maximumFractionDigits: 0,
+                        })}
+                      </span>
+                    </p>
+                  </Visibility>
+                </div>
+                <p className="text-base md:text-xl font-semibold text-buy">
+                  {formatNumber(payout, {
+                    style: "currency",
+                    roundingMode: "floor",
+                  })}
+                </p>
               </div>
-              <p className="text-base md:text-xl font-semibold text-buy">
-                {formatNumber(payout, {
-                  style: "currency",
-                  roundingMode: "floor",
-                })}
-              </p>
-            </div>
+            </Visibility>
           </div>
         </div>
       </div>

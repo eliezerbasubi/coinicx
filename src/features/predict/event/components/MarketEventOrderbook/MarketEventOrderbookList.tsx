@@ -34,19 +34,8 @@ const MarketEventOrderBookList = ({
       index: number;
       style: React.CSSProperties;
     }) => {
-      // Handle empty data
-      if (!data?.length) {
-        return (
-          <OrderBookTableRow
-            key={index}
-            type={type}
-            price={0}
-            amount={0}
-            progress={50}
-            style={style}
-          />
-        );
-      }
+      if (!data.length) return null;
+
       // For Asks, Read items in reverse to align them from the lowest to the highest
       const itemCount = data.length;
       const askIndex = itemCount - 1 - index;
@@ -110,10 +99,15 @@ const MarketEventOrderBookList = ({
 
   return (
     <div
-      className="relative z-5 will-change-transform"
-      style={{ height: containerHeight }}
+      className="relative z-1 will-change-transform"
+      style={{ height: items.length ? containerHeight : 30 }}
     >
       <AutoSizer>{List}</AutoSizer>
+      {!items.length && (
+        <div className="flex h-full items-center justify-center text-neutral-gray-400 font-medium text-sm">
+          No {type}
+        </div>
+      )}
     </div>
   );
 };
