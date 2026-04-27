@@ -16,6 +16,7 @@ import MarketEventOpenOrders from "./components/MarketEventOpenOrders";
 import MarketEventPositions from "./components/MarketEventPositions";
 import MarketRules from "./components/MarketRules";
 import OrderbookAccordion from "./components/OrderbookAccordion";
+import OutcomeResults from "./components/OutcomeResults";
 
 const TradingWidgetDrawer = dynamic(
   () =>
@@ -56,10 +57,12 @@ const MarketEvent = () => {
 
       <aside className="w-full max-w-80 shrink-0 hidden lg:block">
         <div className="sticky top-40">
-          <TradingWidget
-            className="bg-neutral-gray-600 rounded-lg pb-4"
-            showEventTitle={marketEventType === "categorical"}
-          />
+          <OutcomeResults>
+            <TradingWidget
+              className="bg-neutral-gray-600 rounded-lg pb-4"
+              showEventTitle={marketEventType === "categorical"}
+            />
+          </OutcomeResults>
         </div>
       </aside>
 

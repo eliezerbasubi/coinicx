@@ -14,28 +14,23 @@ import { Button } from "@/components/ui/button";
 import { useSpotAssetMeta } from "@/features/predict/hooks/useSpotMetas";
 import { useMarketEventContext } from "@/features/predict/lib/store/market-event/hooks";
 import { ParsedRecurringPayload } from "@/features/predict/lib/types";
+import { isRecurring } from "@/features/predict/lib/utils/outcomes";
 import {
-  generateRecurringSlug,
   parseExpiry,
   parseRecurringMetadata,
   timeToExpiry,
 } from "@/features/predict/lib/utils/parseMetadata";
 import { formatPriceToDecimal, getPriceDecimals } from "@/features/trade/utils";
 
-import { isRecurring } from "../../lib/utils/outcomes";
-
 const LiveMarketDetails = () => {
-  const { recurringPayload, settledPrice, outcomeId } = useMarketEventContext(
-    (s) => ({
-      recurringPayload: s.marketEventMeta.recurringPayload,
-      outcomeId: s.marketEventMeta.outcome,
-      settledPrice:
-        s.marketEventMeta.settledDetails &&
-        "price" in s.marketEventMeta.settledDetails
-          ? s.marketEventMeta.settledDetails.price
-          : null,
-    }),
-  );
+  const { recurringPayload, settledPrice } = useMarketEventContext((s) => ({
+    recurringPayload: s.marketEventMeta.recurringPayload,
+    outcomeId: s.marketEventMeta.outcome,
+    settledPrice:
+      s.marketEventMeta.settlement && "price" in s.marketEventMeta.settlement
+        ? s.marketEventMeta.settlement.price
+        : null,
+  }));
 
   const spotAssetCtxs = useInstrumentStore((s) => s.spotAssetCtxs);
   const spotAssetMeta = useSpotAssetMeta({
@@ -54,9 +49,7 @@ const LiveMarketDetails = () => {
 
     return {
       price,
-      pxDecimals: ctx
-        ? getPriceDecimals(price, spotAssetMeta.meta.szDecimals, true)
-        : 2,
+      szDecimals: spotAssetMeta.meta.szDecimals,
       priceChange,
       priceChangePercent: priceChangePercent * 100,
     };
@@ -74,6 +67,10 @@ const LiveMarketDetails = () => {
 
   const price = settledPrice ? Number(settledPrice) : (activeAsset?.price ?? 0);
 
+  const pxDecimals = activeAsset
+    ? getPriceDecimals(price, activeAsset.szDecimals, true)
+    : 3;
+
   return (
     <div className="w-full flex flex-col-reverse md:flex-row md:items-center justify-between gap-4 md:gap-2 mb-6 md:my-6">
       <div className="flex-1 flex items-center divide-x divide-neutral-gray-200">
@@ -84,90 +81,120 @@ const LiveMarketDetails = () => {
           <p className="text-xl font-bold text-neutral-gray-400">
             {formatPriceToDecimal(
               Number(recurringPayload.targetPrice),
-              activeAsset?.pxDecimals ?? 2,
+              pxDecimals,
               { style: "currency", useFallback: true },
             )}
           </p>
         </div>
-        {activeAsset && (
-          <div className="w-fit pl-4">
-            <div className="text-sm font-medium text-primary flex items-center gap-1">
-              <p className={cn({ "text-neutral-gray-100": !!settledPrice })}>
-                {settledPrice ? "Final Price" : "Current Price"}
-              </p>
-              <div
-                className={cn(
-                  "text-xs text-buy font-medium flex items-center",
-                  {
-                    "text-sell": priceChange < 0,
-                  },
-                )}
-              >
-                <ArrowUp
-                  className={cn("size-4", {
-                    "rotate-180": priceChange < 0,
-                  })}
-                />
-
-                <p>
-                  <span>
-                    {formatPriceToDecimal(
-                      priceChange,
-                      activeAsset.pxDecimals ?? 2,
-                      { style: "currency" },
-                    )}
-                  </span>
-                  <span className="ml-1">
-                    (
-                    {formatNumber(priceChangePercent / 100, {
-                      style: "percent",
-                      useSign: true,
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    )
-                  </span>
-                </p>
-              </div>
-            </div>
-            <p
-              className={cn("text-xl font-bold text-primary", {
-                "text-neutral-gray-100": !!settledPrice,
-              })}
-            >
-              {formatPriceToDecimal(price, activeAsset.pxDecimals, {
-                style: "currency",
-                useFallback: true,
-              })}
-            </p>
-          </div>
-        )}
+        <CurrentMarketPrice
+          price={price}
+          priceChange={priceChange}
+          priceChangePercent={priceChangePercent}
+          pxDecimals={pxDecimals}
+          showCurrentAsFinal={!!settledPrice}
+        />
       </div>
-      <Countdown recurringPayload={recurringPayload} outcomeId={outcomeId} />
+      <Countdown recurringPayload={recurringPayload} />
+    </div>
+  );
+};
+
+const CurrentMarketPrice = ({
+  price,
+  priceChange,
+  priceChangePercent,
+  pxDecimals,
+  showCurrentAsFinal,
+}: {
+  price: number;
+  priceChange: number;
+  priceChangePercent: number;
+  pxDecimals: number;
+  showCurrentAsFinal: boolean;
+}) => {
+  return (
+    <div className="w-fit pl-4">
+      <div className="text-sm font-medium text-primary flex items-center gap-1">
+        <p className={cn({ "text-neutral-gray-100": !!showCurrentAsFinal })}>
+          {showCurrentAsFinal ? "Final Price" : "Current Price"}
+        </p>
+        <div
+          className={cn("text-xs text-buy font-medium flex items-center", {
+            "text-sell": priceChange < 0,
+          })}
+        >
+          <ArrowUp
+            className={cn("size-4", {
+              "rotate-180": priceChange < 0,
+            })}
+          />
+
+          <p>
+            <span>
+              {formatPriceToDecimal(priceChange, pxDecimals ?? 2, {
+                style: "currency",
+              })}
+            </span>
+            <span className="ml-1">
+              (
+              {formatNumber(priceChangePercent / 100, {
+                style: "percent",
+                useSign: true,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              )
+            </span>
+          </p>
+        </div>
+      </div>
+      <p
+        className={cn("text-xl font-bold text-primary", {
+          "text-neutral-gray-100": !!showCurrentAsFinal,
+        })}
+      >
+        {formatPriceToDecimal(price, pxDecimals, {
+          style: "currency",
+          useFallback: true,
+        })}
+      </p>
     </div>
   );
 };
 
 const Countdown = ({
   recurringPayload,
-  outcomeId,
 }: {
   recurringPayload: ParsedRecurringPayload;
-  outcomeId: number;
 }) => {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+
+  const { outcomeStatus, updateMarketEventStatus } = useMarketEventContext(
+    (s) => ({
+      outcomeStatus: s.marketEventMeta.status,
+      updateMarketEventStatus: s.updateMarketEventStatus,
+    }),
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
       const expiryDate = parseExpiry(recurringPayload.expiry);
       const diff = expiryDate.getTime() - now;
+
       setTimeLeft(diff);
+
+      // Optimistically update the outcome status to waiting for settlement when the time left is 0.
+      // This is to prevent the UI from showing the wrong status when the the time has elapsed and we haven't fetched the settled outcome
+      if (diff <= 0 && outcomeStatus === "active") {
+        updateMarketEventStatus("waitingForSettlement");
+        return;
+      }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [recurringPayload.expiry]);
+  }, [recurringPayload.expiry, outcomeStatus]);
 
   const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
   const hours = Math.floor(

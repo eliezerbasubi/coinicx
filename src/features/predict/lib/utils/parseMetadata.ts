@@ -3,6 +3,7 @@ import { OutcomeMetaResponse } from "@nktkas/hyperliquid";
 import { formatDate } from "@/lib/utils/formatting/dates";
 
 import { ParsedRecurringMetadata, ParsedRecurringPayload } from "../types";
+import { buildSideAssetId } from "./outcomes";
 import { slugify } from "./shared";
 
 export function formatExpiryDate(
@@ -108,8 +109,8 @@ export function generateRecurringSlug(
     convertPeriodToMinutes(recurringPayload.period) < 1440;
 
   if (isShortTermOutcome) {
-    // for short term outcomes, we append the period and outcomeId to the slug
-    baseSlug += `${recurringPayload.period}-${outcomeId}`;
+    // for short term outcomes, we append the period and assetId to the slug
+    baseSlug += `${recurringPayload.period}-${buildSideAssetId(outcomeId, 0)}`;
   } else {
     // for long term outcomes, we append the expiry date (month and day) to the slug
     baseSlug += `on ${formatExpiryDate(recurringPayload.expiry, { month: "short", day: "numeric" })}`;
@@ -213,12 +214,4 @@ export function parseSettledOutcomeDetails(
   if (!key || !value) return null;
 
   return { [key]: value };
-}
-
-export function parseOutcomeFromSlug(slug: string) {
-  const lastHyphenIndex = slug.lastIndexOf("-");
-  if (lastHyphenIndex === -1) return null;
-  const outcomeId = slug.slice(lastHyphenIndex + 1);
-  const parsedOutcomeId = parseInt(outcomeId, 10);
-  return Number.isNaN(parsedOutcomeId) ? null : parsedOutcomeId;
 }

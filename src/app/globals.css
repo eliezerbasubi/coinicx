@@ -30,6 +30,8 @@
 @theme {
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-gavel: gavel 1.4s ease-in-out infinite;
+  --animate-gavel-strike: gavel-strike 0.6s ease-out forwards;
 
   @keyframes accordion-down {
     from {
@@ -46,6 +48,51 @@
     }
     to {
       height: 0;
+    }
+  }
+
+  @keyframes gavel {
+    0% {
+      transform: rotate(0deg) translateY(0);
+      color: var(--color-primary);
+    }
+    20% {
+      transform: rotate(-25deg) translateY(-4px); /* lift */
+      color: var(--color-primary);
+    }
+    40% {
+      transform: rotate(10deg) translateY(2px); /* swing */
+      color: var(--color-amber-400);
+    }
+    50% {
+      transform: rotate(0deg) translateY(0) scale(0.95); /* hit */
+      color: var(--color-amber-500);
+    }
+    60% {
+      transform: rotate(0deg) translateY(0); /* pause */
+      color: var(--color-primary);
+    }
+    100% {
+      transform: rotate(0deg) translateY(0);
+      color: var(--color-primary);
+    }
+  }
+
+  @keyframes gavel-strike {
+    0% {
+      transform: rotate(-25deg) translateY(-4px);
+    }
+    40% {
+      transform: rotate(10deg) translateY(2px);
+    }
+    55% {
+      transform: rotate(0deg) translateY(0) scale(0.9); /* impact */
+    }
+    70% {
+      transform: scale(1); /* rebound */
+    }
+    100% {
+      transform: rotate(0deg) translateY(0);
     }
   }
 }

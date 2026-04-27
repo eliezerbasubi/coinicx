@@ -3,7 +3,6 @@ import { NotifyOnChangeProps, useQuery } from "@tanstack/react-query";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { hlInfoClient } from "@/lib/services/transport";
-import { SpotMetas } from "@/lib/types/trade";
 import { mapDataToSpotMetas } from "@/features/trade/utils";
 
 type UseSpotMetasArgs = {
@@ -17,11 +16,8 @@ export const useSpotMetas = (args?: UseSpotMetasArgs) => {
     staleTime: Infinity,
     notifyOnChangeProps: args?.notifyOnChangeProps,
     enabled: args?.enabled,
-    queryFn: async (): Promise<SpotMetas> => {
-      const spotMeta = await hlInfoClient.spotMeta();
-
-      return mapDataToSpotMetas(spotMeta);
-    },
+    select: mapDataToSpotMetas,
+    queryFn: () => hlInfoClient.spotMeta(),
   });
 
   return spotMetas;
@@ -61,7 +57,7 @@ export const useSpotAssetMeta = (args: { assetName: string | null }) => {
       universe,
       meta: baseTokenMeta,
     };
-  }, [spotMetas]);
+  }, [spotMetas, assetName]);
 
   return assetMeta;
 };

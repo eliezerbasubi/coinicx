@@ -42,7 +42,7 @@ export interface ParsedRecurringMetadata extends ParsedRecurringPayload {
   description: string;
 }
 
-export type MarketEventStatus = "active" | "settled";
+export type MarketEventStatus = "active" | "waitingForSettlement" | "settled";
 
 export interface MarketEvent {
   title: string;
@@ -113,7 +113,7 @@ export interface MarketEventMeta {
   recurringPayload: ParsedRecurringPayload | null;
   status: MarketEventStatus;
   settledSide?: number;
-  settledDetails?: { [key: string]: string } | null;
+  settlement?: { [key: string]: string } | null;
 }
 
 export interface MarketEventCtx {

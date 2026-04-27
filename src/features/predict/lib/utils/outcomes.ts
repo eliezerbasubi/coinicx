@@ -4,6 +4,8 @@ const OUTCOME_COIN_PREFIX = "@";
 const SIDE_COIN_PREFIX = "#";
 const SIDE_COIN_PREFIX_PLUS = "+";
 
+const OUTCOME_ASSET_ID_OFFSET = 100_000_000;
+
 /** Outcome-level coin name (AMM instrument) */
 export function buildOutcomeCoin(outcomeId: number): string {
   return `${OUTCOME_COIN_PREFIX}${outcomeId}`;
@@ -14,12 +16,12 @@ export function buildSideCoin(outcomeId: number, sideIndex: number): string {
   return `#${outcomeId}${sideIndex}`;
 }
 
-/** Asset ID for order placement: 100_000_000 + outcomeId * 10 + sideIndex */
+/** Asset ID for order placement: OUTCOME_ASSET_ID_OFFSET + outcomeId * 10 + sideIndex */
 export function buildSideAssetId(outcomeId: number, sideIndex: number): number {
-  return 100_000_000 + buildOutcomeAssetId(outcomeId, sideIndex);
+  return OUTCOME_ASSET_ID_OFFSET + buildOutcomeAssetId(outcomeId, sideIndex);
 }
 
-/** Asset ID for order placement: 100_000_000 + outcomeId */
+/** Asset ID for order placement: OUTCOME_ASSET_ID_OFFSET + outcomeId */
 export function buildOutcomeAssetId(
   outcomeId: number,
   sideIndex: number,
@@ -102,4 +104,28 @@ export function isRecurring(
   outcome: OutcomeMetaResponse["outcomes"][number],
 ): boolean {
   return outcome.name === "Recurring";
+}
+
+export function parseOutcomeFromSlug(slug: string) {
+  const lastHyphenIndex = slug.lastIndexOf("-");
+
+  if (lastHyphenIndex === -1) return null;
+
+  const assetId = slug.slice(lastHyphenIndex + 1);
+
+  const parsedAssetId = parseInt(assetId, 10);
+
+  if (Number.isNaN(parsedAssetId)) return null;
+
+  const actualAssetId = parsedAssetId - OUTCOME_ASSET_ID_OFFSET;
+
+  // check if the parsed outcome id is greater than OUTCOME_ASSET_ID_OFFSET
+  if (actualAssetId < 0) return null;
+
+  const sideIndex = actualAssetId % 10;
+
+  // check if side index is valid
+  if (sideIndex > 1) return null;
+
+  return Math.floor(actualAssetId / 10);
 }

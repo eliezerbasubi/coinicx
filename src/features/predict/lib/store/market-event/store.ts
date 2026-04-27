@@ -2,7 +2,11 @@ import { createContext } from "react";
 import { create } from "zustand";
 
 import { useOrderFormStore } from "@/lib/store/trade/order-form";
-import { MarketEventCtx, MarketEventMeta } from "@/features/predict/lib/types";
+import {
+  MarketEventCtx,
+  MarketEventMeta,
+  MarketEventStatus,
+} from "@/features/predict/lib/types";
 import { parsePriceToFormat, roundToDecimals } from "@/features/trade/utils";
 
 type MarketEventState = {
@@ -36,6 +40,7 @@ type MarketEventActions = {
   setMarketEventCtx: (marketEventCtx: MarketEventCtx) => void;
   setChartOutcomeSideIndex: (sideIndex: number) => void;
   setOutcomeSideIndex: (sideIndex: number) => void;
+  updateMarketEventStatus: (status: MarketEventStatus) => void;
 };
 
 export type MarketEventStoreState = MarketEventState & MarketEventActions;
@@ -63,6 +68,10 @@ export const createMarketEventStore = (initialProps: MarketEventStoreProps) => {
       outcomes: [],
     },
     getState: () => get(),
+    updateMarketEventStatus: (status: MarketEventStatus) => {
+      const { marketEventMeta } = get();
+      set({ marketEventMeta: { ...marketEventMeta, status } });
+    },
     openTradingWidgetDrawer: (open, opts) => {
       set({
         tradingWidgetDrawerOpen: open,

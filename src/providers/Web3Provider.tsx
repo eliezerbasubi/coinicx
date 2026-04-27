@@ -4,6 +4,7 @@ import React from "react";
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { Query } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { WagmiProvider } from "wagmi";
 
@@ -63,6 +64,7 @@ const Web3Provider = ({ children }: Props) => {
           }}
         >
           {children}
+          <ReactQueryDevtools initialIsOpen={false} />
         </RainbowKitProvider>
       </WagmiProvider>
     </PersistQueryClientProvider>

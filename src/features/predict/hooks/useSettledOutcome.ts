@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { hlInfoClient } from "@/lib/services/transport";
@@ -26,9 +27,12 @@ type SettleOutcomeSpec = {
 export const useSettledOutcome = (args: UseSettledOutcomeArgs) => {
   const enabled = args.enabled ?? true;
 
-  const { data, isLoading, error } = useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: QUERY_KEYS.settledOutcome(args.outcomeId),
     enabled: !!args.outcomeId && enabled,
+    staleTime: Infinity,
     select: mapDataToSettledOutcome,
     queryFn: async () => {
       const settledOutcome =
@@ -44,12 +48,34 @@ export const useSettledOutcome = (args: UseSettledOutcomeArgs) => {
     },
   });
 
-  return { data, isLoading, error };
+  const { data, isLoading, error, status } = query;
+
+  const lastOutcomeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (data != null && args.outcomeId !== lastOutcomeRef.current) {
+      lastOutcomeRef.current = args.outcomeId;
+
+      const persistedSettledOutcome = queryClient.getQueryData(
+        QUERY_KEYS.settledOutcome(args.outcomeId),
+      );
+
+      // Persist the settled outcome in cache to prevent the hook from refetching it.
+      if (!persistedSettledOutcome) {
+        queryClient.setQueryData(
+          QUERY_KEYS.settledOutcome(args.outcomeId),
+          data,
+        );
+      }
+    }
+  }, [data, args.outcomeId, queryClient]);
+
+  return { data, isLoading, error, status };
 };
 
 const mapDataToSettledOutcome = (data: SettleOutcomeSpec): MarketEventMeta => {
   const marketEvent = mapOutcomeSpecToMarketEventMeta(data.spec);
-  const settledDetails = parseSettledOutcomeDetails(data.details);
+  const settlement = parseSettledOutcomeDetails(data.details);
 
   const settleFraction = parseInt(data.settleFraction, 10);
 
@@ -58,6 +84,6 @@ const mapDataToSettledOutcome = (data: SettleOutcomeSpec): MarketEventMeta => {
     status: "settled",
     // If settle fraction is 1, it means the second side won (No). If it's 0, it means the first side won (Yes).
     settledSide: settleFraction === 1 ? 0 : 1,
-    settledDetails,
+    settlement,
   };
 };
