@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { hlInfoClient } from "@/lib/services/transport";
 import { cn } from "@/lib/utils/cn";
 import { formatAddress } from "@/lib/utils/formatting/formatAddress";
@@ -17,7 +18,7 @@ const AssetInfo = () => {
 
   const { data } = useQuery({
     enabled: !!tokenMeta && !!tokenMeta.dex && !!tokenMeta.coin,
-    queryKey: ["perpAnnotation", tokenMeta.coin],
+    queryKey: QUERY_KEYS.perpAnnotation(tokenMeta?.coin ?? ""),
     staleTime: Infinity,
     queryFn: () => hlInfoClient.perpAnnotation({ coin: tokenMeta?.coin ?? "" }),
   });

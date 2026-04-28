@@ -13,6 +13,9 @@ export const useTokenBalance = () => {
     args: [address!],
     query: {
       enabled: !!address,
+      meta: {
+        persist: true,
+      },
       select(data) {
         return formatUnits(data, 6);
       },

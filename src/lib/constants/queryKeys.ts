@@ -24,4 +24,9 @@ export const QUERY_KEYS = {
     "settledOutcome",
     outcome,
   ],
+  perpAnnotation: (coin: string) => [
+    PERSISTED_QUERY_KEY,
+    "perpAnnotation",
+    coin,
+  ],
 } as const;

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { COINICX_BUILDER_SETTINGS } from "@/lib/constants/trade";
 import { hlInfoClient } from "@/lib/services/transport";
 
@@ -10,7 +11,7 @@ export const useUserFees = () => {
   const user = address || zeroAddress;
 
   const { data, status } = useQuery({
-    queryKey: ["user-fees", user],
+    queryKey: QUERY_KEYS.userFees(user),
     staleTime: Infinity,
     queryFn: () => hlInfoClient.userFees({ user }),
   });

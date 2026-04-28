@@ -1,7 +1,6 @@
 import { useMemo, useReducer } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useWebHaptics } from "web-haptics/react";
 import { erc20Abi, parseUnits } from "viem";
 import { useAccount, useConfig } from "wagmi";
 import {
@@ -9,6 +8,7 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from "wagmi/actions";
+import { useWebHaptics } from "web-haptics/react";
 
 import { CHAINS_CONFIG_ENV } from "@/lib/config/chains";
 import { ERROR_NAME } from "@/lib/constants/errors";
@@ -68,6 +68,7 @@ export const useDeposit = () => {
 
   const { data: generatedAddress, status } = useQuery({
     queryKey: ["generate-unit-address", currentAssetInfo.network],
+    meta: { persist: true },
     queryFn: () =>
       fetcher({
         network: currentAssetInfo.network,

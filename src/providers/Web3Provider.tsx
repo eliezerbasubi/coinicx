@@ -22,6 +22,7 @@ const queryClient = getQueryClient();
 
 const persister = createAsyncStoragePersister({
   storage: typeof window !== "undefined" ? window.localStorage : undefined,
+  key: "coinicx-tq-cache",
 });
 
 const Web3Provider = ({ children }: Props) => {

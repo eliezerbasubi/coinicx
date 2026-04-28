@@ -22,6 +22,7 @@ export const useUnitFees = (args?: UseUnitFeesArgs) => {
     queryKey: ["unit-estimate-fees"],
     staleTime: 5 * 60 * 1000,
     enabled: args?.enabled,
+    meta: { persist: true },
     queryFn: async () => {
       const response = await fetch(UNIT_API_BASE_URL + "/v2/estimate-fees", {
         headers: {

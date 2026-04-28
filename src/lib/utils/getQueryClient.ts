@@ -62,8 +62,9 @@ const MAX_RECENT = 500;
 export function isPersistedQuery(query: Query, client: QueryClient) {
   const settledOutcomeQueryKey = QUERY_KEYS.settledOutcome(null)[1];
 
-  // Ignore unrelated query groups
-  if (query.queryKey[0] !== QUERY_KEYS.persisted) return false;
+  // Ignore unrelated query groups or queries without persisted meta
+  if (query.queryKey[0] !== QUERY_KEYS.persisted && !query.meta?.persist)
+    return false;
 
   // Allow everything except the specific "settledOutcome" case
   if (query.queryKey[1] !== settledOutcomeQueryKey) return true;
