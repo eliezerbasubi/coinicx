@@ -155,7 +155,19 @@ export function formatRecurringDescription(
 
   const expiry = recurringPayload.expiry ?? "unknown";
 
-  return `If the ${recurringPayload.underlying} mark price at time of settlement is above ${recurringPayload.targetPrice} at ${formatExpiryDate(expiry)}, YES tokens pay out $1 each. Otherwise, NO tokens pay out $1 each.`;
+  const expiryTime = formatExpiryDate(expiry, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const expiryDate = formatExpiryDate(expiry, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+  return `If the ${recurringPayload.underlying} mark price at time of settlement is above ${recurringPayload.targetPrice} at ${expiryTime} UTC on ${expiryDate}, YES tokens pay out $1 each. Otherwise, NO tokens pay out $1 each.`;
 }
 
 export function parseReccuringTitle(
